@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "saute"
+name = "pan_os_upgrade_web"
 version = "0.0.1"
 description = "Backend Django web server"
 authors = ["Calvin Remsburg <cremsburg.dev@gmail.com>"]

@@ -49,7 +49,7 @@ testem.log
 Thumbs.db
 frontend/node_modules/
 frontend/.angular/
-backend/saute/scripts/.env
+backend/pan_os_upgrade_web/scripts/.env
 
 # exclude certs
 **.crt
@@ -60,10 +60,11 @@ backend/saute/scripts/.env
 frontend/dist/**
 
 backend/media/profile_images/**
-backend/saute/migrations/**
+backend/pan_os_upgrade_web/migrations/**
 .vscode/settings.json
 backend/packages/*.whl
 k8s/backend-secrets.yml
 k8s/ghcr-secrets.yaml
 k8s/slackbot-pan-pal.secrets.sh
 **.ai
+llm.md
