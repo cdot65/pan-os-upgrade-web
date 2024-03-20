@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "pan-os-upgrade": {
+    "pan-os-upgrade-web": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/pan-os-upgrade",
+            "outputPath": "dist/pan-os-upgrade-web",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -37,8 +37,7 @@
           },
           "configurations": {
             "production": {
-              "budgets": [
-                {
+              "budgets": [{
                   "type": "initial",
                   "maximumWarning": "500kb",
                   "maximumError": "1mb"
@@ -63,10 +62,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "pan-os-upgrade:build:production"
+              "buildTarget": "pan-os-upgrade-web:build:production"
             },
             "development": {
-              "buildTarget": "pan-os-upgrade:build:development"
+              "buildTarget": "pan-os-upgrade-web:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -74,7 +73,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "pan-os-upgrade:build"
+            "buildTarget": "pan-os-upgrade-web:build"
           }
         },
         "test": {

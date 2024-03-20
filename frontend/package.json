@@ -1,6 +1,6 @@
 {
-  "name": "pan-os-upgrade",
-  "version": "0.0.0",
+  "name": "pan-os-upgrade-web",
+  "version": "0.0.1",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -15,7 +15,6 @@
     "@angular/common": "^17.3.0",
     "@angular/compiler": "^17.3.0",
     "@angular/core": "^17.3.0",
-    "@angular/flex-layout": "^15.0.0-beta.42",
     "@angular/forms": "^17.3.0",
     "@angular/material": "^17.3.0",
     "@angular/platform-browser": "^17.3.0",
