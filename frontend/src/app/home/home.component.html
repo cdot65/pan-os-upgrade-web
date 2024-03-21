@@ -1,0 +1,61 @@
+<div class="container">
+  <h1>Welcome to Pan-OS Upgrade</h1>
+  <p class="intro">
+    `pan-os-upgrade` is a powerful tool that simplifies the process of upgrading Pan-OS devices.
+    With its intuitive interface and automated workflows, you can easily manage and execute upgrades across your
+    network.
+  </p>
+
+  <mat-grid-list cols="3" rowHeight="200px" gutterSize="16px">
+    <mat-grid-tile>
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Upgrade</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Initiate and monitor Pan-OS upgrades.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" routerLink="/upgrade">
+            <mat-icon>update</mat-icon>
+            Start Upgrade
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </mat-grid-tile>
+
+    <mat-grid-tile>
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Jobs</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>View and manage upgrade jobs.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" routerLink="/jobs">
+            <mat-icon>work</mat-icon>
+            Manage Jobs
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </mat-grid-tile>
+
+    <mat-grid-tile>
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Inventory</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Manage your Pan-OS device inventory.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" routerLink="/inventory">
+            <mat-icon>devices</mat-icon>
+            View Inventory
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </mat-grid-tile>
+  </mat-grid-list>
+</div>

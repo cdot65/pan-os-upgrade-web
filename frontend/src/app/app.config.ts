@@ -1,5 +1,7 @@
 import { ApplicationConfig } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -11,7 +13,9 @@ export const appConfig: ApplicationConfig = {
         provideRouter(routes),
         provideAnimations(),
         MatButtonModule,
-        MatToolbarModule,
+        MatCardModule,
+        MatGridListModule,
         MatIconModule,
+        MatToolbarModule,
     ],
 };
