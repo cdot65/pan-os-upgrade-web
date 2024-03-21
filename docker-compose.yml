@@ -9,8 +9,8 @@ services:
             dockerfile: Dockerfile
         ports:
             - "8080:80"
-        # depends_on:
-        #     - backend
+        depends_on:
+            - backend
 
     db:
         image: postgres:14
@@ -28,34 +28,34 @@ services:
         expose:
             - 6379
 
-    # backend:
-    #     build:
-    #         context: ./backend
-    #         dockerfile: Dockerfile
-    #     command: ./start.sh
-    #     volumes:
-    #         - ./backend:/code
-    #     ports:
-    #         - "8000:8000"
-    #     depends_on:
-    #         - db
-    #     env_file:
-    #         - ./backend/.env
+    backend:
+        build:
+            context: ./backend
+            dockerfile: Dockerfile
+        command: ./start.sh
+        volumes:
+            - ./backend:/code
+        ports:
+            - "8000:8000"
+        depends_on:
+            - db
+        env_file:
+            - ./backend/.env
 
-    # worker:
-    #     build:
-    #         context: ./backend
-    #         dockerfile: Dockerfile
-    #     command: celery -A django_project worker -l debug
-    #     deploy:
-    #         replicas: 2
-    #     volumes:
-    #         - ./backend:/code
-    #     depends_on:
-    #         - backend
-    #         - redis
-    #     env_file:
-    #         - ./backend/.env
+    worker:
+        build:
+            context: ./backend
+            dockerfile: Dockerfile
+        command: celery -A django_project worker -l debug
+        deploy:
+            replicas: 2
+        volumes:
+            - ./backend:/code
+        depends_on:
+            - backend
+            - redis
+        env_file:
+            - ./backend/.env
 
 
 volumes:

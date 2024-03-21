@@ -1,12 +1,12 @@
-# Saute
+# PanOsUpgradeWeb
 
 [![Build and Deploy](https://github.com/cdot65/saute/actions/workflows/backend.yml/badge.svg)](https://github.com/cdot65/saute/actions/workflows/backend.yml)
 
-Saute is a self-service automation catalogue, designed to simplify the process of executing automation tasks. With no opinions on the automation technology of choice, it provides a user-friendly interface for executing automation tasks, as well as a REST API for programmatic access.
+PanOsUpgradeWeb is a self-service automation catalogue, designed to simplify the process of executing automation tasks. With no opinions on the automation technology of choice, it provides a user-friendly interface for executing automation tasks, as well as a REST API for programmatic access.
 
 ## 📚 Table of Contents
 
-- [Saute](#saute)
+- [PanOsUpgradeWeb](#saute)
   - [📚 Table of Contents](#-table-of-contents)
   - [📖 Overview](#-overview)
   - [🏗️ Application Structure](#️-application-structure)
@@ -19,7 +19,7 @@ Saute is a self-service automation catalogue, designed to simplify the process o
 
 ## 📖 Overview
 
-Saute is a powerful, scalable application built on modern technologies. It seamlessly integrates a Django REST API backend with an Angular frontend, utilizing a Postgres database, Celery runners, and a container-based architecture for enhanced functionality and development efficiency.
+PanOsUpgradeWeb is a powerful, scalable application built on modern technologies. It seamlessly integrates a Django REST API backend with an Angular frontend, utilizing a Postgres database, Celery runners, and a container-based architecture for enhanced functionality and development efficiency.
 
 The resulting application is a robust, scalable, and performant solution for executing automation through a GUI or REST API. It is designed to be easily deployed to your local machine or cloud platforms such as AWS or GCP.
 

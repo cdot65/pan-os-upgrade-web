@@ -59,12 +59,12 @@ backend/pan_os_upgrade_web/scripts/.env
 # exclude dist folder
 frontend/dist/**
 
+backend/.env
+backend/staticfiles/
 backend/media/profile_images/**
-backend/pan_os_upgrade_web/migrations/**
-.vscode/settings.json
+backend/panosupgradeweb/migrations/**
 backend/packages/*.whl
-k8s/backend-secrets.yml
-k8s/ghcr-secrets.yaml
-k8s/slackbot-pan-pal.secrets.sh
 **.ai
 llm.md
+
+.vscode/settings.json
