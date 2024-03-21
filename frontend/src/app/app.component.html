@@ -5,8 +5,9 @@
   <span>{{ title }}</span>
   <span class="spacer"></span>
   <button mat-button routerLink="/home">Home</button>
-  <button mat-button routerLink="/about">About</button>
-  <button mat-button routerLink="/contact">Contact</button>
+  <button mat-button routerLink="/login">Login</button>
+  <button mat-button routerLink="/register">Register</button>
+  <button mat-button routerLink="/logout">Logout</button>
 </mat-toolbar>
 
 <mat-drawer-container class="example-container" autosize>
@@ -15,6 +16,7 @@
       <a mat-list-item routerLink="/home">Home</a>
       <a mat-list-item routerLink="/upgrade">Upgrade</a>
       <a mat-list-item routerLink="/jobs">Jobs</a>
+      <a mat-list-item routerLink="/login">Login</a>
       <mat-divider></mat-divider>
 
       <a mat-list-item routerLink="/inventory">Inventory</a>
@@ -24,6 +26,6 @@
   </mat-drawer>
 
   <div class="example-sidenav-content">
-    <router-outlet></router-outlet>
   </div>
 </mat-drawer-container>
+<router-outlet></router-outlet>

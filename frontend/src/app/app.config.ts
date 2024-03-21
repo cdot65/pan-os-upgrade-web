@@ -1,4 +1,6 @@
 import { ApplicationConfig } from '@angular/core';
+import { AuthService } from './auth/auth.service';
+import { HttpClientModule } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -17,5 +19,7 @@ export const appConfig: ApplicationConfig = {
         MatGridListModule,
         MatIconModule,
         MatToolbarModule,
+        HttpClientModule,
+        AuthService,
     ],
 };
