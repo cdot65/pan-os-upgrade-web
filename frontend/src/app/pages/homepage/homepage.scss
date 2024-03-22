@@ -103,7 +103,7 @@ $margin-promotion-sections-small: 15px;
   margin: $margin-promotion-sections 0;
 }
 
-.docs-homepage-carousel-row {
+.panosupgrade-homepage-carousel-row {
   margin: $margin-promotion-sections 0;
   display: flex;
   flex-direction: column;
@@ -131,14 +131,14 @@ $margin-promotion-sections-small: 15px;
   align-items: center;
 }
 
-.docs-homepage-guides {
-  .docs-homepage-guides-card-divider {
+.panosupgrade-homepage-guides {
+  .panosupgrade-homepage-guides-card-divider {
     width: 30%;
     height: 5px;
     margin: 15px auto;
   }
 
-  .docs-homepage-guides-carousel-item {
+  .panosupgrade-homepage-guides-carousel-item {
     display: flex;
     text-decoration: none;
     box-sizing: border-box;
@@ -153,11 +153,11 @@ $margin-promotion-sections-small: 15px;
     }
   }
 
-  .docs-homepage-guides-card.mat-mdc-card {
+  .panosupgrade-homepage-guides-card.mat-mdc-card {
     text-align: center;
   }
 
-  .docs-homepage-guides-card .mat-mdc-card-title {
+  .panosupgrade-homepage-guides-card .mat-mdc-card-title {
     height: 35%;
     display: flex;
     align-items: center;
@@ -172,7 +172,7 @@ $margin-promotion-sections-small: 15px;
     box-sizing: border-box;
     font-size: 18px;
 
-    .docs-homepage-img-container {
+    .panosupgrade-homepage-img-container {
       overflow: hidden;
       margin-bottom: 16px;
       max-height: 200px;
@@ -253,7 +253,7 @@ $margin-promotion-sections-small: 15px;
   }
 
   .homepage-row,
-  .docs-homepage-carousel-row {
+  .panosupgrade-homepage-carousel-row {
     margin: $margin-promotion-sections-small 0;
   }
 }

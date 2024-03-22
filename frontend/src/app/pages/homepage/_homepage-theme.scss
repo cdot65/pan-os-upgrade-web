@@ -29,7 +29,7 @@
       color: mat.get-color-from-palette($foreground, secondary-text);
     }
 
-    .docs-homepage-carousel-row h2 {
+    .panosupgrade-homepage-carousel-row h2 {
       color: mat.get-color-from-palette($foreground, secondary-text);
     }
 
@@ -38,23 +38,23 @@
       color: mat.get-color-from-palette($foreground, secondary-text)
     }
 
-    .docs-homepage-guides-card,
+    .panosupgrade-homepage-guides-card,
     a.docs-link:hover {
       color: mat.get-color-from-palette($foreground, text);
     }
 
-    .docs-homepage-guides-card-divider {
+    .panosupgrade-homepage-guides-card-divider {
       background: mat.get-color-from-palette($accent)
     }
 
     [carousel-item]:hover {
-      .docs-homepage-guides-card {
+      .panosupgrade-homepage-guides-card {
         background: mat.get-color-from-palette($background, hover);
       }
     }
 
     [carousel-item]:focus {
-      .docs-homepage-guides-card {
+      .panosupgrade-homepage-guides-card {
         background: mat.get-color-from-palette($background, focused-button);
       }
 

@@ -62,7 +62,9 @@
 
     <mat-divider></mat-divider>
 
-    <div class="homepage-featured-components docs-homepage-carousel-row">
+    <div
+        class="homepage-featured-components panosupgrade-homepage-carousel-row"
+    >
         <div class="homepage-header">
             <h2>PAN-OS Upgrade components</h2>
 
@@ -78,7 +80,7 @@
                 class="carousel-item docs-featured-components-carousel-item"
                 routerLink="/components/{{comp}}"
             >
-                <div class="docs-homepage-img-container">
+                <div class="panosupgrade-homepage-img-container">
                     <img
                         alt=""
                         src="../../../assets/screenshots/{{comp}}.scene.png"
@@ -92,7 +94,9 @@
 
     <mat-divider></mat-divider>
 
-    <div class="docs-homepage-guides docs-homepage-carousel-row">
+    <div
+        class="panosupgrade-homepage-guides panosupgrade-homepage-carousel-row"
+    >
         <div class="homepage-header">
             <h2>Guides</h2>
 
@@ -104,13 +108,15 @@
         <app-carousel [aria-label]="'Guides'">
             <a
                 carousel-item
-                class="carousel-item docs-homepage-guides-carousel-item"
+                class="carousel-item panosupgrade-homepage-guides-carousel-item"
                 *ngFor="let guide of guideItems.getAllItems()"
                 routerLink="/guide/{{guide.id}}"
             >
-                <mat-card class="docs-homepage-guides-card">
+                <mat-card class="panosupgrade-homepage-guides-card">
                     <mat-card-title>{{guide.name}}</mat-card-title>
-                    <div class="docs-homepage-guides-card-divider"></div>
+                    <div
+                        class="panosupgrade-homepage-guides-card-divider"
+                    ></div>
                     <mat-card-content
                         class="docs-component-category-list-card-summary"
                     >
