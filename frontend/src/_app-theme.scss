@@ -1,4 +1,4 @@
-@use '@angular/material' as mat;
+@use '@angular/material'as mat;
 
 @use 'sass:map';
 @use './app/pages/component-category-list/component-category-list-theme';
@@ -12,7 +12,6 @@
 @use './app/shared/footer/footer-theme';
 @use './app/shared/navbar/navbar-theme';
 @use './app/shared/table-of-contents/table-of-contents-theme';
-@use './app/shared/cookie-popup/cookie-popup-theme';
 @use './styles/api-theme';
 @use './styles/markdown-theme';
 @use './styles/svg-theme';
@@ -27,11 +26,11 @@
   $foreground: map.get($theme, foreground);
   $next-theme: mat.define-palette(mat.$red-palette);
 
-  .docs-app-background {
+  .panosupgrade-app-background {
     background: mat.get-color-from-palette($background, background);
   }
 
-  .docs-primary-header {
+  .panosupgrade-primary-header {
     background: mat.get-color-from-palette($primary);
 
     h1 {
@@ -39,12 +38,12 @@
     }
   }
 
-  .docs-footer {
+  .panosupgrade-footer {
     background: mat.get-color-from-palette($primary);
     color: mat.get-color-from-palette($primary, default-contrast);
   }
 
-  .docs-help-support {
+  .panosupgrade-help-support {
     color: mat.get-color-from-palette($foreground, secondary-text);
 
     a {
@@ -71,5 +70,4 @@
   @include not-found-theme.theme($theme);
   @include navbar-theme.theme($theme);
   @include table-of-contents-theme.theme($theme);
-  @include cookie-popup-theme.theme($theme);
 }

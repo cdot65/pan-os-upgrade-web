@@ -1,24 +1,24 @@
-.docs-footer {
+.panosupgrade-footer {
   padding: 12px;
   font-size: 12px;
 }
 
-.docs-footer-list {
+.panosupgrade-footer-list {
   align-items: center;
   display: flex;
   flex-flow: row wrap;
   padding: 8px;
 }
 
-.docs-footer-logo {
+.panosupgrade-footer-logo {
   flex: 1;
 }
 
-.docs-footer-angular-logo {
+.panosupgrade-footer-angular-logo {
   height: 50px;
 }
 
-.docs-footer-version {
+.panosupgrade-footer-version {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -35,7 +35,7 @@
   }
 }
 
-.docs-footer-copyright {
+.panosupgrade-footer-copyright {
   display: flex;
   flex: 1;
   justify-content: flex-end;
@@ -55,7 +55,7 @@
   }
 }
 
-.docs-footer-logo span {
+.panosupgrade-footer-logo span {
   display: inline-block;
   line-height: 50px;
   margin: 0 40px;
@@ -78,7 +78,7 @@ a {
 }
 
 @media screen and (max-width: 884px) {
-  .docs-footer-list {
+  .panosupgrade-footer-list {
     flex-direction: column;
   }
 }

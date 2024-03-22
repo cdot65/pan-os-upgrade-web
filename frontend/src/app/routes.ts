@@ -1,7 +1,7 @@
 import { CanActivateComponentSidenav } from "./pages/component-sidenav/component-sidenav-can-load-guard";
 import { Routes } from "@angular/router";
 
-export const MATERIAL_DOCS_ROUTES: Routes = [
+export const PANOSUPGRADE_ROUTES: Routes = [
     {
         path: "",
         pathMatch: "full",
@@ -19,15 +19,12 @@ export const MATERIAL_DOCS_ROUTES: Routes = [
         loadComponent: () =>
             import("./pages/guide-list").then((m) => m.GuideList),
     },
-    // Since https://github.com/cdot65/pan-os-upgrade-web/pull/9574, the cdk-table guide became the overview
-    // document for the cdk table. To avoid any dead / broken links, we redirect to the new location.
     { path: "guide/cdk-table", redirectTo: "/cdk/table/overview" },
     {
         path: "guide/:id",
         loadChildren: () =>
             import("./pages/guide-viewer").then((m) => m.GuideViewerModule),
     },
-    // Needs to be defined before `:section` so it gets picked first when redirecting a missing page.
     {
         path: "404",
         loadComponent: () =>

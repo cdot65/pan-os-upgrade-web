@@ -105,62 +105,9 @@
             href="https://fonts.googleapis.com/icon?family=Material+Icons&display=block"
             rel="stylesheet"
         />
-
-        <!--Structured Data-->
-        <script type="application/ld+json">
-            {
-                "@context": "http://schema.org",
-                "@type": "WebApplication",
-                "name": "Angular Material",
-                "description": "UI component infrastructure and Material Design components for Angular web applications.",
-                "url": "https://material.angular.io",
-                "image": "https://material.angular.io/assets/img/site-preview.png",
-                "screenshot": "https://material.angular.io/assets/img/site-preview.png",
-                "applicationCategory": "Software Documentation",
-                "operatingSystem": "Android, Chrome OS, iOS, iPadOS, macOS, OS X, Linux, Windows",
-                "author": {
-                    "@type": "Organization",
-                    "name": "Angular",
-                    "description": "Angular is a platform for building mobile and desktop web applications. Join the community of millions of developers who build compelling user interfaces with Angular.",
-                    "url": "https://angular.io",
-                    "logo": "https://angular.io/assets/images/logos/angular/angular.svg"
-                }
-            }
-        </script>
     </head>
 
-    <body class="docs-app-background">
-        <material-docs-app></material-docs-app>
-        <script>
-            // Note this is a customised version of the GA tracking snippet
-            // See the comments below for more info
-            (function (i, s, o, g, r, a, m) {
-                i["GoogleAnalyticsObject"] = r;
-                (i[r] =
-                    i[r] ||
-                    function () {
-                        (i[r].q = i[r].q || []).push(arguments);
-                    }),
-                    (i[r].l = 1 * new Date());
-                (a = s.createElement(o)), (m = s.getElementsByTagName(o)[0]);
-                a.async = 1;
-                a.src = g;
-                ~i.name.indexOf("NG_DEFER_BOOTSTRAP") || // only load library if not running e2e tests
-                    m.parentNode.insertBefore(a, m);
-            })(
-                window,
-                document,
-                "script",
-                "https://www.google-analytics.com/analytics.js",
-                "ga"
-            );
-        </script>
-        <script>
-            // This hides the address bar on mobile browsers
-            // https://developers.google.com/web/fundamentals/native-hardware/fullscreen/
-            window.addEventListener("load", function () {
-                window.scrollTo(0, 1);
-            });
-        </script>
+    <body class="panosupgrade-app-background">
+        <panosupgrade-app></panosupgrade-app>
     </body>
 </html>

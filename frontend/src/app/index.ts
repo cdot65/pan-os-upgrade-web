@@ -1,2 +1,1 @@
-export * from './material-docs-app';
-
+export * from "./panosupgrade-app";

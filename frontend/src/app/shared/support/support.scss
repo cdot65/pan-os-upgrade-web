@@ -1,10 +1,10 @@
-.docs-help-support {
+.panosupgrade-help-support {
   width: 75%;
   margin: auto;
   padding-bottom: 40px;
 }
 
-.docs-help-support ul {
+.panosupgrade-help-support ul {
   display: flex;
   justify-content: space-around;
   list-style: none;
@@ -12,50 +12,53 @@
   padding: 18px 0;
 }
 
-.docs-help-support ul li {
+.panosupgrade-help-support ul li {
   text-align: center;
   flex: 0 1 200px;
   -moz-box-flex: 0;
 }
 
-.docs-help-support ul li a {
+.panosupgrade-help-support ul li a {
   font-weight: 500;
   text-decoration: none;
 }
 
-.docs-help-support ul li a:hover {
+.panosupgrade-help-support ul li a:hover {
   text-decoration: underline;
 }
 
-.docs-help-support ul li a img {
+.panosupgrade-help-support ul li a img {
   display: block;
   margin: 10px auto;
   width: 50px;
   height: 50px;
 }
 
-.docs-help-support-description {
+.panosupgrade-help-support-description {
   font-size: 14px;
   margin-top: 5px;
 }
 
 @media screen and (max-width: 884px) {
-  .docs-help-support {
+  .panosupgrade-help-support {
     padding-bottom: 20px;
   }
-  .docs-help-support ul {
+
+  .panosupgrade-help-support ul {
     display: block;
   }
 
-  .docs-help-support ul li a {
+  .panosupgrade-help-support ul li a {
     display: flex;
     align-items: center;
   }
-  .docs-help-support ul li a img {
+
+  .panosupgrade-help-support ul li a img {
     margin: 10px;
 
   }
-  .docs-help-support-description {
+
+  .panosupgrade-help-support-description {
     display: none;
   }
 }
