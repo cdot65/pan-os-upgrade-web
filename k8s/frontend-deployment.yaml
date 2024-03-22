@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: pan-os-upgrade-web-deployment
+    name: pan-os-upgrade-deployment
     namespace: pan-os-upgrade
 spec:
     replicas: 2
     selector:
         matchLabels:
-            app: pan-os-upgrade-web
+            app: pan-os-upgrade
     template:
         metadata:
             labels:
-                app: pan-os-upgrade-web
+                app: pan-os-upgrade
         spec:
             containers:
-                - name: pan-os-upgrade-web
-                  image: pan-os-upgrade-web-frontend:latest
+                - name: pan-os-upgrade
+                  image: pan-os-upgrade-frontend:latest
                   imagePullPolicy: IfNotPresent
                   ports:
                       - containerPort: 80

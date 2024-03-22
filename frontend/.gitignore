@@ -1,26 +1,33 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
-# Compiled output
+# compiled output
 /dist
 /tmp
 /out-tsc
-/bazel-out
+/src/assets/*.css
+# Only exists if Bazel was run
+/bazel-*
 
-# Node
+.angular/
+
+# dependencies
 /node_modules
-npm-debug.log
-yarn-error.log
+
+# profiling files
+chrome-profiler-events*.json
+speed-measure-plugin*.json
 
 # IDEs and editors
-.idea/
+/.idea
 .project
 .classpath
 .c9/
+.vscode/
 *.launch
 .settings/
 *.sublime-workspace
 
-# Visual Studio Code
+# IDE - VSCode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -28,15 +35,21 @@ yarn-error.log
 !.vscode/extensions.json
 .history/*
 
-# Miscellaneous
-/.angular/cache
-.sass-cache/
+# misc
+/.sass-cache
 /connect.lock
-/coverage
+/coverage/*
 /libpeerconnection.log
+npm-debug.log
+yarn-error.log
 testem.log
+firebase-debug.log
+ui-debug.log
+.firebase/
 /typings
 
-# System files
+.firebaserc
+
+#System Files
 .DS_Store
 Thumbs.db

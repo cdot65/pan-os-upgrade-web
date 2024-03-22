@@ -3,17 +3,14 @@ FROM node:20.11.1 AS build
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci
-
 COPY . .
-RUN npm run build
+RUN yarn install && yarn prod-build
 
 # Stage 2: Serve the app with Nginx
 FROM nginx:1.19
 
 # Copy built assets from Stage 1
-COPY --from=build /app/dist/panosupgrade /usr/share/nginx/html
+COPY --from=build /app/dist/pan-os-upgrade /usr/share/nginx/html
 
 # Copy Nginx configuration file
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
