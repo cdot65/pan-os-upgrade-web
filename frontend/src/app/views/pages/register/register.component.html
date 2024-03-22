@@ -1,0 +1,80 @@
+<div class="bg-dark min-vh-100 d-flex flex-row align-items-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7 col-md-9 col-xl-6">
+                <mat-card class="mx-4">
+                    <mat-card-content class="p-4">
+                        <form
+                            #registerForm="ngForm"
+                            (ngSubmit)="onSubmit(registerForm)"
+                        >
+                            <h1>Register</h1>
+                            <p class="text-medium-emphasis">
+                                Create your account
+                            </p>
+                            <mat-form-field class="w-100 mb-3">
+                                <mat-label>Username</mat-label>
+                                <input
+                                    matInput
+                                    autoComplete="name"
+                                    placeholder="Username"
+                                    [(ngModel)]="username"
+                                    name="username"
+                                    required
+                                />
+                                <mat-icon matPrefix>person</mat-icon>
+                            </mat-form-field>
+                            <mat-form-field class="w-100 mb-3">
+                                <mat-label>Email</mat-label>
+                                <input
+                                    matInput
+                                    autoComplete="email"
+                                    placeholder="Email"
+                                    [(ngModel)]="email"
+                                    name="email"
+                                    required
+                                />
+                                <mat-icon matPrefix>email</mat-icon>
+                            </mat-form-field>
+                            <mat-form-field class="w-100 mb-3">
+                                <mat-label>Password</mat-label>
+                                <input
+                                    matInput
+                                    autoComplete="new-password"
+                                    placeholder="Password"
+                                    type="password"
+                                    [(ngModel)]="password1"
+                                    name="password1"
+                                    required
+                                />
+                                <mat-icon matPrefix>lock</mat-icon>
+                            </mat-form-field>
+                            <mat-form-field class="w-100 mb-4">
+                                <mat-label>Repeat Password</mat-label>
+                                <input
+                                    matInput
+                                    autoComplete="new-password"
+                                    placeholder="Repeat Password"
+                                    type="password"
+                                    [(ngModel)]="password2"
+                                    name="password2"
+                                    required
+                                />
+                                <mat-icon matPrefix>lock</mat-icon>
+                            </mat-form-field>
+                            <div class="d-grid">
+                                <button
+                                    type="submit"
+                                    mat-raised-button
+                                    color="primary"
+                                >
+                                    Create Account
+                                </button>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+    </div>
+</div>
