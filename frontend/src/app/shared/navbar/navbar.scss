@@ -1,10 +1,10 @@
-.docs-navbar-header {
+.panosupgrade-navbar-header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   padding: 4px 16px;
 
-  > .mat-mdc-button {
+  >.mat-mdc-button {
     &:last-child {
       margin-left: auto;
     }
@@ -50,7 +50,7 @@
   * Moves content two rows instead of one.
   */
 @media (max-width: 720px) {
-  .docs-navbar-hide-small {
+  .panosupgrade-navbar-hide-small {
     display: none;
   }
 

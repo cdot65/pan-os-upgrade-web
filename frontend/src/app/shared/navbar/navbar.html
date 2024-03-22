@@ -1,5 +1,5 @@
 <!-- TODO: figure out if the <nav> should go inside of a <header> element. -->
-<nav class="docs-navbar-header" aria-label="Top Toolbar">
+<nav class="panosupgrade-navbar-header" aria-label="Top Toolbar">
     <div
         class="skip-link-wrapper"
         [class.cdk-visually-hidden]="skipLinkHidden"
@@ -17,9 +17,9 @@
     </div>
     <a
         mat-button
-        class="docs-button"
+        class="panosupgrade-button"
         routerLink="/"
-        aria-label="Angular Material"
+        aria-label="PAN-OS Upgrade"
     >
         <img
             class="logo"
@@ -28,28 +28,28 @@
             alt="angular"
             aria-hidden="true"
         />
-        <span>Material</span>
+        <span>PAN-OS Upgrade</span>
     </a>
     <a
         mat-button
-        class="docs-navbar-hide-small docs-button"
+        class="panosupgrade-navbar-hide-small panosupgrade-button"
         *ngFor="let key of sectionKeys"
         [routerLink]="key"
-        routerLinkActive="docs-navbar-header-item-selected"
+        routerLinkActive="panosupgrade-navbar-header-item-selected"
         >{{sections[key].name}}</a
     >
     <a
         mat-button
-        class="docs-navbar-hide-small docs-button"
+        class="panosupgrade-navbar-hide-small panosupgrade-button"
         routerLink="guides"
-        routerLinkActive="docs-navbar-header-item-selected"
+        routerLinkActive="panosupgrade-navbar-header-item-selected"
         >Guides</a
     >
     <div class="flex-spacer"></div>
     <theme-picker></theme-picker>
     <a
         mat-button
-        class="docs-button docs-navbar-hide-small"
+        class="panosupgrade-button panosupgrade-navbar-hide-small"
         href="https://github.com/cdot65/pan-os-upgrade-web"
         aria-label="GitHub Repository"
     >
@@ -64,7 +64,7 @@
     </a>
     <a
         mat-icon-button
-        class="docs-button docs-navbar-show-small"
+        class="panosupgrade-button docs-navbar-show-small"
         href="https://github.com/cdot65/pan-os-upgrade-web"
         aria-label="GitHub Repository"
     >

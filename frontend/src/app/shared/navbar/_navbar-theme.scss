@@ -1,5 +1,5 @@
 @use 'sass:map';
-@use '@angular/material' as mat;
+@use '@angular/material'as mat;
 
 @mixin theme($theme) {
   $primary: map.get($theme, primary);
@@ -11,14 +11,16 @@
   app-navbar {
     color: mat.get-color-from-palette($primary, default-contrast);
 
-    .docs-navbar, .docs-navbar-header {
+    .docs-navbar,
+    .panosupgrade-navbar-header {
       background: mat.get-color-from-palette($primary);
 
-      & a:hover, & a:focus {
+      & a:hover,
+      & a:focus {
         background: rgba(0, 0, 0, 0.4);
       }
 
-      .docs-navbar-header-item-selected {
+      .panosupgrade-navbar-header-item-selected {
         background: rgba(0, 0, 0, 0.2);
       }
     }
