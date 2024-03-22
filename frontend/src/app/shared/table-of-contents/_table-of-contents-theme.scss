@@ -1,5 +1,5 @@
 @use 'sass:map';
-@use '@angular/material' as mat;
+@use '@angular/material'as mat;
 
 @mixin theme($theme) {
   $primary: map.get($theme, primary);
@@ -12,7 +12,7 @@
   .docs-toc-container {
     border-left: solid 4px mat.get-color-from-palette($primary);
 
-    .docs-link {
+    .panosupgrade-link {
       color: mat.get-color-from-palette($foreground, secondary-text);
 
       &:hover,

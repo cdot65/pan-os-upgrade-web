@@ -2,13 +2,13 @@
 $margin-promotion-sections: 50px;
 $margin-promotion-sections-small: 15px;
 
-.docs-header-background {
+.panosupgrade-header-background {
   overflow: hidden;
   position: relative;
   height: 420px;
 }
 
-.docs-header-background::before {
+.panosupgrade-header-background::before {
   content: '';
   position: absolute;
   background-image: url('../../../assets/img/homepage/pan-trans.svg');
@@ -22,7 +22,7 @@ $margin-promotion-sections-small: 15px;
   opacity: 0.2;
 }
 
-.docs-header-section {
+.panosupgrade-header-section {
   width: 90%;
   position: absolute;
   z-index: 0;
@@ -32,7 +32,7 @@ $margin-promotion-sections-small: 15px;
   transform: translate(-50%, -50%);
 }
 
-.docs-header-headline {
+.panosupgrade-header-headline {
   h1 {
     font-size: 56px;
     font-weight: bold;
@@ -97,7 +97,7 @@ $margin-promotion-sections-small: 15px;
   }
 }
 
-.homepage-row {
+.panosupgrade-homepage-row {
   display: flex;
   flex-direction: row;
   margin: $margin-promotion-sections 0;
@@ -126,7 +126,7 @@ $margin-promotion-sections-small: 15px;
   }
 }
 
-.docs-link {
+.panosupgrade-link {
   display: inline-flex;
   align-items: center;
 }
@@ -167,7 +167,7 @@ $margin-promotion-sections-small: 15px;
 }
 
 .homepage-featured-components {
-  .docs-featured-components-carousel-item {
+  .panosupgrade-featured-components-carousel-item {
     text-align: center;
     box-sizing: border-box;
     font-size: 18px;
@@ -196,7 +196,7 @@ $margin-promotion-sections-small: 15px;
   }
 }
 
-.homepage-row-column {
+.panosupgrade-homepage-row-column {
   display: flex;
   flex-direction: column;
   width: 32%;
@@ -206,7 +206,7 @@ $margin-promotion-sections-small: 15px;
   }
 }
 
-.docs-header-start {
+.panosupgrade-header-start {
   text-align: center;
   margin: $margin-promotion-sections 0 0 0;
 
@@ -216,18 +216,18 @@ $margin-promotion-sections-small: 15px;
 }
 
 @media (max-width: 1200px) {
-  .docs-header-background {
+  .panosupgrade-header-background {
     height: 330px;
   }
 
-  .docs-header-background:before {
+  .panosupgrade-header-background:before {
     background-image: none;
   }
 }
 
 @media (max-width: 850px) {
 
-  .docs-header-background:before {
+  .panosupgrade-header-background:before {
     background-image: none;
   }
 
@@ -235,7 +235,7 @@ $margin-promotion-sections-small: 15px;
     flex-direction: column;
   }
 
-  .homepage-row-column {
+  .panosupgrade-homepage-row-column {
     width: 100%;
 
     &+& {
@@ -248,11 +248,11 @@ $margin-promotion-sections-small: 15px;
   * Rules for when the device is detected to be a small screen.
   */
 @media (max-width: 720px) {
-  .docs-header-start {
+  .panosupgrade-header-start {
     margin: $margin-promotion-sections-small 0 0 0;
   }
 
-  .homepage-row,
+  .panosupgrade-homepage-row,
   .panosupgrade-homepage-carousel-row {
     margin: $margin-promotion-sections-small 0;
   }

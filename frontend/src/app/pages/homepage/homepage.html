@@ -1,18 +1,18 @@
 <header
     focusOnNavigation
-    class="docs-header-background"
+    class="panosupgrade-header-background"
     [class.is-next-version]="isNextVersion"
     aria-label="Get started"
     id="homepage-header"
 >
-    <div class="docs-header-section">
-        <div class="docs-header-headline">
+    <div class="panosupgrade-header-section">
+        <div class="panosupgrade-header-headline">
             <h1 class="mat-h1">PAN-OS Upgrade</h1>
             <h2>
                 Automate the upgrades of your PAN-OS and Panorama appliances
             </h2>
         </div>
-        <div class="docs-header-start">
+        <div class="panosupgrade-header-start">
             <a
                 mat-raised-button
                 class="docs-button"
@@ -24,8 +24,8 @@
 </header>
 
 <main class="homepage-promo">
-    <div class="homepage-row docs-introduction">
-        <div class="homepage-row-column">
+    <div class="panosupgrade-homepage-row docs-introduction">
+        <div class="panosupgrade-homepage-row-column">
             <h2>Customizable and Extensible</h2>
             <p>
                 Tailor the execution to fit your unique network environments and
@@ -36,7 +36,7 @@
                 scenarios.
             </p>
         </div>
-        <div class="homepage-row-column">
+        <div class="panosupgrade-homepage-row-column">
             <h2>Automation of Routine Tasks</h2>
             <p>
                 Reduce manual errors and save valuable time with automated
@@ -47,7 +47,7 @@
                 backups.
             </p>
         </div>
-        <div class="homepage-row-column">
+        <div class="panosupgrade-homepage-row-column">
             <h2>High Availability Workflows</h2>
             <p>
                 Seamless upgrading of firewalls and Panorama appliances in HA
@@ -68,7 +68,7 @@
         <div class="homepage-header">
             <h2>PAN-OS Upgrade components</h2>
 
-            <a class="docs-link" routerLink="/components">
+            <a class="panosupgrade-link" routerLink="/components">
                 View all components
                 <mat-icon>chevron_right</mat-icon>
             </a>
@@ -77,7 +77,7 @@
             <a
                 *ngFor="let comp of getTopComponents()"
                 carousel-item
-                class="carousel-item docs-featured-components-carousel-item"
+                class="carousel-item panosupgrade-featured-components-carousel-item"
                 routerLink="/components/{{comp}}"
             >
                 <div class="panosupgrade-homepage-img-container">
@@ -100,7 +100,7 @@
         <div class="homepage-header">
             <h2>Guides</h2>
 
-            <a class="docs-link" routerLink="/guides">
+            <a class="panosupgrade-link" routerLink="/guides">
                 View all guides
                 <mat-icon>chevron_right</mat-icon>
             </a>

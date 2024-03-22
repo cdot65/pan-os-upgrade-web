@@ -18,7 +18,8 @@
     font-size: 20px;
   }
 
-  h2, h4 {
+  h2,
+  h4 {
     margin-top: 40px;
   }
 
@@ -26,7 +27,9 @@
     font-size: 18px;
   }
 
-  p, ul, ol {
+  p,
+  ul,
+  ol {
     font-size: 16px;
     line-height: 28px;
   }
@@ -54,7 +57,7 @@
   }
 }
 
-.docs-header-link {
+.panosupgrade-header-link {
   // padding to prevent the site header from headbutting the headers when navigating using fragment links
   padding-top: 20px;
   margin-top: -20px;
