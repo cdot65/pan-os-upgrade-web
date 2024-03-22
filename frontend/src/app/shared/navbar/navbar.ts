@@ -7,7 +7,6 @@ import { NavigationFocusService } from "../navigation-focus/navigation-focus.ser
 import { SECTIONS } from "../documentation-items/documentation-items";
 import { Subscription } from "rxjs";
 import { ThemePicker } from "../theme-picker/theme-picker";
-import { VersionPicker } from "../version-picker/version-picker";
 
 const SECTIONS_KEYS = Object.keys(SECTIONS);
 
@@ -22,7 +21,6 @@ const SECTIONS_KEYS = Object.keys(SECTIONS);
         RouterLink,
         NgFor,
         RouterLinkActive,
-        VersionPicker,
         ThemePicker,
     ],
 })
