@@ -1,6 +1,10 @@
 {
-  "name": "frontend",
-  "version": "0.0.0",
+  "name": "panosupgrade",
+  "version": "0.1.0",
+  "copyright": "Copyright 20243 cdot65 Calvin Remsburg",
+  "license": "MIT",
+  "author": "Calvin Remsburg",
+  "homepage": "https://github.com/cdot65/pan-os-upgrade-web",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
