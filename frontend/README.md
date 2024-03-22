@@ -16,7 +16,7 @@ Versions of this site are also available for
 
 Please open bugs against the Angular Material and CDK components, directives, documentation
 contents, API docs, and demos in the
-[Angular Components repo](https://github.com/angular/components/issues).
+[Angular Components repo](https://github.com/cdot65/pan-os-upgrade-web/issues).
 
 Please only open issues with the documentation site itself (not the content) in
 [this repo](https://github.com/angular/material.angular.io/issues). This includes issues like the
@@ -28,9 +28,9 @@ issues with rendering or layout of the documentation pages, etc.
 The guides, examples, and docs content repo
 [angular/material2-docs-content](https://github.com/angular/material2-docs-content) contains the
 documentation content and examples. They are generated from:
-- [Angular Material and CDK Guides](https://github.com/angular/components/tree/main/guides)
-- [Material components, services, and directives](https://github.com/angular/components/tree/main/src/material)
-- [CDK components, services, and directives](https://github.com/angular/components/tree/main/src/cdk)
+- [Angular Material and CDK Guides](https://github.com/cdot65/pan-os-upgrade-web/tree/main/guides)
+- [Material components, services, and directives](https://github.com/cdot65/pan-os-upgrade-web/tree/main/src/material)
+- [CDK components, services, and directives](https://github.com/cdot65/pan-os-upgrade-web/tree/main/src/cdk)
 
 ## Development Setup
 

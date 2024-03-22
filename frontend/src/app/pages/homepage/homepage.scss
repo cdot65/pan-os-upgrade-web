@@ -11,7 +11,7 @@ $margin-promotion-sections-small: 15px;
 .docs-header-background::before {
   content: '';
   position: absolute;
-  background-image: url('../../../assets/img/homepage/angular-white-transparent.svg');
+  background-image: url('../../../assets/img/homepage/pan-trans.svg');
   background-size: 600px;
   top: 0;
   bottom: 0;
@@ -48,7 +48,7 @@ $margin-promotion-sections-small: 15px;
   }
 }
 
-.docs-homepage-promo {
+.homepage-promo {
   align-items: center;
   display: flex;
   flex-direction: column;
@@ -88,7 +88,7 @@ $margin-promotion-sections-small: 15px;
 .carousel-item {
   width: 48%;
 
-  & + & {
+  &+& {
     margin-left: 2%;
   }
 
@@ -97,7 +97,7 @@ $margin-promotion-sections-small: 15px;
   }
 }
 
-.docs-homepage-row {
+.homepage-row {
   display: flex;
   flex-direction: row;
   margin: $margin-promotion-sections 0;
@@ -114,7 +114,7 @@ $margin-promotion-sections-small: 15px;
   }
 }
 
-.docs-homepage-header {
+.homepage-header {
   display: flex;
   width: 100%;
   align-items: center;
@@ -166,7 +166,7 @@ $margin-promotion-sections-small: 15px;
   }
 }
 
-.docs-homepage-featured-components {
+.homepage-featured-components {
   .docs-featured-components-carousel-item {
     text-align: center;
     box-sizing: border-box;
@@ -187,7 +187,8 @@ $margin-promotion-sections-small: 15px;
       }
     }
 
-    &:hover, &:focus {
+    &:hover,
+    &:focus {
       img {
         transform: scale(1.1);
       }
@@ -195,12 +196,12 @@ $margin-promotion-sections-small: 15px;
   }
 }
 
-.docs-homepage-row-column {
+.homepage-row-column {
   display: flex;
   flex-direction: column;
   width: 32%;
 
-  & + & {
+  &+& {
     margin-left: 2%;
   }
 }
@@ -218,6 +219,7 @@ $margin-promotion-sections-small: 15px;
   .docs-header-background {
     height: 330px;
   }
+
   .docs-header-background:before {
     background-image: none;
   }
@@ -228,14 +230,15 @@ $margin-promotion-sections-small: 15px;
   .docs-header-background:before {
     background-image: none;
   }
+
   .docs-introduction {
     flex-direction: column;
   }
 
-  .docs-homepage-row-column {
+  .homepage-row-column {
     width: 100%;
 
-    & + & {
+    &+& {
       margin-left: 0;
     }
   }
@@ -249,7 +252,8 @@ $margin-promotion-sections-small: 15px;
     margin: $margin-promotion-sections-small 0 0 0;
   }
 
-  .docs-homepage-row, .docs-homepage-carousel-row {
+  .homepage-row,
+  .docs-homepage-carousel-row {
     margin: $margin-promotion-sections-small 0;
   }
 }

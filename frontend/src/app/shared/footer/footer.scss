@@ -24,11 +24,12 @@
   align-items: center;
   flex: 1;
 
-  .angular-material-logo {
+  .paloaltonetworks-logo {
     width: 40px;
     height: 40px;
     margin: 10px 0 10px 16px;
   }
+
   .version {
     margin: 0 40px;
   }
@@ -42,7 +43,7 @@
   min-width: 225px;
   margin-top: 16px;
 
-  > div {
+  >div {
     display: flex;
     flex-direction: column;
     align-self: flex-end;
@@ -76,7 +77,7 @@ a {
   }
 }
 
-@media screen and (max-width: 884px){
+@media screen and (max-width: 884px) {
   .docs-footer-list {
     flex-direction: column;
   }
