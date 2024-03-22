@@ -67,4 +67,5 @@ backend/packages/*.whl
 **.ai
 llm.md
 
+saute/
 .vscode/settings.json
