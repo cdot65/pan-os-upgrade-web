@@ -51,10 +51,6 @@
     }
   }
 
-  .is-next-version {
-    background: mat.get-color-from-palette($next-theme, 900) !important;
-  }
-
   @include carousel-theme.theme($theme);
   @include component-category-list-theme.theme($theme);
   @include component-sidenav-theme.theme($theme);
