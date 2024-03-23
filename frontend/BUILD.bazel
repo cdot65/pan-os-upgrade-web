@@ -41,27 +41,7 @@ ng_app(
     project_name = "pan-os-upgrade",
     deps = [
       "//:node_modules/@angular/components-examples",
-      "//:node_modules/@stackblitz/sdk",
       "//:node_modules/path-normalize",
       "//:node_modules/moment",
     ],
-)
-
-
-js_test(
-  name = "audit",
-  entry_point = "tools/audit-docs.js",
-  args = [
-    "$(location //:build.production)",
-  ],
-  data = [
-    "tools/lighthouse-audit.mjs",
-    "//:build.production",
-    "//:node_modules/lighthouse",
-    "//:node_modules/lighthouse-logger",
-    "//:node_modules/puppeteer",
-    "//:node_modules/shelljs",
-    "//:node_modules/light-server",
-  ],
-  tags = ["audit"],
 )

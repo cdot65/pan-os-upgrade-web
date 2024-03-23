@@ -1,6 +1,4 @@
 dist/
 node_modules/
 .angular/
-.circleci/
 .github/
-src/assets/stack-blitz/node_modules
