@@ -18,16 +18,15 @@ import { MatCardModule } from "@angular/material/card";
 import { GuideItems } from "../../shared/guide-items/guide-items";
 import { NgFor } from "@angular/common";
 
-import { Support } from "../../shared/support/support";
 import { Carousel, CarouselItem } from "../../shared/carousel/carousel";
 
-const TOP_COMPONENTS = [
-    "datepicker",
-    "input",
-    "slide-toggle",
-    "slider",
-    "button",
-];
+// const TOP_COMPONENTS = [
+//     "datepicker",
+//     "input",
+//     "slide-toggle",
+//     "slider",
+//     "button",
+// ];
 
 @Component({
     selector: "app-homepage",
@@ -44,7 +43,6 @@ const TOP_COMPONENTS = [
         NgFor,
         CarouselItem,
         MatCardModule,
-        Support,
         Footer,
     ],
 })
@@ -65,7 +63,7 @@ export class Homepage implements OnInit {
         this._componentPageTitle.title = "";
     }
 
-    getTopComponents(): string[] {
-        return TOP_COMPONENTS;
-    }
+    // getTopComponents(): string[] {
+    //     return TOP_COMPONENTS;
+    // }
 }

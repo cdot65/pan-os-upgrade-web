@@ -1,131 +1,78 @@
-<header
-    focusOnNavigation
-    class="panosupgrade-header-background"
-    aria-label="Get started"
-    id="homepage-header"
->
-    <div class="panosupgrade-header-section">
-        <div class="panosupgrade-header-headline">
-            <h1 class="mat-h1">PAN-OS Upgrade</h1>
-            <h2>
-                Automate the upgrades of your PAN-OS and Panorama appliances
-            </h2>
-        </div>
-        <div class="panosupgrade-header-start">
-            <a
-                mat-raised-button
-                class="panosupgrade-button"
-                routerLink="/guide/getting-started"
-                >Get started</a
-            >
-        </div>
+<header focusOnNavigation class="panosupgrade-header-background" aria-label="Get started" id="homepage-header">
+  <div class="panosupgrade-header-section">
+    <div class="panosupgrade-header-headline">
+      <h1 class="mat-h1">PAN-OS Upgrade</h1>
+      <h2>
+        Automate the upgrades of your PAN-OS and Panorama appliances
+      </h2>
     </div>
+    <div class="panosupgrade-header-start">
+      <a mat-raised-button class="panosupgrade-button" routerLink="/guide/getting-started">Get started</a>
+    </div>
+  </div>
 </header>
 
 <main class="homepage-promo">
-    <div class="panosupgrade-homepage-row docs-introduction">
-        <div class="panosupgrade-homepage-row-column">
-            <h2>Customizable and Extensible</h2>
-            <p>
-                Tailor the execution to fit your unique network environments and
-                requirements.
-            </p>
-            <p>
-                Offers unparalleled flexibility for a variety of deployment
-                scenarios.
-            </p>
-        </div>
-        <div class="panosupgrade-homepage-row-column">
-            <h2>Automation of Routine Tasks</h2>
-            <p>
-                Reduce manual errors and save valuable time with automated
-                workflows.
-            </p>
-            <p>
-                Perform network snapshots, pre-upgrade checks, and configuration
-                backups.
-            </p>
-        </div>
-        <div class="panosupgrade-homepage-row-column">
-            <h2>High Availability Workflows</h2>
-            <p>
-                Seamless upgrading of firewalls and Panorama appliances in HA
-                deployments.
-            </p>
-            <p>
-                Both Active / Passive and Active / Active configurations are
-                supported.
-            </p>
-        </div>
+  <div class="panosupgrade-homepage-row docs-introduction">
+    <div class="panosupgrade-homepage-row-column">
+      <h2>Customizable and Extensible</h2>
+      <p>
+        Tailor the execution to fit your unique network environments and
+        requirements.
+      </p>
+      <p>
+        Offers unparalleled flexibility for a variety of deployment
+        scenarios.
+      </p>
     </div>
-
-    <mat-divider></mat-divider>
-
-    <div
-        class="homepage-featured-components panosupgrade-homepage-carousel-row"
-    >
-        <div class="homepage-header">
-            <h2>PAN-OS Upgrade components</h2>
-
-            <a class="panosupgrade-link" routerLink="/components">
-                View all components
-                <mat-icon>chevron_right</mat-icon>
-            </a>
-        </div>
-        <app-carousel [aria-label]="'Featured components'">
-            <a
-                *ngFor="let comp of getTopComponents()"
-                carousel-item
-                class="carousel-item panosupgrade-featured-components-carousel-item"
-                routerLink="/components/{{comp}}"
-            >
-                <div class="panosupgrade-homepage-img-container">
-                    <img
-                        alt=""
-                        src="../../../assets/screenshots/{{comp}}.scene.png"
-                        role="presentation"
-                    />
-                </div>
-                {{(comp[0].toUpperCase() + comp.slice(1)).replace('-', ' ')}}
-            </a>
-        </app-carousel>
+    <div class="panosupgrade-homepage-row-column">
+      <h2>Automation of Routine Tasks</h2>
+      <p>
+        Reduce manual errors and save valuable time with automated
+        workflows.
+      </p>
+      <p>
+        Perform network snapshots, pre-upgrade checks, and configuration
+        backups.
+      </p>
     </div>
-
-    <mat-divider></mat-divider>
-
-    <div
-        class="panosupgrade-homepage-guides panosupgrade-homepage-carousel-row"
-    >
-        <div class="homepage-header">
-            <h2>Guides</h2>
-
-            <a class="panosupgrade-link" routerLink="/guides">
-                View all guides
-                <mat-icon>chevron_right</mat-icon>
-            </a>
-        </div>
-        <app-carousel [aria-label]="'Guides'">
-            <a
-                carousel-item
-                class="carousel-item panosupgrade-homepage-guides-carousel-item"
-                *ngFor="let guide of guideItems.getAllItems()"
-                routerLink="/guide/{{guide.id}}"
-            >
-                <mat-card class="panosupgrade-homepage-guides-card">
-                    <mat-card-title>{{guide.name}}</mat-card-title>
-                    <div
-                        class="panosupgrade-homepage-guides-card-divider"
-                    ></div>
-                    <mat-card-content
-                        class="docs-component-category-list-card-summary"
-                    >
-                        {{guide.overview}}
-                    </mat-card-content>
-                </mat-card>
-            </a>
-        </app-carousel>
+    <div class="panosupgrade-homepage-row-column">
+      <h2>High Availability Workflows</h2>
+      <p>
+        Seamless upgrading of firewalls and Panorama appliances in HA
+        deployments.
+      </p>
+      <p>
+        Both Active / Passive and Active / Active configurations are
+        supported.
+      </p>
     </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <div class="panosupgrade-homepage-guides panosupgrade-homepage-carousel-row">
+    <div class="homepage-header">
+      <h2>Guides</h2>
+
+      <a class="panosupgrade-link" routerLink="/guides">
+        View all guides
+        <mat-icon>chevron_right</mat-icon>
+      </a>
+    </div>
+    <app-carousel [aria-label]="'Guides'">
+      <a carousel-item class="carousel-item panosupgrade-homepage-guides-carousel-item"
+        *ngFor="let guide of guideItems.getAllItems()" routerLink="/guide/{{guide.id}}">
+        <mat-card class="panosupgrade-homepage-guides-card">
+          <mat-card-title>{{guide.name}}</mat-card-title>
+          <div class="panosupgrade-homepage-guides-card-divider"></div>
+          <mat-card-content class="docs-component-category-list-card-summary">
+            {{guide.overview}}
+          </mat-card-content>
+        </mat-card>
+      </a>
+    </app-carousel>
+  </div>
 </main>
 
-<app-support></app-support>
 <app-footer></app-footer>
