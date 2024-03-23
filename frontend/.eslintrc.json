@@ -33,7 +33,7 @@
                 "@typescript-eslint/no-non-null-assertion": "off",
                 "@typescript-eslint/quotes": [
                     "error",
-                    "single",
+                    "double",
                     {
                         "avoidEscape": true,
                         "allowTemplateLiterals": true

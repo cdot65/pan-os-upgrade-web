@@ -14,7 +14,7 @@ import { Subscription } from "rxjs";
     standalone: true,
     imports: [NavBar, RouterOutlet],
 })
-export class MaterialDocsApp implements OnDestroy {
+export class PanOsUpgradeApp implements OnDestroy {
     private subscriptions = new Subscription();
 
     constructor(navigationFocusService: NavigationFocusService) {
@@ -26,8 +26,6 @@ export class MaterialDocsApp implements OnDestroy {
                     pairwise()
                 )
                 .subscribe(([fromUrl, toUrl]) => {
-                    // We want to reset the scroll position on navigation except when navigating within
-                    // the documentation for a single component.
                     if (
                         !navigationFocusService.isNavigationWithinComponentView(
                             fromUrl,

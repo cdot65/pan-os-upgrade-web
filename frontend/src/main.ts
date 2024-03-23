@@ -5,9 +5,8 @@ import {
 } from "@angular/platform-browser/animations";
 import { provideRouter, withInMemoryScrolling } from "@angular/router";
 
-import { ErrorHandler } from "@angular/core";
-import { MaterialDocsApp } from "./app/panosupgrade-app";
 import { PANOSUPGRADE_ROUTES } from "./app/routes";
+import { PanOsUpgradeApp } from "./app/panosupgrade-app";
 import { bootstrapApplication } from "@angular/platform-browser";
 import { provideHttpClient } from "@angular/common/http";
 import { unregisterServiceWorkers } from "./unregister-service-workers";
@@ -23,7 +22,7 @@ unregisterServiceWorkers().then(
     (hadServiceWorker) => hadServiceWorker && location.reload()
 );
 
-bootstrapApplication(MaterialDocsApp, {
+bootstrapApplication(PanOsUpgradeApp, {
     providers: [
         prefersReducedMotion ? provideNoopAnimations() : provideAnimations(),
         { provide: LocationStrategy, useClass: PathLocationStrategy },
