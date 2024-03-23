@@ -1,0 +1,23 @@
+{
+    "folders": [
+			{
+				"path": "./backend"
+			},
+			{
+				"path": "./frontend"
+			},
+			{
+				"path": "."
+			}
+		],
+    "settings": {
+        "debug.openExplorerOnEnd": true,
+        "explorer.openEditors.visible": 0,
+        "git.confirmSync": false,
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "workbench.iconTheme": "material-icon-theme",
+        "gitlens.menus": {
+            "editorGroup": false
+        }
+    }
+}
