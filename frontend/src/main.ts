@@ -5,7 +5,6 @@ import {
 } from "@angular/platform-browser/animations";
 import { provideRouter, withInMemoryScrolling } from "@angular/router";
 
-import { AnalyticsErrorReportHandler } from "./app/shared/analytics/error-report-handler";
 import { ErrorHandler } from "@angular/core";
 import { MaterialDocsApp } from "./app/panosupgrade-app";
 import { PANOSUPGRADE_ROUTES } from "./app/routes";
@@ -28,7 +27,6 @@ bootstrapApplication(MaterialDocsApp, {
     providers: [
         prefersReducedMotion ? provideNoopAnimations() : provideAnimations(),
         { provide: LocationStrategy, useClass: PathLocationStrategy },
-        { provide: ErrorHandler, useClass: AnalyticsErrorReportHandler },
         provideRouter(
             PANOSUPGRADE_ROUTES,
             withInMemoryScrolling({

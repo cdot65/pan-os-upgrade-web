@@ -1,7 +1,6 @@
 import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { map, pairwise, startWith } from "rxjs/operators";
 
-import { AnalyticsService } from "./shared/analytics/analytics";
 import { NavBar } from "./shared/navbar/navbar";
 import { NavigationFocusService } from "./shared/navigation-focus/navigation-focus.service";
 import { RouterOutlet } from "@angular/router";
@@ -18,10 +17,7 @@ import { Subscription } from "rxjs";
 export class MaterialDocsApp implements OnDestroy {
     private subscriptions = new Subscription();
 
-    constructor(
-        analytics: AnalyticsService,
-        navigationFocusService: NavigationFocusService
-    ) {
+    constructor(navigationFocusService: NavigationFocusService) {
         this.subscriptions.add(
             navigationFocusService.navigationEndEvents
                 .pipe(
@@ -40,7 +36,6 @@ export class MaterialDocsApp implements OnDestroy {
                     ) {
                         resetScrollPosition();
                     }
-                    analytics.locationChanged(toUrl);
                 })
         );
     }
