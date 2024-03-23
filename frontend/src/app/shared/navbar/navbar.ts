@@ -15,14 +15,7 @@ const SECTIONS_KEYS = Object.keys(SECTIONS);
     templateUrl: "./navbar.html",
     styleUrls: ["./navbar.scss"],
     standalone: true,
-    imports: [
-        NgIf,
-        MatButtonModule,
-        RouterLink,
-        NgFor,
-        RouterLinkActive,
-        ThemePicker,
-    ],
+    imports: [NgIf, MatButtonModule, RouterLink, NgFor, RouterLinkActive, ThemePicker],
 })
 export class NavBar implements OnDestroy {
     private subscriptions = new Subscription();
@@ -30,12 +23,7 @@ export class NavBar implements OnDestroy {
     skipLinkHidden = true;
 
     constructor(private navigationFocusService: NavigationFocusService) {
-        setTimeout(
-            () =>
-                (this.skipLinkHref =
-                    this.navigationFocusService.getSkipLinkHref()),
-            100
-        );
+        setTimeout(() => (this.skipLinkHref = this.navigationFocusService.getSkipLinkHref()), 100);
     }
 
     get sections() {

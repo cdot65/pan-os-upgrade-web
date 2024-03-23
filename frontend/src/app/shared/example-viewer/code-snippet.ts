@@ -1,10 +1,4 @@
-import {
-    ChangeDetectionStrategy,
-    Component,
-    Input,
-    ViewChild,
-    forwardRef,
-} from "@angular/core";
+import { ChangeDetectionStrategy, Component, Input, ViewChild, forwardRef } from "@angular/core";
 
 import { DocViewer } from "../doc-viewer/doc-viewer";
 

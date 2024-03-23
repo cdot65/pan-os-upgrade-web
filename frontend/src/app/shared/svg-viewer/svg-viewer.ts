@@ -11,7 +11,10 @@ export class SvgViewer implements OnInit {
     @Input() src: string | undefined;
     @Input() scaleToContainer: boolean | undefined;
 
-    constructor(private elementRef: ElementRef, private http: HttpClient) {}
+    constructor(
+        private elementRef: ElementRef,
+        private http: HttpClient,
+    ) {}
 
     ngOnInit() {
         if (this.src) {
@@ -32,11 +35,9 @@ export class SvgViewer implements OnInit {
 
     private fetchAndInlineSvgContent(path: string): void {
         const svgAbsPath = getAbsolutePathFromSrc(path);
-        this.http
-            .get(svgAbsPath, { responseType: "text" })
-            .subscribe((svgResponse) => {
-                this.inlineSvgContent(svgResponse);
-            });
+        this.http.get(svgAbsPath, { responseType: "text" }).subscribe((svgResponse) => {
+            this.inlineSvgContent(svgResponse);
+        });
     }
 }
 

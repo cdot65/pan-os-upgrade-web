@@ -66,10 +66,7 @@ export class Carousel implements AfterContentInit {
             manager.setFirstItemActive();
         }
 
-        if (
-            manager.activeItemIndex != null &&
-            manager.activeItemIndex !== previousActiveIndex
-        ) {
+        if (manager.activeItemIndex != null && manager.activeItemIndex !== previousActiveIndex) {
             this.index = manager.activeItemIndex;
             this._updateItemTabIndices();
 
@@ -79,9 +76,7 @@ export class Carousel implements AfterContentInit {
         }
     }
 
-    constructor(
-        @Optional() @Inject(ANIMATION_MODULE_TYPE) animationsModule?: string
-    ) {
+    constructor(@Optional() @Inject(ANIMATION_MODULE_TYPE) animationsModule?: string) {
         this.animationsDisabled = animationsModule === "NoopAnimations";
     }
 
@@ -115,8 +110,7 @@ export class Carousel implements AfterContentInit {
     private _updateItemTabIndices() {
         this.items.forEach((item: CarouselItem) => {
             if (this._keyManager != null) {
-                item.tabindex =
-                    item === this._keyManager.activeItem ? "0" : "-1";
+                item.tabindex = item === this._keyManager.activeItem ? "0" : "-1";
             }
         });
     }
@@ -133,12 +127,10 @@ export class Carousel implements AfterContentInit {
         // Only shift the carousel by one if we're going forwards. This
         // looks better compared to moving the carousel by an entire page.
         if (this.index > 0 && !this._isOutOfView(this.index - 1)) {
-            targetItemIndex =
-                itemsArray.findIndex((_, i) => !this._isOutOfView(i)) + 1;
+            targetItemIndex = itemsArray.findIndex((_, i) => !this._isOutOfView(i)) + 1;
         }
 
-        this.position =
-            itemsArray[targetItemIndex].element.nativeElement.offsetLeft;
+        this.position = itemsArray[targetItemIndex].element.nativeElement.offsetLeft;
         this.list.nativeElement.style.transform = `translateX(-${this.position}px)`;
         this.showPrevArrow = this.index > 0;
         this.showNextArrow = false;
@@ -153,8 +145,7 @@ export class Carousel implements AfterContentInit {
 
     /** Checks whether an item at a specific index is outside of the viewport. */
     private _isOutOfView(index: number, side?: "start" | "end") {
-        const { offsetWidth, offsetLeft } =
-            this.items.toArray()[index].element.nativeElement;
+        const { offsetWidth, offsetLeft } = this.items.toArray()[index].element.nativeElement;
 
         if ((!side || side === "start") && offsetLeft - this.position < 0) {
             return true;
@@ -162,8 +153,7 @@ export class Carousel implements AfterContentInit {
 
         return (
             (!side || side === "end") &&
-            offsetWidth + offsetLeft - this.position >
-                this.list.nativeElement.clientWidth
+            offsetWidth + offsetLeft - this.position > this.list.nativeElement.clientWidth
         );
     }
 }

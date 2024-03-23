@@ -33,9 +33,7 @@ class DocFetcher {
             return this._cache[url];
         }
 
-        const stream = this._http
-            .get(url, { responseType: "text" })
-            .pipe(shareReplay(1));
+        const stream = this._http.get(url, { responseType: "text" }).pipe(shareReplay(1));
         return stream.pipe(tap(() => (this._cache[url] = stream)));
     }
 }
@@ -68,7 +66,7 @@ export class DocViewer implements OnDestroy {
         exampleViewerComponent: ExampleViewer,
         example: string,
         file: string | null,
-        region: string | null
+        region: string | null,
     ) {
         exampleViewerComponent.example = example;
         if (file) {
@@ -95,18 +93,16 @@ export class DocViewer implements OnDestroy {
         private _viewContainerRef: ViewContainerRef,
         private _ngZone: NgZone,
         private _domSanitizer: DomSanitizer,
-        private _docFetcher: DocFetcher
+        private _docFetcher: DocFetcher,
     ) {}
 
     /** Fetch a document by URL. */
     private _fetchDocument(url: string) {
         this._documentFetchSubscription?.unsubscribe();
-        this._documentFetchSubscription = this._docFetcher
-            .fetchDocument(url)
-            .subscribe(
-                (document) => this.updateDocument(document),
-                (error) => this.showError(url, error)
-            );
+        this._documentFetchSubscription = this._docFetcher.fetchDocument(url).subscribe(
+            (document) => this.updateDocument(document),
+            (error) => this.showError(url, error),
+        );
     }
 
     /**
@@ -116,16 +112,10 @@ export class DocViewer implements OnDestroy {
     private updateDocument(rawDocument: string) {
         // "/components/button/api#my-section". This is necessary because otherwise these fragment
         // links would redirect to "/#my-section".
-        rawDocument = rawDocument.replace(
-            /href="#([^"]*)"/g,
-            (_m: string, fragmentUrl: string) => {
-                const absoluteUrl = `${location.pathname}#${fragmentUrl}`;
-                return `href="${this._domSanitizer.sanitize(
-                    SecurityContext.URL,
-                    absoluteUrl
-                )}"`;
-            }
-        );
+        rawDocument = rawDocument.replace(/href="#([^"]*)"/g, (_m: string, fragmentUrl: string) => {
+            const absoluteUrl = `${location.pathname}#${fragmentUrl}`;
+            return `href="${this._domSanitizer.sanitize(SecurityContext.URL, absoluteUrl)}"`;
+        });
         this._elementRef.nativeElement.innerHTML = rawDocument;
         this.textContent = this._elementRef.nativeElement.textContent;
         this._loadComponents("material-docs-example", ExampleViewer);
@@ -136,9 +126,7 @@ export class DocViewer implements OnDestroy {
         // until the Angular zone becomes stable.
         this._ngZone.onStable
             .pipe(take(1))
-            .subscribe(() =>
-                this.contentRendered.next(this._elementRef.nativeElement)
-            );
+            .subscribe(() => this.contentRendered.next(this._elementRef.nativeElement));
     }
 
     /** Show an error that occurred when fetching a document. */
@@ -150,7 +138,7 @@ export class DocViewer implements OnDestroy {
     /** Instantiate a ExampleViewer for each example. */
     private _loadComponents(componentName: string, componentClass: any) {
         const exampleElements = this._elementRef.nativeElement.querySelectorAll(
-            `[${componentName}]`
+            `[${componentName}]`,
         );
 
         [...exampleElements].forEach((element: Element) => {
@@ -161,22 +149,13 @@ export class DocViewer implements OnDestroy {
                 element,
                 this._componentFactoryResolver,
                 this._appRef,
-                this._injector
+                this._injector,
             );
-            const examplePortal = new ComponentPortal(
-                componentClass,
-                this._viewContainerRef
-            );
+            const examplePortal = new ComponentPortal(componentClass, this._viewContainerRef);
             const exampleViewer = portalHost.attach(examplePortal);
-            const exampleViewerComponent =
-                exampleViewer.instance as ExampleViewer;
+            const exampleViewerComponent = exampleViewer.instance as ExampleViewer;
             if (example !== null) {
-                DocViewer.initExampleViewer(
-                    exampleViewerComponent,
-                    example,
-                    file,
-                    region
-                );
+                DocViewer.initExampleViewer(exampleViewerComponent, example, file, region);
             }
             this._portalHosts.push(portalHost);
         });

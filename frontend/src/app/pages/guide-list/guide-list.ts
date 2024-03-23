@@ -20,7 +20,7 @@ export class GuideList implements OnInit {
 
     constructor(
         public guideItems: GuideItems,
-        public _componentPageTitle: ComponentPageTitle
+        public _componentPageTitle: ComponentPageTitle,
     ) {}
 
     ngOnInit(): void {

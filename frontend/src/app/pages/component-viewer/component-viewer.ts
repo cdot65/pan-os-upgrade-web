@@ -20,10 +20,7 @@ import {
     ViewChildren,
     ViewEncapsulation,
 } from "@angular/core";
-import {
-    DocItem,
-    DocumentationItems,
-} from "../../shared/documentation-items/documentation-items";
+import { DocItem, DocumentationItems } from "../../shared/documentation-items/documentation-items";
 import { Observable, ReplaySubject, Subject, combineLatest } from "rxjs";
 import { map, skip, takeUntil } from "rxjs/operators";
 
@@ -42,14 +39,7 @@ import { TableOfContents } from "../../shared/table-of-contents/table-of-content
     styleUrls: ["./component-viewer.scss"],
     encapsulation: ViewEncapsulation.None,
     standalone: true,
-    imports: [
-        MatTabsModule,
-        NavigationFocus,
-        NgFor,
-        RouterLinkActive,
-        RouterLink,
-        RouterOutlet,
-    ],
+    imports: [MatTabsModule, NavigationFocus, NgFor, RouterLinkActive, RouterLink, RouterOutlet],
 })
 export class ComponentViewer implements OnDestroy {
     componentDocItem = new ReplaySubject<DocItem>(1);
@@ -60,7 +50,7 @@ export class ComponentViewer implements OnDestroy {
         _route: ActivatedRoute,
         private router: Router,
         public _componentPageTitle: ComponentPageTitle,
-        public docItems: DocumentationItems
+        public docItems: DocumentationItems,
     ) {
         const routeAndParentParams = [_route.params];
         if (_route.parent) {
@@ -76,37 +66,26 @@ export class ComponentViewer implements OnDestroy {
                 })),
                 map(
                     (docIdAndSection: { id: string; section: string }) => ({
-                        doc: docItems.getItemById(
-                            docIdAndSection.id,
-                            docIdAndSection.section
-                        ),
+                        doc: docItems.getItemById(docIdAndSection.id, docIdAndSection.section),
                         section: docIdAndSection.section,
                     }),
-                    takeUntil(this._destroyed)
-                )
+                    takeUntil(this._destroyed),
+                ),
             )
-            .subscribe(
-                (docItemAndSection: {
-                    doc: DocItem | undefined;
-                    section: string;
-                }) => {
-                    if (docItemAndSection.doc !== undefined) {
-                        this.componentDocItem.next(docItemAndSection.doc);
-                        this._componentPageTitle.title = `${docItemAndSection.doc.name}`;
+            .subscribe((docItemAndSection: { doc: DocItem | undefined; section: string }) => {
+                if (docItemAndSection.doc !== undefined) {
+                    this.componentDocItem.next(docItemAndSection.doc);
+                    this._componentPageTitle.title = `${docItemAndSection.doc.name}`;
 
-                        if (
-                            docItemAndSection.doc.examples &&
-                            docItemAndSection.doc.examples.length
-                        ) {
-                            this.sections.add("examples");
-                        } else {
-                            this.sections.delete("examples");
-                        }
+                    if (docItemAndSection.doc.examples && docItemAndSection.doc.examples.length) {
+                        this.sections.add("examples");
                     } else {
-                        this.router.navigate(["/" + docItemAndSection.section]);
+                        this.sections.delete("examples");
                     }
+                } else {
+                    this.router.navigate(["/" + docItemAndSection.section]);
                 }
-            );
+            });
     }
 
     ngOnDestroy(): void {
@@ -131,31 +110,27 @@ export class ComponentBaseView implements OnInit, OnDestroy {
     constructor(
         public componentViewer: ComponentViewer,
         breakpointObserver: BreakpointObserver,
-        private changeDetectorRef: ChangeDetectorRef
+        private changeDetectorRef: ChangeDetectorRef,
     ) {
         this.showToc = breakpointObserver.observe("(max-width: 1200px)").pipe(
             map((result) => {
                 this.changeDetectorRef.detectChanges();
                 return !result.matches;
-            })
+            }),
         );
     }
 
     ngOnInit() {
-        this.componentViewer.componentDocItem
-            .pipe(takeUntil(this._destroyed))
-            .subscribe(() => {
-                if (this.tableOfContents) {
-                    this.tableOfContents.resetHeaders();
-                }
-            });
+        this.componentViewer.componentDocItem.pipe(takeUntil(this._destroyed)).subscribe(() => {
+            if (this.tableOfContents) {
+                this.tableOfContents.resetHeaders();
+            }
+        });
 
         this.showToc.pipe(skip(1), takeUntil(this._destroyed)).subscribe(() => {
             if (this.tableOfContents) {
                 this.viewers.forEach((viewer) => {
-                    viewer.contentRendered.emit(
-                        viewer._elementRef.nativeElement
-                    );
+                    viewer.contentRendered.emit(viewer._elementRef.nativeElement);
                 });
             }
         });
@@ -166,17 +141,9 @@ export class ComponentBaseView implements OnInit, OnDestroy {
         this._destroyed.complete();
     }
 
-    updateTableOfContents(
-        sectionName: string,
-        docViewerContent: HTMLElement,
-        sectionIndex = 0
-    ) {
+    updateTableOfContents(sectionName: string, docViewerContent: HTMLElement, sectionIndex = 0) {
         if (this.tableOfContents) {
-            this.tableOfContents.addHeaders(
-                sectionName,
-                docViewerContent,
-                sectionIndex
-            );
+            this.tableOfContents.addHeaders(sectionName, docViewerContent, sectionIndex);
             this.tableOfContents.updateScrollPosition();
         }
     }
@@ -193,7 +160,7 @@ export class ComponentOverview extends ComponentBaseView {
     constructor(
         componentViewer: ComponentViewer,
         breakpointObserver: BreakpointObserver,
-        changeDetectorRef: ChangeDetectorRef
+        changeDetectorRef: ChangeDetectorRef,
     ) {
         super(componentViewer, breakpointObserver, changeDetectorRef);
     }
@@ -204,8 +171,7 @@ export class ComponentOverview extends ComponentBaseView {
         // folder named after the component while the overview file is named similarly. e.g.
         //    `cdk#overlay`     -> `cdk/overlay/overlay.md`
         //    `material#button` -> `material/button/button.md`
-        const overviewPath =
-            doc.overviewPath || `${doc.packageName}/${doc.id}/${doc.id}.html`;
+        const overviewPath = doc.overviewPath || `${doc.packageName}/${doc.id}/${doc.id}.html`;
         return `/docs-content/overviews/${overviewPath}`;
     }
 }
@@ -222,7 +188,7 @@ export class ComponentApi extends ComponentBaseView {
     constructor(
         componentViewer: ComponentViewer,
         breakpointObserver: BreakpointObserver,
-        changeDetectorRef: ChangeDetectorRef
+        changeDetectorRef: ChangeDetectorRef,
     ) {
         super(componentViewer, breakpointObserver, changeDetectorRef);
     }
@@ -244,7 +210,7 @@ export class ComponentExamples extends ComponentBaseView {
     constructor(
         componentViewer: ComponentViewer,
         breakpointObserver: BreakpointObserver,
-        changeDetectorRef: ChangeDetectorRef
+        changeDetectorRef: ChangeDetectorRef,
     ) {
         super(componentViewer, breakpointObserver, changeDetectorRef);
     }

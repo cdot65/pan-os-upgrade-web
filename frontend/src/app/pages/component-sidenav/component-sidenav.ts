@@ -30,19 +30,9 @@ import {
     ComponentCategoryList,
     ComponentCategoryListModule,
 } from "../component-category-list/component-category-list";
-import {
-    MatDrawerToggleResult,
-    MatSidenav,
-    MatSidenavModule,
-} from "@angular/material/sidenav";
+import { MatDrawerToggleResult, MatSidenav, MatSidenavModule } from "@angular/material/sidenav";
 import { Observable, Subscription, combineLatest } from "rxjs";
-import {
-    animate,
-    state,
-    style,
-    transition,
-    trigger,
-} from "@angular/animations";
+import { animate, state, style, transition, trigger } from "@angular/animations";
 
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { CdkAccordionModule } from "@angular/cdk/accordion";
@@ -95,7 +85,7 @@ export class ComponentSidenav implements OnInit, OnDestroy {
         private _route: ActivatedRoute,
         private _navigationFocusService: NavigationFocusService,
         zone: NgZone,
-        breakpoints: BreakpointObserver
+        breakpoints: BreakpointObserver,
     ) {
         this.isExtraScreenSmall = breakpoints
             .observe(`(max-width: ${EXTRA_SMALL_WIDTH_BREAKPOINT}px)`)
@@ -109,7 +99,7 @@ export class ComponentSidenav implements OnInit, OnDestroy {
         // Combine params from all of the path into a single object.
         this.params = combineLatest(
             this._route.pathFromRoot.map((route) => route.params),
-            Object.assign
+            Object.assign,
         );
 
         this.subscriptions.add(
@@ -119,7 +109,7 @@ export class ComponentSidenav implements OnInit, OnDestroy {
                     if (shouldCloseSideNav && this.sidenav) {
                         this.sidenav.close();
                     }
-                })
+                }),
         );
     }
 
@@ -139,21 +129,11 @@ export class ComponentSidenav implements OnInit, OnDestroy {
         trigger("bodyExpansion", [
             state("collapsed", style({ height: "0px", display: "none" })),
             state("expanded", style({ height: "*", display: "block" })),
-            transition(
-                "expanded <=> collapsed",
-                animate("225ms cubic-bezier(0.4,0.0,0.2,1)")
-            ),
+            transition("expanded <=> collapsed", animate("225ms cubic-bezier(0.4,0.0,0.2,1)")),
         ]),
     ],
     standalone: true,
-    imports: [
-        NgIf,
-        MatListModule,
-        NgFor,
-        RouterLinkActive,
-        RouterLink,
-        AsyncPipe,
-    ],
+    imports: [NgIf, MatListModule, NgFor, RouterLinkActive, RouterLink, AsyncPipe],
 })
 export class ComponentNav {
     @Input() params: Observable<Params> | undefined;

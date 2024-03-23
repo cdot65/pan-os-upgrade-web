@@ -8,8 +8,15 @@ export const PANOSUPGRADE_ROUTES: Routes = [
         pathMatch: "full",
         loadComponent: () => import("./pages/homepage").then((m) => m.Homepage),
     },
-    { path: "categories", redirectTo: "/components/categories" },
-    { path: "cdk", pathMatch: "full", redirectTo: "/cdk/categories" },
+    {
+        path: "categories",
+        redirectTo: "/components/categories",
+    },
+    {
+        path: "cdk",
+        pathMatch: "full",
+        redirectTo: "/cdk/categories",
+    },
     {
         path: "components",
         pathMatch: "full",
@@ -17,27 +24,30 @@ export const PANOSUPGRADE_ROUTES: Routes = [
     },
     {
         path: "guides",
-        loadComponent: () =>
-            import("./pages/guide-list").then((m) => m.GuideList),
+        loadComponent: () => import("./pages/guide-list").then((m) => m.GuideList),
     },
-    { path: "guide/cdk-table", redirectTo: "/cdk/table/overview" },
+    {
+        path: "guide/cdk-table",
+        redirectTo: "/cdk/table/overview",
+    },
     {
         path: "guide/:id",
-        loadChildren: () =>
-            import("./pages/guide-viewer").then((m) => m.GuideViewerModule),
+        loadChildren: () => import("./pages/guide-viewer").then((m) => m.GuideViewerModule),
     },
     {
         path: "404",
-        loadComponent: () =>
-            import("./pages/not-found").then((m) => m.NotFound),
+        loadComponent: () => import("./pages/not-found").then((m) => m.NotFound),
     },
     {
         path: ":section",
         canActivate: [CanActivateComponentSidenav],
         loadChildren: () =>
             import("./pages/component-sidenav/component-sidenav").then(
-                (m) => m.ComponentSidenavModule
+                (m) => m.ComponentSidenavModule,
             ),
     },
-    { path: "**", redirectTo: "/404" },
+    {
+        path: "**",
+        redirectTo: "/404",
+    },
 ];

@@ -62,7 +62,7 @@ export class TableOfContents implements OnInit, AfterViewInit, OnDestroy {
         private _navigationFocusService: NavigationFocusService,
         @Inject(DOCUMENT) private _document: Document,
         private _ngZone: NgZone,
-        private _changeDetectorRef: ChangeDetectorRef
+        private _changeDetectorRef: ChangeDetectorRef,
     ) {
         this.subscriptions.add(
             this._navigationFocusService.navigationEndEvents.subscribe(() => {
@@ -70,7 +70,7 @@ export class TableOfContents implements OnInit, AfterViewInit, OnDestroy {
                 if (rootUrl !== this._rootUrl) {
                     this._rootUrl = rootUrl;
                 }
-            })
+            }),
         );
 
         this.subscriptions.add(
@@ -83,7 +83,7 @@ export class TableOfContents implements OnInit, AfterViewInit, OnDestroy {
                         target.scrollIntoView();
                     }
                 }
-            })
+            }),
         );
     }
 
@@ -93,16 +93,14 @@ export class TableOfContents implements OnInit, AfterViewInit, OnDestroy {
         this._ngZone.runOutsideAngular(() => {
             Promise.resolve().then(() => {
                 this._scrollContainer = this.container
-                    ? (this._document.querySelector(
-                          this.container
-                      ) as HTMLElement)
+                    ? (this._document.querySelector(this.container) as HTMLElement)
                     : window;
 
                 if (this._scrollContainer) {
                     this.subscriptions.add(
                         fromEvent(this._scrollContainer, "scroll")
                             .pipe(debounceTime(10))
-                            .subscribe(() => this.onScroll())
+                            .subscribe(() => this.onScroll()),
                     );
                 }
             });
@@ -126,28 +124,19 @@ export class TableOfContents implements OnInit, AfterViewInit, OnDestroy {
         this._links = [];
     }
 
-    addHeaders(
-        sectionName: string,
-        docViewerContent: HTMLElement,
-        sectionIndex = 0
-    ) {
-        const links = Array.from(
-            docViewerContent.querySelectorAll("h3, h4"),
-            (header) => {
-                // remove the 'link' icon name from the inner text
-                const name = (header as HTMLElement).innerText
-                    .trim()
-                    .replace(/^link/, "");
-                const { top } = header.getBoundingClientRect();
-                return {
-                    name,
-                    type: header.tagName.toLowerCase(),
-                    top: top,
-                    id: header.id,
-                    active: false,
-                };
-            }
-        );
+    addHeaders(sectionName: string, docViewerContent: HTMLElement, sectionIndex = 0) {
+        const links = Array.from(docViewerContent.querySelectorAll("h3, h4"), (header) => {
+            // remove the 'link' icon name from the inner text
+            const name = (header as HTMLElement).innerText.trim().replace(/^link/, "");
+            const { top } = header.getBoundingClientRect();
+            return {
+                name,
+                type: header.tagName.toLowerCase(),
+                top: top,
+                id: header.id,
+                active: false,
+            };
+        });
 
         this._linkSections[sectionIndex] = { name: sectionName, links };
         this._links.push(...links);
@@ -181,8 +170,7 @@ export class TableOfContents implements OnInit, AfterViewInit, OnDestroy {
             const currentLink = this._links[i];
             const nextLink = this._links[i + 1];
             const isActive =
-                scrollOffset >= currentLink.top &&
-                (!nextLink || nextLink.top >= scrollOffset);
+                scrollOffset >= currentLink.top && (!nextLink || nextLink.top >= scrollOffset);
 
             if (isActive !== currentLink.active) {
                 currentLink.active = isActive;

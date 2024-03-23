@@ -8,11 +8,7 @@ import {
     Type,
     ViewChildren,
 } from "@angular/core";
-import {
-    EXAMPLE_COMPONENTS,
-    LiveExample,
-    loadExample,
-} from "@angular/components-examples";
+import { EXAMPLE_COMPONENTS, LiveExample, loadExample } from "@angular/components-examples";
 import { NgComponentOutlet, NgFor, NgIf } from "@angular/common";
 
 import { Clipboard } from "@angular/cdk/clipboard";
@@ -79,18 +75,12 @@ export class ExampleViewer implements OnInit {
         return this._example;
     }
     set example(exampleName: string | undefined) {
-        if (
-            exampleName &&
-            exampleName !== this._example &&
-            EXAMPLE_COMPONENTS[exampleName]
-        ) {
+        if (exampleName && exampleName !== this._example && EXAMPLE_COMPONENTS[exampleName]) {
             this._example = exampleName;
             this.exampleData = EXAMPLE_COMPONENTS[exampleName];
             this._generateExampleTabs();
             this._loadExampleComponent().catch((error) =>
-                console.error(
-                    `Could not load example '${exampleName}': ${error}`
-                )
+                console.error(`Could not load example '${exampleName}': ${error}`),
             );
         } else {
             console.error(`Could not find example: ${exampleName}`);
@@ -107,7 +97,7 @@ export class ExampleViewer implements OnInit {
     constructor(
         private readonly snackbar: MatSnackBar,
         private readonly clipboard: Clipboard,
-        private readonly elementRef: ElementRef<HTMLElement>
+        private readonly elementRef: ElementRef<HTMLElement>,
     ) {}
 
     ngOnInit() {
@@ -127,10 +117,7 @@ export class ExampleViewer implements OnInit {
 
         for (let i = 0; i < exampleTabNames.length; i++) {
             const tabName = exampleTabNames[i];
-            if (
-                tabName.toLowerCase() === extension ||
-                tabName.endsWith(`.${extension}`)
-            ) {
+            if (tabName.toLowerCase() === extension || tabName.endsWith(`.${extension}`)) {
                 this.selectedTab = i;
                 return;
             }
@@ -202,8 +189,7 @@ export class ExampleViewer implements OnInit {
 
     _copyLink() {
         // Reconstruct the URL using `origin + pathname` so we drop any pre-existing hash.
-        const fullUrl =
-            location.origin + location.pathname + "#" + this._example;
+        const fullUrl = location.origin + location.pathname + "#" + this._example;
 
         if (this.clipboard.copy(fullUrl)) {
             this.snackbar.open("Link copied", "", { duration: 2500 });
@@ -225,14 +211,8 @@ export class ExampleViewer implements OnInit {
             // Since the data is loaded asynchronously, we can't count on the native behavior
             // that scrolls the element into view automatically. We do it ourselves while giving
             // the page some time to render.
-            if (
-                typeof location !== "undefined" &&
-                location.hash.slice(1) === this._example
-            ) {
-                setTimeout(
-                    () => this.elementRef.nativeElement.scrollIntoView(),
-                    300
-                );
+            if (typeof location !== "undefined" && location.hash.slice(1) === this._example) {
+                setTimeout(() => this.elementRef.nativeElement.scrollIntoView(), 300);
             }
         }
     }
@@ -254,10 +234,7 @@ export class ExampleViewer implements OnInit {
             for (let fileName of this.exampleData.files) {
                 // Since the additional files refer to the original file name, we need to transform
                 // the file name to match the highlighted HTML file that displays the source.
-                const fileSourceName = fileName.replace(
-                    fileExtensionRegex,
-                    "$1-$2.html"
-                );
+                const fileSourceName = fileName.replace(fileExtensionRegex, "$1-$2.html");
                 const importPath = `${docsContentPath}/${fileSourceName}`;
 
                 // Normalize the path to allow for more consistent displaying in the tabs,

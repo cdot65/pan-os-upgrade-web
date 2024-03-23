@@ -1,10 +1,4 @@
-import {
-    Component,
-    HostBinding,
-    Inject,
-    OnInit,
-    Optional,
-} from "@angular/core";
+import { Component, HostBinding, Inject, OnInit, Optional } from "@angular/core";
 import { ANIMATION_MODULE_TYPE } from "@angular/platform-browser/animations";
 
 import { MatButtonModule } from "@angular/material/button";
@@ -54,7 +48,7 @@ export class Homepage implements OnInit {
     constructor(
         public _componentPageTitle: ComponentPageTitle,
         public guideItems: GuideItems,
-        @Optional() @Inject(ANIMATION_MODULE_TYPE) animationsModule?: string
+        @Optional() @Inject(ANIMATION_MODULE_TYPE) animationsModule?: string,
     ) {
         this.animationsDisabled = animationsModule === "NoopAnimations";
     }

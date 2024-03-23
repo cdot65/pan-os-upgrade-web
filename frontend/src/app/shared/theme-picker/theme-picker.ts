@@ -26,13 +26,7 @@ import { map } from "rxjs/operators";
     changeDetection: ChangeDetectionStrategy.OnPush,
     encapsulation: ViewEncapsulation.None,
     standalone: true,
-    imports: [
-        MatButtonModule,
-        MatTooltipModule,
-        MatMenuModule,
-        MatIconModule,
-        NgFor,
-    ],
+    imports: [MatButtonModule, MatTooltipModule, MatMenuModule, MatIconModule, NgFor],
 })
 export class ThemePicker implements OnInit, OnDestroy {
     private _queryParamSubscription = Subscription.EMPTY;
@@ -77,13 +71,11 @@ export class ThemePicker implements OnInit, OnDestroy {
         private _activatedRoute: ActivatedRoute,
         private liveAnnouncer: LiveAnnouncer,
         iconRegistry: MatIconRegistry,
-        sanitizer: DomSanitizer
+        sanitizer: DomSanitizer,
     ) {
         iconRegistry.addSvgIcon(
             "theme-example",
-            sanitizer.bypassSecurityTrustResourceUrl(
-                "assets/img/theme-demo-icon.svg"
-            )
+            sanitizer.bypassSecurityTrustResourceUrl("assets/img/theme-demo-icon.svg"),
         );
         const themeName = this._themeStorage.getStoredThemeName();
         if (themeName) {
@@ -112,9 +104,7 @@ export class ThemePicker implements OnInit, OnDestroy {
     }
 
     selectTheme(themeName: string) {
-        const theme = this.themes.find(
-            (currentTheme) => currentTheme.name === themeName
-        );
+        const theme = this.themes.find((currentTheme) => currentTheme.name === themeName);
 
         if (!theme) {
             return;
@@ -129,11 +119,7 @@ export class ThemePicker implements OnInit, OnDestroy {
         }
 
         if (this.currentTheme) {
-            this.liveAnnouncer.announce(
-                `${theme.displayName} theme selected.`,
-                "polite",
-                3000
-            );
+            this.liveAnnouncer.announce(`${theme.displayName} theme selected.`, "polite", 3000);
             this._themeStorage.storeTheme(this.currentTheme);
         }
     }

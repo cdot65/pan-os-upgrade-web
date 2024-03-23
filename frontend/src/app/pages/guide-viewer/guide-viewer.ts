@@ -25,7 +25,7 @@ export class GuideViewer implements OnInit {
         _route: ActivatedRoute,
         private _componentPageTitle: ComponentPageTitle,
         private router: Router,
-        public guideItems: GuideItems
+        public guideItems: GuideItems,
     ) {
         _route.params.subscribe((p) => {
             const guideItem = guideItems.getItemById(p["id"]);
@@ -52,12 +52,7 @@ const routes: Routes = [{ path: "", component: GuideViewer }];
 // For example, the custom form-field guide requires the ReactiveFormsModule.
 // These imports may need to be updated when adding examples to new or existing guides.
 @NgModule({
-    imports: [
-        DocViewerModule,
-        ReactiveFormsModule,
-        RouterModule.forChild(routes),
-        GuideViewer,
-    ],
+    imports: [DocViewerModule, ReactiveFormsModule, RouterModule.forChild(routes), GuideViewer],
     exports: [GuideViewer],
 })
 export class GuideViewerModule {}

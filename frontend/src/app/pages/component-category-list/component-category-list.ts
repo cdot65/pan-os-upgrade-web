@@ -1,15 +1,7 @@
-import {
-    ActivatedRoute,
-    Params,
-    RouterLink,
-    RouterModule,
-} from "@angular/router";
+import { ActivatedRoute, Params, RouterLink, RouterModule } from "@angular/router";
 import { AsyncPipe, CommonModule, NgFor, NgIf } from "@angular/common";
 import { Component, NgModule, OnDestroy, OnInit } from "@angular/core";
-import {
-    DocumentationItems,
-    SECTIONS,
-} from "../../shared/documentation-items/documentation-items";
+import { DocumentationItems, SECTIONS } from "../../shared/documentation-items/documentation-items";
 import { Observable, Subscription, combineLatest } from "rxjs";
 
 import { ComponentPageTitle } from "../page-title/page-title";
@@ -31,14 +23,14 @@ export class ComponentCategoryList implements OnInit, OnDestroy {
     constructor(
         public docItems: DocumentationItems,
         public _componentPageTitle: ComponentPageTitle,
-        private _route: ActivatedRoute
+        private _route: ActivatedRoute,
     ) {}
 
     ngOnInit() {
         // Combine params from all of the path into a single object.
         this.params = combineLatest(
             this._route.pathFromRoot.map((route) => route.params),
-            Object.assign
+            Object.assign,
         );
 
         // title on topbar navigation

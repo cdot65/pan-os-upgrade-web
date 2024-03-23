@@ -23,18 +23,13 @@ export class PanOsUpgradeApp implements OnDestroy {
                 .pipe(
                     map((e) => e.urlAfterRedirects),
                     startWith(""),
-                    pairwise()
+                    pairwise(),
                 )
                 .subscribe(([fromUrl, toUrl]) => {
-                    if (
-                        !navigationFocusService.isNavigationWithinComponentView(
-                            fromUrl,
-                            toUrl
-                        )
-                    ) {
+                    if (!navigationFocusService.isNavigationWithinComponentView(fromUrl, toUrl)) {
                         resetScrollPosition();
                     }
-                })
+                }),
         );
     }
 

@@ -14,9 +14,7 @@ export class CanActivateComponentSidenav {
     canActivate(route: ActivatedRouteSnapshot) {
         // Searches if the section defined in the base UrlSegment is a valid section from the
         if (
-            Object.keys(SECTIONS).some(
-                (s) => s.toLowerCase() === route.url[0].path.toLowerCase()
-            )
+            Object.keys(SECTIONS).some((s) => s.toLowerCase() === route.url[0].path.toLowerCase())
         ) {
             return true;
         }
