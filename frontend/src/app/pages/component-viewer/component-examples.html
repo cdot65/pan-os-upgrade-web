@@ -2,9 +2,6 @@
   <span class="cdk-visually-hidden" tabindex="-1">
     Examples for {{docItem.id}}
   </span>
-  <example-viewer
-    *ngFor="let example of docItem.examples"
-    [example]="example"
-    [showCompactToggle]="false"
+  <example-viewer *ngFor="let example of docItem.examples" [example]="example" [showCompactToggle]="false"
     [view]="'demo'"></example-viewer>
 </ng-container>

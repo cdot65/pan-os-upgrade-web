@@ -244,6 +244,7 @@ export class ExampleViewer implements OnInit {
             // Name of the default example files. If files with such name exist within the example,
             // we provide a shorthand for them within the example tabs (for less verbose tabs).
             const exampleBaseFileName = `${this.example}-example`;
+            // eslint-disable-next-line max-len
             const docsContentPath = `/docs-content/examples-highlighted/${this.exampleData.packagePath}`;
 
             const tsPath = normalizePath(`${exampleBaseFileName}.ts`);

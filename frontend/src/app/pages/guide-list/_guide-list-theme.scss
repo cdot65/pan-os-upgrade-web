@@ -1,5 +1,5 @@
 @use 'sass:map';
-@use '@angular/material' as mat;
+@use '@angular/material'as mat;
 
 @mixin theme($theme) {
   $primary: map.get($theme, primary);
@@ -25,6 +25,7 @@
     .docs-guide-card {
       background: mat.get-color-from-palette($background, focused-button);
     }
+
     outline: none;
   }
 }

@@ -1,8 +1,8 @@
 #!/bin/env node
-'use strict';
+"use strict";
 
-const imagemin = require('imagemin');
-const imageminPngquant = require('imagemin-pngquant');
+const imagemin = require("imagemin");
+const imageminPngquant = require("imagemin-pngquant");
 
 /**
  * Runs imagemin with pngquant to optimize the PNG images generated for the component scenes.
@@ -14,12 +14,12 @@ const imageminPngquant = require('imagemin-pngquant');
  */
 
 // Imports
-const sh = require('shelljs');
-sh.set('-e');
+const sh = require("shelljs");
+sh.set("-e");
 
-imagemin(['src/assets/screenshots/*.png'], {
-  destination: 'src/assets/screenshots',
-  plugins: [imageminPngquant({quality: [0.4, 0.6]})]
+imagemin(["src/assets/screenshots/*.png"], {
+    destination: "src/assets/screenshots",
+    plugins: [imageminPngquant({ quality: [0.4, 0.6] })],
 })
-.then(() => console.log('Optimization complete.'))
-.catch(error => console.error);
+    .then(() => console.log("Optimization complete."))
+    .catch((error) => console.error);

@@ -11,6 +11,7 @@ app-component-viewer {
   @media (max-width: constants.$small-breakpoint-width) {
     width: calc(100% - #{constants.$content-padding-sidenav * 2});
   }
+
   @media (max-width: 599px) {
     width: calc(100% - #{constants.$content-padding-side-xs * 2});
     padding-left: constants.$content-padding-side-xs;
@@ -33,7 +34,8 @@ app-component-viewer {
 
   // Display outlet components with toc as flex and switch to
   // vertical direction on small screens
-  component-overview, component-api {
+  component-overview,
+  component-api {
     display: flex;
     align-items: flex-start;
     overflow: visible;

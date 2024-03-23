@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-len
 import { CanActivateComponentSidenav } from "./pages/component-sidenav/component-sidenav-can-load-guard";
 import { Routes } from "@angular/router";
 

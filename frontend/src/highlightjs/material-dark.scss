@@ -9,11 +9,11 @@ Orginal Style from https://github.com/Kelbster/highlightjs-material-dark-theme  
   color: #CDD3D8;
   -webkit-font-smoothing: antialiased;
   text-size-adjust: 100%;
-  font: 300 100%/1 Roboto Mono,monospace;
+  font: 300 100%/1 Roboto Mono, monospace;
   font-size: 14px;
 }
 
-.hljs > *::selection {
+.hljs>*::selection {
   background-color: #3e4451;
 }
 
@@ -41,15 +41,19 @@ Orginal Style from https://github.com/Kelbster/highlightjs-material-dark-theme  
 .hljs-keyword {
   color: #C792EA;
 }
-.hljs-function > .hljs-title {
+
+.hljs-function>.hljs-title {
   color: #75A5FF;
 }
+
 .hljs-tag {
   color: #ce93d8;
 }
+
 .hljs-name {
   color: #4dd0e1;
 }
+
 .hljs-type {
   color: #da4939;
 }

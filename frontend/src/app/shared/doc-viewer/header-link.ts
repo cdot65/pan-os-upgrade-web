@@ -1,6 +1,7 @@
-import {Component, Input} from '@angular/core';
-import {Router} from '@angular/router';
-import {MatIconModule} from '@angular/material/icon';
+import { Component, Input } from "@angular/core";
+
+import { MatIconModule } from "@angular/material/icon";
+import { Router } from "@angular/router";
 
 /**
  * Header link is a component that handles normalizing
@@ -16,33 +17,35 @@ import {MatIconModule} from '@angular/material/icon';
  *    <a href="/guide#foo">Foo</a>
  */
 @Component({
-  selector: 'header-link',
-  template: `
-    <a aria-label="Link to this heading" class="docs-markdown-a"
-      [attr.aria-describedby]="example" [href]="_getFragmentUrl()">
-      <mat-icon>link</mat-icon>
-    </a>
-  `,
-  standalone: true,
-  imports: [MatIconModule]
+    selector: "header-link",
+    template: `
+        <a
+            aria-label="Link to this heading"
+            class="docs-markdown-a"
+            [attr.aria-describedby]="example"
+            [href]="_getFragmentUrl()"
+        >
+            <mat-icon>link</mat-icon>
+        </a>
+    `,
+    standalone: true,
+    imports: [MatIconModule],
 })
 export class HeaderLink {
+    /**
+     * Id of the anchor element. Note that is uses "example" because we instantiate the
+     * header link components through the ComponentPortal.
+     */
+    @Input() example: string | undefined;
 
-  /**
-   * Id of the anchor element. Note that is uses "example" because we instantiate the
-   * header link components through the ComponentPortal.
-   */
-  @Input() example: string | undefined;
+    /** Base URL that is used to build an absolute fragment URL. */
+    private _baseUrl: string;
 
-  /** Base URL that is used to build an absolute fragment URL. */
-  private _baseUrl: string;
+    constructor(router: Router) {
+        this._baseUrl = router.url.split("#")[0];
+    }
 
-  constructor(router: Router) {
-    this._baseUrl = router.url.split('#')[0];
-  }
-
-  _getFragmentUrl(): string {
-    return `${this._baseUrl}#${this.example}`;
-  }
-
+    _getFragmentUrl(): string {
+        return `${this._baseUrl}#${this.example}`;
+    }
 }

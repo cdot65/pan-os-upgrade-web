@@ -1,89 +1,35 @@
 <!-- TODO: figure out if the <nav> should go inside of a <header> element. -->
 <nav class="panosupgrade-navbar-header" aria-label="Top Toolbar">
-    <div
-        class="skip-link-wrapper"
-        [class.cdk-visually-hidden]="skipLinkHidden"
-        *ngIf="skipLinkHref"
-    >
-        <a
-            mat-raised-button
-            [href]="skipLinkHref"
-            (focus)="skipLinkHidden = false"
-            (blur)="skipLinkHidden = true"
-            color="accent"
-        >
-            Skip to main content
-        </a>
-    </div>
-    <a
-        mat-button
-        class="panosupgrade-button"
-        routerLink="/"
-        aria-label="PAN-OS Upgrade"
-    >
-        <img
-            class="logo"
-            matButtonIcon
-            src="../../../assets/img/homepage/pan-orange.svg"
-            alt="angular"
-            aria-hidden="true"
-        />
-        <span>PAN-OS Upgrade</span>
+  <div class="skip-link-wrapper" [class.cdk-visually-hidden]="skipLinkHidden" *ngIf="skipLinkHref">
+    <a mat-raised-button [href]="skipLinkHref" (focus)="skipLinkHidden = false" (blur)="skipLinkHidden = true"
+      color="accent">
+      Skip to main content
     </a>
-    <a
-        mat-button
-        class="panosupgrade-navbar-hide-small panosupgrade-button"
-        *ngFor="let key of sectionKeys"
-        [routerLink]="key"
-        routerLinkActive="panosupgrade-navbar-header-item-selected"
-        >{{sections[key].name}}</a
-    >
-    <a
-        mat-button
-        class="panosupgrade-navbar-hide-small panosupgrade-button"
-        routerLink="guides"
-        routerLinkActive="panosupgrade-navbar-header-item-selected"
-        >Guides</a
-    >
-    <div class="flex-spacer"></div>
-    <theme-picker></theme-picker>
-    <a
-        mat-button
-        class="panosupgrade-button panosupgrade-navbar-hide-small"
-        href="https://github.com/cdot65/pan-os-upgrade-web"
-        aria-label="GitHub Repository"
-    >
-        <img
-            class="logo"
-            matButtonIcon
-            src="../../../assets/img/homepage/github-circle-white-transparent.svg"
-            alt="angular"
-            aria-hidden="true"
-        />
-        GitHub
-    </a>
-    <a
-        mat-icon-button
-        class="panosupgrade-button docs-navbar-show-small"
-        href="https://github.com/cdot65/pan-os-upgrade-web"
-        aria-label="GitHub Repository"
-    >
-        <img
-            class="logo docs-navbar--github-logo"
-            matButtonIcon
-            src="../../../assets/img/homepage/github-circle-white-transparent.svg"
-            alt="angular"
-            aria-hidden="true"
-        />
-    </a>
+  </div>
+  <a mat-button class="panosupgrade-button" routerLink="/" aria-label="PAN-OS Upgrade">
+    <img class="logo" matButtonIcon src="../../../assets/img/homepage/pan-orange.svg" alt="angular"
+      aria-hidden="true" />
+    <span>PAN-OS Upgrade</span>
+  </a>
+  <a mat-button class="panosupgrade-navbar-hide-small panosupgrade-button" *ngFor="let key of sectionKeys"
+    [routerLink]="key" routerLinkActive="panosupgrade-navbar-header-item-selected">{{sections[key].name}}</a>
+  <a mat-button class="panosupgrade-navbar-hide-small panosupgrade-button" routerLink="guides"
+    routerLinkActive="panosupgrade-navbar-header-item-selected">Guides</a>
+  <div class="flex-spacer"></div>
+  <theme-picker></theme-picker>
+  <a mat-button class="panosupgrade-button panosupgrade-navbar-hide-small"
+    href="https://github.com/cdot65/pan-os-upgrade-web" aria-label="GitHub Repository">
+    <img class="logo" matButtonIcon src="../../../assets/img/homepage/github-circle-white-transparent.svg" alt="angular"
+      aria-hidden="true" />
+    GitHub
+  </a>
+  <a mat-icon-button class="panosupgrade-button docs-navbar-show-small"
+    href="https://github.com/cdot65/pan-os-upgrade-web" aria-label="GitHub Repository">
+    <img class="logo docs-navbar--github-logo" matButtonIcon
+      src="../../../assets/img/homepage/github-circle-white-transparent.svg" alt="angular" aria-hidden="true" />
+  </a>
 </nav>
 <nav class="docs-navbar docs-navbar-show-small" aria-label="Section Nav Bar">
-    <a
-        mat-button
-        class="docs-navbar-link"
-        *ngFor="let key of sectionKeys"
-        [routerLink]="key"
-        >{{sections[key].name}}</a
-    >
-    <a mat-button class="docs-navbar-link" routerLink="guides">Guides</a>
+  <a mat-button class="docs-navbar-link" *ngFor="let key of sectionKeys" [routerLink]="key">{{sections[key].name}}</a>
+  <a mat-button class="docs-navbar-link" routerLink="guides">Guides</a>
 </nav>

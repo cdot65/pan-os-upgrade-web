@@ -59,12 +59,11 @@
  * Zone JS is required by default for Angular itself.
  */
 import "zone.js"; // Included with Angular CLI.
-
-/***************************************************************************************************
- * APPLICATION IMPORTS
- */
-
 // Examples might use `$localize`, so we initialize the localize package. Note that we do not
 // intend to load any translations at runtime. `$localize` has a pass-through mode where it does
 // not actually translate content. This is what we want to use for our examples.
 import "@angular/localize/init";
+
+/***************************************************************************************************
+ * APPLICATION IMPORTS
+ */

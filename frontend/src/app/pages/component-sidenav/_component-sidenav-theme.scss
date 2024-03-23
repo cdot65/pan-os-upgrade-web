@@ -1,4 +1,4 @@
-@use '@angular/material' as mat;
+@use '@angular/material'as mat;
 @use 'sass:color';
 @use 'sass:map';
 @use '../../../styles/constants';
@@ -29,10 +29,8 @@
         background: rgba(mat.get-color-from-palette($primary, default), 0.15);
 
         .mdc-list-item__primary-text {
-          color: color.adjust(
-            mat.get-color-from-palette($primary, default),
-            $lightness: if($is-dark-theme, 25%, 0%)
-          );
+          color: color.adjust(mat.get-color-from-palette($primary, default),
+              $lightness: if($is-dark-theme, 25%, 0%));
         }
       }
 

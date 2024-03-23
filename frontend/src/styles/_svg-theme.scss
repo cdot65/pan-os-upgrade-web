@@ -1,5 +1,5 @@
 @use 'sass:map';
-@use '@angular/material' as mat;
+@use '@angular/material'as mat;
 
 // Mixin to create a css class for each fill, stroke, and stop-color for a given color.
 @mixin _svgColorProperties($className, $color) {
@@ -31,8 +31,8 @@
   // Use sass's `lighten` and `darken` to create gradient colors for the docs SVGs.
   // This is specifically tailored to the SVGs in this app and is not a general approach.
   $base: mat.get-color-from-palette($primary);
-  @include _svgColorProperties(primary-dark-30,  scale_color($base, $lightness: -30%));
-  @include _svgColorProperties(primary-dark-40,  scale_color($base, $lightness: -40%));
+  @include _svgColorProperties(primary-dark-30, scale_color($base, $lightness: -30%));
+  @include _svgColorProperties(primary-dark-40, scale_color($base, $lightness: -40%));
   @include _svgColorProperties(primary-light-20, scale_color($base, $lightness: +20%));
   @include _svgColorProperties(primary-light-30, scale_color($base, $lightness: +30%));
   @include _svgColorProperties(primary-light-40, scale_color($base, $lightness: +40%));

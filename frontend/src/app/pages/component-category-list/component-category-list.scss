@@ -45,7 +45,10 @@
     font-weight: 500;
   }
 
-  &, &:active, &:hover, &:focus {
+  &,
+  &:active,
+  &:hover,
+  &:focus {
     text-decoration: none;
   }
 }

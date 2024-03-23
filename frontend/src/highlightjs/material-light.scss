@@ -7,11 +7,11 @@
   color: #37474f;
   -webkit-font-smoothing: antialiased;
   text-size-adjust: 100%;
-  font: 300 100%/1 Roboto Mono,monospace;
+  font: 300 100%/1 Roboto Mono, monospace;
   font-size: 14px;
 }
 
-.hljs > *::selection,
+.hljs>*::selection,
 .hljs-section {
   background-color: #D6EDEA;
 }
@@ -47,7 +47,7 @@
 }
 
 .hljs-title,
-.hljs-function > .hljs-title,
+.hljs-function>.hljs-title,
 .hljs-symbol,
 .hljs-bullet,
 .hljs-built_in,

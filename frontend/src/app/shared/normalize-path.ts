@@ -1,4 +1,4 @@
-import * as normalize from 'path-normalize';
+import * as normalize from "path-normalize";
 
 /**
  * Normalizes the given path by:
@@ -7,9 +7,9 @@ import * as normalize from 'path-normalize';
  *    - Removing a leading `./` if present.
  */
 export function normalizePath(input: string): string {
-  input = normalize(input.replace(/\\/g, '/'));
-  if (input.startsWith('./')) {
-    input = input.substring(2);
-  }
-  return input;
+    input = normalize(input.replace(/\\/g, "/"));
+    if (input.startsWith("./")) {
+        input = input.substring(2);
+    }
+    return input;
 }

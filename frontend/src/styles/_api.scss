@@ -24,6 +24,7 @@
 .docs-api-class-description {
   font-size: 12px;
 }
+
 .docs-api-property-name {
   margin: 0;
 }
@@ -107,6 +108,6 @@
   }
 }
 
-.docs-api-deprecated-marker + .docs-api-property-name {
+.docs-api-deprecated-marker+.docs-api-property-name {
   text-decoration: line-through;
 }
