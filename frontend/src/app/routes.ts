@@ -1,3 +1,5 @@
+// src/app/routes.ts
+
 // eslint-disable-next-line max-len
 import { CanActivateComponentSidenav } from "./pages/component-sidenav/component-sidenav-can-load-guard";
 import { Routes } from "@angular/router";
@@ -7,6 +9,11 @@ export const PANOSUPGRADE_ROUTES: Routes = [
         path: "",
         pathMatch: "full",
         loadComponent: () => import("./pages/homepage").then((m) => m.Homepage),
+    },
+    {
+        path: "auth",
+        loadChildren: () =>
+            import("./pages/auth/auth.module").then((m) => m.AuthModule),
     },
     {
         path: "categories",
@@ -24,7 +31,8 @@ export const PANOSUPGRADE_ROUTES: Routes = [
     },
     {
         path: "guides",
-        loadComponent: () => import("./pages/guide-list").then((m) => m.GuideList),
+        loadComponent: () =>
+            import("./pages/guide-list").then((m) => m.GuideList),
     },
     {
         path: "guide/cdk-table",
@@ -32,11 +40,13 @@ export const PANOSUPGRADE_ROUTES: Routes = [
     },
     {
         path: "guide/:id",
-        loadChildren: () => import("./pages/guide-viewer").then((m) => m.GuideViewerModule),
+        loadChildren: () =>
+            import("./pages/guide-viewer").then((m) => m.GuideViewerModule),
     },
     {
         path: "404",
-        loadComponent: () => import("./pages/not-found").then((m) => m.NotFound),
+        loadComponent: () =>
+            import("./pages/not-found").then((m) => m.NotFound),
     },
     {
         path: ":section",

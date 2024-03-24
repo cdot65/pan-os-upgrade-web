@@ -13,7 +13,7 @@ import { map } from "rxjs/operators";
 })
 export class AuthService {
     private apiUrl = environment.apiUrl;
-    private tokenUrl = environment.tokenUrl;
+    private tokenUrl = this.apiUrl + environment.tokenUrl;
     private registrationUrl =
         environment.apiUrl + "/api/v1/dj-rest-auth/registration/";
     private userProfileUrl = environment.apiUrl + "/api/v1/dj-rest-auth/user/";
@@ -31,7 +31,7 @@ export class AuthService {
         );
         const body = JSON.stringify({ username, password });
 
-        return this.http.post<any>(`${this.apiUrl}${this.tokenUrl}`, body, {
+        return this.http.post<any>(`${this.tokenUrl}`, body, {
             headers,
         });
     }
