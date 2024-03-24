@@ -1,5 +1,7 @@
-<!-- src/app/pages/auth/login/login.component.html -->
-
+<component-page-header></component-page-header>
+<header class="panosupgrade-primary-header">
+  <h1>Authenticate</h1>
+</header>
 <div class="login-container">
   <mat-card>
     <mat-card-header>
@@ -10,16 +12,20 @@
         <mat-form-field appearance="outline">
           <mat-label>Username</mat-label>
           <input matInput type="text" name="username" [(ngModel)]="username" required autocomplete="username">
+          <mat-icon matSuffix>person</mat-icon>
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Password</mat-label>
           <input matInput type="password" name="password" [(ngModel)]="password" required
             autocomplete="current-password">
+          <mat-icon matSuffix>lock</mat-icon>
         </mat-form-field>
         <div class="error-message" *ngIf="errorMessage">
           {{ errorMessage }}
         </div>
-        <button mat-raised-button color="primary" type="submit">Login</button>
+        <div class="button-flex-container">
+          <button mat-raised-button color="primary" type="submit">Login</button>
+        </div>
       </form>
     </mat-card-content>
   </mat-card>

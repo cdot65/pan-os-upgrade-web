@@ -5,10 +5,12 @@ import { FormsModule, NgForm } from "@angular/forms";
 import { AuthService } from "../../../shared/services/auth.service";
 import { CommonModule } from "@angular/common";
 import { Component } from "@angular/core";
+import { ComponentPageHeader } from "../../component-page-header/component-page-header";
 import { CookieService } from "ngx-cookie-service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
 import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { Router } from "@angular/router";
 
@@ -23,7 +25,9 @@ import { Router } from "@angular/router";
         MatCardModule,
         MatFormFieldModule,
         MatButtonModule,
+        MatIconModule,
         MatInputModule,
+        ComponentPageHeader,
     ],
 })
 export class LoginComponent {
