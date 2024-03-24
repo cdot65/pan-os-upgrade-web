@@ -47,6 +47,12 @@ export const PANOSUPGRADE_ROUTES: Routes = [
         redirectTo: "/cdk/table/overview",
     },
     {
+        path: "inventory",
+        loadComponent: () =>
+            import("./pages/inventory-list").then((m) => m.InventoryList),
+        canActivate: [authGuard],
+    },
+    {
         path: "404",
         loadComponent: () =>
             import("./pages/not-found").then((m) => m.NotFound),

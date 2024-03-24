@@ -1,0 +1,16 @@
+<!-- src/app/pages/inventory-create/inventory-create.html -->
+
+<div class="inventory-create-wrapper">
+  <h1>Create Inventory Item</h1>
+  <form [formGroup]="inventoryForm" (ngSubmit)="createInventoryItem()">
+    <mat-form-field>
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" required>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description"></textarea>
+    </mat-form-field>
+    <button mat-raised-button color="primary" type="submit" [disabled]="inventoryForm.invalid">Create</button>
+  </form>
+</div>

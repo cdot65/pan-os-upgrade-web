@@ -1,0 +1,17 @@
+<!-- src/app/pages/inventory-details/inventory-details.html -->
+
+<div class="inventory-details-wrapper">
+  <h1>Inventory Details</h1>
+  <form [formGroup]="inventoryForm" (ngSubmit)="updateInventoryItem()">
+    <mat-form-field>
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" required>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description"></textarea>
+    </mat-form-field>
+    <button mat-raised-button color="primary" type="submit" [disabled]="inventoryForm.invalid">Update</button>
+    <button mat-raised-button color="warn" type="button" (click)="deleteInventoryItem()">Delete</button>
+  </form>
+</div>

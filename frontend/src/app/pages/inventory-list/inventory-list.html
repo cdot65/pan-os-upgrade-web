@@ -1,0 +1,19 @@
+<!-- src/app/pages/inventory-list/inventory-list.html -->
+
+<header class="panosupgrade-primary-header">
+  <h1>Inventory</h1>
+</header>
+
+<main focusOnNavigation aria-label="Inventory list" id="inventory-list" class="docs-inventory">
+  <div class="docs-inventory-list">
+    <a class="docs-inventory-item" *ngFor="let item of inventoryItems" routerLink="/inventory/{{item.uuid}}">
+      <mat-card class="docs-inventory-card">
+        <mat-card-title>{{item.hostname}}</mat-card-title>
+        <div class="docs-inventory-card-divider"></div>
+        <mat-card-content class="docs-inventory-card-summary">
+          {{item.notes}}
+        </mat-card-content>
+      </mat-card>
+    </a>
+  </div>
+</main>
