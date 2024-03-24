@@ -1,3 +1,5 @@
+// src/app/pages/guide-list/guide-list.ts;
+
 import { Component, HostBinding, OnInit } from "@angular/core";
 
 import { ComponentPageTitle } from "../page-title/page-title";
