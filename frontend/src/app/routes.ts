@@ -3,6 +3,7 @@
 // eslint-disable-next-line max-len
 import { CanActivateComponentSidenav } from "./pages/component-sidenav/component-sidenav-can-load-guard";
 import { Routes } from "@angular/router";
+import { authGuard } from "./shared/guards/auth.guard";
 
 export const PANOSUPGRADE_ROUTES: Routes = [
     {
@@ -33,15 +34,17 @@ export const PANOSUPGRADE_ROUTES: Routes = [
         path: "guides",
         loadComponent: () =>
             import("./pages/guide-list").then((m) => m.GuideList),
-    },
-    {
-        path: "guide/cdk-table",
-        redirectTo: "/cdk/table/overview",
+        canActivate: [authGuard],
     },
     {
         path: "guide/:id",
         loadChildren: () =>
             import("./pages/guide-viewer").then((m) => m.GuideViewerModule),
+        canActivate: [authGuard],
+    },
+    {
+        path: "guide/cdk-table",
+        redirectTo: "/cdk/table/overview",
     },
     {
         path: "404",
