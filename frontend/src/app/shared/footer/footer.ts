@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { VERSION } from "@angular/material/core";
+import packageJson from "../../../../package.json";
 
 @Component({
     selector: "app-footer",
@@ -8,6 +8,6 @@ import { VERSION } from "@angular/material/core";
     standalone: true,
 })
 export class Footer {
-    version = VERSION.full;
+    public version: string = packageJson.version;
     year = new Date().getFullYear();
 }

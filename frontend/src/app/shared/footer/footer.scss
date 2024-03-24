@@ -14,8 +14,9 @@
   flex: 1;
 }
 
-.panosupgrade-footer-angular-logo {
-  height: 50px;
+.panosupgrade-footer-github-logo {
+  height: 40px;
+  margin-right: 6px;
 }
 
 .panosupgrade-footer-version {
@@ -59,10 +60,10 @@
   display: inline-block;
   line-height: 50px;
   margin: 0 40px;
-  vertical-align: bottom;
+  vertical-align: middle;
 
   a {
-    font-size: 16px;
+    font-size: 26px;
     padding: 0;
   }
 }

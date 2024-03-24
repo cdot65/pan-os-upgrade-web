@@ -22,6 +22,8 @@
         "strictBindCallApply": true,
         "strictFunctionTypes": true,
         "strictPropertyInitialization": true,
+        "resolveJsonModule": true,
+        "allowSyntheticDefaultImports": true,
         "useDefineForClassFields": false
     },
     "exclude": ["src/assets", "dist"],
