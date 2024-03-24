@@ -1,6 +1,9 @@
+// src/app/panosupgrade-app.ts
+
 import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { map, pairwise, startWith } from "rxjs/operators";
 
+import { CookieService } from "ngx-cookie-service";
 import { NavBar } from "./shared/navbar/navbar";
 import { NavigationFocusService } from "./shared/navigation-focus/navigation-focus.service";
 import { RouterOutlet } from "@angular/router";
@@ -13,6 +16,7 @@ import { Subscription } from "rxjs";
     encapsulation: ViewEncapsulation.None,
     standalone: true,
     imports: [NavBar, RouterOutlet],
+    providers: [CookieService],
 })
 export class PanOsUpgradeApp implements OnDestroy {
     private subscriptions = new Subscription();

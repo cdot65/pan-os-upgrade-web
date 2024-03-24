@@ -1,3 +1,5 @@
+// src/main.ts
+
 import { LocationStrategy, PathLocationStrategy } from "@angular/common";
 import { provideAnimations, provideNoopAnimations } from "@angular/platform-browser/animations";
 import { provideRouter, withInMemoryScrolling } from "@angular/router";

@@ -1,3 +1,5 @@
+// src/app/pages/homepage/homepage.ts
+
 import { Component, HostBinding, Inject, OnInit, Optional } from "@angular/core";
 import { ANIMATION_MODULE_TYPE } from "@angular/platform-browser/animations";
 
