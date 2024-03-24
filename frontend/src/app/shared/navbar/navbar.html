@@ -28,6 +28,16 @@
     <img class="logo docs-navbar--github-logo" matButtonIcon
       src="../../../assets/img/homepage/github-circle-white-transparent.svg" alt="angular" aria-hidden="true" />
   </a>
+  <a mat-button class="panosupgrade-button panosupgrade-navbar-hide-small" routerLink="/auth/login"
+    *ngIf="!hasAuthToken">
+    <mat-icon>login</mat-icon>
+    Login
+  </a>
+  <a mat-button class="panosupgrade-button panosupgrade-navbar-hide-small" routerLink="/auth/login" (click)="logout()"
+    *ngIf="hasAuthToken">
+    <mat-icon>logout</mat-icon>
+    Logout
+  </a>
 </nav>
 <nav class="docs-navbar docs-navbar-show-small" aria-label="Section Nav Bar">
   <a mat-button class="docs-navbar-link" *ngFor="let key of sectionKeys" [routerLink]="key">{{sections[key].name}}</a>

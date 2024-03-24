@@ -40,6 +40,7 @@ export interface DocSection {
 const exampleNames = Object.keys(EXAMPLE_COMPONENTS);
 const CDK = "cdk";
 const COMPONENTS = "components";
+const INVENTORY = "inventory";
 export const SECTIONS: { [key: string]: DocSection } = {
     [COMPONENTS]: {
         name: "Components",
@@ -53,6 +54,12 @@ export const SECTIONS: { [key: string]: DocSection } = {
             "The Component Dev Kit (CDK) is a set of behavior primitives for building UI" +
             " components.",
     },
+    [INVENTORY]: {
+        name: "Inventory",
+        summary:
+            "Manage your environments inventory of Palo Alto Networks firewalls and" +
+            " Panorama appliances.",
+    },
 };
 
 const DOCS: { [key: string]: DocItem[] } = {
@@ -64,16 +71,21 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "autocomplete-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-autocomplete-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-autocomplete-testing.html" },
+            ],
         },
         {
             id: "badge",
             name: "Badge",
-            summary: "A small value indicator that can be overlaid on another object.",
+            summary:
+                "A small value indicator that can be overlaid on another object.",
             exampleSpecs: {
                 prefix: "badge-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-badge-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-badge-testing.html" },
+            ],
         },
         {
             id: "bottom-sheet",
@@ -82,22 +94,28 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "bottom-sheet-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-bottom-sheet-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-bottom-sheet-testing.html" },
+            ],
         },
         {
             id: "button",
             name: "Button",
-            summary: "An interactive button with a range of presentation options.",
+            summary:
+                "An interactive button with a range of presentation options.",
             exampleSpecs: {
                 prefix: "button-",
                 exclude: ["button-toggle-"],
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-button-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-button-testing.html" },
+            ],
         },
         {
             id: "button-toggle",
             name: "Button toggle",
-            summary: "A groupable on/off toggle for enabling and disabling options.",
+            summary:
+                "A groupable on/off toggle for enabling and disabling options.",
             exampleSpecs: {
                 prefix: "button-toggle-",
             },
@@ -115,25 +133,33 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "card-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-card-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-card-testing.html" },
+            ],
         },
         {
             id: "checkbox",
             name: "Checkbox",
-            summary: "Captures boolean input with an optional indeterminate mode.",
+            summary:
+                "Captures boolean input with an optional indeterminate mode.",
             exampleSpecs: {
                 prefix: "checkbox-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-checkbox-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-checkbox-testing.html" },
+            ],
         },
         {
             id: "chips",
             name: "Chips",
-            summary: "Presents a list of items as a set of small, tactile entities.",
+            summary:
+                "Presents a list of items as a set of small, tactile entities.",
             exampleSpecs: {
                 prefix: "chips-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-chips-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-chips-testing.html" },
+            ],
         },
         {
             id: "core",
@@ -142,16 +168,21 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "core-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-core-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-core-testing.html" },
+            ],
         },
         {
             id: "datepicker",
             name: "Datepicker",
-            summary: "Captures dates, agnostic about their internal representation.",
+            summary:
+                "Captures dates, agnostic about their internal representation.",
             exampleSpecs: {
                 prefix: "date",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-datepicker-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-datepicker-testing.html" },
+            ],
         },
         {
             id: "dialog",
@@ -160,7 +191,9 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "dialog-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-dialog-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-dialog-testing.html" },
+            ],
         },
         {
             id: "divider",
@@ -169,16 +202,21 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "divider-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-divider-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-divider-testing.html" },
+            ],
         },
         {
             id: "expansion",
             name: "Expansion Panel",
-            summary: "A container which can be expanded to reveal more content.",
+            summary:
+                "A container which can be expanded to reveal more content.",
             exampleSpecs: {
                 prefix: "expansion-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-expansion-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-expansion-testing.html" },
+            ],
         },
         {
             id: "form-field",
@@ -187,16 +225,21 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "form-field-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-form-field-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-form-field-testing.html" },
+            ],
         },
         {
             id: "grid-list",
             name: "Grid list",
-            summary: "A flexible structure for presenting content items in a grid.",
+            summary:
+                "A flexible structure for presenting content items in a grid.",
             exampleSpecs: {
                 prefix: "grid-list-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-grid-list-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-grid-list-testing.html" },
+            ],
         },
         {
             id: "icon",
@@ -205,7 +248,9 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "icon-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-icon-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-icon-testing.html" },
+            ],
         },
         {
             id: "input",
@@ -214,7 +259,9 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "input-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-input-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-input-testing.html" },
+            ],
         },
         {
             id: "list",
@@ -223,7 +270,9 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "list-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-list-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-list-testing.html" },
+            ],
         },
         {
             id: "menu",
@@ -232,7 +281,9 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "menu-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-menu-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-menu-testing.html" },
+            ],
         },
         {
             id: "paginator",
@@ -241,7 +292,9 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "paginator-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-paginator-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-paginator-testing.html" },
+            ],
         },
         {
             id: "progress-bar",
@@ -250,7 +303,9 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "progress-bar-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-progress-bar-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-progress-bar-testing.html" },
+            ],
         },
         {
             id: "progress-spinner",
@@ -273,7 +328,9 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "radio-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-radio-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-radio-testing.html" },
+            ],
         },
         {
             id: "ripple",
@@ -287,47 +344,62 @@ const DOCS: { [key: string]: DocItem[] } = {
         {
             id: "select",
             name: "Select",
-            summary: "Allows the user to select one or more options using a dropdown.",
+            summary:
+                "Allows the user to select one or more options using a dropdown.",
             exampleSpecs: {
                 prefix: "select-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-select-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-select-testing.html" },
+            ],
         },
         {
             id: "sidenav",
             name: "Sidenav",
-            summary: "A container for content that is fixed to one side of the screen.",
+            summary:
+                "A container for content that is fixed to one side of the screen.",
             exampleSpecs: {
                 prefix: "sidenav-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-sidenav-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-sidenav-testing.html" },
+            ],
         },
         {
             id: "slide-toggle",
             name: "Slide toggle",
-            summary: "Captures boolean values as a clickable and draggable switch.",
+            summary:
+                "Captures boolean values as a clickable and draggable switch.",
             exampleSpecs: {
                 prefix: "slide-toggle-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-slide-toggle-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-slide-toggle-testing.html" },
+            ],
         },
         {
             id: "slider",
             name: "Slider",
-            summary: "Allows the user to input a value by dragging along a slider.",
+            summary:
+                "Allows the user to input a value by dragging along a slider.",
             exampleSpecs: {
                 prefix: "slider-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-slider-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-slider-testing.html" },
+            ],
         },
         {
             id: "snack-bar",
             name: "Snackbar",
-            summary: "Displays short actionable messages as an uninvasive alert.",
+            summary:
+                "Displays short actionable messages as an uninvasive alert.",
             exampleSpecs: {
                 prefix: "snack-bar-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-snack-bar-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-snack-bar-testing.html" },
+            ],
         },
         {
             id: "sort",
@@ -336,7 +408,9 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "sort-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-sort-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-sort-testing.html" },
+            ],
         },
         {
             id: "stepper",
@@ -345,7 +419,9 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "stepper-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-stepper-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-stepper-testing.html" },
+            ],
         },
         {
             id: "table",
@@ -354,16 +430,21 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "table-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-table-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-table-testing.html" },
+            ],
         },
         {
             id: "tabs",
             name: "Tabs",
-            summary: "Only presents one view at a time from a provided set of views.",
+            summary:
+                "Only presents one view at a time from a provided set of views.",
             exampleSpecs: {
                 prefix: "tab-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-tabs-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-tabs-testing.html" },
+            ],
         },
         {
             id: "toolbar",
@@ -372,7 +453,9 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "toolbar-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-toolbar-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-toolbar-testing.html" },
+            ],
         },
         {
             id: "tooltip",
@@ -381,7 +464,9 @@ const DOCS: { [key: string]: DocItem[] } = {
             exampleSpecs: {
                 prefix: "tooltip-",
             },
-            additionalApiDocs: [{ name: "Testing", path: "material-tooltip-testing.html" }],
+            additionalApiDocs: [
+                { name: "Testing", path: "material-tooltip-testing.html" },
+            ],
         },
         {
             id: "tree",
@@ -412,7 +497,8 @@ const DOCS: { [key: string]: DocItem[] } = {
         {
             id: "bidi",
             name: "Bidirectionality",
-            summary: "Utilities to respond to changes in LTR/RTL layout direction.",
+            summary:
+                "Utilities to respond to changes in LTR/RTL layout direction.",
             exampleSpecs: {
                 prefix: "cdk-bidi-",
             },
@@ -428,7 +514,8 @@ const DOCS: { [key: string]: DocItem[] } = {
         {
             id: "coercion",
             name: "Coercion",
-            summary: "Utility functions for coercing @Input into specific types.",
+            summary:
+                "Utility functions for coercing @Input into specific types.",
             exampleSpecs: {
                 prefix: "cdk-coercion-",
             },
@@ -508,7 +595,8 @@ const DOCS: { [key: string]: DocItem[] } = {
         {
             id: "portal",
             name: "Portal",
-            summary: "Utilities for dynamically displaying content into a target.",
+            summary:
+                "Utilities for dynamically displaying content into a target.",
             exampleSpecs: {
                 prefix: "cdk-portal-",
             },
@@ -598,7 +686,9 @@ export class DocumentationItems {
 
     getItemById(id: string, section: string): DocItem | undefined {
         const sectionLookup = section === "cdk" ? "cdk" : "material";
-        return ALL_DOCS.find((doc) => doc.id === id && doc.packageName === sectionLookup);
+        return ALL_DOCS.find(
+            (doc) => doc.id === id && doc.packageName === sectionLookup,
+        );
     }
 }
 
@@ -608,7 +698,9 @@ function processDocs(packageName: string, docs: DocItem[]): DocItem[] {
         doc.examples = exampleNames.filter(
             (key) =>
                 key.match(RegExp(`^${doc.exampleSpecs.prefix}`)) &&
-                !doc.exampleSpecs.exclude?.some((excludeName) => key.indexOf(excludeName) === 0),
+                !doc.exampleSpecs.exclude?.some(
+                    (excludeName) => key.indexOf(excludeName) === 0,
+                ),
         );
     }
 
