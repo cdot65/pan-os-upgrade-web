@@ -2,9 +2,10 @@
 
 # django imports
 from django.contrib.auth import get_user_model
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.db.models.functions import Lower, Replace
 from django.db.models import Value as V
+from django.shortcuts import get_object_or_404
 
 # django rest framework imports
 from rest_framework import viewsets, status, permissions
@@ -22,6 +23,7 @@ from .models import (
 )
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
+    InventoryDetailSerializer,
     InventoryListSerializer,
     PanoramaSerializer,
     PanoramaPlatformSerializer,
@@ -32,6 +34,44 @@ from .serializers import (
 )
 
 
+class InventoryExistsView(APIView):
+    """
+    A view that returns the existence of an inventory item by name as a boolean.
+    """
+
+    def get(self, request, format=None):
+        raw_inventory_hostname = request.GET.get("hostname", None)
+        if raw_inventory_hostname is not None:
+            formatted_inventory_hostname = (
+                raw_inventory_hostname.lower().replace(" ", "_").replace("-", "_")
+            )
+            exists = (
+                (
+                    Panorama.objects.annotate(
+                        formatted_hostname=Replace(
+                            Replace(Lower("hostname"), V(" "), V("_")), V("-"), V("_")
+                        )
+                    )
+                    # trunk-ignore(flake8/W503)
+                    | Firewall.objects.annotate(
+                        formatted_hostname=Replace(
+                            Replace(Lower("hostname"), V(" "), V("_")), V("-"), V("_")
+                        )
+                    )
+                )
+                .filter(formatted_hostname=formatted_inventory_hostname)
+                .exists()
+            )
+            return Response(
+                {"exists": exists, "formatted_value": formatted_inventory_hostname}
+            )
+        else:
+            return Response(
+                {"error": "No inventory hostname provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
 class InventoryViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnly,)
 
@@ -40,9 +80,24 @@ class InventoryViewSet(viewsets.ModelViewSet):
             return list(Panorama.objects.all()) + list(Firewall.objects.all())
         return self.queryset
 
+    def get_object(self):
+        uuid = self.kwargs.get("pk")
+
+        panorama_obj = Panorama.objects.filter(uuid=uuid).first()
+        if panorama_obj:
+            return panorama_obj
+
+        firewall_obj = Firewall.objects.filter(uuid=uuid).first()
+        if firewall_obj:
+            return firewall_obj
+
+        raise Http404("Object not found.")
+
     def get_serializer_class(self):
         if self.action == "list":
             return InventoryListSerializer
+        elif self.action == "retrieve":
+            return InventoryDetailSerializer
         elif isinstance(self.get_object(), Panorama):
             return PanoramaSerializer
         elif isinstance(self.get_object(), Firewall):
@@ -136,41 +191,3 @@ class UserProfileView(RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
-
-
-class InventoryExistsView(APIView):
-    """
-    A view that returns the existence of an inventory item by name as a boolean.
-    """
-
-    def get(self, request, format=None):
-        raw_inventory_hostname = request.GET.get("hostname", None)
-        if raw_inventory_hostname is not None:
-            formatted_inventory_hostname = (
-                raw_inventory_hostname.lower().replace(" ", "_").replace("-", "_")
-            )
-            exists = (
-                (
-                    Panorama.objects.annotate(
-                        formatted_hostname=Replace(
-                            Replace(Lower("hostname"), V(" "), V("_")), V("-"), V("_")
-                        )
-                    )
-                    # trunk-ignore(flake8/W503)
-                    | Firewall.objects.annotate(
-                        formatted_hostname=Replace(
-                            Replace(Lower("hostname"), V(" "), V("_")), V("-"), V("_")
-                        )
-                    )
-                )
-                .filter(formatted_hostname=formatted_inventory_hostname)
-                .exists()
-            )
-            return Response(
-                {"exists": exists, "formatted_value": formatted_inventory_hostname}
-            )
-        else:
-            return Response(
-                {"error": "No inventory hostname provided."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
