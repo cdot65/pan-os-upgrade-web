@@ -1,13 +1,13 @@
 // src/app/pages/inventory-list/inventory-list.ts
 
 import { Component, HostBinding, OnInit } from "@angular/core";
+import { Router, RouterLink } from "@angular/router";
 
 import { Firewall } from "../../shared/interfaces/firewall.interface";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { MatCardModule } from "@angular/material/card";
 import { NgFor } from "@angular/common";
 import { Panorama } from "../../shared/interfaces/panorama.interface";
-import { RouterLink } from "@angular/router";
 
 @Component({
     selector: "app-inventory-list",
@@ -20,7 +20,10 @@ export class InventoryList implements OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     inventoryItems: (Firewall | Panorama)[] = [];
 
-    constructor(private inventoryService: InventoryService) {}
+    constructor(
+        private inventoryService: InventoryService,
+        private router: Router,
+    ) {}
 
     ngOnInit(): void {
         this.getInventoryItems();
@@ -35,5 +38,9 @@ export class InventoryList implements OnInit {
                 console.error("Error fetching inventory items:", error);
             },
         );
+    }
+
+    onItemClick(item: Firewall | Panorama): void {
+        this.router.navigate(["/inventory", item.uuid]);
     }
 }

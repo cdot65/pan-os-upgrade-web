@@ -1,17 +1,32 @@
 <!-- src/app/pages/inventory-details/inventory-details.html -->
 
-<div class="inventory-details-wrapper">
-  <h1>Inventory Details</h1>
-  <form [formGroup]="inventoryForm" (ngSubmit)="updateInventoryItem()">
-    <mat-form-field>
-      <mat-label>Name</mat-label>
-      <input matInput formControlName="name" required>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Description</mat-label>
-      <textarea matInput formControlName="description"></textarea>
-    </mat-form-field>
-    <button mat-raised-button color="primary" type="submit" [disabled]="inventoryForm.invalid">Update</button>
-    <button mat-raised-button color="warn" type="button" (click)="deleteInventoryItem()">Delete</button>
-  </form>
-</div>
+<header class="panosupgrade-primary-header">
+  <h1>Inventory</h1>
+</header>
+
+<main focusOnNavigation aria-label="Inventory list" id="inventory-list" class="docs-inventory">
+  <div class="inventory-details-wrapper">
+    <h1>Inventory Details</h1>
+    <form [formGroup]="inventoryForm" (ngSubmit)="updateInventoryItem()">
+      <mat-form-field>
+        <mat-label>Hostname</mat-label>
+        <input matInput formControlName="hostname" required>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>IPv4 Address</mat-label>
+        <input matInput formControlName="ipv4Address" required>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>IPv6 Address</mat-label>
+        <input matInput formControlName="ipv6Address">
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Notes</mat-label>
+        <textarea matInput formControlName="notes"></textarea>
+      </mat-form-field>
+      <!-- Add other form fields for the inventory item properties -->
+      <button mat-raised-button color="primary" type="submit" [disabled]="inventoryForm.invalid">Update</button>
+      <button mat-raised-button color="warn" type="button" (click)="deleteInventoryItem()">Delete</button>
+    </form>
+  </div>
+</main>

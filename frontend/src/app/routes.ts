@@ -53,6 +53,14 @@ export const PANOSUPGRADE_ROUTES: Routes = [
         canActivate: [authGuard],
     },
     {
+        path: "inventory/:id",
+        loadComponent: () =>
+            import("./pages/inventory-details").then(
+                (m) => m.InventoryDetailsComponent,
+            ),
+        canActivate: [authGuard],
+    },
+    {
         path: "404",
         loadComponent: () =>
             import("./pages/not-found").then((m) => m.NotFound),

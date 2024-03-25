@@ -39,8 +39,10 @@ export class InventoryDetailsComponent implements OnInit {
         private formBuilder: FormBuilder,
     ) {
         this.inventoryForm = this.formBuilder.group({
-            name: ["", Validators.required],
-            description: [""],
+            hostname: ["", Validators.required],
+            ipv4Address: ["", Validators.required],
+            ipv6Address: [""],
+            notes: [""],
         });
     }
 
