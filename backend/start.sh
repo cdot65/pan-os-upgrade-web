@@ -21,14 +21,17 @@ EOF
 
 # Populate database
 echo "Populate database with initial data"
-python manage.py loaddata fixtures/firewall_platforms.json
+python manage.py loaddata fixtures/platforms.json
 python manage.py loaddata fixtures/firewalls.json
-python manage.py loaddata fixtures/panorama_platforms.json
 python manage.py loaddata fixtures/panoramas.json
 
 # Load scripts
 # echo "Load scripts"
 # python manage.py load_scripts /code/panosupgradeweb/scripts
+
+# Collect static files
+echo "Collect static files"
+python manage.py collectstatic --noinput
 
 # Start server
 echo "Starting server"
