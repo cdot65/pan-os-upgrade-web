@@ -22,12 +22,12 @@ lint:
         - osv-scanner
         - checkov
         - terrascan
+        - flake8
     enabled:
         - actionlint@1.6.27
         - bandit@1.7.8
         - black@24.3.0
         - dotenv-linter@3.3.0
-        - flake8@7.0.0
         - git-diff-check
         - hadolint@2.12.0
         - isort@5.13.2
