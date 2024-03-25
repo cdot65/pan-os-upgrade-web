@@ -12,8 +12,12 @@ import {
 import { Firewall } from "../../shared/interfaces/firewall.interface";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
+import { MatCardModule } from "@angular/material/card";
+import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
+import { MatSelectModule } from "@angular/material/select";
 import { Panorama } from "../../shared/interfaces/panorama.interface";
 
 @Component({
@@ -23,9 +27,13 @@ import { Panorama } from "../../shared/interfaces/panorama.interface";
     standalone: true,
     imports: [
         ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
         MatButtonModule,
+        MatCardModule,
+        MatCheckboxModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatInputModule,
+        MatSelectModule,
     ],
 })
 export class InventoryDetailsComponent implements OnInit {
@@ -38,11 +46,16 @@ export class InventoryDetailsComponent implements OnInit {
         private inventoryService: InventoryService,
         private formBuilder: FormBuilder,
     ) {
+        // Update the form group
         this.inventoryForm = this.formBuilder.group({
             hostname: ["", Validators.required],
             ipv4Address: ["", Validators.required],
             ipv6Address: [""],
+            platform: [""],
             notes: [""],
+            ha: [false],
+            haPeer: [""],
+            inventoryType: [""],
         });
     }
 

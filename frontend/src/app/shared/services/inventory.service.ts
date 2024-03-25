@@ -3,14 +3,12 @@
 import {
     Firewall,
     FirewallApiResponse,
-    FirewallPlatform,
 } from "../interfaces/firewall.interface";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable, of } from "rxjs";
 import {
     Panorama,
     PanoramaApiResponse,
-    PanoramaPlatform,
 } from "../interfaces/panorama.interface";
 import { catchError, map } from "rxjs/operators";
 
@@ -31,9 +29,10 @@ export class InventoryService {
             ipv4Address: response.ipv4_address,
             ipv6Address: response.ipv6_address,
             notes: response.notes,
-            platform: {
-                name: response.platform,
-            },
+            platform: response.platform,
+            ha: response.ha,
+            haPeer: response.ha_peer,
+            inventoryType: response.inventory_type,
         };
     }
     private mapPanoramaResponse(response: PanoramaApiResponse): Panorama {
@@ -44,9 +43,10 @@ export class InventoryService {
             ipv4Address: response.ipv4_address,
             ipv6Address: response.ipv6_address,
             notes: response.notes,
-            platform: {
-                name: response.platform,
-            },
+            platform: response.platform,
+            ha: response.ha,
+            haPeer: response.ha_peer,
+            inventoryType: response.inventory_type,
         };
     }
 
@@ -173,16 +173,12 @@ export class InventoryService {
             );
     }
 
-    fetchInventoryPlatforms(): Observable<
-        (FirewallPlatform | PanoramaPlatform)[]
-    > {
+    fetchInventoryPlatforms(): Observable<string[]> {
         return this.http
-            .get<
-                (FirewallPlatform | PanoramaPlatform)[]
-            >(`${this.apiUrl}/api/v1/inventory/platforms/`)
+            .get<string[]>(`${this.apiUrl}/api/v1/inventory/platforms/`)
             .pipe(
-                map((platforms: (FirewallPlatform | PanoramaPlatform)[]) =>
-                    platforms.sort((a, b) => a.name.localeCompare(b.name)),
+                map((platforms: string[]) =>
+                    platforms.sort((a, b) => a.localeCompare(b)),
                 ),
                 catchError((error) => {
                     console.error("Error fetching Inventory platforms:", error);

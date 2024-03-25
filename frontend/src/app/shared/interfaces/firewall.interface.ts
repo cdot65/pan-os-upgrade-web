@@ -7,12 +7,11 @@ export interface Firewall {
     ipv4Address: string;
     ipv6Address: string;
     notes: string;
-    platform: FirewallPlatform;
+    platform: string;
     uuid: string;
-}
-
-export interface FirewallPlatform {
-    name: string;
+    ha: boolean;
+    haPeer: string | null;
+    inventoryType: string;
 }
 
 export interface FirewallApiResponse {

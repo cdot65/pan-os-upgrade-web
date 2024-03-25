@@ -7,12 +7,11 @@ export interface Panorama {
     ipv4Address: string;
     ipv6Address: string;
     notes: string;
-    platform: PanoramaPlatform;
+    platform: string;
     uuid: string;
-}
-
-export interface PanoramaPlatform {
-    name: string;
+    ha: boolean;
+    haPeer: string | null;
+    inventoryType: string;
 }
 
 export interface PanoramaApiResponse {
