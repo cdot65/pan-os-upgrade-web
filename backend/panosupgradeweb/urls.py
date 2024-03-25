@@ -1,25 +1,25 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 from .views import (
-    PanoramaPlatformViewSet,
     FirewallPlatformViewSet,
+    PanoramaPlatformViewSet,
     InventoryExistsView,
     InventoryViewSet,
-    JobsViewSet,
+    JobViewSet,
     UserViewSet,
     UserProfileView,
 )
 
 router = SimpleRouter()
 router.register(
-    "inventory/types/firewall",
+    "inventory/platforms/firewall",
     FirewallPlatformViewSet,
-    basename="firewall_types",
+    basename="firewall_platforms",
 )
 router.register(
-    "inventory/types/panorama",
+    "inventory/platforms/panorama",
     PanoramaPlatformViewSet,
-    basename="panorama_types",
+    basename="panorama_platforms",
 )
 router.register(
     "inventory",
@@ -27,9 +27,9 @@ router.register(
     basename="inventory",
 )
 router.register(
-    "jobs",
-    JobsViewSet,
-    basename="jobs",
+    "Job",
+    JobViewSet,
+    basename="Job",
 )
 router.register(
     "users",

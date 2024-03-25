@@ -4,11 +4,10 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from .models import (
-    Panorama,
-    PanoramaPlatform,
     Firewall,
-    FirewallPlatform,
-    Jobs,
+    InventoryPlatform,
+    Job,
+    Panorama,
 )
 
 
@@ -106,22 +105,13 @@ class InventoryItemSerializer(serializers.ModelSerializer):
         return None
 
 
-class PanoramaPlatformSerializer(serializers.ModelSerializer):
+class InventoryPlatformSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PanoramaPlatform
+        model = InventoryPlatform
         fields = (
             "id",
+            "device_type",
             "name",
-        )
-
-
-class FirewallPlatformSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FirewallPlatform
-        fields = (
-            "id",
-            "name",
-            "vendor",
         )
 
 
@@ -132,9 +122,9 @@ class PanoramaSerializer(InventoryItemSerializer):
         platform_name = validated_data.pop("platform", None)
         if platform_name:
             try:
-                platform = PanoramaPlatform.objects.get(name=platform_name)
+                platform = InventoryPlatform.objects.get(name=platform_name)
                 instance.platform = platform
-            except PanoramaPlatform.DoesNotExist:
+            except InventoryPlatform.DoesNotExist:
                 raise serializers.ValidationError("Invalid platform")
         return super().update(instance, validated_data)
 
@@ -151,9 +141,9 @@ class FirewallSerializer(InventoryItemSerializer):
         platform_name = validated_data.pop("platform", None)
         if platform_name:
             try:
-                platform = FirewallPlatform.objects.get(name=platform_name)
+                platform = InventoryPlatform.objects.get(name=platform_name)
                 instance.platform = platform
-            except FirewallPlatform.DoesNotExist:
+            except InventoryPlatform.DoesNotExist:
                 raise serializers.ValidationError("Invalid platform")
         return super().update(instance, validated_data)
 
@@ -162,11 +152,11 @@ class FirewallSerializer(InventoryItemSerializer):
         fields = InventoryItemSerializer.Meta.fields + ("platform_name", "device_group")
 
 
-class JobsSerializer(serializers.ModelSerializer):
+class JobSerializer(serializers.ModelSerializer):
     task_id = serializers.CharField(read_only=True)
 
     class Meta:
-        model = Jobs
+        model = Job
         fields = (
             "task_id",
             "job_type",

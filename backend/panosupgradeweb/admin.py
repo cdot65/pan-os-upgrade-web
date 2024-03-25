@@ -1,10 +1,9 @@
 from django.contrib import admin
 from .models import (
     Firewall,
-    FirewallPlatform,
-    Jobs,
+    InventoryPlatform,
+    Job,
     Panorama,
-    PanoramaPlatform,
 )
 
 
@@ -22,9 +21,15 @@ class FirewallAdmin(admin.ModelAdmin):
     search_fields = ("hostname", "ipv4_address", "ipv6_address", "notes")
 
 
-class FirewallPlatformAdmin(admin.ModelAdmin):
-    list_display = ("name", "vendor")
-    search_fields = ("name", "vendor")
+class InventoryPlatformAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "device_type",
+    )
+    search_fields = (
+        "name",
+        "device_type",
+    )
 
 
 class PanoramaAdmin(admin.ModelAdmin):
@@ -40,19 +45,13 @@ class PanoramaAdmin(admin.ModelAdmin):
     search_fields = ("hostname", "ipv4_address", "ipv6_address", "notes")
 
 
-class PanoramaPlatformAdmin(admin.ModelAdmin):
-    list_display = ("name",)
-    search_fields = ("name",)
-
-
-class JobsAdmin(admin.ModelAdmin):
+class JobAdmin(admin.ModelAdmin):
     list_display = ("task_id", "job_type", "author", "created_at")
     list_filter = ("job_type", "author")
     search_fields = ("task_id", "job_type")
 
 
 admin.site.register(Firewall, FirewallAdmin)
-admin.site.register(FirewallPlatform, FirewallPlatformAdmin)
+admin.site.register(InventoryPlatform, InventoryPlatformAdmin)
 admin.site.register(Panorama, PanoramaAdmin)
-admin.site.register(PanoramaPlatform, PanoramaPlatformAdmin)
-admin.site.register(Jobs, JobsAdmin)
+admin.site.register(Job, JobAdmin)

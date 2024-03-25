@@ -79,7 +79,7 @@ export class InventoryService {
         return this.http
             .get<
                 FirewallPlatform[]
-            >(`${this.apiUrl}/api/v1/inventory/types/firewall/`)
+            >(`${this.apiUrl}/api/v1/inventory/platforms/firewall/`)
             .pipe(
                 catchError((error) => {
                     console.error("Error fetching firewall platforms:", error);
@@ -92,7 +92,7 @@ export class InventoryService {
         return this.http
             .get<
                 PanoramaPlatform[]
-            >(`${this.apiUrl}/api/v1/inventory/types/panorama/`)
+            >(`${this.apiUrl}/api/v1/inventory/platforms/panorama/`)
             .pipe(
                 catchError((error) => {
                     console.error("Error fetching panorama platforms:", error);

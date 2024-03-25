@@ -4,7 +4,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
-from .models import Panorama, Prisma, Jobs
+from .models import Panorama, Prisma, Job
 
 
 User = get_user_model()
@@ -30,7 +30,7 @@ class PanOsUpgradeWebModelTest(APITestCase):
             tsg_id="1234567890",
             author=cls.user,
         )
-        cls.job = Jobs.objects.create(
+        cls.job = Job.objects.create(
             task_id="1234567890",
             job_type="test",
             json_data='{"test": "test"}',
@@ -55,7 +55,7 @@ class PanOsUpgradeWebModelTest(APITestCase):
         self.assertEqual(self.prisma.client_secret, "1234567890")
         self.assertEqual(self.prisma.tsg_id, "1234567890")
 
-    def test_jobs(self):
+    def test_Job(self):
         self.assertEqual(self.job.__str__(), self.job.task_id)
         self.assertEqual(self.job.task_id, "1234567890")
         self.assertEqual(self.job.job_type, "test")
@@ -164,58 +164,58 @@ class PanOsUpgradeWebModelTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Prisma.objects.count(), 0)
 
-    # Jobs API tests
-    def test_api_jobs_list_view(self):
-        response = self.client.get(reverse("jobs-list"))
+    # Job API tests
+    def test_api_Job_list_view(self):
+        response = self.client.get(reverse("Job-list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data[0]["task_id"], "1234567890")
         self.assertEqual(response.data[0]["job_type"], "test")
         self.assertEqual(response.data[0]["json_data"], '{"test": "test"}')
-        self.assertEqual(Jobs.objects.count(), 1)
+        self.assertEqual(Job.objects.count(), 1)
         self.assertContains(response, self.job)
 
-    def test_api_jobs_detail_view(self):
+    def test_api_Job_detail_view(self):
         response = self.client.get(
-            reverse("jobs-detail", kwargs={"pk": self.job.task_id}), format="json"
+            reverse("Job-detail", kwargs={"pk": self.job.task_id}), format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(Jobs.objects.count(), 1)
+        self.assertEqual(Job.objects.count(), 1)
         self.assertEqual(json.loads(response.content)["task_id"], self.job.task_id)
 
-    def test_api_jobs_create(self):
+    def test_api_Job_create(self):
         data = {
             "task_id": "2345678901",
             "job_type": "test2",
             "json_data": '{"test2": "test2"}',
             "author": self.user.id,
         }
-        response = self.client.post(reverse("jobs-list"), data, format="json")
+        response = self.client.post(reverse("Job-list"), data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Jobs.objects.count(), 2)
+        self.assertEqual(Job.objects.count(), 2)
 
-    def test_api_jobs_update(self):
+    def test_api_Job_update(self):
         data = {
             "job_type": "updated_test",
             "json_data": '{"updated_test": "updated_test"}',
         }
         response = self.client.patch(
-            reverse("jobs-detail", kwargs={"pk": self.job.task_id}), data, format="json"
+            reverse("Job-detail", kwargs={"pk": self.job.task_id}), data, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            Jobs.objects.get(task_id=self.job.task_id).job_type, "updated_test"
+            Job.objects.get(task_id=self.job.task_id).job_type, "updated_test"
         )
         self.assertEqual(
-            Jobs.objects.get(task_id=self.job.task_id).json_data,
+            Job.objects.get(task_id=self.job.task_id).json_data,
             '{"updated_test": "updated_test"}',
         )
 
-    def test_api_jobs_delete(self):
+    def test_api_Job_delete(self):
         response = self.client.delete(
-            reverse("jobs-detail", kwargs={"pk": self.job.task_id})
+            reverse("Job-detail", kwargs={"pk": self.job.task_id})
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(Jobs.objects.count(), 0)
+        self.assertEqual(Job.objects.count(), 0)
 
 
 class UserRegistrationTestCase(APITestCase):

@@ -25,18 +25,9 @@ class InventoryItem(models.Model):
         return self.hostname
 
 
-class FirewallPlatform(models.Model):
-    """
-    Represents a specific type of firewall.
-
-    Each instance of the FirewallPlatform class holds information about a distinct platform of firewall.
-
-    Fields:
-    - hostname: The unique name of the FirewallPlatform.
-    """
-
+class InventoryPlatform(models.Model):
     name = models.CharField(max_length=32, unique=True)
-    vendor = models.CharField(max_length=32)
+    device_type = models.CharField(max_length=32)
 
     def __str__(self):
         return self.name
@@ -44,43 +35,18 @@ class FirewallPlatform(models.Model):
 
 class Firewall(InventoryItem):
     platform = models.ForeignKey(
-        FirewallPlatform, blank=True, null=True, on_delete=models.CASCADE
+        InventoryPlatform, blank=True, null=True, on_delete=models.CASCADE
     )
     device_group = models.CharField(max_length=100, blank=True, null=True)
 
 
-class PanoramaPlatform(models.Model):
-    """
-    Represents a specific type of Panorama.
-
-    Each instance of the PanoramaPlatform class holds information about a distinct platform of Panorama.
-
-    Fields:
-    - name: The unique name of the PanoramaPlatform.
-    """
-
-    name = models.CharField(max_length=32, unique=True)
-
-    def __str__(self):
-        return self.name
-
-
 class Panorama(InventoryItem):
-    """
-    Panorama appliance.
-
-    Each instance of the Panorama class holds information about a distinct Panorama appliance.
-
-    Fields:
-    - hostname: The unique name of the Panorama appliance.
-    """
-
     platform = models.ForeignKey(
-        PanoramaPlatform, blank=True, null=True, on_delete=models.CASCADE
+        InventoryPlatform, blank=True, null=True, on_delete=models.CASCADE
     )
 
 
-class Jobs(models.Model):
+class Job(models.Model):
     task_id = models.CharField(max_length=255, unique=True, primary_key=True)
     job_type = models.CharField(max_length=1024)
     json_data = models.JSONField(null=True, blank=True)

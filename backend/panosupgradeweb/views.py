@@ -15,21 +15,19 @@ from rest_framework.views import APIView
 
 # directory object imports
 from .models import (
-    Panorama,
-    PanoramaPlatform,
     Firewall,
-    FirewallPlatform,
-    Jobs,
+    InventoryPlatform,
+    Job,
+    Panorama,
 )
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     InventoryDetailSerializer,
     InventoryListSerializer,
     PanoramaSerializer,
-    PanoramaPlatformSerializer,
+    InventoryPlatformSerializer,
     FirewallSerializer,
-    FirewallPlatformSerializer,
-    JobsSerializer,
+    JobSerializer,
     UserSerializer,
 )
 
@@ -112,9 +110,9 @@ class InventoryViewSet(viewsets.ModelViewSet):
                 platform_name = request.data.get("platform")
                 if platform_name:
                     if serializer_class == PanoramaSerializer:
-                        platform = PanoramaPlatform.objects.get(name=platform_name)
+                        platform = InventoryPlatform.objects.get(name=platform_name)
                     else:
-                        platform = FirewallPlatform.objects.get(name=platform_name)
+                        platform = InventoryPlatform.objects.get(name=platform_name)
                     serializer.validated_data["platform"] = platform
                 serializer.save(author=self.request.user)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -124,22 +122,28 @@ class InventoryViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class PanoramaPlatformViewSet(viewsets.ModelViewSet):
+class InventoryPlatformViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnly,)
-    queryset = PanoramaPlatform.objects.all()
-    serializer_class = PanoramaPlatformSerializer
+    queryset = InventoryPlatform.objects.all()
+    serializer_class = InventoryPlatformSerializer
 
 
 class FirewallPlatformViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnly,)
-    queryset = FirewallPlatform.objects.all()
-    serializer_class = FirewallPlatformSerializer
+    queryset = InventoryPlatform.objects.filter(device_type="Firewall")
+    serializer_class = InventoryPlatformSerializer
 
 
-class JobsViewSet(viewsets.ModelViewSet):
+class PanoramaPlatformViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnly,)
-    queryset = Jobs.objects.all()
-    serializer_class = JobsSerializer
+    queryset = InventoryPlatform.objects.filter(device_type="Panorama")
+    serializer_class = InventoryPlatformSerializer
+
+
+class JobViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthorOrReadOnly,)
+    queryset = Job.objects.all()
+    serializer_class = JobSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
