@@ -4,6 +4,10 @@ import {
     Firewall,
     FirewallApiResponse,
 } from "../interfaces/firewall.interface";
+import {
+    FirewallPlatform,
+    PanoramaPlatform,
+} from "../interfaces/platform.interface";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable, of } from "rxjs";
 import {
@@ -66,6 +70,32 @@ export class InventoryService {
                 ),
                 catchError((error) => {
                     console.error("Error fetching Inventory data:", error);
+                    return of([]);
+                }),
+            );
+    }
+
+    fetchFirewallPlatforms(): Observable<FirewallPlatform[]> {
+        return this.http
+            .get<
+                FirewallPlatform[]
+            >(`${this.apiUrl}/api/v1/inventory/types/firewall/`)
+            .pipe(
+                catchError((error) => {
+                    console.error("Error fetching firewall platforms:", error);
+                    return of([]);
+                }),
+            );
+    }
+
+    fetchPanoramaPlatforms(): Observable<PanoramaPlatform[]> {
+        return this.http
+            .get<
+                PanoramaPlatform[]
+            >(`${this.apiUrl}/api/v1/inventory/types/panorama/`)
+            .pipe(
+                catchError((error) => {
+                    console.error("Error fetching panorama platforms:", error);
                     return of([]);
                 }),
             );

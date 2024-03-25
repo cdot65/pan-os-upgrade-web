@@ -12,27 +12,7 @@
           <mat-label>Hostname</mat-label>
           <input matInput formControlName="hostname" required>
         </mat-form-field>
-        <mat-form-field>
-          <mat-label>IPv4 Address</mat-label>
-          <input matInput formControlName="ipv4Address" required>
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>IPv6 Address</mat-label>
-          <input matInput formControlName="ipv6Address">
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Notes</mat-label>
-          <textarea matInput formControlName="notes"></textarea>
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Platform</mat-label>
-          <input matInput formControlName="platform">
-        </mat-form-field>
-        <mat-checkbox formControlName="ha">HA</mat-checkbox>
-        <mat-form-field>
-          <mat-label>HA Peer</mat-label>
-          <input matInput formControlName="haPeer">
-        </mat-form-field>
+
         <mat-form-field>
           <mat-label>Inventory Type</mat-label>
           <mat-select matInput formControlName="inventoryType">
@@ -40,6 +20,46 @@
             <mat-option value="panorama">Panorama</mat-option>
           </mat-select>
         </mat-form-field>
+
+        <mat-form-field *ngIf="inventoryForm.get('inventoryType')?.value === 'firewall'">
+          <mat-label>Platform</mat-label>
+          <mat-select matInput formControlName="platform">
+            <mat-option *ngFor="let platform of firewallPlatforms" [value]="platform.name">
+              {{platform.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field *ngIf="inventoryForm.get('inventoryType')?.value === 'panorama'">
+          <mat-label>Platform</mat-label>
+          <mat-select matInput formControlName="platform">
+            <mat-option *ngFor="let platform of panoramaPlatforms" [value]="platform.name">
+              {{platform.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>IPv4 Address</mat-label>
+          <input matInput formControlName="ipv4Address" required>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>IPv6 Address</mat-label>
+          <input matInput formControlName="ipv6Address">
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Notes</mat-label>
+          <textarea matInput formControlName="notes"></textarea>
+        </mat-form-field>
+
+        <mat-checkbox formControlName="ha">HA</mat-checkbox>
+        <mat-form-field>
+          <mat-label>HA Peer</mat-label>
+          <input matInput formControlName="haPeer">
+        </mat-form-field>
+
         <!-- Add other form fields for the inventory item properties -->
         <button mat-raised-button color="primary" type="submit" [disabled]="inventoryForm.invalid">Update</button>
         <button mat-raised-button color="warn" type="button" (click)="deleteInventoryItem()">Delete</button>

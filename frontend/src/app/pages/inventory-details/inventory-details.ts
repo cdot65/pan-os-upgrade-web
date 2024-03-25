@@ -3,12 +3,17 @@
 import { ActivatedRoute, Router } from "@angular/router";
 import { Component, OnInit } from "@angular/core";
 import {
+    FirewallPlatform,
+    PanoramaPlatform,
+} from "../../shared/interfaces/platform.interface";
+import {
     FormBuilder,
     FormGroup,
     ReactiveFormsModule,
     Validators,
 } from "@angular/forms";
 
+import { CommonModule } from "@angular/common";
 import { Firewall } from "../../shared/interfaces/firewall.interface";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
@@ -26,6 +31,7 @@ import { Panorama } from "../../shared/interfaces/panorama.interface";
     styleUrls: ["./inventory-details.scss"],
     standalone: true,
     imports: [
+        CommonModule,
         ReactiveFormsModule,
         MatButtonModule,
         MatCardModule,
@@ -39,6 +45,8 @@ import { Panorama } from "../../shared/interfaces/panorama.interface";
 export class InventoryDetailsComponent implements OnInit {
     inventoryItem: Firewall | Panorama | undefined;
     inventoryForm: FormGroup;
+    firewallPlatforms: FirewallPlatform[] = [];
+    panoramaPlatforms: PanoramaPlatform[] = [];
 
     constructor(
         private route: ActivatedRoute,
@@ -64,6 +72,38 @@ export class InventoryDetailsComponent implements OnInit {
         if (itemId) {
             this.getInventoryItem(itemId);
         }
+
+        this.inventoryForm
+            .get("inventoryType")
+            ?.valueChanges.subscribe((inventoryType) => {
+                if (inventoryType === "firewall") {
+                    this.fetchFirewallPlatforms();
+                } else if (inventoryType === "panorama") {
+                    this.fetchPanoramaPlatforms();
+                }
+            });
+    }
+
+    fetchFirewallPlatforms(): void {
+        this.inventoryService.fetchFirewallPlatforms().subscribe(
+            (platforms: FirewallPlatform[]) => {
+                this.firewallPlatforms = platforms;
+            },
+            (error: any) => {
+                console.error("Error fetching firewall platforms:", error);
+            },
+        );
+    }
+
+    fetchPanoramaPlatforms(): void {
+        this.inventoryService.fetchPanoramaPlatforms().subscribe(
+            (platforms: PanoramaPlatform[]) => {
+                this.panoramaPlatforms = platforms;
+            },
+            (error: any) => {
+                console.error("Error fetching panorama platforms:", error);
+            },
+        );
     }
 
     getInventoryItem(itemId: string): void {
