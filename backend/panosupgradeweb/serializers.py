@@ -115,20 +115,6 @@ class PanoramaPlatformSerializer(serializers.ModelSerializer):
         )
 
 
-class PanoramaSerializer(InventoryItemSerializer):
-    platform = serializers.CharField(source="platform.name", read_only=True)
-
-    def create(self, validated_data):
-        return Panorama.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        return super().update(instance, validated_data)
-
-    class Meta(InventoryItemSerializer.Meta):
-        model = Panorama
-        fields = InventoryItemSerializer.Meta.fields + ("platform",)
-
-
 class FirewallPlatformSerializer(serializers.ModelSerializer):
     class Meta:
         model = FirewallPlatform
@@ -139,19 +125,41 @@ class FirewallPlatformSerializer(serializers.ModelSerializer):
         )
 
 
-class FirewallSerializer(InventoryItemSerializer):
-    platform = serializers.CharField(source="platform.name", read_only=True)
-    device_group = serializers.CharField(allow_blank=True, required=False)
-
-    def create(self, validated_data):
-        return Firewall.objects.create(**validated_data)
+class PanoramaSerializer(InventoryItemSerializer):
+    platform_name = serializers.CharField(source="platform.name", read_only=True)
 
     def update(self, instance, validated_data):
+        platform_name = validated_data.pop("platform", None)
+        if platform_name:
+            try:
+                platform = PanoramaPlatform.objects.get(name=platform_name)
+                instance.platform = platform
+            except PanoramaPlatform.DoesNotExist:
+                raise serializers.ValidationError("Invalid platform")
+        return super().update(instance, validated_data)
+
+    class Meta(InventoryItemSerializer.Meta):
+        model = Panorama
+        fields = InventoryItemSerializer.Meta.fields + ("platform_name",)
+
+
+class FirewallSerializer(InventoryItemSerializer):
+    platform_name = serializers.CharField(source="platform.name", read_only=True)
+    device_group = serializers.CharField(allow_blank=True, required=False)
+
+    def update(self, instance, validated_data):
+        platform_name = validated_data.pop("platform", None)
+        if platform_name:
+            try:
+                platform = FirewallPlatform.objects.get(name=platform_name)
+                instance.platform = platform
+            except FirewallPlatform.DoesNotExist:
+                raise serializers.ValidationError("Invalid platform")
         return super().update(instance, validated_data)
 
     class Meta(InventoryItemSerializer.Meta):
         model = Firewall
-        fields = InventoryItemSerializer.Meta.fields + ("platform", "device_group")
+        fields = InventoryItemSerializer.Meta.fields + ("platform_name", "device_group")
 
 
 class JobsSerializer(serializers.ModelSerializer):
