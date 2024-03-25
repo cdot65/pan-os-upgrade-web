@@ -22,6 +22,7 @@ from .models import (
 )
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
+    InventoryListSerializer,
     PanoramaSerializer,
     PanoramaPlatformSerializer,
     FirewallSerializer,
@@ -40,7 +41,9 @@ class InventoryViewSet(viewsets.ModelViewSet):
         return self.queryset
 
     def get_serializer_class(self):
-        if isinstance(self.get_object(), Panorama):
+        if self.action == "list":
+            return InventoryListSerializer
+        elif isinstance(self.get_object(), Panorama):
             return PanoramaSerializer
         elif isinstance(self.get_object(), Firewall):
             return FirewallSerializer

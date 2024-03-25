@@ -12,17 +12,43 @@ from .models import (
 )
 
 
+class InventoryListSerializer(serializers.Serializer):
+    uuid = serializers.UUIDField()
+    api_key = serializers.CharField()
+    author = serializers.StringRelatedField()
+    created_at = serializers.DateTimeField()
+    hostname = serializers.CharField()
+    ipv4_address = serializers.IPAddressField()
+    ipv6_address = serializers.IPAddressField()
+    notes = serializers.CharField()
+    ha = serializers.BooleanField()
+    ha_peer = serializers.CharField()
+    platform = serializers.SerializerMethodField()
+    inventory_type = serializers.SerializerMethodField()
+
+    def get_platform(self, obj):
+        if isinstance(obj, Panorama):
+            return obj.platform.name if obj.platform else None
+        elif isinstance(obj, Firewall):
+            return obj.platform.name if obj.platform else None
+        return None
+
+    def get_inventory_type(self, obj):
+        if isinstance(obj, Panorama):
+            return "panorama"
+        elif isinstance(obj, Firewall):
+            return "firewall"
+        return None
+
+
 class InventoryItemSerializer(serializers.ModelSerializer):
-    ipv6_address = serializers.IPAddressField(
-        protocol="IPv6",
-        allow_blank=True,
-        required=False,
-        allow_null=True,
-    )
+    platform = serializers.SerializerMethodField()
+    inventory_type = serializers.SerializerMethodField()
 
     class Meta:
         model = None
         fields = (
+            "uuid",
             "api_key",
             "author",
             "created_at",
@@ -30,10 +56,25 @@ class InventoryItemSerializer(serializers.ModelSerializer):
             "ipv4_address",
             "ipv6_address",
             "notes",
-            "uuid",
             "ha",
             "ha_peer",
+            "platform",
+            "inventory_type",
         )
+
+    def get_platform(self, obj):
+        if isinstance(obj, Panorama):
+            return obj.platform.name if obj.platform else None
+        elif isinstance(obj, Firewall):
+            return obj.platform.name if obj.platform else None
+        return None
+
+    def get_inventory_type(self, obj):
+        if isinstance(obj, Panorama):
+            return "panorama"
+        elif isinstance(obj, Firewall):
+            return "firewall"
+        return None
 
 
 class PanoramaPlatformSerializer(serializers.ModelSerializer):
