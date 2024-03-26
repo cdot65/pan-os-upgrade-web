@@ -12,10 +12,12 @@ import {
     ReactiveFormsModule,
     Validators,
 } from "@angular/forms";
+import { MatDialog, MatDialogModule } from "@angular/material/dialog";
 
 import { CommonModule } from "@angular/common";
 import { ComponentPageHeader } from "../component-page-header/component-page-header";
 import { ComponentPageTitle } from "../page-title/page-title";
+import { DeleteDialogComponent } from "../confirmation-dialog/delete-dialog";
 import { Firewall } from "../../shared/interfaces/firewall.interface";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
@@ -39,6 +41,7 @@ import { Panorama } from "../../shared/interfaces/panorama.interface";
         MatButtonModule,
         MatCardModule,
         MatCheckboxModule,
+        MatDialogModule,
         MatFormFieldModule,
         MatIconModule,
         MatInputModule,
@@ -61,6 +64,7 @@ export class InventoryDetailsComponent implements OnInit {
         private router: Router,
         private inventoryService: InventoryService,
         private formBuilder: FormBuilder,
+        private dialog: MatDialog,
         public _componentPageTitle: ComponentPageTitle,
     ) {
         // Update the form group
@@ -174,16 +178,32 @@ export class InventoryDetailsComponent implements OnInit {
      */
     deleteInventoryItem(): void {
         if (this.inventoryItem) {
-            this.inventoryService
-                .deleteInventoryItem(this.inventoryItem.uuid)
-                .subscribe(
-                    () => {
-                        this.router.navigate(["/inventory"]);
-                    },
-                    (error) => {
-                        console.error("Error deleting inventory item:", error);
-                    },
-                );
+            const dialogRef = this.dialog.open(DeleteDialogComponent, {
+                width: "300px",
+                data: {
+                    title: "Confirm Delete",
+                    message:
+                        "Are you sure you want to delete this inventory item?",
+                },
+            });
+
+            dialogRef.afterClosed().subscribe((result: boolean) => {
+                if (result) {
+                    this.inventoryService
+                        .deleteInventoryItem(this.inventoryItem!.uuid)
+                        .subscribe(
+                            () => {
+                                this.router.navigate(["/inventory"]);
+                            },
+                            (error) => {
+                                console.error(
+                                    "Error deleting inventory item:",
+                                    error,
+                                );
+                            },
+                        );
+                }
+            });
         }
     }
 }
