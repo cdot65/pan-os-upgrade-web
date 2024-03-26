@@ -1,45 +1,39 @@
+// src/app/pages/inventory-details/inventory-details.scss
+
 .inventory-details-container {
-  display: flex;
-  justify-content: center;
-  // align-items: center;
-  min-height: calc(100vh - 104px);
-  padding: 52px;
-  background-color: #f5f5f5;
-}
+  width: 97%;
+  padding: 25px;
 
-mat-card {
-  width: 800px;
-  padding: 24px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+  h2 {
+    margin-bottom: 20px;
+  }
 
-mat-card-header {
-  justify-content: center;
-  margin-bottom: 24px;
-}
+  .inventory-details-table {
+    width: 100%;
+    border-collapse: collapse;
 
-mat-card-title {
-  font-size: 24px;
-  font-weight: 500;
-  color: #333;
-}
+    th {
+      text-align: left;
+      padding: 10px;
+      font-weight: bold;
+    }
 
-mat-form-field {
-  width: 100%;
-  margin-bottom: 16px;
-}
+    td {
+      padding: 10px;
+    }
 
-.error-message {
-  color: #f44336;
-  margin-bottom: 16px;
-}
+    mat-form-field {
+      width: 100%;
+    }
+  }
 
-.button-flex-container {
-  display: flex;
-  justify-content: flex-end;
-}
+  .button-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
 
-button {
-  width: 120px;
+    button {
+      margin-left: 10px;
+    }
+  }
 }
