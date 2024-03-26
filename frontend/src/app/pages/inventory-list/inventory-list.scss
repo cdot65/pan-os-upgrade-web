@@ -1,1 +1,32 @@
+// src/app/pages/inventory-list/inventory-list.scss
 
+.inventory-list {
+  width: 97%;
+  padding: 25px;
+
+  .mat-table {
+    width: 85%;
+    margin: 0 auto;
+
+    .mat-row {
+      &:hover {
+        .mat-cell {
+          background-color: rgba(0, 0, 0, 0.2);
+        }
+      }
+    }
+
+    .mat-cell {
+      padding-right: 20px;
+      transition: background-color 0.3s;
+    }
+
+    .mat-header-cell {
+      font-weight: bold;
+    }
+
+    .edit-button {
+      margin-left: 10px;
+    }
+  }
+}

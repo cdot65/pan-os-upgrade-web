@@ -1,4 +1,4 @@
-<main focusOnNavigation aria-label="Inventory list" id="inventory-list" class="docs-inventory">
+<main focusOnNavigation aria-label="Inventory list" id="inventory-list" class="inventory-list">
   <table mat-table [dataSource]="dataSource" matSort (matSortChange)="announceSortChange($event)"
     class="mat-elevation-z8">
     <!-- Hostname Column -->
@@ -41,7 +41,17 @@
       <td mat-cell *matCellDef="let item">{{item.notes}}</td>
     </ng-container>
 
+    <!-- Edit Column -->
+    <ng-container matColumnDef="edit">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let item">
+        <button mat-icon-button (click)="onEditClick(item)" class="edit-button">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onRowClick(row)"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
 </main>

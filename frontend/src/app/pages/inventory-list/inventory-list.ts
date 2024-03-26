@@ -11,6 +11,8 @@ import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 import { Firewall } from "../../shared/interfaces/firewall.interface";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
 import { NgFor } from "@angular/common";
 import { Panorama } from "../../shared/interfaces/panorama.interface";
 import { Router } from "@angular/router";
@@ -20,7 +22,13 @@ import { Router } from "@angular/router";
     templateUrl: "./inventory-list.html",
     styleUrls: ["./inventory-list.scss"],
     standalone: true,
-    imports: [NgFor, MatTableModule, MatSortModule],
+    imports: [
+        NgFor,
+        MatTableModule,
+        MatSortModule,
+        MatIconModule,
+        MatButtonModule,
+    ],
 })
 export class InventoryList implements OnInit, AfterViewInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
@@ -31,6 +39,7 @@ export class InventoryList implements OnInit, AfterViewInit {
         "platform",
         "inventoryType",
         "notes",
+        "edit",
     ];
     dataSource: MatTableDataSource<Firewall | Panorama> =
         new MatTableDataSource<Firewall | Panorama>([]);
@@ -64,7 +73,7 @@ export class InventoryList implements OnInit, AfterViewInit {
         );
     }
 
-    onRowClick(item: Firewall | Panorama): void {
+    onEditClick(item: Firewall | Panorama): void {
         this.router.navigate(["/inventory", item.uuid]);
     }
 
