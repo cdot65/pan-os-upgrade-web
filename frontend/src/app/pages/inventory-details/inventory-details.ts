@@ -45,7 +45,11 @@ import { Panorama } from "../../shared/interfaces/panorama.interface";
         MatSelectModule,
     ],
 })
+/**
+ * Represents the component for displaying and managing inventory details.
+ */
 export class InventoryDetailsComponent implements OnInit {
+    // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
     inventoryItem: Firewall | Panorama | undefined;
     inventoryForm: FormGroup;
@@ -72,6 +76,12 @@ export class InventoryDetailsComponent implements OnInit {
         });
     }
 
+    /**
+     * Initializes the component.
+     * Sets the page title to "Inventory Details".
+     * Retrieves the inventory item based on the provided ID.
+     * Subscribe to changes of inventory type form control and fetches the corresponding platforms.
+     */
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory Details";
         const itemId = this.route.snapshot.paramMap.get("id");
@@ -90,6 +100,9 @@ export class InventoryDetailsComponent implements OnInit {
             });
     }
 
+    /**
+     * Fetches the firewall platforms from the inventory service.
+     */
     fetchFirewallPlatforms(): void {
         this.inventoryService.fetchFirewallPlatforms().subscribe(
             (platforms: FirewallPlatform[]) => {
@@ -101,6 +114,9 @@ export class InventoryDetailsComponent implements OnInit {
         );
     }
 
+    /**
+     * Fetches the Panorama platforms from the inventory service.
+     */
     fetchPanoramaPlatforms(): void {
         this.inventoryService.fetchPanoramaPlatforms().subscribe(
             (platforms: PanoramaPlatform[]) => {
@@ -112,6 +128,11 @@ export class InventoryDetailsComponent implements OnInit {
         );
     }
 
+    /**
+     * Retrieves an inventory item by its ID.
+     *
+     * @param itemId - The ID of the inventory item to retrieve.
+     */
     getInventoryItem(itemId: string): void {
         this.inventoryService.getInventoryItem(itemId).subscribe(
             (item: Firewall | Panorama) => {
@@ -124,6 +145,11 @@ export class InventoryDetailsComponent implements OnInit {
         );
     }
 
+    /**
+     * Updates the inventory item with the values from the inventory form.
+     * Navigates to the inventory page after successful update.
+     * Logs an error if the update fails.
+     */
     updateInventoryItem(): void {
         if (this.inventoryItem && this.inventoryForm.valid) {
             const updatedItem = {
@@ -143,6 +169,9 @@ export class InventoryDetailsComponent implements OnInit {
         }
     }
 
+    /**
+     * Deletes the inventory item.
+     */
     deleteInventoryItem(): void {
         if (this.inventoryItem) {
             this.inventoryService
