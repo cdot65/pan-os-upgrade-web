@@ -1,9 +1,9 @@
 <!-- src/app/pages/inventory-details/inventory-details.html -->
 
-<div class="inventory-details-container">
-  <h2>Inventory Details</h2>
-  <form [formGroup]="inventoryForm" (ngSubmit)="updateInventoryItem()">
-    <table class="inventory-details-table">
+<component-page-header></component-page-header>
+<main focusOnNavigation aria-label="Inventory details" id="inventory-details" class="inventory-details">
+  <form [formGroup]="inventoryForm" (ngSubmit)="updateInventoryItem()" class="mat-elevation-z1">
+    <table class="inventory-details-table inventory-details">
       <tr>
         <th>Hostname</th>
         <td>
@@ -91,4 +91,4 @@
       <button mat-raised-button color="warn" type="button" (click)="deleteInventoryItem()">Delete</button>
     </div>
   </form>
-</div>
+</main>

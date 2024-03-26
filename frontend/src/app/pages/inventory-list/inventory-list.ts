@@ -8,6 +8,8 @@ import {
 import { MatSort, MatSortModule, Sort } from "@angular/material/sort";
 import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 
+import { ComponentPageHeader } from "../component-page-header/component-page-header";
+import { ComponentPageTitle } from "../page-title/page-title";
 import { Firewall } from "../../shared/interfaces/firewall.interface";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
@@ -24,6 +26,7 @@ import { Router } from "@angular/router";
     standalone: true,
     imports: [
         NgFor,
+        ComponentPageHeader,
         MatTableModule,
         MatSortModule,
         MatIconModule,
@@ -50,9 +53,11 @@ export class InventoryList implements OnInit, AfterViewInit {
         private inventoryService: InventoryService,
         private router: Router,
         private _liveAnnouncer: LiveAnnouncer,
+        public _componentPageTitle: ComponentPageTitle,
     ) {}
 
     ngOnInit(): void {
+        this._componentPageTitle.title = "Inventory List";
         this.getInventoryItems();
     }
 

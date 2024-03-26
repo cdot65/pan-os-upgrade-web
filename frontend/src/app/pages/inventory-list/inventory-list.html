@@ -1,8 +1,9 @@
 <!-- src/app/pages/inventory-list/inventory-list.html -->
 
+<component-page-header></component-page-header>
 <main focusOnNavigation aria-label="Inventory list" id="inventory-list" class="inventory-list">
   <table mat-table [dataSource]="dataSource" matSort (matSortChange)="announceSortChange($event)"
-    class="mat-elevation-z8">
+    class="mat-elevation-z1">
     <!-- Hostname Column -->
     <ng-container matColumnDef="hostname">
       <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by hostname">

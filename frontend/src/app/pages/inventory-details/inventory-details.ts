@@ -1,7 +1,7 @@
 // src/app/pages/inventory-details/inventory-details.ts
 
 import { ActivatedRoute, Router } from "@angular/router";
-import { Component, OnInit } from "@angular/core";
+import { Component, HostBinding, OnInit } from "@angular/core";
 import {
     FirewallPlatform,
     PanoramaPlatform,
@@ -14,6 +14,8 @@ import {
 } from "@angular/forms";
 
 import { CommonModule } from "@angular/common";
+import { ComponentPageHeader } from "../component-page-header/component-page-header";
+import { ComponentPageTitle } from "../page-title/page-title";
 import { Firewall } from "../../shared/interfaces/firewall.interface";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
@@ -32,6 +34,7 @@ import { Panorama } from "../../shared/interfaces/panorama.interface";
     standalone: true,
     imports: [
         CommonModule,
+        ComponentPageHeader,
         ReactiveFormsModule,
         MatButtonModule,
         MatCardModule,
@@ -43,6 +46,7 @@ import { Panorama } from "../../shared/interfaces/panorama.interface";
     ],
 })
 export class InventoryDetailsComponent implements OnInit {
+    @HostBinding("class.main-content") readonly mainContentClass = true;
     inventoryItem: Firewall | Panorama | undefined;
     inventoryForm: FormGroup;
     firewallPlatforms: FirewallPlatform[] = [];
@@ -53,6 +57,7 @@ export class InventoryDetailsComponent implements OnInit {
         private router: Router,
         private inventoryService: InventoryService,
         private formBuilder: FormBuilder,
+        public _componentPageTitle: ComponentPageTitle,
     ) {
         // Update the form group
         this.inventoryForm = this.formBuilder.group({
@@ -68,6 +73,7 @@ export class InventoryDetailsComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this._componentPageTitle.title = "Inventory Details";
         const itemId = this.route.snapshot.paramMap.get("id");
         if (itemId) {
             this.getInventoryItem(itemId);
