@@ -3,89 +3,70 @@
 <component-page-header></component-page-header>
 <main focusOnNavigation aria-label="Inventory details" id="inventory-details" class="inventory-details">
   <form [formGroup]="inventoryForm" (ngSubmit)="updateInventoryItem()" class="mat-elevation-z1">
-    <table class="inventory-details-table inventory-details">
-      <tr>
-        <th>Hostname</th>
-        <td>
-          <mat-form-field>
-            <input matInput id="hostname" formControlName="hostname" required>
-          </mat-form-field>
-        </td>
-      </tr>
-      <tr>
-        <th>Inventory Type</th>
-        <td>
-          <mat-form-field>
-            <mat-select id="inventoryType" formControlName="inventoryType" aria-labelledby="inventoryTypeLabel">
-              <mat-option value="firewall">Firewall</mat-option>
-              <mat-option value="panorama">Panorama</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </td>
-      </tr>
-      <tr *ngIf="inventoryForm.get('inventoryType')?.value === 'firewall'">
-        <th>Platform</th>
-        <td>
-          <mat-form-field>
-            <mat-select id="firewallPlatform" formControlName="platform" aria-labelledby="firewallPlatformLabel">
-              <mat-option *ngFor="let platform of firewallPlatforms" [value]="platform.name">
-                {{platform.name}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </td>
-      </tr>
-      <tr *ngIf="inventoryForm.get('inventoryType')?.value === 'panorama'">
-        <th>Platform</th>
-        <td>
-          <mat-form-field>
-            <mat-select id="panoramaPlatform" formControlName="platform" aria-labelledby="panoramaPlatformLabel">
-              <mat-option *ngFor="let platform of panoramaPlatforms" [value]="platform.name">
-                {{platform.name}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </td>
-      </tr>
-      <tr>
-        <th>IPv4 Address</th>
-        <td>
-          <mat-form-field>
-            <input matInput id="ipv4Address" formControlName="ipv4Address" required>
-          </mat-form-field>
-        </td>
-      </tr>
-      <tr>
-        <th>IPv6 Address</th>
-        <td>
-          <mat-form-field>
-            <input matInput id="ipv6Address" formControlName="ipv6Address">
-          </mat-form-field>
-        </td>
-      </tr>
-      <tr>
-        <th>Notes</th>
-        <td>
-          <mat-form-field>
-            <textarea matInput id="notes" formControlName="notes"></textarea>
-          </mat-form-field>
-        </td>
-      </tr>
-      <tr>
-        <th>HA</th>
-        <td>
-          <mat-checkbox formControlName="ha">HA</mat-checkbox>
-        </td>
-      </tr>
-      <tr>
-        <th>HA Peer</th>
-        <td>
-          <mat-form-field>
-            <input matInput id="haPeer" formControlName="haPeer">
-          </mat-form-field>
-        </td>
-      </tr>
-    </table>
+    <div class="inventory-details-grid">
+      <div class="form-field">
+        <mat-form-field>
+          <mat-label>Hostname</mat-label>
+          <input matInput id="hostname" formControlName="hostname" required>
+        </mat-form-field>
+      </div>
+      <div class="form-field">
+        <mat-form-field>
+          <mat-label>Notes</mat-label>
+          <input matInput id="notes" formControlName="notes">
+        </mat-form-field>
+      </div>
+      <div class="form-field">
+        <mat-form-field>
+          <mat-label>Inventory Type</mat-label>
+          <mat-select id="inventoryType" formControlName="inventoryType" aria-labelledby="inventoryTypeLabel">
+            <mat-option value="firewall">Firewall</mat-option>
+            <mat-option value="panorama">Panorama</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="form-field" *ngIf="inventoryForm.get('inventoryType')?.value === 'firewall'">
+        <mat-form-field>
+          <mat-label>Platform</mat-label>
+          <mat-select id="firewallPlatform" formControlName="platform" aria-labelledby="firewallPlatformLabel">
+            <mat-option *ngFor="let platform of firewallPlatforms" [value]="platform.name">
+              {{platform.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="form-field" *ngIf="inventoryForm.get('inventoryType')?.value === 'panorama'">
+        <mat-form-field>
+          <mat-label>Platform</mat-label>
+          <mat-select id="panoramaPlatform" formControlName="platform" aria-labelledby="panoramaPlatformLabel">
+            <mat-option *ngFor="let platform of panoramaPlatforms" [value]="platform.name">
+              {{platform.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="form-field">
+        <mat-form-field>
+          <mat-label>IPv4 Address</mat-label>
+          <input matInput id="ipv4Address" formControlName="ipv4Address" required>
+        </mat-form-field>
+      </div>
+      <div class="form-field">
+        <mat-form-field>
+          <mat-label>IPv6 Address</mat-label>
+          <input matInput id="ipv6Address" formControlName="ipv6Address">
+        </mat-form-field>
+      </div>
+      <div class="form-field">
+        <mat-checkbox formControlName="ha">HA</mat-checkbox>
+      </div>
+      <div class="form-field">
+        <mat-form-field>
+          <mat-label>HA Peer</mat-label>
+          <input matInput id="haPeer" formControlName="haPeer">
+        </mat-form-field>
+      </div>
+    </div>
     <div class="button-container">
       <button mat-raised-button color="primary" type="submit" [disabled]="inventoryForm.invalid">Update</button>
       <button mat-raised-button color="warn" type="button" (click)="deleteInventoryItem()">Delete</button>

@@ -4,22 +4,19 @@
   width: 97%;
   padding: 25px;
 
-  .inventory-details-table {
-    width: 100%;
-    border-collapse: collapse;
+  form {
+    padding: 20px;
+  }
 
-    th {
-      text-align: left;
-      padding: 10px;
-      font-weight: bold;
-    }
+  .inventory-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
 
-    td {
-      padding: 10px;
-    }
-
-    mat-form-field {
-      width: 100%;
+    .form-field {
+      mat-form-field {
+        width: 100%;
+      }
     }
   }
 
