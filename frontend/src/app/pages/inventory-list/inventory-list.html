@@ -12,12 +12,20 @@
       <td mat-cell *matCellDef="let item">{{item.hostname}}</td>
     </ng-container>
 
-    <!-- IP Address Column -->
-    <ng-container matColumnDef="ipAddress">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by IP address">
-        IP Address
+    <!-- IPv4 Address Column -->
+    <ng-container matColumnDef="ipv4Address">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by IPv4 address">
+        IPv4 Address
       </th>
       <td mat-cell *matCellDef="let item">{{item.ipv4Address}}</td>
+    </ng-container>
+
+    <!-- IPv6 Address Column -->
+    <ng-container matColumnDef="ipv6Address">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by IPv6 address">
+        IPv6 Address
+      </th>
+      <td mat-cell *matCellDef="let item">{{item.ipv6Address}}</td>
     </ng-container>
 
     <!-- Platform Column -->

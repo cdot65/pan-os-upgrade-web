@@ -38,7 +38,8 @@ export class InventoryList implements OnInit, AfterViewInit {
     inventoryItems: (Firewall | Panorama)[] = [];
     displayedColumns: string[] = [
         "hostname",
-        "ipAddress",
+        "ipv4Address",
+        "ipv6Address",
         "platform",
         "inventoryType",
         "notes",
