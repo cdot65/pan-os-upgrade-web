@@ -4,18 +4,24 @@
 <main focusOnNavigation aria-label="Inventory details" id="inventory-details" class="inventory-details">
   <form [formGroup]="inventoryForm" (ngSubmit)="updateInventoryItem()" class="mat-elevation-z2">
     <div class="inventory-details-grid">
+
+      <!-- form field for the hostname input. -->
       <div class="form-field">
         <mat-form-field>
           <mat-label>Hostname</mat-label>
           <input matInput id="hostname" formControlName="hostname" required>
         </mat-form-field>
       </div>
+
+      <!-- form field for the notes input. -->
       <div class="form-field">
         <mat-form-field>
           <mat-label>Notes</mat-label>
           <input matInput id="notes" formControlName="notes">
         </mat-form-field>
       </div>
+
+      <!-- form field for the inventory type dropdown. -->
       <div class="form-field">
         <mat-form-field>
           <mat-label>Inventory Type</mat-label>
@@ -25,6 +31,8 @@
           </mat-select>
         </mat-form-field>
       </div>
+
+      <!-- form field for the platform dropdown when inventory type is firewall. -->
       <div class="form-field" *ngIf="inventoryForm.get('inventoryType')?.value === 'firewall'">
         <mat-form-field>
           <mat-label>Platform</mat-label>
@@ -35,6 +43,8 @@
           </mat-select>
         </mat-form-field>
       </div>
+
+      <!-- form field for the platform dropdown when inventory type is panorama. -->
       <div class="form-field" *ngIf="inventoryForm.get('inventoryType')?.value === 'panorama'">
         <mat-form-field>
           <mat-label>Platform</mat-label>
@@ -45,21 +55,29 @@
           </mat-select>
         </mat-form-field>
       </div>
+
+      <!-- form field for the IPv4 address input. -->
       <div class="form-field">
         <mat-form-field>
           <mat-label>IPv4 Address</mat-label>
           <input matInput id="ipv4Address" formControlName="ipv4Address" required>
         </mat-form-field>
       </div>
+
+      <!-- form field for the IPv6 address input. -->
       <div class="form-field">
         <mat-form-field>
           <mat-label>IPv6 Address</mat-label>
           <input matInput id="ipv6Address" formControlName="ipv6Address">
         </mat-form-field>
       </div>
+
+      <!-- form field for the HA checkbox. -->
       <div class="form-field">
         <mat-checkbox formControlName="ha">HA</mat-checkbox>
       </div>
+
+      <!-- form field for the HA Peer input. -->
       <div class="form-field">
         <mat-form-field>
           <mat-label>HA Peer</mat-label>
@@ -67,6 +85,8 @@
         </mat-form-field>
       </div>
     </div>
+
+    <!-- container for the Update and Delete buttons. -->
     <div class="button-container">
       <button mat-raised-button color="primary" type="submit" [disabled]="inventoryForm.invalid">Update</button>
       <button mat-raised-button color="warn" type="button" (click)="deleteInventoryItem()">Delete</button>
