@@ -10,12 +10,12 @@
       <form [formGroup]="inventoryForm" (ngSubmit)="updateInventoryItem()">
         <mat-form-field>
           <mat-label>Hostname</mat-label>
-          <input matInput formControlName="hostname" required>
+          <input matInput id="hostname" formControlName="hostname" required>
         </mat-form-field>
 
         <mat-form-field>
           <mat-label>Inventory Type</mat-label>
-          <mat-select matInput formControlName="inventoryType">
+          <mat-select matInput id="inventoryType" formControlName="inventoryType">
             <mat-option value="firewall">Firewall</mat-option>
             <mat-option value="panorama">Panorama</mat-option>
           </mat-select>
@@ -23,7 +23,7 @@
 
         <mat-form-field *ngIf="inventoryForm.get('inventoryType')?.value === 'firewall'">
           <mat-label>Platform</mat-label>
-          <mat-select matInput formControlName="platform">
+          <mat-select matInput id="firewallPlatform" formControlName="platform">
             <mat-option *ngFor="let platform of firewallPlatforms" [value]="platform.name">
               {{platform.name}}
             </mat-option>
@@ -32,7 +32,7 @@
 
         <mat-form-field *ngIf="inventoryForm.get('inventoryType')?.value === 'panorama'">
           <mat-label>Platform</mat-label>
-          <mat-select matInput formControlName="platform">
+          <mat-select matInput id="panoramaPlatform" formControlName="platform">
             <mat-option *ngFor="let platform of panoramaPlatforms" [value]="platform.name">
               {{platform.name}}
             </mat-option>
@@ -41,23 +41,23 @@
 
         <mat-form-field>
           <mat-label>IPv4 Address</mat-label>
-          <input matInput formControlName="ipv4Address" required>
+          <input matInput id="ipv4Address" formControlName="ipv4Address" required>
         </mat-form-field>
 
         <mat-form-field>
           <mat-label>IPv6 Address</mat-label>
-          <input matInput formControlName="ipv6Address">
+          <input matInput id="ipv6Address" formControlName="ipv6Address">
         </mat-form-field>
 
         <mat-form-field>
           <mat-label>Notes</mat-label>
-          <textarea matInput formControlName="notes"></textarea>
+          <textarea matInput id="notes" formControlName="notes"></textarea>
         </mat-form-field>
 
         <mat-checkbox formControlName="ha">HA</mat-checkbox>
         <mat-form-field>
           <mat-label>HA Peer</mat-label>
-          <input matInput formControlName="haPeer">
+          <input matInput id="haPeer" formControlName="haPeer">
         </mat-form-field>
 
         <!-- Add other form fields for the inventory item properties -->
