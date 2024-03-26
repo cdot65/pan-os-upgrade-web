@@ -9,6 +9,10 @@ import {
     PanoramaPlatform,
 } from "../interfaces/platform.interface";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
+import {
+    InventoryList,
+    InventoryListApiResponse,
+} from "../interfaces/inventory.interface";
 import { Observable, of } from "rxjs";
 import {
     Panorama,
@@ -25,47 +29,30 @@ import { environment } from "../../../environments/environment.prod";
 })
 export class InventoryService {
     private apiUrl = environment.apiUrl;
-    private mapFirewallResponse(response: FirewallApiResponse): Firewall {
-        return {
-            uuid: response.uuid,
-            apiKey: response.api_key,
-            hostname: response.hostname,
-            ipv4Address: response.ipv4_address,
-            ipv6Address: response.ipv6_address,
-            notes: response.notes,
-            platform: response.platform,
-            ha: response.ha,
-            haPeer: response.ha_peer,
-            inventoryType: response.inventory_type,
-        };
-    }
-    private mapPanoramaResponse(response: PanoramaApiResponse): Panorama {
-        return {
-            uuid: response.uuid,
-            apiKey: response.api_key,
-            hostname: response.hostname,
-            ipv4Address: response.ipv4_address,
-            ipv6Address: response.ipv6_address,
-            notes: response.notes,
-            platform: response.platform,
-            ha: response.ha,
-            haPeer: response.ha_peer,
-            inventoryType: response.inventory_type,
-        };
-    }
 
     constructor(
         private http: HttpClient,
         private cookieService: CookieService,
     ) {}
 
-    fetchInventoryData(): Observable<(Firewall | Panorama)[]> {
+    /**
+     * Fetches the inventory data from the API.
+     * @returns An Observable that emits an array of InventoryList objects.
+     */
+    fetchInventoryData(): Observable<InventoryList[]> {
+        const authToken = this.cookieService.get("auth_token");
+        const headers = new HttpHeaders().set(
+            "Authorization",
+            `Token ${authToken}`,
+        );
         return this.http
-            .get<(Firewall | Panorama)[]>(`${this.apiUrl}/api/v1/inventory/`)
+            .get<
+                InventoryListApiResponse[]
+            >(`${this.apiUrl}/api/v1/inventory/`, { headers })
             .pipe(
-                map((inventory: (Firewall | Panorama)[]) =>
-                    inventory.sort((a, b) =>
-                        a.hostname.localeCompare(b.hostname),
+                map((response: InventoryListApiResponse[]) =>
+                    response.map((item: InventoryListApiResponse) =>
+                        this.mapInventoryListResponse(item),
                     ),
                 ),
                 catchError((error) => {
@@ -75,6 +62,10 @@ export class InventoryService {
             );
     }
 
+    /**
+     * Fetches the firewall platforms from the API.
+     * @returns An Observable that emits an array of FirewallPlatform objects.
+     */
     fetchFirewallPlatforms(): Observable<FirewallPlatform[]> {
         return this.http
             .get<
@@ -88,6 +79,10 @@ export class InventoryService {
             );
     }
 
+    /**
+     * Fetches the Panorama platforms from the API.
+     * @returns An Observable that emits an array of PanoramaPlatform objects.
+     */
     fetchPanoramaPlatforms(): Observable<PanoramaPlatform[]> {
         return this.http
             .get<
@@ -101,6 +96,12 @@ export class InventoryService {
             );
     }
 
+    /**
+     * Retrieves an inventory item by its UUID.
+     * @param uuid - The UUID of the inventory item.
+     * @returns An Observable that emits a Firewall or Panorama object.
+     * @throws Error if the inventory type is invalid.
+     */
     getInventoryItem(uuid: string): Observable<Firewall | Panorama> {
         const authToken = this.cookieService.get("auth_token");
         const headers = new HttpHeaders().set(
@@ -130,6 +131,11 @@ export class InventoryService {
             );
     }
 
+    /**
+     * Checks if an inventory exists for the given hostname.
+     * @param hostname - The hostname to check.
+     * @returns An Observable that emits a boolean indicating whether the inventory exists or not.
+     */
     inventoryExists(hostname: string): Observable<boolean> {
         const formattedValue = hostname.toLowerCase().replace(/[\s-]/g, "_");
         const path = "api/v1/inventory/exists?hostname";
@@ -187,6 +193,11 @@ export class InventoryService {
             );
     }
 
+    /**
+     * Deletes an inventory item by its UUID.
+     * @param uuid The UUID of the inventory item to delete.
+     * @returns An Observable that emits the response from the server, or null if an error occurs.
+     */
     deleteInventoryItem(uuid: string): Observable<any> {
         const authToken = this.cookieService.get("auth_token");
         const headers = new HttpHeaders().set(
@@ -203,6 +214,10 @@ export class InventoryService {
             );
     }
 
+    /**
+     * Fetches the inventory platforms from the API.
+     * @returns An Observable that emits an array of strings representing the inventory platforms.
+     */
     fetchInventoryPlatforms(): Observable<string[]> {
         return this.http
             .get<string[]>(`${this.apiUrl}/api/v1/inventory/platforms/`)
@@ -217,6 +232,11 @@ export class InventoryService {
             );
     }
 
+    /**
+     * Executes an admin report with the given job details.
+     * @param jobDetails - The details of the job to be executed.
+     * @returns An Observable that emits the response from the server.
+     */
     executeAdminReport(jobDetails: any): Observable<any> {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const headers = new HttpHeaders({ "Content-Type": "application/json" });
@@ -232,5 +252,72 @@ export class InventoryService {
                     return of(null);
                 }),
             );
+    }
+
+    /**
+     * Maps a FirewallApiResponse object to a Firewall object.
+     *
+     * @param response - The FirewallApiResponse object to be mapped.
+     * @returns The mapped Firewall object.
+     */
+    private mapFirewallResponse(response: FirewallApiResponse): Firewall {
+        return {
+            uuid: response.uuid,
+            apiKey: response.api_key,
+            hostname: response.hostname,
+            ipv4Address: response.ipv4_address,
+            ipv6Address: response.ipv6_address,
+            notes: response.notes,
+            platform: response.platform,
+            ha: response.ha,
+            haPeer: response.ha_peer,
+            inventoryType: response.inventory_type,
+        };
+    }
+
+    /**
+     * Maps the response from the inventory list API to an InventoryList object.
+     *
+     * @param response - The response from the inventory list API.
+     * @returns The mapped InventoryList object.
+     */
+    private mapInventoryListResponse(
+        response: InventoryListApiResponse,
+    ): InventoryList {
+        return {
+            uuid: response.uuid,
+            apiKey: response.api_key,
+            author: response.author,
+            createdAt: response.created_at,
+            hostname: response.hostname,
+            ipv4Address: response.ipv4_address,
+            ipv6Address: response.ipv6_address,
+            notes: response.notes,
+            ha: response.ha,
+            haPeer: response.ha_peer,
+            platform: response.platform,
+            inventoryType: response.inventory_type,
+        };
+    }
+
+    /**
+     * Maps a Panorama API response to a Panorama object.
+     *
+     * @param response - The Panorama API response.
+     * @returns The mapped Panorama object.
+     */
+    private mapPanoramaResponse(response: PanoramaApiResponse): Panorama {
+        return {
+            uuid: response.uuid,
+            apiKey: response.api_key,
+            hostname: response.hostname,
+            ipv4Address: response.ipv4_address,
+            ipv6Address: response.ipv6_address,
+            notes: response.notes,
+            platform: response.platform,
+            ha: response.ha,
+            haPeer: response.ha_peer,
+            inventoryType: response.inventory_type,
+        };
     }
 }
