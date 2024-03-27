@@ -1,1 +1,32 @@
+// src/app/pages/inventory-details/inventory-details.scss
 
+.inventory-details {
+  width: 97%;
+  padding: 25px;
+
+  form {
+    padding: 20px;
+  }
+
+  .inventory-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+
+    .form-field {
+      mat-form-field {
+        width: 100%;
+      }
+    }
+  }
+
+  .button-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+
+    button {
+      margin-left: 10px;
+    }
+  }
+}

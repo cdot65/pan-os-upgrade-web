@@ -116,17 +116,17 @@ class InventoryPlatformSerializer(serializers.ModelSerializer):
 
 
 class PanoramaSerializer(InventoryItemSerializer):
-    platform_name = serializers.CharField(source="platform.name", read_only=True)
+    platform_name = serializers.CharField(source="platform.name", required=False)
 
-    def update(self, instance, validated_data):
-        platform_name = validated_data.pop("platform", None)
+    def create(self, validated_data):
+        platform_name = validated_data.pop("platform_name", None)
         if platform_name:
             try:
                 platform = InventoryPlatform.objects.get(name=platform_name)
-                instance.platform = platform
+                validated_data["platform"] = platform
             except InventoryPlatform.DoesNotExist:
                 raise serializers.ValidationError("Invalid platform")
-        return super().update(instance, validated_data)
+        return super().create(validated_data)
 
     class Meta(InventoryItemSerializer.Meta):
         model = Panorama
@@ -134,18 +134,18 @@ class PanoramaSerializer(InventoryItemSerializer):
 
 
 class FirewallSerializer(InventoryItemSerializer):
-    platform_name = serializers.CharField(source="platform.name", read_only=True)
+    platform_name = serializers.CharField(source="platform.name", required=False)
     device_group = serializers.CharField(allow_blank=True, required=False)
 
-    def update(self, instance, validated_data):
-        platform_name = validated_data.pop("platform", None)
+    def create(self, validated_data):
+        platform_name = validated_data.pop("platform_name", None)
         if platform_name:
             try:
                 platform = InventoryPlatform.objects.get(name=platform_name)
-                instance.platform = platform
+                validated_data["platform"] = platform
             except InventoryPlatform.DoesNotExist:
                 raise serializers.ValidationError("Invalid platform")
-        return super().update(instance, validated_data)
+        return super().create(validated_data)
 
     class Meta(InventoryItemSerializer.Meta):
         model = Firewall

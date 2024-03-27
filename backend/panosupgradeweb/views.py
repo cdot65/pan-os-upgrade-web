@@ -12,6 +12,7 @@ from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.views import APIView
+from rest_framework.serializers import ValidationError
 
 # directory object imports
 from .models import (
@@ -96,6 +97,14 @@ class InventoryViewSet(viewsets.ModelViewSet):
             return InventoryListSerializer
         elif self.action == "retrieve":
             return InventoryDetailSerializer
+        elif self.action == "create":
+            inventory_type = self.request.data.get("inventory_type")
+            if inventory_type == "panorama":
+                return PanoramaSerializer
+            elif inventory_type == "firewall":
+                return FirewallSerializer
+            else:
+                raise ValidationError("Invalid inventory type")
         elif isinstance(self.get_object(), Panorama):
             return PanoramaSerializer
         elif isinstance(self.get_object(), Firewall):
@@ -109,10 +118,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
             try:
                 platform_name = request.data.get("platform")
                 if platform_name:
-                    if serializer_class == PanoramaSerializer:
-                        platform = InventoryPlatform.objects.get(name=platform_name)
-                    else:
-                        platform = InventoryPlatform.objects.get(name=platform_name)
+                    platform = InventoryPlatform.objects.get(name=platform_name)
                     serializer.validated_data["platform"] = platform
                 serializer.save(author=self.request.user)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
