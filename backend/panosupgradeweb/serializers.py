@@ -63,9 +63,9 @@ class InventoryListSerializer(serializers.Serializer):
 
     def get_device_type(self, obj):
         if isinstance(obj, Panorama):
-            return "panorama"
+            return "Panorama"
         elif isinstance(obj, Firewall):
-            return "firewall"
+            return "Firewall"
         return None
 
 
@@ -99,9 +99,9 @@ class InventoryItemSerializer(serializers.ModelSerializer):
 
     def get_device_type(self, obj):
         if isinstance(obj, Panorama):
-            return "panorama"
+            return "Panorama"
         elif isinstance(obj, Firewall):
-            return "firewall"
+            return "Firewall"
         return None
 
 

@@ -26,14 +26,14 @@
         <mat-form-field>
           <mat-label>Inventory Type</mat-label>
           <mat-select id="deviceType" formControlName="deviceType" aria-labelledby="deviceTypeLabel">
-            <mat-option value="firewall">Firewall</mat-option>
-            <mat-option value="panorama">Panorama</mat-option>
+            <mat-option value="Firewall">Firewall</mat-option>
+            <mat-option value="Panorama">Panorama</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
 
       <!-- form field for the platform dropdown when inventory type is firewall. -->
-      <div class="form-field" *ngIf="inventoryForm.get('deviceType')?.value === 'firewall'">
+      <div class="form-field" *ngIf="inventoryForm.get('deviceType')?.value === 'Firewall'">
         <mat-form-field>
           <mat-label>Platform</mat-label>
           <mat-select id="firewallPlatform" formControlName="platform" aria-labelledby="firewallPlatformLabel">

@@ -96,9 +96,9 @@ export class InventoryDetailsComponent implements OnInit {
         this.inventoryForm
             .get("deviceType")
             ?.valueChanges.subscribe((deviceType) => {
-                if (deviceType === "firewall") {
+                if (deviceType === "Firewall") {
                     this.fetchFirewallPlatforms();
-                } else if (deviceType === "panorama") {
+                } else if (deviceType === "Panorama") {
                     this.fetchPanoramaPlatforms();
                 }
             });
