@@ -76,7 +76,7 @@ export class InventoryDetailsComponent implements OnInit {
             notes: [""],
             ha: [false],
             haPeer: [""],
-            inventoryType: [""],
+            deviceType: [""],
         });
     }
 
@@ -94,11 +94,11 @@ export class InventoryDetailsComponent implements OnInit {
         }
 
         this.inventoryForm
-            .get("inventoryType")
-            ?.valueChanges.subscribe((inventoryType) => {
-                if (inventoryType === "firewall") {
+            .get("deviceType")
+            ?.valueChanges.subscribe((deviceType) => {
+                if (deviceType === "firewall") {
                     this.fetchFirewallPlatforms();
-                } else if (inventoryType === "panorama") {
+                } else if (deviceType === "panorama") {
                     this.fetchPanoramaPlatforms();
                 }
             });

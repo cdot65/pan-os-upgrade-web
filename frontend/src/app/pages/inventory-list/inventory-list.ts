@@ -45,7 +45,7 @@ export class InventoryList implements OnInit, AfterViewInit {
         "ipv4Address",
         "ipv6Address",
         "platform",
-        "inventoryType",
+        "deviceType",
         "notes",
         "edit",
     ];

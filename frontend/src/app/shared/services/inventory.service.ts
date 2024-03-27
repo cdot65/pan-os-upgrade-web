@@ -110,10 +110,10 @@ export class InventoryService {
             >(`${this.apiUrl}/api/v1/inventory/${uuid}/`, { headers })
             .pipe(
                 map((response: FirewallApiResponse | PanoramaApiResponse) => {
-                    if ("inventory_type" in response) {
-                        if (response.inventory_type === "firewall") {
+                    if ("device_type" in response) {
+                        if (response.device_type === "Firewall") {
                             return this.mapFirewallResponse(response);
-                        } else if (response.inventory_type === "panorama") {
+                        } else if (response.device_type === "Panorama") {
                             return this.mapPanoramaResponse(response);
                         }
                     }
@@ -267,7 +267,7 @@ export class InventoryService {
             platform: response.platform,
             ha: response.ha,
             haPeer: response.ha_peer,
-            inventoryType: response.inventory_type,
+            deviceType: response.device_type,
         };
     }
 
@@ -292,7 +292,7 @@ export class InventoryService {
             ha: response.ha,
             haPeer: response.ha_peer,
             platform: response.platform,
-            inventoryType: response.inventory_type,
+            deviceType: response.device_type,
         };
     }
 
@@ -313,7 +313,7 @@ export class InventoryService {
             platform: response.platform,
             ha: response.ha,
             haPeer: response.ha_peer,
-            inventoryType: response.inventory_type,
+            deviceType: response.device_type,
         };
     }
 }

@@ -23,7 +23,7 @@ class InventoryDetailSerializer(serializers.Serializer):
     ha = serializers.BooleanField()
     ha_peer = serializers.CharField()
     platform = serializers.SerializerMethodField()
-    inventory_type = serializers.SerializerMethodField()
+    device_type = serializers.SerializerMethodField()
 
     def get_platform(self, obj):
         if isinstance(obj, Panorama):
@@ -32,11 +32,11 @@ class InventoryDetailSerializer(serializers.Serializer):
             return obj.platform.name if obj.platform else None
         return None
 
-    def get_inventory_type(self, obj):
+    def get_device_type(self, obj):
         if isinstance(obj, Panorama):
-            return "panorama"
+            return "Panorama"
         elif isinstance(obj, Firewall):
-            return "firewall"
+            return "Firewall"
         return None
 
 
@@ -52,7 +52,7 @@ class InventoryListSerializer(serializers.Serializer):
     ha = serializers.BooleanField()
     ha_peer = serializers.CharField()
     platform = serializers.SerializerMethodField()
-    inventory_type = serializers.SerializerMethodField()
+    device_type = serializers.SerializerMethodField()
 
     def get_platform(self, obj):
         if isinstance(obj, Panorama):
@@ -61,7 +61,7 @@ class InventoryListSerializer(serializers.Serializer):
             return obj.platform.name if obj.platform else None
         return None
 
-    def get_inventory_type(self, obj):
+    def get_device_type(self, obj):
         if isinstance(obj, Panorama):
             return "panorama"
         elif isinstance(obj, Firewall):
@@ -71,7 +71,7 @@ class InventoryListSerializer(serializers.Serializer):
 
 class InventoryItemSerializer(serializers.ModelSerializer):
     platform = serializers.SerializerMethodField()
-    inventory_type = serializers.SerializerMethodField()
+    device_type = serializers.SerializerMethodField()
 
     class Meta:
         model = None
@@ -87,7 +87,7 @@ class InventoryItemSerializer(serializers.ModelSerializer):
             "ha",
             "ha_peer",
             "platform",
-            "inventory_type",
+            "device_type",
         )
 
     def get_platform(self, obj):
@@ -97,7 +97,7 @@ class InventoryItemSerializer(serializers.ModelSerializer):
             return obj.platform.name if obj.platform else None
         return None
 
-    def get_inventory_type(self, obj):
+    def get_device_type(self, obj):
         if isinstance(obj, Panorama):
             return "panorama"
         elif isinstance(obj, Firewall):

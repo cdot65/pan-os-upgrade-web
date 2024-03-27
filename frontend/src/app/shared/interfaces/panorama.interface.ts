@@ -11,7 +11,7 @@ export interface Panorama {
     uuid: string;
     ha: boolean;
     haPeer: string | null;
-    inventoryType: string;
+    deviceType: string;
 }
 
 export interface PanoramaApiResponse {
@@ -26,5 +26,5 @@ export interface PanoramaApiResponse {
     ha: boolean;
     ha_peer: string | null;
     platform: string;
-    inventory_type: string;
+    device_type: string;
 }

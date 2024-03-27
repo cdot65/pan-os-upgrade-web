@@ -11,7 +11,7 @@ export interface Firewall {
     uuid: string;
     ha: boolean;
     haPeer: string | null;
-    inventoryType: string;
+    deviceType: string;
 }
 
 export interface FirewallApiResponse {
@@ -26,5 +26,5 @@ export interface FirewallApiResponse {
     ha: boolean;
     ha_peer: string | null;
     platform: string;
-    inventory_type: string;
+    device_type: string;
 }

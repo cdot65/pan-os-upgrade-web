@@ -53,18 +53,18 @@ export const PANOSUPGRADE_ROUTES: Routes = [
         canActivate: [authGuard],
     },
     {
-        path: "inventory/:id",
-        loadComponent: () =>
-            import("./pages/inventory-details").then(
-                (m) => m.InventoryDetailsComponent,
-            ),
-        canActivate: [authGuard],
-    },
-    {
         path: "inventory/create",
         loadComponent: () =>
             import("./pages/inventory-create").then(
                 (m) => m.InventoryCreateComponent,
+            ),
+        canActivate: [authGuard],
+    },
+    {
+        path: "inventory/:id",
+        loadComponent: () =>
+            import("./pages/inventory-details").then(
+                (m) => m.InventoryDetailsComponent,
             ),
         canActivate: [authGuard],
     },

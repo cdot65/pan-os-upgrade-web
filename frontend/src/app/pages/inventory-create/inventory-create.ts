@@ -14,6 +14,7 @@ import {
 
 import { CommonModule } from "@angular/common";
 import { ComponentPageHeader } from "../component-page-header/component-page-header";
+import { ComponentPageTitle } from "../page-title/page-title";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
@@ -48,6 +49,7 @@ export class InventoryCreateComponent implements OnInit {
         private formBuilder: FormBuilder,
         private inventoryService: InventoryService,
         private router: Router,
+        public _componentPageTitle: ComponentPageTitle,
     ) {
         this.inventoryForm = this.formBuilder.group({
             hostname: ["", Validators.required],
@@ -57,17 +59,18 @@ export class InventoryCreateComponent implements OnInit {
             notes: [""],
             ha: [false],
             haPeer: [""],
-            inventoryType: ["", Validators.required],
+            deviceType: ["", Validators.required],
         });
     }
 
     ngOnInit(): void {
+        this._componentPageTitle.title = "Inventory Create";
         this.inventoryForm
-            .get("inventoryType")
-            ?.valueChanges.subscribe((inventoryType) => {
-                if (inventoryType === "firewall") {
+            .get("deviceType")
+            ?.valueChanges.subscribe((deviceType) => {
+                if (deviceType === "firewall") {
                     this.fetchFirewallPlatforms();
-                } else if (inventoryType === "panorama") {
+                } else if (deviceType === "panorama") {
                     this.fetchPanoramaPlatforms();
                 }
             });

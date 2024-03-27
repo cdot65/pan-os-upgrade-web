@@ -98,10 +98,10 @@ class InventoryViewSet(viewsets.ModelViewSet):
         elif self.action == "retrieve":
             return InventoryDetailSerializer
         elif self.action == "create":
-            inventory_type = self.request.data.get("inventory_type")
-            if inventory_type == "panorama":
+            device_type = self.request.data.get("device_type")
+            if device_type == "panorama":
                 return PanoramaSerializer
-            elif inventory_type == "firewall":
+            elif device_type == "firewall":
                 return FirewallSerializer
             else:
                 raise ValidationError("Invalid inventory type")
