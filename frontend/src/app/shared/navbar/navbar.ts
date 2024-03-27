@@ -3,7 +3,6 @@ import { NgFor, NgIf } from "@angular/common";
 import { Router, RouterLink, RouterLinkActive } from "@angular/router";
 
 import { AuthService } from "../services/auth.service";
-import { CookieService } from "ngx-cookie-service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 import { NavigationFocusService } from "../navigation-focus/navigation-focus.service";
@@ -64,7 +63,6 @@ export class NavBar implements OnDestroy, OnInit {
 
     constructor(
         private navigationFocusService: NavigationFocusService,
-        private cookieService: CookieService,
         private authService: AuthService,
         private router: Router,
     ) {
@@ -92,7 +90,7 @@ export class NavBar implements OnDestroy, OnInit {
     }
 
     logout() {
-        this.cookieService.delete("auth_token");
+        localStorage.removeItem("auth_token");
         this.hasAuthToken = false;
         this.router.navigate(["/auth/login"]);
     }

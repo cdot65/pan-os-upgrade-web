@@ -1,7 +1,5 @@
 // src/app/shared/services/auth.service.ts
 
-import * as CryptoJS from "crypto-js";
-
 import { BehaviorSubject, Observable } from "rxjs";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { map, tap } from "rxjs/operators";
@@ -9,9 +7,6 @@ import { map, tap } from "rxjs/operators";
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { environment } from "../../../environments/environment";
-
-const TOKEN_KEY = "auth_token";
-const secretKey = "your-secret-key";
 
 @Injectable({
     providedIn: "root",
@@ -30,37 +25,8 @@ export class AuthService {
         private router: Router,
     ) {
         this.isLoggedIn$ = this.isLoggedInSubject.asObservable();
-        this.isLoggedInSubject.next(this.checkAuthToken());
-    }
-
-    private encryptToken(token: string): string {
-        return CryptoJS.AES.encrypt(token, secretKey).toString();
-    }
-
-    private decryptToken(encryptedToken: string): string {
-        const bytes = CryptoJS.AES.decrypt(encryptedToken, secretKey);
-        return bytes.toString(CryptoJS.enc.Utf8);
-    }
-
-    private setAuthToken(token: string) {
-        const encryptedToken = this.encryptToken(token);
-        localStorage.setItem(TOKEN_KEY, encryptedToken);
-    }
-
-    private getAuthToken(): string | null {
-        const encryptedToken = localStorage.getItem(TOKEN_KEY);
-        if (encryptedToken) {
-            return this.decryptToken(encryptedToken);
-        }
-        return null;
-    }
-
-    private removeAuthToken() {
-        localStorage.removeItem(TOKEN_KEY);
-    }
-
-    private checkAuthToken(): boolean {
-        return !!this.getAuthToken();
+        const token = localStorage.getItem("auth_token");
+        this.isLoggedInSubject.next(!!token);
     }
 
     login(username: string, password: string) {
@@ -72,8 +38,14 @@ export class AuthService {
 
         return this.http.post<any>(`${this.tokenUrl}`, body, { headers }).pipe(
             tap((response) => {
-                this.setAuthToken(response.key);
-                this.isLoggedInSubject.next(true);
+                console.log("Login response:", response); // Log the response object
+                if (response && response.key) {
+                    // Check if the token is present in the response
+                    localStorage.setItem("auth_token", response.key);
+                    this.isLoggedInSubject.next(true);
+                } else {
+                    console.error("Token not found in the response");
+                }
             }),
         );
     }
@@ -98,13 +70,12 @@ export class AuthService {
     }
 
     logout(): void {
-        this.removeAuthToken();
-        this.isLoggedInSubject.next(false);
+        localStorage.removeItem("auth_token");
         this.router.navigate(["/auth/login"]);
     }
 
     getUserData() {
-        const authToken = this.getAuthToken();
+        const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,

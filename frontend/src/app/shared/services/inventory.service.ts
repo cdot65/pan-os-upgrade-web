@@ -20,7 +20,6 @@ import {
 } from "../interfaces/panorama.interface";
 import { catchError, map } from "rxjs/operators";
 
-import { CookieService } from "ngx-cookie-service";
 import { Injectable } from "@angular/core";
 import { environment } from "../../../environments/environment.prod";
 
@@ -30,17 +29,14 @@ import { environment } from "../../../environments/environment.prod";
 export class InventoryService {
     private apiUrl = environment.apiUrl;
 
-    constructor(
-        private http: HttpClient,
-        private cookieService: CookieService,
-    ) {}
+    constructor(private http: HttpClient) {}
 
     /**
      * Fetches the inventory data from the API.
      * @returns An Observable that emits an array of InventoryList objects.
      */
     fetchInventoryData(): Observable<InventoryList[]> {
-        const authToken = this.cookieService.get("auth_token");
+        const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
@@ -103,7 +99,7 @@ export class InventoryService {
      * @throws Error if the inventory type is invalid.
      */
     getInventoryItem(uuid: string): Observable<Firewall | Panorama> {
-        const authToken = this.cookieService.get("auth_token");
+        const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
@@ -155,7 +151,7 @@ export class InventoryService {
     createInventoryItem(
         inventoryItem: Firewall | Panorama,
     ): Observable<Firewall | Panorama> {
-        const authToken = this.cookieService.get("auth_token");
+        const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
@@ -176,7 +172,7 @@ export class InventoryService {
         inventoryItem: Firewall | Panorama,
         uuid: string,
     ): Observable<Firewall | Panorama> {
-        const authToken = this.cookieService.get("auth_token");
+        const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
@@ -199,7 +195,7 @@ export class InventoryService {
      * @returns An Observable that emits the response from the server, or null if an error occurs.
      */
     deleteInventoryItem(uuid: string): Observable<any> {
-        const authToken = this.cookieService.get("auth_token");
+        const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,

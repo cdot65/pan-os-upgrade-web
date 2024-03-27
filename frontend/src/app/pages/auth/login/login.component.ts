@@ -5,7 +5,6 @@ import { FormsModule, NgForm } from "@angular/forms";
 import { AuthService } from "../../../shared/services/auth.service";
 import { CommonModule } from "@angular/common";
 import { Component } from "@angular/core";
-import { CookieService } from "ngx-cookie-service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
 import { MatFormFieldModule } from "@angular/material/form-field";
@@ -36,7 +35,6 @@ export class LoginComponent {
     constructor(
         private router: Router,
         private authService: AuthService,
-        private cookieService: CookieService,
     ) {}
 
     onSubmit(form: NgForm) {
@@ -44,8 +42,7 @@ export class LoginComponent {
 
         const { username, password } = form.value;
         this.authService.login(username, password).subscribe({
-            next: (response) => {
-                this.cookieService.set("auth_token", response.key);
+            next: () => {
                 this.router.navigate(["/"]);
             },
             error: () => {
