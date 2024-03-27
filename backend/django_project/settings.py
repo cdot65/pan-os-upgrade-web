@@ -1,3 +1,5 @@
+# django_project/settings.py
+
 from pathlib import Path
 from environs import Env
 
@@ -202,7 +204,7 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "panosupgradeweb",
-    "DESCRIPTION": "Sync configuration data between Panorama and Prisma Access",
+    "DESCRIPTION": "Upgrade PAN-OS devices using the web interface",
     "VERSION": "1.0.0",
 }
 
