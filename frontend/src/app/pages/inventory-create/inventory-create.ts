@@ -52,14 +52,15 @@ export class InventoryCreateComponent implements OnInit {
         public _componentPageTitle: ComponentPageTitle,
     ) {
         this.inventoryForm = this.formBuilder.group({
+            author: localStorage.getItem("author"),
+            deviceType: ["", Validators.required],
+            ha: [false],
+            haPeer: [""],
             hostname: ["", Validators.required],
             ipv4Address: ["", Validators.required],
             ipv6Address: [""],
-            platform: ["", Validators.required],
             notes: [""],
-            ha: [false],
-            haPeer: [""],
-            deviceType: ["", Validators.required],
+            platform: ["", Validators.required],
         });
     }
 

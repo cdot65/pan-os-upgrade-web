@@ -1,7 +1,6 @@
 [{
   "model": "panosupgradeweb.firewall",
   "fields": {
-    "api_key": "867-5309",
     "author": 1,
     "hostname": "example.firewall.cdot.io",
     "notes": "Example branch firewall",

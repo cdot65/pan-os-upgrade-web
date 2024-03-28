@@ -202,6 +202,10 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
+REST_AUTH_SERIALIZERS = {
+    "TOKEN_SERIALIZER": "panosupgradeweb.serializers.CustomTokenSerializer",
+}
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "panosupgradeweb",
     "DESCRIPTION": "Upgrade PAN-OS devices using the web interface",

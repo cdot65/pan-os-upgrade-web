@@ -6,7 +6,6 @@ from django.db import models
 
 
 class InventoryItem(models.Model):
-    api_key = models.CharField(max_length=1024)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     hostname = models.CharField(max_length=100, unique=True)

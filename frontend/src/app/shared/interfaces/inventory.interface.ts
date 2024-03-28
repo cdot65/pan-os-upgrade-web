@@ -2,31 +2,29 @@
 // frontend/src/app/shared/interfaces/inventory-list-response.interface.ts
 
 export interface InventoryList {
-    uuid: string;
-    apiKey: string;
-    author: string;
+    author: number;
     createdAt: string;
+    deviceType: string;
+    ha: boolean;
+    haPeer: string | null;
     hostname: string;
     ipv4Address: string;
     ipv6Address: string;
     notes: string;
-    ha: boolean;
-    haPeer: string | null;
     platform: string;
-    deviceType: string;
+    uuid: string;
 }
 
 export interface InventoryListApiResponse {
-    uuid: string;
-    api_key: string;
-    author: string;
+    author: number;
     created_at: string;
+    device_type: string;
+    ha: boolean;
+    ha_peer: string | null;
     hostname: string;
     ipv4_address: string;
     ipv6_address: string;
     notes: string;
-    ha: boolean;
-    ha_peer: string | null;
     platform: string;
-    device_type: string;
+    uuid: string;
 }

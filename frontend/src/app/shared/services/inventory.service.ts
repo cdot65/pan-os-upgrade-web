@@ -258,16 +258,17 @@ export class InventoryService {
      */
     private mapFirewallResponse(response: FirewallApiResponse): Firewall {
         return {
-            uuid: response.uuid,
-            apiKey: response.api_key,
+            author: response.author,
+            createdAt: response.created_at,
+            deviceType: response.device_type,
+            ha: response.ha,
+            haPeer: response.ha_peer,
             hostname: response.hostname,
             ipv4Address: response.ipv4_address,
             ipv6Address: response.ipv6_address,
             notes: response.notes,
             platform: response.platform,
-            ha: response.ha,
-            haPeer: response.ha_peer,
-            deviceType: response.device_type,
+            uuid: response.uuid,
         };
     }
 
@@ -281,18 +282,17 @@ export class InventoryService {
         response: InventoryListApiResponse,
     ): InventoryList {
         return {
-            uuid: response.uuid,
-            apiKey: response.api_key,
             author: response.author,
             createdAt: response.created_at,
+            deviceType: response.device_type,
+            ha: response.ha,
+            haPeer: response.ha_peer,
             hostname: response.hostname,
             ipv4Address: response.ipv4_address,
             ipv6Address: response.ipv6_address,
             notes: response.notes,
-            ha: response.ha,
-            haPeer: response.ha_peer,
             platform: response.platform,
-            deviceType: response.device_type,
+            uuid: response.uuid,
         };
     }
 
@@ -304,16 +304,17 @@ export class InventoryService {
      */
     private mapPanoramaResponse(response: PanoramaApiResponse): Panorama {
         return {
-            uuid: response.uuid,
-            apiKey: response.api_key,
+            author: response.author,
+            createdAt: response.created_at,
+            deviceType: response.device_type,
+            ha: response.ha,
+            haPeer: response.ha_peer,
             hostname: response.hostname,
             ipv4Address: response.ipv4_address,
             ipv6Address: response.ipv6_address,
             notes: response.notes,
             platform: response.platform,
-            ha: response.ha,
-            haPeer: response.ha_peer,
-            deviceType: response.device_type,
+            uuid: response.uuid,
         };
     }
 }

@@ -42,6 +42,7 @@ export class AuthService {
                 if (response && response.key) {
                     // Check if the token is present in the response
                     localStorage.setItem("auth_token", response.key);
+                    localStorage.setItem("author", response.author);
                     this.isLoggedInSubject.next(true);
                 } else {
                     console.error("Token not found in the response");

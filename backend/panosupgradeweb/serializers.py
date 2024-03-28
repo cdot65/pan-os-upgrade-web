@@ -1,6 +1,7 @@
 # backend/panosupgradeweb/serializers.py
 
 from rest_framework import serializers
+from dj_rest_auth.serializers import TokenSerializer
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from .models import (
@@ -11,9 +12,19 @@ from .models import (
 )
 
 
+class CustomTokenSerializer(TokenSerializer):
+    author = serializers.SerializerMethodField()
+
+    def get_author(self, obj):
+        user = obj.user
+        return user.id
+
+    class Meta(TokenSerializer.Meta):
+        fields = TokenSerializer.Meta.fields + ("author",)
+
+
 class InventoryDetailSerializer(serializers.Serializer):
     uuid = serializers.UUIDField()
-    api_key = serializers.CharField()
     author = serializers.StringRelatedField()
     created_at = serializers.DateTimeField()
     hostname = serializers.CharField()
@@ -42,7 +53,6 @@ class InventoryDetailSerializer(serializers.Serializer):
 
 class InventoryListSerializer(serializers.Serializer):
     uuid = serializers.UUIDField()
-    api_key = serializers.CharField()
     author = serializers.StringRelatedField()
     created_at = serializers.DateTimeField()
     hostname = serializers.CharField()
@@ -77,7 +87,6 @@ class InventoryItemSerializer(serializers.ModelSerializer):
         model = None
         fields = (
             "uuid",
-            "api_key",
             "author",
             "created_at",
             "hostname",
@@ -117,16 +126,19 @@ class InventoryPlatformSerializer(serializers.ModelSerializer):
 
 class PanoramaSerializer(InventoryItemSerializer):
     platform_name = serializers.CharField(source="platform.name", required=False)
+    ha_peer = serializers.CharField(source="haPeer", allow_blank=True, required=False)
+    ipv4_address = serializers.IPAddressField(source="ipv4Address", required=True)
+    ipv6_address = serializers.IPAddressField(
+        source="ipv6Address", allow_blank=True, required=False
+    )
+    device_type = serializers.CharField(source="deviceType", required=False)
 
-    def create(self, validated_data):
-        platform_name = validated_data.pop("platform_name", None)
-        if platform_name:
-            try:
-                platform = InventoryPlatform.objects.get(name=platform_name)
-                validated_data["platform"] = platform
-            except InventoryPlatform.DoesNotExist:
-                raise serializers.ValidationError("Invalid platform")
-        return super().create(validated_data)
+    def to_internal_value(self, data):
+        data["ipv4_address"] = data.pop("ipv4Address", None)
+        data["ipv6_address"] = data.pop("ipv6Address", None)
+        data["ha_peer"] = data.pop("haPeer", None)
+        data["device_type"] = data.pop("deviceType", None)
+        return super().to_internal_value(data)
 
     class Meta(InventoryItemSerializer.Meta):
         model = Panorama
@@ -136,16 +148,19 @@ class PanoramaSerializer(InventoryItemSerializer):
 class FirewallSerializer(InventoryItemSerializer):
     platform_name = serializers.CharField(source="platform.name", required=False)
     device_group = serializers.CharField(allow_blank=True, required=False)
+    ha_peer = serializers.CharField(source="haPeer", allow_blank=True, required=False)
+    ipv4_address = serializers.IPAddressField(source="ipv4Address", required=True)
+    ipv6_address = serializers.IPAddressField(
+        source="ipv6Address", allow_blank=True, required=False
+    )
+    device_type = serializers.CharField(source="deviceType", required=False)
 
-    def create(self, validated_data):
-        platform_name = validated_data.pop("platform_name", None)
-        if platform_name:
-            try:
-                platform = InventoryPlatform.objects.get(name=platform_name)
-                validated_data["platform"] = platform
-            except InventoryPlatform.DoesNotExist:
-                raise serializers.ValidationError("Invalid platform")
-        return super().create(validated_data)
+    def to_internal_value(self, data):
+        data["ipv4_address"] = data.pop("ipv4Address", None)
+        data["ipv6_address"] = data.pop("ipv6Address", None)
+        data["ha_peer"] = data.pop("haPeer", None)
+        data["device_type"] = data.pop("deviceType", None)
+        return super().to_internal_value(data)
 
     class Meta(InventoryItemSerializer.Meta):
         model = Firewall

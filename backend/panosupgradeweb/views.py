@@ -113,14 +113,14 @@ class InventoryViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer_class = self.get_serializer_class()
-        serializer = serializer_class(data=request.data)
+        serializer = serializer_class(data=request.data, context={"request": request})
         if serializer.is_valid():
             try:
                 platform_name = request.data.get("platform")
                 if platform_name:
                     platform = InventoryPlatform.objects.get(name=platform_name)
                     serializer.validated_data["platform"] = platform
-                serializer.save(author=self.request.user)
+                serializer.save(author=request.user)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
