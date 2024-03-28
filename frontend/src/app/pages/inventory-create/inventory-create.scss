@@ -1,6 +1,6 @@
-// src/app/pages/inventory-details/inventory-details.scss
+// src/app/pages/inventory-create/inventory-create.scss
 
-.inventory-details {
+.inventory-create {
   width: 97%;
   padding: 25px;
 
@@ -8,7 +8,7 @@
     padding: 20px;
   }
 
-  .inventory-details-grid {
+  .inventory-create-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
