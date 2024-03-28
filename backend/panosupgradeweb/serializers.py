@@ -24,7 +24,7 @@ class CustomTokenSerializer(TokenSerializer):
 
 
 class InventoryDetailSerializer(serializers.Serializer):
-    author = serializers.StringRelatedField()
+    # author = serializers.StringRelatedField()
     created_at = serializers.DateTimeField()
     device_type = serializers.SerializerMethodField()
     ha = serializers.BooleanField()
@@ -52,7 +52,7 @@ class InventoryDetailSerializer(serializers.Serializer):
 
 
 class InventoryListSerializer(serializers.Serializer):
-    author = serializers.StringRelatedField()
+    # author = serializers.StringRelatedField()
     created_at = serializers.DateTimeField()
     device_type = serializers.SerializerMethodField()
     ha = serializers.BooleanField()
@@ -86,7 +86,7 @@ class InventoryItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = None
         fields = (
-            "author",
+            # "author",
             "created_at",
             "device_type",
             "ha",
@@ -183,10 +183,12 @@ class FirewallSerializer(InventoryItemSerializer):
     device_group = serializers.CharField(
         allow_blank=True,
         required=False,
+        allow_null=True,
     )
     ha_peer = serializers.CharField(
         allow_blank=True,
         required=False,
+        allow_null=True,
     )
     ipv4_address = serializers.IPAddressField(
         required=True,
@@ -194,13 +196,16 @@ class FirewallSerializer(InventoryItemSerializer):
     ipv6_address = serializers.IPAddressField(
         allow_blank=True,
         required=False,
+        allow_null=True,
     )
     panorama_appliance = serializers.CharField(
         allow_blank=True,
         required=False,
+        allow_null=True,
     )
     panorama_managed = serializers.BooleanField(
         required=False,
+        allow_null=True,
     )
     platform_name = serializers.CharField(
         source="platform.name",

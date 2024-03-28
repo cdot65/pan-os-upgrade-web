@@ -4,6 +4,7 @@
 export interface InventoryList {
     author: number;
     createdAt: string;
+    deviceGroup: string;
     deviceType: string;
     ha: boolean;
     haPeer: string | null;
@@ -11,6 +12,8 @@ export interface InventoryList {
     ipv4Address: string;
     ipv6Address: string;
     notes: string;
+    panoramaAppliance: string | null;
+    panoramaManaged: boolean;
     platform: string;
     uuid: string;
 }
@@ -18,6 +21,7 @@ export interface InventoryList {
 export interface InventoryListApiResponse {
     author: number;
     created_at: string;
+    device_group: string;
     device_type: string;
     ha: boolean;
     ha_peer: string | null;
@@ -25,6 +29,8 @@ export interface InventoryListApiResponse {
     ipv4_address: string;
     ipv6_address: string;
     notes: string;
+    panorama_appliance: string | null;
+    panorama_managed: boolean;
     platform: string;
     uuid: string;
 }

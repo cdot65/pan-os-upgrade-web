@@ -92,6 +92,7 @@ export class InventoryDetailsComponent implements OnInit {
      */
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory Details";
+        console.log(localStorage.getItem("author"));
         const itemId = this.route.snapshot.paramMap.get("id");
         if (itemId) {
             this.getInventoryItem(itemId);
@@ -167,6 +168,10 @@ export class InventoryDetailsComponent implements OnInit {
             (item: Firewall | Panorama) => {
                 this.inventoryItem = item;
                 this.inventoryForm.patchValue(item);
+                console.log(
+                    "localStorage author: " + localStorage.getItem("author"),
+                );
+                console.log("inventoryItem: ", this.inventoryItem);
             },
             (error: any) => {
                 console.error("Error fetching inventory item:", error);

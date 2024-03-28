@@ -112,9 +112,13 @@ export class InventoryService {
                 map((response: FirewallApiResponse | PanoramaApiResponse) => {
                     if ("device_type" in response) {
                         if (response.device_type === "Firewall") {
-                            return this.mapFirewallResponse(response);
+                            return this.mapFirewallResponse(
+                                response as FirewallApiResponse,
+                            );
                         } else if (response.device_type === "Panorama") {
-                            return this.mapPanoramaResponse(response);
+                            return this.mapPanoramaResponse(
+                                response as PanoramaApiResponse,
+                            );
                         }
                     }
                     // Throw an error if the mapping is not applicable
@@ -261,12 +265,15 @@ export class InventoryService {
             author: response.author,
             createdAt: response.created_at,
             deviceType: response.device_type,
+            deviceGroup: response.device_group,
             ha: response.ha,
             haPeer: response.ha_peer,
             hostname: response.hostname,
             ipv4Address: response.ipv4_address,
             ipv6Address: response.ipv6_address,
             notes: response.notes,
+            panoramaAppliance: response.panorama_appliance,
+            panoramaManaged: response.panorama_managed,
             platform: response.platform,
             uuid: response.uuid,
         };
@@ -285,12 +292,15 @@ export class InventoryService {
             author: response.author,
             createdAt: response.created_at,
             deviceType: response.device_type,
+            deviceGroup: response.device_group,
             ha: response.ha,
             haPeer: response.ha_peer,
             hostname: response.hostname,
             ipv4Address: response.ipv4_address,
             ipv6Address: response.ipv6_address,
             notes: response.notes,
+            panoramaAppliance: response.panorama_appliance,
+            panoramaManaged: response.panorama_managed,
             platform: response.platform,
             uuid: response.uuid,
         };
