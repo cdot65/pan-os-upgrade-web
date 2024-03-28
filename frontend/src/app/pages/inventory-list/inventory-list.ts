@@ -10,10 +10,12 @@ import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 
 import { ComponentPageHeader } from "../component-page-header/component-page-header";
 import { ComponentPageTitle } from "../page-title/page-title";
+import { DeleteDialogComponent } from "../confirmation-dialog/delete-dialog";
 import { Firewall } from "../../shared/interfaces/firewall.interface";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { MatButtonModule } from "@angular/material/button";
+import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { NgFor } from "@angular/common";
 import { Panorama } from "../../shared/interfaces/panorama.interface";
@@ -48,6 +50,7 @@ export class InventoryList implements OnInit, AfterViewInit {
         "deviceType",
         "notes",
         "edit",
+        "delete",
     ];
     dataSource: MatTableDataSource<Firewall | Panorama> =
         new MatTableDataSource<Firewall | Panorama>([]);
@@ -59,6 +62,7 @@ export class InventoryList implements OnInit, AfterViewInit {
         private router: Router,
         private _liveAnnouncer: LiveAnnouncer,
         public _componentPageTitle: ComponentPageTitle,
+        private dialog: MatDialog,
     ) {}
 
     /**
@@ -114,5 +118,32 @@ export class InventoryList implements OnInit, AfterViewInit {
         } else {
             this._liveAnnouncer.announce("Sorting cleared");
         }
+    }
+
+    /**
+     * Opens the delete dialog when the delete button is clicked.
+     * @param item - The item to be deleted. It can be either a Firewall or Panorama object.
+     */
+    onDeleteClick(item: Firewall | Panorama): void {
+        const dialogRef = this.dialog.open(DeleteDialogComponent, {
+            width: "300px",
+            data: {
+                title: "Confirm Delete",
+                message: "Are you sure you want to delete this inventory item?",
+            },
+        });
+
+        dialogRef.afterClosed().subscribe((result: boolean) => {
+            if (result) {
+                this.inventoryService.deleteInventoryItem(item.uuid).subscribe(
+                    () => {
+                        this.getInventoryItems(); // Refresh the inventory list after deletion
+                    },
+                    (error) => {
+                        console.error("Error deleting inventory item:", error);
+                    },
+                );
+            }
+        });
     }
 }
