@@ -24,17 +24,17 @@ class CustomTokenSerializer(TokenSerializer):
 
 
 class InventoryDetailSerializer(serializers.Serializer):
-    uuid = serializers.UUIDField()
     author = serializers.StringRelatedField()
     created_at = serializers.DateTimeField()
+    device_type = serializers.SerializerMethodField()
+    ha = serializers.BooleanField()
+    ha_peer = serializers.CharField()
     hostname = serializers.CharField()
     ipv4_address = serializers.IPAddressField()
     ipv6_address = serializers.IPAddressField()
     notes = serializers.CharField()
-    ha = serializers.BooleanField()
-    ha_peer = serializers.CharField()
     platform = serializers.SerializerMethodField()
-    device_type = serializers.SerializerMethodField()
+    uuid = serializers.UUIDField()
 
     def get_platform(self, obj):
         if isinstance(obj, Panorama):
@@ -52,17 +52,17 @@ class InventoryDetailSerializer(serializers.Serializer):
 
 
 class InventoryListSerializer(serializers.Serializer):
-    uuid = serializers.UUIDField()
     author = serializers.StringRelatedField()
     created_at = serializers.DateTimeField()
+    device_type = serializers.SerializerMethodField()
+    ha = serializers.BooleanField()
+    ha_peer = serializers.CharField()
     hostname = serializers.CharField()
     ipv4_address = serializers.IPAddressField()
     ipv6_address = serializers.IPAddressField()
     notes = serializers.CharField()
-    ha = serializers.BooleanField()
-    ha_peer = serializers.CharField()
     platform = serializers.SerializerMethodField()
-    device_type = serializers.SerializerMethodField()
+    uuid = serializers.UUIDField()
 
     def get_platform(self, obj):
         if isinstance(obj, Panorama):
@@ -80,8 +80,8 @@ class InventoryListSerializer(serializers.Serializer):
 
 
 class InventoryItemSerializer(serializers.ModelSerializer):
-    platform = serializers.SerializerMethodField()
     device_type = serializers.SerializerMethodField()
+    platform = serializers.SerializerMethodField()
 
     class Meta:
         model = None
@@ -118,8 +118,8 @@ class InventoryPlatformSerializer(serializers.ModelSerializer):
     class Meta:
         model = InventoryPlatform
         fields = (
-            "id",
             "device_type",
+            "id",
             "name",
         )
 
@@ -180,10 +180,6 @@ class FirewallSerializer(InventoryItemSerializer):
 
     """
 
-    platform_name = serializers.CharField(
-        source="platform.name",
-        required=False,
-    )
     device_group = serializers.CharField(
         allow_blank=True,
         required=False,
@@ -199,6 +195,17 @@ class FirewallSerializer(InventoryItemSerializer):
         allow_blank=True,
         required=False,
     )
+    panorama_appliance = serializers.CharField(
+        allow_blank=True,
+        required=False,
+    )
+    panorama_managed = serializers.BooleanField(
+        required=False,
+    )
+    platform_name = serializers.CharField(
+        source="platform.name",
+        required=False,
+    )
 
     def to_internal_value(self, data):
         """
@@ -211,9 +218,12 @@ class FirewallSerializer(InventoryItemSerializer):
             dict: The modified data with the field names mapped to the model field names.
 
         """
+        data["device_group"] = data.pop("deviceGroup", None)
+        data["panorama_appliance"] = data.pop("panoramaAppliance", None)
+        data["panorama_managed"] = data.pop("panoramaManaged", None)
+        data["ha_peer"] = data.pop("haPeer", None)
         data["ipv4_address"] = data.pop("ipv4Address", None)
         data["ipv6_address"] = data.pop("ipv6Address", None)
-        data["ha_peer"] = data.pop("haPeer", None)
         data.pop("deviceType", None)
         return super().to_internal_value(data)
 
@@ -243,7 +253,12 @@ class FirewallSerializer(InventoryItemSerializer):
 
     class Meta(InventoryItemSerializer.Meta):
         model = Firewall
-        fields = InventoryItemSerializer.Meta.fields + ("platform_name", "device_group")
+        fields = InventoryItemSerializer.Meta.fields + (
+            "device_group",
+            "panorama_appliance",
+            "panorama_managed",
+            "platform_name",
+        )
 
 
 class JobSerializer(serializers.ModelSerializer):

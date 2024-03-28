@@ -53,6 +53,7 @@ export class InventoryCreateComponent implements OnInit {
     ) {
         this.inventoryForm = this.formBuilder.group({
             author: localStorage.getItem("author"),
+            deviceGroup: [""],
             deviceType: ["Firewall", Validators.required],
             ha: [false],
             haPeer: [""],
@@ -60,20 +61,44 @@ export class InventoryCreateComponent implements OnInit {
             ipv4Address: ["", Validators.required],
             ipv6Address: [""],
             notes: [""],
+            panoramaAppliance: [""],
+            panoramaManaged: [false],
             platform: ["", Validators.required],
         });
     }
 
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory Create";
+        this.fetchFirewallPlatforms();
         this.inventoryForm
             .get("deviceType")
             ?.valueChanges.subscribe((deviceType) => {
                 if (deviceType === "Firewall") {
                     this.fetchFirewallPlatforms();
+                    this.inventoryForm.get("deviceGroup")?.setValidators([]);
+                    this.inventoryForm
+                        .get("panoramaAppliance")
+                        ?.setValidators([]);
+                    this.inventoryForm
+                        .get("panoramaManaged")
+                        ?.setValidators([]);
                 } else if (deviceType === "Panorama") {
                     this.fetchPanoramaPlatforms();
+                    this.inventoryForm.get("deviceGroup")?.clearValidators();
+                    this.inventoryForm
+                        .get("panoramaAppliance")
+                        ?.clearValidators();
+                    this.inventoryForm
+                        .get("panoramaManaged")
+                        ?.clearValidators();
                 }
+                this.inventoryForm.get("deviceGroup")?.updateValueAndValidity();
+                this.inventoryForm
+                    .get("panoramaAppliance")
+                    ?.updateValueAndValidity();
+                this.inventoryForm
+                    .get("panoramaManaged")
+                    ?.updateValueAndValidity();
             });
     }
 
@@ -101,16 +126,20 @@ export class InventoryCreateComponent implements OnInit {
 
     createInventoryItem(): void {
         if (this.inventoryForm.valid) {
-            this.inventoryService
-                .createInventoryItem(this.inventoryForm.value)
-                .subscribe(
-                    () => {
-                        this.router.navigate(["/inventory"]);
-                    },
-                    (error) => {
-                        console.error("Error creating inventory item:", error);
-                    },
-                );
+            const formValue = this.inventoryForm.value;
+            if (formValue.deviceType === "Panorama") {
+                delete formValue.deviceGroup;
+                delete formValue.panoramaAppliance;
+                delete formValue.panoramaManaged;
+            }
+            this.inventoryService.createInventoryItem(formValue).subscribe(
+                () => {
+                    this.router.navigate(["/inventory"]);
+                },
+                (error) => {
+                    console.error("Error creating inventory item:", error);
+                },
+            );
         }
     }
 }

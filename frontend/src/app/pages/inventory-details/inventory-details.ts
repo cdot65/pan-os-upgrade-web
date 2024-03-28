@@ -69,14 +69,15 @@ export class InventoryDetailsComponent implements OnInit {
     ) {
         // Update the form group
         this.inventoryForm = this.formBuilder.group({
+            author: localStorage.getItem("author"),
+            deviceType: [""],
+            ha: [false],
+            haPeer: [""],
             hostname: ["", Validators.required],
             ipv4Address: ["", Validators.required],
             ipv6Address: [""],
-            platform: [""],
             notes: [""],
-            ha: [false],
-            haPeer: [""],
-            deviceType: [""],
+            platform: ["", Validators.required],
         });
     }
 

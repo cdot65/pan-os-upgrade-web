@@ -89,6 +89,16 @@ class Firewall(InventoryItem):
         null=True,
         verbose_name="Device Group",
     )
+    panorama_appliance = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Panorama Appliance",
+    )
+    panorama_managed = models.BooleanField(
+        default=False,
+        verbose_name="Panorama Managed",
+    )
     platform = models.ForeignKey(
         InventoryPlatform,
         blank=True,

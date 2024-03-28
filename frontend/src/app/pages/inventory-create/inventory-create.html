@@ -28,22 +28,13 @@
         </mat-form-field>
       </div>
 
-      <div class="form-field" *ngIf="inventoryForm.get('deviceType')?.value === 'Firewall'">
+      <div class="form-field">
         <mat-form-field>
           <mat-label>Platform</mat-label>
-          <mat-select id="firewallPlatform" formControlName="platform" aria-labelledby="firewallPlatformLabel">
-            <mat-option *ngFor="let platform of firewallPlatforms" [value]="platform.name">
-              {{platform.name}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <div class="form-field" *ngIf="inventoryForm.get('deviceType')?.value === 'Panorama'">
-        <mat-form-field>
-          <mat-label>Platform</mat-label>
-          <mat-select id="panoramaPlatform" formControlName="platform" aria-labelledby="panoramaPlatformLabel">
-            <mat-option *ngFor="let platform of panoramaPlatforms" [value]="platform.name">
+          <mat-select formControlName="platform" aria-labelledby="platformLabel">
+            <mat-option
+              *ngFor="let platform of inventoryForm.get('deviceType')?.value === 'Firewall' ? firewallPlatforms : panoramaPlatforms"
+              [value]="platform.name">
               {{platform.name}}
             </mat-option>
           </mat-select>
@@ -72,6 +63,24 @@
         <mat-form-field>
           <mat-label>HA Peer</mat-label>
           <input matInput id="haPeer" formControlName="haPeer">
+        </mat-form-field>
+      </div>
+
+      <div class="form-field" *ngIf="inventoryForm.get('deviceType')?.value === 'Firewall'">
+        <mat-checkbox formControlName="panoramaManaged">Panorama Managed</mat-checkbox>
+      </div>
+
+      <div class="form-field" *ngIf="inventoryForm.get('deviceType')?.value === 'Firewall'">
+        <mat-form-field>
+          <mat-label>Panorama Appliance</mat-label>
+          <input matInput id="panoramaAppliance" formControlName="panoramaAppliance">
+        </mat-form-field>
+      </div>
+
+      <div class="form-field" *ngIf="inventoryForm.get('deviceType')?.value === 'Firewall'">
+        <mat-form-field>
+          <mat-label>Device Group</mat-label>
+          <input matInput id="deviceGroup" formControlName="deviceGroup">
         </mat-form-field>
       </div>
     </div>
