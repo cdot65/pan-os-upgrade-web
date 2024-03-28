@@ -53,7 +53,7 @@ export class InventoryCreateComponent implements OnInit {
     ) {
         this.inventoryForm = this.formBuilder.group({
             author: localStorage.getItem("author"),
-            deviceType: ["", Validators.required],
+            deviceType: ["Firewall", Validators.required],
             ha: [false],
             haPeer: [""],
             hostname: ["", Validators.required],
