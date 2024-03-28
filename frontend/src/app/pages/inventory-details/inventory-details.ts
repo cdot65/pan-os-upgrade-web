@@ -70,6 +70,7 @@ export class InventoryDetailsComponent implements OnInit {
         // Update the form group
         this.inventoryForm = this.formBuilder.group({
             author: localStorage.getItem("author"),
+            deviceGroup: [""],
             deviceType: [""],
             ha: [false],
             haPeer: [""],
@@ -77,6 +78,8 @@ export class InventoryDetailsComponent implements OnInit {
             ipv4Address: ["", Validators.required],
             ipv6Address: [""],
             notes: [""],
+            panoramaAppliance: [""],
+            panoramaManaged: [false],
             platform: ["", Validators.required],
         });
     }
@@ -99,9 +102,30 @@ export class InventoryDetailsComponent implements OnInit {
             ?.valueChanges.subscribe((deviceType) => {
                 if (deviceType === "Firewall") {
                     this.fetchFirewallPlatforms();
+                    this.inventoryForm.get("deviceGroup")?.setValidators([]);
+                    this.inventoryForm
+                        .get("panoramaAppliance")
+                        ?.setValidators([]);
+                    this.inventoryForm
+                        .get("panoramaManaged")
+                        ?.setValidators([]);
                 } else if (deviceType === "Panorama") {
                     this.fetchPanoramaPlatforms();
+                    this.inventoryForm.get("deviceGroup")?.clearValidators();
+                    this.inventoryForm
+                        .get("panoramaAppliance")
+                        ?.clearValidators();
+                    this.inventoryForm
+                        .get("panoramaManaged")
+                        ?.clearValidators();
                 }
+                this.inventoryForm.get("deviceGroup")?.updateValueAndValidity();
+                this.inventoryForm
+                    .get("panoramaAppliance")
+                    ?.updateValueAndValidity();
+                this.inventoryForm
+                    .get("panoramaManaged")
+                    ?.updateValueAndValidity();
             });
     }
 
@@ -161,6 +185,12 @@ export class InventoryDetailsComponent implements OnInit {
                 ...this.inventoryItem,
                 ...this.inventoryForm.value,
             };
+            if (updatedItem.deviceType === "Panorama") {
+                delete updatedItem.deviceGroup;
+                delete updatedItem.panoramaAppliance;
+                delete updatedItem.panoramaManaged;
+            }
+            console.log("updatedItem", updatedItem);
             this.inventoryService
                 .updateInventoryItem(updatedItem, this.inventoryItem.uuid)
                 .subscribe(

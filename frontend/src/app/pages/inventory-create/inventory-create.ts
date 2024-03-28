@@ -70,6 +70,7 @@ export class InventoryCreateComponent implements OnInit {
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory Create";
         this.fetchFirewallPlatforms();
+
         this.inventoryForm
             .get("deviceType")
             ?.valueChanges.subscribe((deviceType) => {
@@ -125,7 +126,7 @@ export class InventoryCreateComponent implements OnInit {
     }
 
     createInventoryItem(): void {
-        if (this.inventoryForm.valid) {
+        if (this.inventoryForm && this.inventoryForm.valid) {
             const formValue = this.inventoryForm.value;
             if (formValue.deviceType === "Panorama") {
                 delete formValue.deviceGroup;
