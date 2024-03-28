@@ -237,4 +237,9 @@ export class InventoryDetailsComponent implements OnInit {
             });
         }
     }
+
+    onCancel(): void {
+        this.inventoryForm.reset();
+        this.router.navigate(["/inventory"]);
+    }
 }

@@ -99,6 +99,7 @@
 
     <!-- container for the Create button. -->
     <div class="button-container">
+      <button mat-raised-button color="warn" type="button" (click)="onCancel()">Cancel</button>
       <button mat-raised-button color="primary" type="submit" [disabled]="inventoryForm.invalid">Create</button>
     </div>
   </form>
