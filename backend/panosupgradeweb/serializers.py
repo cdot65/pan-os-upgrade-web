@@ -86,17 +86,17 @@ class InventoryItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = None
         fields = (
-            "uuid",
             "author",
             "created_at",
+            "device_type",
+            "ha",
+            "ha_peer",
             "hostname",
             "ipv4_address",
             "ipv6_address",
             "notes",
-            "ha",
-            "ha_peer",
             "platform",
-            "device_type",
+            "uuid",
         )
 
     def get_platform(self, obj):
@@ -125,13 +125,28 @@ class InventoryPlatformSerializer(serializers.ModelSerializer):
 
 
 class PanoramaSerializer(InventoryItemSerializer):
-    platform_name = serializers.CharField(source="platform.name", required=False)
-    ha_peer = serializers.CharField(source="haPeer", allow_blank=True, required=False)
-    ipv4_address = serializers.IPAddressField(source="ipv4Address", required=True)
-    ipv6_address = serializers.IPAddressField(
-        source="ipv6Address", allow_blank=True, required=False
+    platform_name = serializers.CharField(
+        source="platform.name",
+        required=False,
     )
-    device_type = serializers.CharField(source="deviceType", required=False)
+    ha_peer = serializers.CharField(
+        source="haPeer",
+        allow_blank=True,
+        required=False,
+    )
+    ipv4_address = serializers.IPAddressField(
+        source="ipv4Address",
+        required=True,
+    )
+    ipv6_address = serializers.IPAddressField(
+        source="ipv6Address",
+        allow_blank=True,
+        required=False,
+    )
+    device_type = serializers.CharField(
+        source="deviceType",
+        required=False,
+    )
 
     def to_internal_value(self, data):
         data["ipv4_address"] = data.pop("ipv4Address", None)
@@ -146,21 +161,85 @@ class PanoramaSerializer(InventoryItemSerializer):
 
 
 class FirewallSerializer(InventoryItemSerializer):
-    platform_name = serializers.CharField(source="platform.name", required=False)
-    device_group = serializers.CharField(allow_blank=True, required=False)
-    ha_peer = serializers.CharField(source="haPeer", allow_blank=True, required=False)
-    ipv4_address = serializers.IPAddressField(source="ipv4Address", required=True)
-    ipv6_address = serializers.IPAddressField(
-        source="ipv6Address", allow_blank=True, required=False
+    """
+    Serializer class for Firewall objects.
+
+    This serializer is used to convert Firewall objects to JSON representation and vice versa.
+    It inherits from the InventoryItemSerializer class and adds additional fields specific to Firewall objects.
+
+    Attributes:
+        platform_name (serializers.CharField): The name of the platform associated with the Firewall.
+        device_group (serializers.CharField): The device group of the Firewall.
+        ha_peer (serializers.CharField): The HA peer of the Firewall.
+        ipv4_address (serializers.IPAddressField): The IPv4 address of the Firewall.
+        ipv6_address (serializers.IPAddressField): The IPv6 address of the Firewall.
+
+    Methods:
+        to_internal_value(data): Maps the field names from the payload to the model field names.
+        create(validated_data): Creates a new Firewall object with the validated data.
+
+    """
+
+    platform_name = serializers.CharField(
+        source="platform.name",
+        required=False,
     )
-    device_type = serializers.CharField(source="deviceType", required=False)
+    device_group = serializers.CharField(
+        allow_blank=True,
+        required=False,
+    )
+    ha_peer = serializers.CharField(
+        allow_blank=True,
+        required=False,
+    )
+    ipv4_address = serializers.IPAddressField(
+        required=True,
+    )
+    ipv6_address = serializers.IPAddressField(
+        allow_blank=True,
+        required=False,
+    )
 
     def to_internal_value(self, data):
+        """
+        Maps the field names from the payload to the model field names.
+
+        Args:
+            data (dict): The input data containing the field names from the payload.
+
+        Returns:
+            dict: The modified data with the field names mapped to the model field names.
+
+        """
         data["ipv4_address"] = data.pop("ipv4Address", None)
         data["ipv6_address"] = data.pop("ipv6Address", None)
         data["ha_peer"] = data.pop("haPeer", None)
-        data["device_type"] = data.pop("deviceType", None)
+        data.pop("deviceType", None)
         return super().to_internal_value(data)
+
+    def create(self, validated_data):
+        """
+        Creates a new Firewall object with the validated data.
+
+        Args:
+            validated_data (dict): The validated data for creating the Firewall object.
+
+        Returns:
+            Firewall: The created Firewall object.
+
+        Raises:
+            serializers.ValidationError: If the platform name is invalid.
+
+        """
+        platform_name = validated_data.pop("platform.name", None)
+        if platform_name:
+            try:
+                platform = InventoryPlatform.objects.get(name=platform_name)
+                validated_data["platform"] = platform
+            except InventoryPlatform.DoesNotExist:
+                raise serializers.ValidationError("Invalid platform")
+
+        return super().create(validated_data)
 
     class Meta(InventoryItemSerializer.Meta):
         model = Firewall
