@@ -11,10 +11,10 @@ import {
 import { MatDialog, MatDialogModule } from "@angular/material/dialog";
 
 import { CommonModule } from "@angular/common";
-import { ComponentPageHeader } from "../component-page-header/component-page-header";
 import { ComponentPageTitle } from "../page-title/page-title";
 import { DeleteDialogComponent } from "../confirmation-dialog/delete-dialog";
 import { InventoryItem } from "../../shared/interfaces/inventory-item.interface";
+import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
 import { InventoryPlatform } from "src/app/shared/interfaces/inventory-platform.interface";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
@@ -32,7 +32,7 @@ import { MatSelectModule } from "@angular/material/select";
     standalone: true,
     imports: [
         CommonModule,
-        ComponentPageHeader,
+        InventoryPageHeader,
         ReactiveFormsModule,
         MatButtonModule,
         MatCardModule,
