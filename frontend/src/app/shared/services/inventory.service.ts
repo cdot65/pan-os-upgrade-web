@@ -258,8 +258,8 @@ export class InventoryService {
         return {
             // author: response.author,
             createdAt: response.created_at,
-            deviceType: response.device_type,
             deviceGroup: response.device_group,
+            deviceType: response.device_type,
             ha: response.ha,
             haPeer: response.ha_peer,
             hostname: response.hostname,
@@ -285,8 +285,8 @@ export class InventoryService {
         return {
             // author: response.author,
             createdAt: response.created_at,
-            deviceType: response.device_type,
             deviceGroup: response.device_group,
+            deviceType: response.device_type,
             ha: response.ha,
             haPeer: response.ha_peer,
             hostname: response.hostname,

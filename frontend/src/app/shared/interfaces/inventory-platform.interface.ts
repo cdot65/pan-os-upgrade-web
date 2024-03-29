@@ -3,4 +3,5 @@
 export interface InventoryPlatform {
     id: number;
     name: string;
+    deviceType: string;
 }

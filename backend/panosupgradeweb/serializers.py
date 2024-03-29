@@ -55,13 +55,12 @@ class InventoryItemSerializer(serializers.ModelSerializer):
     )
     platform_name = serializers.CharField(
         source="platform.name",
-        required=False,
+        read_only=True,
     )
 
     class Meta:
         model = InventoryItem
         fields = (
-            # "author",
             "created_at",
             "device_group",
             "device_type",
@@ -84,11 +83,10 @@ class InventoryItemSerializer(serializers.ModelSerializer):
         data["ha_peer"] = data.pop("haPeer", None)
         data["ipv4_address"] = data.pop("ipv4Address", None)
         data["ipv6_address"] = data.pop("ipv6Address", None)
-        data["device_type"] = data.pop("deviceType", None)
         return super().to_internal_value(data)
 
     def create(self, validated_data):
-        platform_name = validated_data.pop("platform.name", None)
+        platform_name = self.initial_data.get("platformName")
         if platform_name:
             try:
                 platform = InventoryPlatform.objects.get(name=platform_name)
@@ -98,7 +96,7 @@ class InventoryItemSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        platform_name = validated_data.pop("platform.name", None)
+        platform_name = self.initial_data.get("platformName")
         if platform_name:
             try:
                 platform = InventoryPlatform.objects.get(name=platform_name)

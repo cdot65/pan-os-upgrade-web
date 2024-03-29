@@ -77,6 +77,7 @@ class InventoryItem(models.Model):
     )
     panorama_managed = models.BooleanField(
         default=False,
+        null=True,
         verbose_name="Panorama Managed",
     )
     platform = models.ForeignKey(
