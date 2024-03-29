@@ -19,7 +19,6 @@ import { Observable, Subscription } from "rxjs";
 import { shareReplay, take, tap } from "rxjs/operators";
 
 import { DomSanitizer } from "@angular/platform-browser";
-import { ExampleViewer } from "../example-viewer/example-viewer";
 import { HeaderLink } from "./header-link";
 
 @Injectable({ providedIn: "root" })
@@ -33,7 +32,9 @@ class DocFetcher {
             return this._cache[url];
         }
 
-        const stream = this._http.get(url, { responseType: "text" }).pipe(shareReplay(1));
+        const stream = this._http
+            .get(url, { responseType: "text" })
+            .pipe(shareReplay(1));
         return stream.pipe(tap(() => (this._cache[url] = stream)));
     }
 }
@@ -62,29 +63,6 @@ export class DocViewer implements OnDestroy {
     /** The document text. It should not be HTML encoded. */
     textContent = "";
 
-    private static initExampleViewer(
-        exampleViewerComponent: ExampleViewer,
-        example: string,
-        file: string | null,
-        region: string | null,
-    ) {
-        exampleViewerComponent.example = example;
-        if (file) {
-            // if the html div has field `file` then it should be in compact view to show the code
-            // snippet
-            exampleViewerComponent.view = "snippet";
-            exampleViewerComponent.showCompactToggle = true;
-            exampleViewerComponent.file = file;
-            if (region) {
-                // `region` should only exist when `file` exists but not vice versa
-                exampleViewerComponent.region = region;
-            }
-        } else {
-            // otherwise it is an embedded demo
-            exampleViewerComponent.view = "demo";
-        }
-    }
-
     constructor(
         private _appRef: ApplicationRef,
         private _componentFactoryResolver: ComponentFactoryResolver,
@@ -99,10 +77,12 @@ export class DocViewer implements OnDestroy {
     /** Fetch a document by URL. */
     private _fetchDocument(url: string) {
         this._documentFetchSubscription?.unsubscribe();
-        this._documentFetchSubscription = this._docFetcher.fetchDocument(url).subscribe(
-            (document) => this.updateDocument(document),
-            (error) => this.showError(url, error),
-        );
+        this._documentFetchSubscription = this._docFetcher
+            .fetchDocument(url)
+            .subscribe(
+                (document) => this.updateDocument(document),
+                (error) => this.showError(url, error),
+            );
     }
 
     /**
@@ -112,13 +92,15 @@ export class DocViewer implements OnDestroy {
     private updateDocument(rawDocument: string) {
         // "/components/button/api#my-section". This is necessary because otherwise these fragment
         // links would redirect to "/#my-section".
-        rawDocument = rawDocument.replace(/href="#([^"]*)"/g, (_m: string, fragmentUrl: string) => {
-            const absoluteUrl = `${location.pathname}#${fragmentUrl}`;
-            return `href="${this._domSanitizer.sanitize(SecurityContext.URL, absoluteUrl)}"`;
-        });
+        rawDocument = rawDocument.replace(
+            /href="#([^"]*)"/g,
+            (_m: string, fragmentUrl: string) => {
+                const absoluteUrl = `${location.pathname}#${fragmentUrl}`;
+                return `href="${this._domSanitizer.sanitize(SecurityContext.URL, absoluteUrl)}"`;
+            },
+        );
         this._elementRef.nativeElement.innerHTML = rawDocument;
         this.textContent = this._elementRef.nativeElement.textContent;
-        this._loadComponents("material-docs-example", ExampleViewer);
         this._loadComponents("header-link", HeaderLink);
 
         // Resolving and creating components dynamically in Angular happens synchronously, but since
@@ -126,7 +108,9 @@ export class DocViewer implements OnDestroy {
         // until the Angular zone becomes stable.
         this._ngZone.onStable
             .pipe(take(1))
-            .subscribe(() => this.contentRendered.next(this._elementRef.nativeElement));
+            .subscribe(() =>
+                this.contentRendered.next(this._elementRef.nativeElement),
+            );
     }
 
     /** Show an error that occurred when fetching a document. */
@@ -135,39 +119,35 @@ export class DocViewer implements OnDestroy {
         this._elementRef.nativeElement.innerText = `document: ${url}. Error: ${error.statusText}`;
     }
 
-    /** Instantiate a ExampleViewer for each example. */
+    /** Instantiate a HeaderLink for each header. */
     private _loadComponents(componentName: string, componentClass: any) {
-        const exampleElements = this._elementRef.nativeElement.querySelectorAll(
+        const headerElements = this._elementRef.nativeElement.querySelectorAll(
             `[${componentName}]`,
         );
 
-        [...exampleElements].forEach((element: Element) => {
-            const example = element.getAttribute(componentName);
-            const region = element.getAttribute("region");
-            const file = element.getAttribute("file");
+        [...headerElements].forEach((element: Element) => {
             const portalHost = new DomPortalOutlet(
                 element,
                 this._componentFactoryResolver,
                 this._appRef,
                 this._injector,
             );
-            const examplePortal = new ComponentPortal(componentClass, this._viewContainerRef);
-            const exampleViewer = portalHost.attach(examplePortal);
-            const exampleViewerComponent = exampleViewer.instance as ExampleViewer;
-            if (example !== null) {
-                DocViewer.initExampleViewer(exampleViewerComponent, example, file, region);
-            }
+            const headerPortal = new ComponentPortal(
+                componentClass,
+                this._viewContainerRef,
+            );
+            portalHost.attach(headerPortal);
             this._portalHosts.push(portalHost);
         });
     }
 
-    private _clearLiveExamples() {
+    private _clearPortalHosts() {
         this._portalHosts.forEach((h) => h.dispose());
         this._portalHosts = [];
     }
 
     ngOnDestroy() {
-        this._clearLiveExamples();
+        this._clearPortalHosts();
         this._documentFetchSubscription?.unsubscribe();
     }
 }
