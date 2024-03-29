@@ -1,35 +1,18 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 from .views import (
-    FirewallPlatformViewSet,
-    PanoramaPlatformViewSet,
     InventoryExistsView,
+    InventoryPlatformViewSet,
     InventoryViewSet,
-    JobViewSet,
     UserViewSet,
     UserProfileView,
 )
 
 router = SimpleRouter()
 router.register(
-    "inventory/platforms/firewall",
-    FirewallPlatformViewSet,
-    basename="firewall_platforms",
-)
-router.register(
-    "inventory/platforms/panorama",
-    PanoramaPlatformViewSet,
-    basename="panorama_platforms",
-)
-router.register(
     "inventory",
     InventoryViewSet,
     basename="inventory",
-)
-router.register(
-    "Job",
-    JobViewSet,
-    basename="Job",
 )
 router.register(
     "users",
@@ -37,9 +20,29 @@ router.register(
     basename="users",
 )
 
-urlpatterns = router.urls
-
-urlpatterns += [
+urlpatterns = [
+    path(
+        "inventory/platforms/",
+        InventoryPlatformViewSet.as_view({"get": "list"}),
+        name="inventory-platforms-list",
+    ),
+    path(
+        "inventory/platforms/<int:pk>/",
+        InventoryPlatformViewSet.as_view({"get": "retrieve"}),
+        name="inventory-platforms-detail",
+    ),
+    path(
+        "inventory/platforms/firewall/",
+        InventoryPlatformViewSet.as_view({"get": "list"}),
+        {"device_type": "Firewall"},
+        name="firewall-platforms",
+    ),
+    path(
+        "inventory/platforms/panorama/",
+        InventoryPlatformViewSet.as_view({"get": "list"}),
+        {"device_type": "Panorama"},
+        name="panorama-platforms",
+    ),
     path(
         "user-profile/",
         UserProfileView.as_view(),
@@ -51,3 +54,5 @@ urlpatterns += [
         name="inventory_exists",
     ),
 ]
+
+urlpatterns += router.urls

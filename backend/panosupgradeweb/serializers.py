@@ -5,10 +5,8 @@ from dj_rest_auth.serializers import TokenSerializer
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from .models import (
-    Firewall,
+    InventoryItem,
     InventoryPlatform,
-    Job,
-    Panorama,
 )
 
 
@@ -23,167 +21,15 @@ class CustomTokenSerializer(TokenSerializer):
         fields = TokenSerializer.Meta.fields + ("author",)
 
 
-class InventoryDetailSerializer(serializers.Serializer):
-    # author = serializers.StringRelatedField()
-    created_at = serializers.DateTimeField()
-    device_type = serializers.SerializerMethodField()
-    ha = serializers.BooleanField()
-    ha_peer = serializers.CharField()
-    hostname = serializers.CharField()
-    ipv4_address = serializers.IPAddressField()
-    ipv6_address = serializers.IPAddressField()
-    notes = serializers.CharField()
-    platform = serializers.SerializerMethodField()
-    uuid = serializers.UUIDField()
-
-    def get_platform(self, obj):
-        if isinstance(obj, Panorama):
-            return obj.platform.name if obj.platform else None
-        elif isinstance(obj, Firewall):
-            return obj.platform.name if obj.platform else None
-        return None
-
-    def get_device_type(self, obj):
-        if isinstance(obj, Panorama):
-            return "Panorama"
-        elif isinstance(obj, Firewall):
-            return "Firewall"
-        return None
-
-
-class InventoryListSerializer(serializers.Serializer):
-    # author = serializers.StringRelatedField()
-    created_at = serializers.DateTimeField()
-    device_type = serializers.SerializerMethodField()
-    ha = serializers.BooleanField()
-    ha_peer = serializers.CharField()
-    hostname = serializers.CharField()
-    ipv4_address = serializers.IPAddressField()
-    ipv6_address = serializers.IPAddressField()
-    notes = serializers.CharField()
-    platform = serializers.SerializerMethodField()
-    uuid = serializers.UUIDField()
-
-    def get_platform(self, obj):
-        if isinstance(obj, Panorama):
-            return obj.platform.name if obj.platform else None
-        elif isinstance(obj, Firewall):
-            return obj.platform.name if obj.platform else None
-        return None
-
-    def get_device_type(self, obj):
-        if isinstance(obj, Panorama):
-            return "Panorama"
-        elif isinstance(obj, Firewall):
-            return "Firewall"
-        return None
-
-
 class InventoryItemSerializer(serializers.ModelSerializer):
-    device_type = serializers.SerializerMethodField()
-    platform = serializers.SerializerMethodField()
-
-    class Meta:
-        model = None
-        fields = (
-            # "author",
-            "created_at",
-            "device_type",
-            "ha",
-            "ha_peer",
-            "hostname",
-            "ipv4_address",
-            "ipv6_address",
-            "notes",
-            "platform",
-            "uuid",
-        )
-
-    def get_platform(self, obj):
-        if isinstance(obj, Panorama):
-            return obj.platform.name if obj.platform else None
-        elif isinstance(obj, Firewall):
-            return obj.platform.name if obj.platform else None
-        return None
-
-    def get_device_type(self, obj):
-        if isinstance(obj, Panorama):
-            return "Panorama"
-        elif isinstance(obj, Firewall):
-            return "Firewall"
-        return None
-
-
-class InventoryPlatformSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = InventoryPlatform
-        fields = (
-            "device_type",
-            "id",
-            "name",
-        )
-
-
-class PanoramaSerializer(InventoryItemSerializer):
-    platform_name = serializers.CharField(
-        source="platform.name",
-        required=False,
-    )
-    ha_peer = serializers.CharField(
-        source="haPeer",
-        allow_blank=True,
-        required=False,
-    )
-    ipv4_address = serializers.IPAddressField(
-        source="ipv4Address",
-        required=True,
-    )
-    ipv6_address = serializers.IPAddressField(
-        source="ipv6Address",
-        allow_blank=True,
-        required=False,
-    )
-    device_type = serializers.CharField(
-        source="deviceType",
-        required=False,
-    )
-
-    def to_internal_value(self, data):
-        data["ipv4_address"] = data.pop("ipv4Address", None)
-        data["ipv6_address"] = data.pop("ipv6Address", None)
-        data["ha_peer"] = data.pop("haPeer", None)
-        data["device_type"] = data.pop("deviceType", None)
-        return super().to_internal_value(data)
-
-    class Meta(InventoryItemSerializer.Meta):
-        model = Panorama
-        fields = InventoryItemSerializer.Meta.fields + ("platform_name",)
-
-
-class FirewallSerializer(InventoryItemSerializer):
-    """
-    Serializer class for Firewall objects.
-
-    This serializer is used to convert Firewall objects to JSON representation and vice versa.
-    It inherits from the InventoryItemSerializer class and adds additional fields specific to Firewall objects.
-
-    Attributes:
-        platform_name (serializers.CharField): The name of the platform associated with the Firewall.
-        device_group (serializers.CharField): The device group of the Firewall.
-        ha_peer (serializers.CharField): The HA peer of the Firewall.
-        ipv4_address (serializers.IPAddressField): The IPv4 address of the Firewall.
-        ipv6_address (serializers.IPAddressField): The IPv6 address of the Firewall.
-
-    Methods:
-        to_internal_value(data): Maps the field names from the payload to the model field names.
-        create(validated_data): Creates a new Firewall object with the validated data.
-
-    """
-
     device_group = serializers.CharField(
         allow_blank=True,
         required=False,
         allow_null=True,
+    )
+    device_type = serializers.CharField(
+        source="platform.device_type",
+        read_only=True,
     )
     ha_peer = serializers.CharField(
         allow_blank=True,
@@ -212,40 +58,36 @@ class FirewallSerializer(InventoryItemSerializer):
         required=False,
     )
 
+    class Meta:
+        model = InventoryItem
+        fields = (
+            # "author",
+            "created_at",
+            "device_group",
+            "device_type",
+            "ha",
+            "ha_peer",
+            "hostname",
+            "ipv4_address",
+            "ipv6_address",
+            "notes",
+            "panorama_appliance",
+            "panorama_managed",
+            "platform_name",
+            "uuid",
+        )
+
     def to_internal_value(self, data):
-        """
-        Maps the field names from the payload to the model field names.
-
-        Args:
-            data (dict): The input data containing the field names from the payload.
-
-        Returns:
-            dict: The modified data with the field names mapped to the model field names.
-
-        """
         data["device_group"] = data.pop("deviceGroup", None)
         data["panorama_appliance"] = data.pop("panoramaAppliance", None)
         data["panorama_managed"] = data.pop("panoramaManaged", None)
         data["ha_peer"] = data.pop("haPeer", None)
         data["ipv4_address"] = data.pop("ipv4Address", None)
         data["ipv6_address"] = data.pop("ipv6Address", None)
-        data.pop("deviceType", None)
+        data["device_type"] = data.pop("deviceType", None)
         return super().to_internal_value(data)
 
     def create(self, validated_data):
-        """
-        Creates a new Firewall object with the validated data.
-
-        Args:
-            validated_data (dict): The validated data for creating the Firewall object.
-
-        Returns:
-            Firewall: The created Firewall object.
-
-        Raises:
-            serializers.ValidationError: If the platform name is invalid.
-
-        """
         platform_name = validated_data.pop("platform.name", None)
         if platform_name:
             try:
@@ -253,30 +95,26 @@ class FirewallSerializer(InventoryItemSerializer):
                 validated_data["platform"] = platform
             except InventoryPlatform.DoesNotExist:
                 raise serializers.ValidationError("Invalid platform")
-
         return super().create(validated_data)
 
-    class Meta(InventoryItemSerializer.Meta):
-        model = Firewall
-        fields = InventoryItemSerializer.Meta.fields + (
-            "device_group",
-            "panorama_appliance",
-            "panorama_managed",
-            "platform_name",
-        )
+    def update(self, instance, validated_data):
+        platform_name = validated_data.pop("platform.name", None)
+        if platform_name:
+            try:
+                platform = InventoryPlatform.objects.get(name=platform_name)
+                instance.platform = platform
+            except InventoryPlatform.DoesNotExist:
+                raise serializers.ValidationError("Invalid platform")
+        return super().update(instance, validated_data)
 
 
-class JobSerializer(serializers.ModelSerializer):
-    task_id = serializers.CharField(read_only=True)
-
+class InventoryPlatformSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Job
+        model = InventoryPlatform
         fields = (
-            "task_id",
-            "job_type",
-            "author",
-            "created_at",
-            "json_data",
+            "device_type",
+            "id",
+            "name",
         )
 
 

@@ -1,26 +1,19 @@
 // frontend/src/app/shared/services/inventory.service.ts
 
-import {
-    Firewall,
-    FirewallApiResponse,
-} from "../interfaces/firewall.interface";
-import {
-    FirewallPlatform,
-    PanoramaPlatform,
-} from "../interfaces/platform.interface";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
+import {
+    InventoryItem,
+    InventoryItemApiResponse,
+} from "../interfaces/inventory-item.interface";
 import {
     InventoryList,
     InventoryListApiResponse,
-} from "../interfaces/inventory.interface";
+} from "../interfaces/inventory-list.interface.ts";
 import { Observable, of } from "rxjs";
-import {
-    Panorama,
-    PanoramaApiResponse,
-} from "../interfaces/panorama.interface";
 import { catchError, map } from "rxjs/operators";
 
 import { Injectable } from "@angular/core";
+import { InventoryPlatform } from "../interfaces/inventory-platform.interface";
 import { environment } from "../../../environments/environment.prod";
 
 @Injectable({
@@ -60,12 +53,12 @@ export class InventoryService {
 
     /**
      * Fetches the firewall platforms from the API.
-     * @returns An Observable that emits an array of FirewallPlatform objects.
+     * @returns An Observable that emits an array of InventoryItem objects.
      */
-    fetchFirewallPlatforms(): Observable<FirewallPlatform[]> {
+    fetchFirewallPlatforms(): Observable<InventoryPlatform[]> {
         return this.http
             .get<
-                FirewallPlatform[]
+                InventoryPlatform[]
             >(`${this.apiUrl}/api/v1/inventory/platforms/firewall/`)
             .pipe(
                 catchError((error) => {
@@ -77,12 +70,12 @@ export class InventoryService {
 
     /**
      * Fetches the Panorama platforms from the API.
-     * @returns An Observable that emits an array of PanoramaPlatform objects.
+     * @returns An Observable that emits an array of InventoryPlatform objects.
      */
-    fetchPanoramaPlatforms(): Observable<PanoramaPlatform[]> {
+    fetchPanoramaPlatforms(): Observable<InventoryPlatform[]> {
         return this.http
             .get<
-                PanoramaPlatform[]
+                InventoryPlatform[]
             >(`${this.apiUrl}/api/v1/inventory/platforms/panorama/`)
             .pipe(
                 catchError((error) => {
@@ -98,28 +91,23 @@ export class InventoryService {
      * @returns An Observable that emits a Firewall or Panorama object.
      * @throws Error if the inventory type is invalid.
      */
-    getInventoryItem(uuid: string): Observable<Firewall | Panorama> {
+    getInventoryItem(uuid: string): Observable<InventoryItem> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
         );
         return this.http
-            .get<
-                FirewallApiResponse | PanoramaApiResponse
-            >(`${this.apiUrl}/api/v1/inventory/${uuid}/`, { headers })
+            .get<InventoryItemApiResponse>(
+                `${this.apiUrl}/api/v1/inventory/${uuid}/`,
+                { headers },
+            )
             .pipe(
-                map((response: FirewallApiResponse | PanoramaApiResponse) => {
+                map((response: InventoryItemApiResponse) => {
                     if ("device_type" in response) {
-                        if (response.device_type === "Firewall") {
-                            return this.mapFirewallResponse(
-                                response as FirewallApiResponse,
-                            );
-                        } else if (response.device_type === "Panorama") {
-                            return this.mapPanoramaResponse(
-                                response as PanoramaApiResponse,
-                            );
-                        }
+                        return this.mapInventoryItemResponse(
+                            response as InventoryItemApiResponse,
+                        );
                     }
                     // Throw an error if the mapping is not applicable
                     throw new Error("Invalid inventory type");
@@ -153,17 +141,19 @@ export class InventoryService {
     }
 
     createInventoryItem(
-        inventoryItem: Firewall | Panorama,
-    ): Observable<Firewall | Panorama> {
+        inventoryItem: InventoryItem,
+    ): Observable<InventoryItem> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
         );
         return this.http
-            .post<
-                Firewall | Panorama
-            >(`${this.apiUrl}/api/v1/inventory/`, inventoryItem, { headers })
+            .post<InventoryItem>(
+                `${this.apiUrl}/api/v1/inventory/`,
+                inventoryItem,
+                { headers },
+            )
             .pipe(
                 catchError((error) => {
                     console.error("Error creating inventory item:", error);
@@ -173,18 +163,20 @@ export class InventoryService {
     }
 
     updateInventoryItem(
-        inventoryItem: Firewall | Panorama,
+        inventoryItem: InventoryItem,
         uuid: string,
-    ): Observable<Firewall | Panorama> {
+    ): Observable<InventoryItem> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
         );
         return this.http
-            .patch<
-                Firewall | Panorama
-            >(`${this.apiUrl}/api/v1/inventory/${uuid}/`, inventoryItem, { headers })
+            .patch<InventoryItem>(
+                `${this.apiUrl}/api/v1/inventory/${uuid}/`,
+                inventoryItem,
+                { headers },
+            )
             .pipe(
                 catchError((error: any) => {
                     console.error("Error updating inventory item:", error);
@@ -260,9 +252,11 @@ export class InventoryService {
      * @param response - The FirewallApiResponse object to be mapped.
      * @returns The mapped Firewall object.
      */
-    private mapFirewallResponse(response: FirewallApiResponse): Firewall {
+    private mapInventoryItemResponse(
+        response: InventoryItemApiResponse,
+    ): InventoryItem {
         return {
-            author: response.author,
+            // author: response.author,
             createdAt: response.created_at,
             deviceType: response.device_type,
             deviceGroup: response.device_group,
@@ -274,7 +268,7 @@ export class InventoryService {
             notes: response.notes,
             panoramaAppliance: response.panorama_appliance,
             panoramaManaged: response.panorama_managed,
-            platform: response.platform,
+            platformName: response.platform_name,
             uuid: response.uuid,
         };
     }
@@ -289,7 +283,7 @@ export class InventoryService {
         response: InventoryListApiResponse,
     ): InventoryList {
         return {
-            author: response.author,
+            // author: response.author,
             createdAt: response.created_at,
             deviceType: response.device_type,
             deviceGroup: response.device_group,
@@ -301,29 +295,7 @@ export class InventoryService {
             notes: response.notes,
             panoramaAppliance: response.panorama_appliance,
             panoramaManaged: response.panorama_managed,
-            platform: response.platform,
-            uuid: response.uuid,
-        };
-    }
-
-    /**
-     * Maps a Panorama API response to a Panorama object.
-     *
-     * @param response - The Panorama API response.
-     * @returns The mapped Panorama object.
-     */
-    private mapPanoramaResponse(response: PanoramaApiResponse): Panorama {
-        return {
-            author: response.author,
-            createdAt: response.created_at,
-            deviceType: response.device_type,
-            ha: response.ha,
-            haPeer: response.ha_peer,
-            hostname: response.hostname,
-            ipv4Address: response.ipv4_address,
-            ipv6Address: response.ipv6_address,
-            notes: response.notes,
-            platform: response.platform,
+            platformName: response.platform_name,
             uuid: response.uuid,
         };
     }

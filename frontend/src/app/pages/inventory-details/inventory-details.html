@@ -36,11 +36,11 @@
       <div class="form-field">
         <mat-form-field>
           <mat-label>Platform</mat-label>
-          <mat-select formControlName="platform" aria-labelledby="platformLabel">
+          <mat-select formControlName="platformName" aria-labelledby="platformLabel">
             <mat-option
-              *ngFor="let platform of inventoryForm.get('deviceType')?.value === 'Firewall' ? firewallPlatforms : panoramaPlatforms"
-              [value]="platform.name">
-              {{platform.name}}
+              *ngFor="let platformName of inventoryForm.get('deviceType')?.value === 'Firewall' ? firewallPlatforms : panoramaPlatforms"
+              [value]="platformName.name">
+              {{platformName.name}}
             </mat-option>
           </mat-select>
         </mat-form-field>

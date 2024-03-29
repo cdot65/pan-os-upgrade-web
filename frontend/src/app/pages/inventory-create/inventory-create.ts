@@ -2,10 +2,6 @@
 
 import { Component, HostBinding, OnInit } from "@angular/core";
 import {
-    FirewallPlatform,
-    PanoramaPlatform,
-} from "../../shared/interfaces/platform.interface";
-import {
     FormBuilder,
     FormGroup,
     ReactiveFormsModule,
@@ -15,6 +11,7 @@ import {
 import { CommonModule } from "@angular/common";
 import { ComponentPageHeader } from "../component-page-header/component-page-header";
 import { ComponentPageTitle } from "../page-title/page-title";
+import { InventoryPlatform } from "../../shared/interfaces/inventory-platform.interface";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
@@ -42,8 +39,8 @@ import { Router } from "@angular/router";
 export class InventoryCreateComponent implements OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     inventoryForm: FormGroup;
-    firewallPlatforms: FirewallPlatform[] = [];
-    panoramaPlatforms: PanoramaPlatform[] = [];
+    firewallPlatforms: InventoryPlatform[] = [];
+    panoramaPlatforms: InventoryPlatform[] = [];
 
     constructor(
         private formBuilder: FormBuilder,
@@ -63,7 +60,7 @@ export class InventoryCreateComponent implements OnInit {
             notes: [""],
             panoramaAppliance: [""],
             panoramaManaged: [false],
-            platform: ["", Validators.required],
+            platformName: ["", Validators.required],
         });
     }
 
@@ -105,7 +102,7 @@ export class InventoryCreateComponent implements OnInit {
 
     fetchFirewallPlatforms(): void {
         this.inventoryService.fetchFirewallPlatforms().subscribe(
-            (platforms: FirewallPlatform[]) => {
+            (platforms: InventoryPlatform[]) => {
                 this.firewallPlatforms = platforms;
             },
             (error: any) => {
@@ -116,7 +113,7 @@ export class InventoryCreateComponent implements OnInit {
 
     fetchPanoramaPlatforms(): void {
         this.inventoryService.fetchPanoramaPlatforms().subscribe(
-            (platforms: PanoramaPlatform[]) => {
+            (platforms: InventoryPlatform[]) => {
                 this.panoramaPlatforms = platforms;
             },
             (error: any) => {

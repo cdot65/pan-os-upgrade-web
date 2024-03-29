@@ -3,10 +3,6 @@
 import { ActivatedRoute, Router } from "@angular/router";
 import { Component, HostBinding, OnInit } from "@angular/core";
 import {
-    FirewallPlatform,
-    PanoramaPlatform,
-} from "../../shared/interfaces/platform.interface";
-import {
     FormBuilder,
     FormGroup,
     ReactiveFormsModule,
@@ -18,7 +14,8 @@ import { CommonModule } from "@angular/common";
 import { ComponentPageHeader } from "../component-page-header/component-page-header";
 import { ComponentPageTitle } from "../page-title/page-title";
 import { DeleteDialogComponent } from "../confirmation-dialog/delete-dialog";
-import { Firewall } from "../../shared/interfaces/firewall.interface";
+import { InventoryItem } from "../../shared/interfaces/inventory-item.interface";
+import { InventoryPlatform } from "src/app/shared/interfaces/inventory-platform.interface";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
@@ -27,7 +24,6 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
-import { Panorama } from "../../shared/interfaces/panorama.interface";
 
 @Component({
     selector: "app-inventory-details",
@@ -54,10 +50,10 @@ import { Panorama } from "../../shared/interfaces/panorama.interface";
 export class InventoryDetailsComponent implements OnInit {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
-    inventoryItem: Firewall | Panorama | undefined;
+    inventoryItem: InventoryItem | undefined;
     inventoryForm: FormGroup;
-    firewallPlatforms: FirewallPlatform[] = [];
-    panoramaPlatforms: PanoramaPlatform[] = [];
+    firewallPlatforms: InventoryPlatform[] = [];
+    panoramaPlatforms: InventoryPlatform[] = [];
 
     constructor(
         private route: ActivatedRoute,
@@ -69,7 +65,7 @@ export class InventoryDetailsComponent implements OnInit {
     ) {
         // Update the form group
         this.inventoryForm = this.formBuilder.group({
-            author: localStorage.getItem("author"),
+            // author: localStorage.getItem("author"),
             deviceGroup: [""],
             deviceType: [""],
             ha: [false],
@@ -80,7 +76,7 @@ export class InventoryDetailsComponent implements OnInit {
             notes: [""],
             panoramaAppliance: [""],
             panoramaManaged: [false],
-            platform: ["", Validators.required],
+            platformName: ["", Validators.required],
         });
     }
 
@@ -92,7 +88,7 @@ export class InventoryDetailsComponent implements OnInit {
      */
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory Details";
-        console.log(localStorage.getItem("author"));
+        // console.log(localStorage.getItem("author"));
         const itemId = this.route.snapshot.paramMap.get("id");
         if (itemId) {
             this.getInventoryItem(itemId);
@@ -135,7 +131,7 @@ export class InventoryDetailsComponent implements OnInit {
      */
     fetchFirewallPlatforms(): void {
         this.inventoryService.fetchFirewallPlatforms().subscribe(
-            (platforms: FirewallPlatform[]) => {
+            (platforms: InventoryPlatform[]) => {
                 this.firewallPlatforms = platforms;
             },
             (error: any) => {
@@ -149,7 +145,7 @@ export class InventoryDetailsComponent implements OnInit {
      */
     fetchPanoramaPlatforms(): void {
         this.inventoryService.fetchPanoramaPlatforms().subscribe(
-            (platforms: PanoramaPlatform[]) => {
+            (platforms: InventoryPlatform[]) => {
                 this.panoramaPlatforms = platforms;
             },
             (error: any) => {
@@ -165,12 +161,9 @@ export class InventoryDetailsComponent implements OnInit {
      */
     getInventoryItem(itemId: string): void {
         this.inventoryService.getInventoryItem(itemId).subscribe(
-            (item: Firewall | Panorama) => {
+            (item: InventoryItem) => {
                 this.inventoryItem = item;
                 this.inventoryForm.patchValue(item);
-                console.log(
-                    "localStorage author: " + localStorage.getItem("author"),
-                );
                 console.log("inventoryItem: ", this.inventoryItem);
             },
             (error: any) => {

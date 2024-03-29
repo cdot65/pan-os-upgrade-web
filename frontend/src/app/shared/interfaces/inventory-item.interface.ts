@@ -1,36 +1,36 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-// frontend/src/app/shared/interfaces/firewall.interface.ts
+// frontend/src/app/shared/interfaces/inventory-item.interface.ts
 
-export interface Firewall {
-    author: number;
+export interface InventoryItem {
+    // author: number;
     createdAt: string;
-    deviceGroup: string;
+    deviceGroup: string | null;
     deviceType: string;
     ha: boolean;
     haPeer: string | null;
     hostname: string;
     ipv4Address: string;
-    ipv6Address: string;
+    ipv6Address: string | null;
     notes: string;
     panoramaAppliance: string | null;
     panoramaManaged: boolean;
-    platform: string;
+    platformName: string;
     uuid: string;
 }
 
-export interface FirewallApiResponse {
-    author: number;
+export interface InventoryItemApiResponse {
+    // author: number;
     created_at: string;
-    device_group: string;
+    device_group: string | null;
     device_type: string;
     ha: boolean;
     ha_peer: string | null;
     hostname: string;
     ipv4_address: string;
-    ipv6_address: string;
+    ipv6_address: string | null;
     notes: string;
     panorama_appliance: string | null;
     panorama_managed: boolean;
-    platform: string;
+    platform_name: string;
     uuid: string;
 }

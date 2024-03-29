@@ -16,19 +16,13 @@ from rest_framework.serializers import ValidationError
 
 # directory object imports
 from .models import (
-    Firewall,
     InventoryPlatform,
-    Job,
-    Panorama,
+    InventoryItem,
 )
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
-    InventoryDetailSerializer,
-    InventoryListSerializer,
-    PanoramaSerializer,
+    InventoryItemSerializer,
     InventoryPlatformSerializer,
-    FirewallSerializer,
-    JobSerializer,
     UserSerializer,
 )
 
@@ -46,13 +40,7 @@ class InventoryExistsView(APIView):
             )
             exists = (
                 (
-                    Panorama.objects.annotate(
-                        formatted_hostname=Replace(
-                            Replace(Lower("hostname"), V(" "), V("_")), V("-"), V("_")
-                        )
-                    )
-                    # trunk-ignore(flake8/W503)
-                    | Firewall.objects.annotate(
+                    InventoryItem.objects.annotate(
                         formatted_hostname=Replace(
                             Replace(Lower("hostname"), V(" "), V("_")), V("-"), V("_")
                         )
@@ -73,47 +61,20 @@ class InventoryExistsView(APIView):
 
 class InventoryViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnly,)
+    queryset = InventoryItem.objects.all()
+    serializer_class = InventoryItemSerializer
 
     def get_queryset(self):
-        if self.action == "list":
-            return list(Panorama.objects.all()) + list(Firewall.objects.all())
-        return self.queryset
-
-    def get_object(self):
-        uuid = self.kwargs.get("pk")
-
-        panorama_obj = Panorama.objects.filter(uuid=uuid).first()
-        if panorama_obj:
-            return panorama_obj
-
-        firewall_obj = Firewall.objects.filter(uuid=uuid).first()
-        if firewall_obj:
-            return firewall_obj
-
-        raise Http404("Object not found.")
-
-    def get_serializer_class(self):
-        if self.action == "list":
-            return InventoryListSerializer
-        elif self.action == "retrieve":
-            return InventoryDetailSerializer
-        elif self.action == "create":
-            device_type = self.request.data.get("deviceType")
-            if device_type == "Panorama":
-                return PanoramaSerializer
-            elif device_type == "Firewall":
-                return FirewallSerializer
-            else:
-                raise ValidationError("Invalid inventory type")
-        elif isinstance(self.get_object(), Panorama):
-            return PanoramaSerializer
-        elif isinstance(self.get_object(), Firewall):
-            return FirewallSerializer
-        return super().get_serializer_class()
+        queryset = InventoryItem.objects.all()
+        device_type = self.request.query_params.get("device_type", None)
+        if device_type is not None:
+            queryset = queryset.filter(platform__device_type=device_type)
+        return queryset
 
     def create(self, request, *args, **kwargs):
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(data=request.data, context={"request": request})
+        serializer = self.get_serializer(
+            data=request.data, context={"request": request}
+        )
         if serializer.is_valid():
             try:
                 platform_name = request.data.get("platform")
@@ -133,48 +94,12 @@ class InventoryPlatformViewSet(viewsets.ModelViewSet):
     queryset = InventoryPlatform.objects.all()
     serializer_class = InventoryPlatformSerializer
 
-
-class FirewallPlatformViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthorOrReadOnly,)
-    queryset = InventoryPlatform.objects.filter(device_type="Firewall")
-    serializer_class = InventoryPlatformSerializer
-
-
-class PanoramaPlatformViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthorOrReadOnly,)
-    queryset = InventoryPlatform.objects.filter(device_type="Panorama")
-    serializer_class = InventoryPlatformSerializer
-
-
-class JobViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthorOrReadOnly,)
-    queryset = Job.objects.all()
-    serializer_class = JobSerializer
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            try:
-                serializer.save(author=self.request.user)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            except Exception as e:
-                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def retrieve(self, request, pk=None, format=None):
-        instance = self.get_object()
-        if instance.json_data is None:
-            return JsonResponse({}, status=200)
-
-        response_data = {
-            "task_id": instance.task_id,
-            "job_type": instance.job_type,
-            "created_at": instance.created_at.isoformat(),
-            "json_data": instance.json_data if instance.json_data is not None else {},
-        }
-
-        return JsonResponse(response_data, status=200)
+    def get_queryset(self):
+        queryset = InventoryPlatform.objects.all()
+        device_type = self.kwargs.get("device_type", None)
+        if device_type is not None:
+            queryset = queryset.filter(device_type=device_type)
+        return queryset
 
 
 class UserViewSet(viewsets.ModelViewSet):

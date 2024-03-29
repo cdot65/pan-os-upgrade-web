@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-// frontend/src/app/shared/interfaces/panorama.interface.ts
+// frontend/src/app/shared/interfaces/inventory-list-response.interface.ts
 
-export interface Panorama {
-    author: number;
+export interface InventoryList {
+    // author: number;
     createdAt: string;
+    deviceGroup: string;
     deviceType: string;
     ha: boolean;
     haPeer: string | null;
@@ -11,13 +12,16 @@ export interface Panorama {
     ipv4Address: string;
     ipv6Address: string;
     notes: string;
-    platform: string;
+    panoramaAppliance: string | null;
+    panoramaManaged: boolean;
+    platformName: string;
     uuid: string;
 }
 
-export interface PanoramaApiResponse {
-    author: number;
+export interface InventoryListApiResponse {
+    // author: number;
     created_at: string;
+    device_group: string;
     device_type: string;
     ha: boolean;
     ha_peer: string | null;
@@ -25,6 +29,8 @@ export interface PanoramaApiResponse {
     ipv4_address: string;
     ipv6_address: string;
     notes: string;
-    platform: string;
+    panorama_appliance: string | null;
+    panorama_managed: boolean;
+    platform_name: string;
     uuid: string;
 }

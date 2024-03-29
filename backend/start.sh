@@ -22,8 +22,7 @@ EOF
 # Populate database
 echo "Populate database with initial data"
 python manage.py loaddata fixtures/platforms.json
-python manage.py loaddata fixtures/firewalls.json
-python manage.py loaddata fixtures/panoramas.json
+python manage.py loaddata fixtures/inventory.json
 
 # Load scripts
 # echo "Load scripts"

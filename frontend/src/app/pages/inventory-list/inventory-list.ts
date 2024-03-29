@@ -11,14 +11,13 @@ import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 import { ComponentPageHeader } from "../component-page-header/component-page-header";
 import { ComponentPageTitle } from "../page-title/page-title";
 import { DeleteDialogComponent } from "../confirmation-dialog/delete-dialog";
-import { Firewall } from "../../shared/interfaces/firewall.interface";
+import { InventoryItem } from "../../shared/interfaces/inventory-item.interface";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { NgFor } from "@angular/common";
-import { Panorama } from "../../shared/interfaces/panorama.interface";
 import { Router } from "@angular/router";
 
 @Component({
@@ -41,19 +40,19 @@ import { Router } from "@angular/router";
 export class InventoryList implements OnInit, AfterViewInit {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
-    inventoryItems: (Firewall | Panorama)[] = [];
+    inventoryItems: InventoryItem[] = [];
     displayedColumns: string[] = [
         "hostname",
         "ipv4Address",
         "ipv6Address",
-        "platform",
+        "platformName",
         "deviceType",
         "notes",
         "edit",
         "delete",
     ];
-    dataSource: MatTableDataSource<Firewall | Panorama> =
-        new MatTableDataSource<Firewall | Panorama>([]);
+    dataSource: MatTableDataSource<InventoryItem> =
+        new MatTableDataSource<InventoryItem>([]);
 
     @ViewChild(MatSort) sort: MatSort = new MatSort();
 
@@ -101,9 +100,9 @@ export class InventoryList implements OnInit, AfterViewInit {
 
     /**
      * Navigates to the inventory page for editing the specified item.
-     * @param item - The item to be edited. It can be either a Firewall or Panorama object.
+     * @param item - The item to be edited. It can be an InventoryItem object.
      */
-    onEditClick(item: Firewall | Panorama): void {
+    onEditClick(item: InventoryItem): void {
         this.router.navigate(["/inventory", item.uuid]);
     }
 
@@ -122,9 +121,9 @@ export class InventoryList implements OnInit, AfterViewInit {
 
     /**
      * Opens the delete dialog when the delete button is clicked.
-     * @param item - The item to be deleted. It can be either a Firewall or Panorama object.
+     * @param item - The item to be deleted. It can be an InventoryItem object.
      */
-    onDeleteClick(item: Firewall | Panorama): void {
+    onDeleteClick(item: InventoryItem): void {
         const dialogRef = this.dialog.open(DeleteDialogComponent, {
             width: "300px",
             data: {
