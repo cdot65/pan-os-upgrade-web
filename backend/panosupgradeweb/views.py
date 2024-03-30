@@ -18,11 +18,13 @@ from rest_framework.serializers import ValidationError
 from .models import (
     InventoryPlatform,
     InventoryItem,
+    Settings,
 )
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     InventoryItemSerializer,
     InventoryPlatformSerializer,
+    SettingsSerializer,
     UserSerializer,
 )
 
@@ -100,6 +102,12 @@ class InventoryPlatformViewSet(viewsets.ModelViewSet):
         if device_type is not None:
             queryset = queryset.filter(device_type=device_type)
         return queryset
+
+
+class SettingsViewSet(viewsets.ModelViewSet):
+    queryset = Settings.objects.all()
+    serializer_class = SettingsSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class UserViewSet(viewsets.ModelViewSet):
