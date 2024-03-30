@@ -1,12 +1,27 @@
 // src/app/pages/inventory-list/inventory-list.scss
-
 .inventory-list {
   width: 97%;
   padding: 25px;
 
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    h2 {
+      margin: 0;
+    }
+
+    button {
+      mat-icon {
+        margin-right: 5px;
+      }
+    }
+  }
+
   .mat-table {
-    width: 85%;
-    margin: 0 auto;
+    width: 100%;
 
     .mat-row {
       &:hover {

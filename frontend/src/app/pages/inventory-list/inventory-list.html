@@ -2,6 +2,14 @@
 
 <inventory-page-header></inventory-page-header>
 <main focusOnNavigation aria-label="Inventory list" id="inventory-list" class="inventory-list">
+  <div class="table-header">
+    <h2>Devices</h2>
+    <button mat-raised-button color="primary" (click)="navigateToCreateInventory()" aria-label="Add a new device">
+      <mat-icon>add</mat-icon>
+      Add a new device
+    </button>
+  </div>
+
   <table mat-table [dataSource]="dataSource" matSort (matSortChange)="announceSortChange($event)"
     class="mat-elevation-z2">
     <!-- Hostname Column -->

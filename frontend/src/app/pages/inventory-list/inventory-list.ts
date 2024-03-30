@@ -119,6 +119,10 @@ export class InventoryList implements OnInit, AfterViewInit {
         }
     }
 
+    navigateToCreateInventory(): void {
+        this.router.navigate(["/inventory/create"]);
+    }
+
     /**
      * Opens the delete dialog when the delete button is clicked.
      * @param item - The item to be deleted. It can be an InventoryItem object.
