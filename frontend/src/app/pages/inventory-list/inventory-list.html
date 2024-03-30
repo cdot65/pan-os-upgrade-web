@@ -1,0 +1,86 @@
+<!-- src/app/pages/inventory-list/inventory-list.html -->
+
+<inventory-page-header></inventory-page-header>
+<main focusOnNavigation aria-label="Inventory list" id="inventory-list" class="inventory-list">
+  <div class="table-header">
+    <h2>Devices</h2>
+    <button mat-raised-button color="primary" (click)="navigateToCreateInventory()" aria-label="Add a new device">
+      <mat-icon>add</mat-icon>
+      Add a new device
+    </button>
+  </div>
+
+  <table mat-table [dataSource]="dataSource" matSort (matSortChange)="announceSortChange($event)"
+    class="mat-elevation-z2">
+    <!-- Hostname Column -->
+    <ng-container matColumnDef="hostname">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by hostname">
+        Hostname
+      </th>
+      <td mat-cell *matCellDef="let item">{{item.hostname}}</td>
+    </ng-container>
+
+    <!-- IPv4 Address Column -->
+    <ng-container matColumnDef="ipv4Address">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by IPv4 address">
+        IPv4 Address
+      </th>
+      <td mat-cell *matCellDef="let item">{{item.ipv4Address}}</td>
+    </ng-container>
+
+    <!-- IPv6 Address Column -->
+    <ng-container matColumnDef="ipv6Address">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by IPv6 address">
+        IPv6 Address
+      </th>
+      <td mat-cell *matCellDef="let item">{{item.ipv6Address}}</td>
+    </ng-container>
+
+    <!-- Platform Column -->
+    <ng-container matColumnDef="platformName">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by platform">
+        Platform
+      </th>
+      <td mat-cell *matCellDef="let item">{{item.platformName}}</td>
+    </ng-container>
+
+    <!-- Inventory Type Column -->
+    <ng-container matColumnDef="deviceType">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by inventory type">
+        Inventory Type
+      </th>
+      <td mat-cell *matCellDef="let item">{{item.deviceType}}</td>
+    </ng-container>
+
+    <!-- Notes Column -->
+    <ng-container matColumnDef="notes">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by notes">
+        Notes
+      </th>
+      <td mat-cell *matCellDef="let item">{{item.notes}}</td>
+    </ng-container>
+
+    <!-- Edit Column -->
+    <ng-container matColumnDef="edit">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let item">
+        <button mat-icon-button (click)="onEditClick(item)" class="edit-button">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <!-- Delete Column -->
+    <ng-container matColumnDef="delete">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let item">
+        <button mat-icon-button (click)="onDeleteClick(item)" class="delete-button">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+</main>

@@ -1,7 +1,5 @@
-import { CodeSnippet } from "../example-viewer/code-snippet";
 import { CommonModule } from "@angular/common";
 import { DocViewer } from "./doc-viewer";
-import { ExampleViewer } from "../example-viewer/example-viewer";
 import { HeaderLink } from "./header-link";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
@@ -22,10 +20,8 @@ import { PortalModule } from "@angular/cdk/portal";
         MatTabsModule,
         PortalModule,
         DocViewer,
-        ExampleViewer,
         HeaderLink,
-        CodeSnippet,
     ],
-    exports: [DocViewer, ExampleViewer, HeaderLink],
+    exports: [DocViewer, HeaderLink],
 })
 export class DocViewerModule {}

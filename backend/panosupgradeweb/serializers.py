@@ -1,123 +1,118 @@
+# backend/panosupgradeweb/serializers.py
+
 from rest_framework import serializers
+from dj_rest_auth.serializers import TokenSerializer
 from django.contrib.auth import get_user_model
 from django.conf import settings
-import os
 from .models import (
-    Panorama,
-    PanoramaPlatform,
-    Prisma,
-    Firewall,
-    FirewallPlatform,
-    Jobs,
-    Message,
-    Script,
+    InventoryItem,
+    InventoryPlatform,
 )
 
 
-class PanoramaPlatformSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PanoramaPlatform
-        fields = (
-            "id",
-            "name",
-        )
+class CustomTokenSerializer(TokenSerializer):
+    author = serializers.SerializerMethodField()
+
+    def get_author(self, obj):
+        user = obj.user
+        return user.id
+
+    class Meta(TokenSerializer.Meta):
+        fields = TokenSerializer.Meta.fields + ("author",)
 
 
-class PanoramaSerializer(serializers.ModelSerializer):
-    platform = serializers.CharField(source="platform.name", read_only=True)
-    ipv6_address = serializers.IPAddressField(
-        protocol="IPv6",
+class InventoryItemSerializer(serializers.ModelSerializer):
+    device_group = serializers.CharField(
         allow_blank=True,
         required=False,
         allow_null=True,
     )
-
-    def create(self, validated_data):
-        return Panorama.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        return super().update(instance, validated_data)
-
-    class Meta:
-        model = Panorama
-        fields = (
-            "api_key",
-            "author",
-            "created_at",
-            "hostname",
-            "ipv4_address",
-            "ipv6_address",
-            "notes",
-            "platform",
-            "uuid",
-        )
-
-
-class PrismaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Prisma
-        fields = (
-            "id",
-            "tenant_name",
-            "client_id",
-            "client_secret",
-            "tsg_id",
-            "author",
-            "created_at",
-        )
-
-
-class FirewallSerializer(serializers.ModelSerializer):
-    platform = serializers.CharField(source="platform.name", read_only=True)
-    ipv6_address = serializers.IPAddressField(
-        protocol="IPv6",
+    device_type = serializers.CharField(
+        source="platform.device_type",
+        read_only=True,
+    )
+    ha_peer = serializers.CharField(
         allow_blank=True,
         required=False,
         allow_null=True,
     )
-
-    def create(self, validated_data):
-        return Firewall.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        return super().update(instance, validated_data)
+    ipv4_address = serializers.IPAddressField(
+        required=True,
+    )
+    ipv6_address = serializers.IPAddressField(
+        allow_blank=True,
+        required=False,
+        allow_null=True,
+    )
+    panorama_appliance = serializers.CharField(
+        allow_blank=True,
+        required=False,
+        allow_null=True,
+    )
+    panorama_managed = serializers.BooleanField(
+        required=False,
+        allow_null=True,
+    )
+    platform_name = serializers.CharField(
+        source="platform.name",
+        read_only=True,
+    )
 
     class Meta:
-        model = Firewall
+        model = InventoryItem
         fields = (
-            "api_key",
-            "author",
             "created_at",
+            "device_group",
+            "device_type",
+            "ha",
+            "ha_peer",
             "hostname",
             "ipv4_address",
             "ipv6_address",
             "notes",
-            "platform",
+            "panorama_appliance",
+            "panorama_managed",
+            "platform_name",
             "uuid",
         )
 
+    def to_internal_value(self, data):
+        data["device_group"] = data.pop("deviceGroup", None)
+        data["panorama_appliance"] = data.pop("panoramaAppliance", None)
+        data["panorama_managed"] = data.pop("panoramaManaged", None)
+        data["ha_peer"] = data.pop("haPeer", None)
+        data["ipv4_address"] = data.pop("ipv4Address", None)
+        data["ipv6_address"] = data.pop("ipv6Address", None)
+        return super().to_internal_value(data)
 
-class FirewallPlatformSerializer(serializers.ModelSerializer):
+    def create(self, validated_data):
+        platform_name = self.initial_data.get("platformName")
+        if platform_name:
+            try:
+                platform = InventoryPlatform.objects.get(name=platform_name)
+                validated_data["platform"] = platform
+            except InventoryPlatform.DoesNotExist:
+                raise serializers.ValidationError("Invalid platform")
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        platform_name = self.initial_data.get("platformName")
+        if platform_name:
+            try:
+                platform = InventoryPlatform.objects.get(name=platform_name)
+                instance.platform = platform
+            except InventoryPlatform.DoesNotExist:
+                raise serializers.ValidationError("Invalid platform")
+        return super().update(instance, validated_data)
+
+
+class InventoryPlatformSerializer(serializers.ModelSerializer):
     class Meta:
-        model = FirewallPlatform
+        model = InventoryPlatform
         fields = (
+            "device_type",
             "id",
             "name",
-            "vendor",
-        )
-
-
-class JobsSerializer(serializers.ModelSerializer):
-    task_id = serializers.CharField(read_only=True)  # Add the task_id field
-
-    class Meta:
-        model = Jobs
-        fields = (
-            "task_id",
-            "job_type",
-            "author",
-            "created_at",
-            "json_data",
         )
 
 
@@ -140,35 +135,3 @@ class UserSerializer(serializers.ModelSerializer):
         if obj.profile_image:
             return settings.MEDIA_URL + str(obj.profile_image)
         return None
-
-
-class MessageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Message
-        fields = "__all__"
-
-
-class ScriptSerializer(serializers.ModelSerializer):
-    content = serializers.CharField(write_only=True, required=False)
-    file_content = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = Script
-        fields = "__all__"
-
-    def get_file_content(self, obj):
-        file_path = os.path.join(settings.SCRIPTS_BASE_PATH, obj.file.name)
-        try:
-            with open(file_path) as f:
-                return f.read()
-        except FileNotFoundError:
-            print("FileNotFoundError for file path: ", file_path)
-            return "File not found"
-
-    def update(self, instance, validated_data):
-        file_path = os.path.join(settings.SCRIPTS_BASE_PATH, instance.file.name)
-        if "content" in validated_data:
-            with open(file_path, "w") as f:
-                f.write(validated_data.pop("content"))
-
-        return super().update(instance, validated_data)

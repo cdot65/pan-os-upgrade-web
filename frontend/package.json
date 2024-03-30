@@ -13,7 +13,6 @@
     "test": "ng test",
     "e2e": "ng e2e",
     "build": "ng build",
-    "build:content": "yarn upgrade @angular/components-examples",
     "prod-build": "ng build --configuration production",
     "preinstall": "node ./tools/npm/check-npm.js"
   },
@@ -24,7 +23,6 @@
     "@angular/cdk-experimental": "^17.3.0",
     "@angular/common": "^17.3.0",
     "@angular/compiler": "^17.3.0",
-    "@angular/components-examples": "https://github.com/angular/material2-docs-content.git#8319d8fde93ab4ed2bd6e0b6e2a88d893661bdd5",
     "@angular/core": "^17.3.0",
     "@angular/forms": "^17.3.0",
     "@angular/google-maps": "^17.3.0",

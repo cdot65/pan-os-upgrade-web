@@ -1,0 +1,65 @@
+<div class="docs-markdown">
+  <h1>Getting Started</h1>
+
+  <h2>Purpose of the Project</h2>
+  <p>The <code>pan-os-upgrade</code> CLI tool is designed to streamline and simplify the process of upgrading Palo Alto
+    Networks firewalls. This tool offers two distinct workflows to cater to different user preferences and environments:
+    a Python-based workflow and a Docker-based workflow.</p>
+
+  <h2>Problem Statement</h2>
+  <p>Upgrading firewalls can be intricate and tedious, posing numerous challenges. The <code>pan-os-upgrade</code> tool
+    addresses these by:</p>
+  <ul>
+    <li>Performing a series of readiness checks.</li>
+    <li>Taking snapshots of the current network state.</li>
+    <li>Creating backups of the configuration before initiating the upgrade process.</li>
+  </ul>
+
+  <h2>Two Distinct Workflows</h2>
+
+  <h3>Python Workflow</h3>
+  <p>This workflow is ideal for those who prefer working within a Python environment. It involves setting up a Python
+    virtual environment, installing dependencies, and executing the tool via command-line interface.</p>
+  <ul>
+    <li><strong>Advantages</strong>: Offers more control and flexibility, especially for users familiar with Python.
+    </li>
+    <li><strong>Details</strong>: See the <a href="python/getting-started.md">Python Workflow Getting Started Guide</a>
+      for detailed instructions on setup and usage.</li>
+  </ul>
+
+  <h3>Docker Workflow</h3>
+  <p>The Docker workflow simplifies the setup by encapsulating the tool and its dependencies within a Docker container.
+    It's suitable for users seeking an easy-to-deploy solution without configuring a Python environment.</p>
+  <ul>
+    <li><strong>Advantages</strong>: Ensures consistent runtime environment, simplifies deployment, and is ideal for
+      users not familiar with Python.</li>
+    <li><strong>Details</strong>: Refer to the <a href="docker/getting-started.md">Docker Workflow Getting Started
+        Guide</a> for comprehensive steps on using the Docker container.</li>
+  </ul>
+
+  <h2>Key Features</h2>
+  <p><code>pan-os-upgrade</code> is equipped with several features for efficient and reliable upgrades:</p>
+  <ul>
+    <li><strong>Automation of Routine Tasks</strong>: Reduces manual errors and saves time by automating upgrades,
+      configurations, and system checks.</li>
+    <li><strong>Support for Direct and Proxy Connections</strong>: Connect directly to firewalls or through a Panorama
+      appliance.</li>
+    <li><strong>Active/Passive High Availability (HA) Workflow</strong>: Fully supports upgrading devices in
+      active/passive HA configurations, ensuring both members are properly upgraded and synchronized.</li>
+    <li><strong>Multi-threading for Efficiency</strong>: Utilizes multi-threading to parallelize upgrades, especially
+      beneficial when upgrading multiple devices through Panorama, enhancing performance and reducing overall upgrade
+      time.</li>
+    <li><strong>Customizable and Extensible</strong>: Scripts can be tailored to fit diverse network environments and
+      requirements, offering flexibility for various deployment scenarios.</li>
+    <li><strong>Comprehensive PAN-OS Interactions</strong>: Facilitates extensive interactions with Palo Alto Networks
+      appliances for operations like readiness checks, state snapshots, and report generation.</li>
+    <li><strong>Interactive Menu for Firewall Selection</strong>: Introduces an interactive menu for selecting specific
+      firewalls to target for upgrade, streamlining the process of identifying and confirming devices for upgrade within
+      a Panorama-managed environment.</li>
+  </ul>
+
+  <h2>Next Steps</h2>
+  <p>With an understanding of <code>pan-os-upgrade</code> and its dual workflows, you can choose the approach that best
+    suits your needs. Follow the respective guides to set up and start using the tool for upgrading your Palo Alto
+    Networks firewalls.</p>
+</div>
