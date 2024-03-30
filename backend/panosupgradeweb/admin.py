@@ -1,31 +1,35 @@
 from django.contrib import admin
-
-
 from .models import (
-    Firewall,
-    FirewallPlatform,
-    Jobs,
-    Panorama,
-    Prisma,
+    InventoryItem,
+    InventoryPlatform,
 )
 
 
-class PanoramaAdmin(admin.ModelAdmin):
+class InventoryItemAdmin(admin.ModelAdmin):
     list_display = (
         "hostname",
+        "device_group",
+        "ha",
+        "ha_peer",
         "ipv4_address",
         "ipv6_address",
-        "api_key",
+        "panorama_appliance",
+        "panorama_managed",
+        "platform",
     )
+    list_filter = ("platform", "device_group", "ha")
+    search_fields = ("hostname", "ipv4_address", "ipv6_address", "notes")
 
 
-class PrismaAdmin(admin.ModelAdmin):
+class InventoryPlatformAdmin(admin.ModelAdmin):
     list_display = (
-        "tenant_name",
-        "client_id",
-        "tsg_id",
+        "device_type",
+        "name",
+    )
+    search_fields = (
+        "device_type",
+        "name",
     )
 
 
-admin.site.register(Panorama, PanoramaAdmin)
-admin.site.register(Prisma, PrismaAdmin)
+admin.site.register(InventoryPlatform, InventoryPlatformAdmin)

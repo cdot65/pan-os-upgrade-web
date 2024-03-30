@@ -1,3 +1,5 @@
+# django_project/settings.py
+
 from pathlib import Path
 from environs import Env
 
@@ -200,9 +202,13 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
+REST_AUTH_SERIALIZERS = {
+    "TOKEN_SERIALIZER": "panosupgradeweb.serializers.CustomTokenSerializer",
+}
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "panosupgradeweb",
-    "DESCRIPTION": "Sync configuration data between Panorama and Prisma Access",
+    "DESCRIPTION": "Upgrade PAN-OS devices using the web interface",
     "VERSION": "1.0.0",
 }
 

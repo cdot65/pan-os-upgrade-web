@@ -4,7 +4,6 @@ import { BehaviorSubject, Observable } from "rxjs";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { map, tap } from "rxjs/operators";
 
-import { CookieService } from "ngx-cookie-service";
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { environment } from "../../../environments/environment";
@@ -24,10 +23,10 @@ export class AuthService {
     constructor(
         private http: HttpClient,
         private router: Router,
-        private cookieService: CookieService,
     ) {
         this.isLoggedIn$ = this.isLoggedInSubject.asObservable();
-        this.isLoggedInSubject.next(this.cookieService.check("auth_token"));
+        const token = localStorage.getItem("auth_token");
+        this.isLoggedInSubject.next(!!token);
     }
 
     login(username: string, password: string) {
@@ -37,16 +36,19 @@ export class AuthService {
         );
         const body = JSON.stringify({ username, password });
 
-        return this.http
-            .post<any>(`${this.tokenUrl}`, body, {
-                headers,
-            })
-            .pipe(
-                tap((response) => {
-                    this.cookieService.set("auth_token", response.token);
+        return this.http.post<any>(`${this.tokenUrl}`, body, { headers }).pipe(
+            tap((response) => {
+                console.log("Login response:", response); // Log the response object
+                if (response && response.key) {
+                    // Check if the token is present in the response
+                    localStorage.setItem("auth_token", response.key);
+                    localStorage.setItem("author", response.author);
                     this.isLoggedInSubject.next(true);
-                }),
-            );
+                } else {
+                    console.error("Token not found in the response");
+                }
+            }),
+        );
     }
 
     register(
@@ -61,9 +63,7 @@ export class AuthService {
         );
         const body = JSON.stringify({ username, email, password1, password2 });
         console.log("Register request body:", body);
-        return this.http.post<any>(this.registrationUrl, body, {
-            headers,
-        });
+        return this.http.post<any>(this.registrationUrl, body, { headers });
     }
 
     getUserProfile() {
@@ -71,12 +71,12 @@ export class AuthService {
     }
 
     logout(): void {
-        this.cookieService.delete("auth_token");
+        localStorage.removeItem("auth_token");
         this.router.navigate(["/auth/login"]);
     }
 
     getUserData() {
-        const authToken = this.cookieService.get("auth_token");
+        const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,

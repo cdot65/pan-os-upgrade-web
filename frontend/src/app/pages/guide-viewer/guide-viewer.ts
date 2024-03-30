@@ -1,3 +1,5 @@
+// src/app/pages/guide-viewer/guide-viewer.ts
+
 import { ActivatedRoute, Router, RouterModule, Routes } from "@angular/router";
 import { Component, HostBinding, NgModule, OnInit } from "@angular/core";
 import { GuideItem, GuideItems } from "../../shared/guide-items/guide-items";
@@ -52,7 +54,12 @@ const routes: Routes = [{ path: "", component: GuideViewer }];
 // For example, the custom form-field guide requires the ReactiveFormsModule.
 // These imports may need to be updated when adding examples to new or existing guides.
 @NgModule({
-    imports: [DocViewerModule, ReactiveFormsModule, RouterModule.forChild(routes), GuideViewer],
+    imports: [
+        DocViewerModule,
+        ReactiveFormsModule,
+        RouterModule.forChild(routes),
+        GuideViewer,
+    ],
     exports: [GuideViewer],
 })
 export class GuideViewerModule {}

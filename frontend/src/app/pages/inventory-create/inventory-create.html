@@ -1,0 +1,106 @@
+<!-- src/app/pages/inventory-create/inventory-create.html -->
+
+<inventory-page-header></inventory-page-header>
+<main focusOnNavigation aria-label="Inventory create" id="inventory-create" class="inventory-create">
+  <form [formGroup]="inventoryForm" (ngSubmit)="createInventoryItem()" class="mat-elevation-z2">
+    <div class="inventory-create-grid">
+
+      <!-- form field for the hostname input. -->
+      <div class="form-field">
+        <mat-form-field>
+          <mat-label>Hostname</mat-label>
+          <input matInput id="hostname" formControlName="hostname" required>
+        </mat-form-field>
+      </div>
+
+      <!-- form field for the notes input. -->
+      <div class="form-field">
+        <mat-form-field>
+          <mat-label>Notes</mat-label>
+          <input matInput id="notes" formControlName="notes">
+        </mat-form-field>
+      </div>
+
+      <!-- form field for the inventory type dropdown. -->
+      <div class="form-field">
+        <mat-form-field>
+          <mat-label>Inventory Type</mat-label>
+          <mat-select id="deviceType" formControlName="deviceType" aria-labelledby="deviceTypeLabel">
+            <mat-option value="Firewall">Firewall</mat-option>
+            <mat-option value="Panorama">Panorama</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- form field for the platform dropdown. -->
+      <div class="form-field">
+        <mat-form-field>
+          <mat-label>Platform</mat-label>
+          <mat-select formControlName="platformName" aria-labelledby="platformLabel">
+            <mat-option
+              *ngFor="let platformName of inventoryForm.get('deviceType')?.value === 'Firewall' ? firewallPlatforms : panoramaPlatforms"
+              [value]="platformName.name">
+              {{platformName.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- form field for the IPv4 address input. -->
+      <div class="form-field">
+        <mat-form-field>
+          <mat-label>IPv4 Address</mat-label>
+          <input matInput id="ipv4Address" formControlName="ipv4Address" required>
+        </mat-form-field>
+      </div>
+
+      <!-- form field for the IPv6 address input. -->
+      <div class="form-field">
+        <mat-form-field>
+          <mat-label>IPv6 Address</mat-label>
+          <input matInput id="ipv6Address" formControlName="ipv6Address">
+        </mat-form-field>
+      </div>
+
+      <!-- form field for the HA checkbox. -->
+      <div class="form-field">
+        <mat-checkbox formControlName="ha">HA</mat-checkbox>
+      </div>
+
+      <!-- form field for the HA Peer input. -->
+      <div class="form-field">
+        <mat-form-field>
+          <mat-label>HA Peer</mat-label>
+          <input matInput id="haPeer" formControlName="haPeer">
+        </mat-form-field>
+      </div>
+
+      <!-- form field for the Panorama managed checkbox. -->
+      <div class="form-field" *ngIf="inventoryForm.get('deviceType')?.value === 'Firewall'">
+        <mat-checkbox formControlName="panoramaManaged">Panorama Managed</mat-checkbox>
+      </div>
+
+      <!-- form field for the Panorama appliance input. -->
+      <div class="form-field" *ngIf="inventoryForm.get('deviceType')?.value === 'Firewall'">
+        <mat-form-field>
+          <mat-label>Panorama Appliance</mat-label>
+          <input matInput id="panoramaAppliance" formControlName="panoramaAppliance">
+        </mat-form-field>
+      </div>
+
+      <!-- form field for the Device Group input. -->
+      <div class="form-field" *ngIf="inventoryForm.get('deviceType')?.value === 'Firewall'">
+        <mat-form-field>
+          <mat-label>Device Group</mat-label>
+          <input matInput id="deviceGroup" formControlName="deviceGroup">
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- container for the Create button. -->
+    <div class="button-container">
+      <button mat-raised-button color="warn" type="button" (click)="onCancel()">Cancel</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="inventoryForm.invalid">Create</button>
+    </div>
+  </form>
+</main>
