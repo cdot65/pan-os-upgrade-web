@@ -1,0 +1,246 @@
+[{
+    "fields": {
+      "device_type": "Panorama",
+      "name": "M-100"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Panorama",
+      "name": "M-200"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Panorama",
+      "name": "M-500"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Panorama",
+      "name": "M-600"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Panorama",
+      "name": "Virtual"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-220R"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-410"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-415"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-440"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-445"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-450"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-460"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-820"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-850"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-1410"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-1420"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-3220"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-3250"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-3260"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-3410"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-3420"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-3430"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-3440"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-5220"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-5250"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-5260"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-5280"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-5410"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-5420"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-5430"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-5440"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-5450"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-7050"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "PA-7080"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  },
+  {
+    "fields": {
+      "device_type": "Firewall",
+      "name": "VM-Series"
+    },
+    "model": "panosupgradeweb.inventoryplatform"
+  }
+]

@@ -53,6 +53,10 @@ export class SettingsComponent implements OnInit {
         private settingsService: SettingsService,
     ) {
         this.settingsForm = this.formBuilder.group({
+            authentication: this.formBuilder.group({
+                panUsername: [""],
+                panPassword: [""],
+            }),
             download: this.formBuilder.group({
                 maxDownloadTries: [3, Validators.min(1)],
                 downloadRetryInterval: [60, Validators.min(1)],
@@ -61,6 +65,7 @@ export class SettingsComponent implements OnInit {
                 maxInstallAttempts: [3, Validators.min(1)],
                 installRetryInterval: [60, Validators.min(1)],
             }),
+            profile: [""],
             readinessChecks: this.formBuilder.group({
                 checks: this.formBuilder.group({
                     activeSupportCheck: [true],
@@ -108,18 +113,38 @@ export class SettingsComponent implements OnInit {
 
     ngOnInit(): void {
         this._componentPageTitle.title = "Settings";
-        this.fetchSettings();
+        this.fetchProfiles();
     }
 
-    private fetchSettings(): void {
-        this.settingsService.getSettings().subscribe(
-            (settings: Settings) => {
-                this.settingsForm.patchValue(settings);
+    private fetchProfiles(): void {
+        this.settingsService.getProfiles().subscribe(
+            (profiles: string[]) => {
+                console.log("Profiles fetched:", profiles);
+                // this.profile = profiles;
             },
             (error: any) => {
-                console.error("Error fetching settings:", error);
+                console.error("Error fetching profiles:", error);
             },
         );
+    }
+
+    onProfileChange(): void {
+        const selectedProfile = this.settingsForm.get("profile")?.value;
+        if (selectedProfile) {
+            this.settingsService
+                .getSettingsByProfile(selectedProfile)
+                .subscribe(
+                    (settings: Settings) => {
+                        this.settingsForm.patchValue(settings);
+                    },
+                    (error: any) => {
+                        console.error(
+                            "Error fetching settings by profile:",
+                            error,
+                        );
+                    },
+                );
+        }
     }
 
     formatLabel(value: number): string {

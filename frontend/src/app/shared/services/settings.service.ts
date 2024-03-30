@@ -44,6 +44,36 @@ export class SettingsService {
             );
     }
 
+    getProfiles(): Observable<string[]> {
+        const authToken = localStorage.getItem("auth_token");
+        const headers = new HttpHeaders().set(
+            "Authorization",
+            `Token ${authToken}`,
+        );
+        return this.http.get<string[]>(
+            `${this.apiUrl}/api/v1/settings/profiles/`,
+            { headers },
+        );
+    }
+
+    getSettingsByProfile(profile: string): Observable<Settings> {
+        const authToken = localStorage.getItem("auth_token");
+        const headers = new HttpHeaders().set(
+            "Authorization",
+            `Token ${authToken}`,
+        );
+        return this.http
+            .get<SettingsApiResponse>(
+                `${this.apiUrl}/api/v1/settings/?profile=${profile}`,
+                { headers },
+            )
+            .pipe(
+                map((response: SettingsApiResponse) =>
+                    this.mapSettingsResponse(response),
+                ),
+            );
+    }
+
     /**
      * Updates the settings data via the API.
      * @param settings - The settings data to update.

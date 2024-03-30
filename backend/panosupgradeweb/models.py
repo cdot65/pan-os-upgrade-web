@@ -103,7 +103,7 @@ class InventoryItem(models.Model):
         return self.hostname
 
 
-class Settings(models.Model):
+class SettingsProfile(models.Model):
     active_support_check = models.BooleanField(
         default=True,
         verbose_name="Active Support Check",
