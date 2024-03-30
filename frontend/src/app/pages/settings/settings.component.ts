@@ -18,7 +18,9 @@ import { MatInputModule } from "@angular/material/input";
 import { MatOptionModule } from "@angular/material/core";
 import { MatRadioModule } from "@angular/material/radio";
 import { MatSliderModule } from "@angular/material/slider";
+import { Router } from "@angular/router";
 import { Settings } from "../../shared/interfaces/settings.interface";
+import { SettingsPageHeader } from "../settings-page-header/settings-page-header";
 
 @Component({
     selector: "app-settings",
@@ -36,6 +38,7 @@ import { Settings } from "../../shared/interfaces/settings.interface";
         MatOptionModule,
         MatRadioModule,
         MatSliderModule,
+        SettingsPageHeader,
     ],
 })
 export class SettingsComponent implements OnInit {
@@ -43,67 +46,55 @@ export class SettingsComponent implements OnInit {
     settingsForm: FormGroup;
 
     constructor(
+        private router: Router,
         private formBuilder: FormBuilder,
         public _componentPageTitle: ComponentPageTitle,
     ) {
         this.settingsForm = this.formBuilder.group({
-            concurrency: this.formBuilder.group({
-                threads: [10, Validators.min(1)],
-            }),
             download: this.formBuilder.group({
-                maxTries: [3, Validators.min(1)],
-                retryInterval: [60, Validators.min(1)],
+                maxDownloadTries: [3, Validators.min(1)],
+                downloadRetryInterval: [60, Validators.min(1)],
             }),
             install: this.formBuilder.group({
-                maxTries: [3, Validators.min(1)],
-                retryInterval: [60, Validators.min(1)],
-            }),
-            logging: this.formBuilder.group({
-                filePath: ["logs/upgrade.log"],
-                level: ["INFO"],
-                maxSize: [10, Validators.min(1)],
-                upgradeLogCount: [10, Validators.min(1)],
+                maxInstallAttempts: [3, Validators.min(1)],
+                installRetryInterval: [60, Validators.min(1)],
             }),
             readinessChecks: this.formBuilder.group({
                 checks: this.formBuilder.group({
-                    activeSupport: [true],
-                    arpEntryExist: [false],
-                    candidateConfig: [true],
-                    certificatesRequirements: [false],
-                    contentVersion: [true],
-                    dynamicUpdates: [true],
-                    expiredLicenses: [true],
-                    freeDiskSpace: [true],
-                    ha: [true],
-                    ipSecTunnelStatus: [true],
-                    jobs: [false],
-                    ntpSync: [false],
-                    panorama: [true],
-                    planesClockSync: [true],
-                    sessionExist: [false],
+                    activeSupportCheck: [true],
+                    arpEntryExistCheck: [false],
+                    candidateConfigCheck: [true],
+                    certificatesRequirementsCheck: [false],
+                    contentVersionCheck: [true],
+                    dynamicUpdatesCheck: [true],
+                    expiredLicensesCheck: [true],
+                    freeDiskSpaceCheck: [true],
+                    haCheck: [true],
+                    ipSecTunnelStatusCheck: [true],
+                    jobsCheck: [false],
+                    ntpSyncCheck: [false],
+                    panoramaCheck: [true],
+                    planesClockSyncCheck: [true],
+                    sessionExistCheck: [false],
                 }),
-                customize: [true],
-                disabled: [false],
-                location: ["assurance/readiness_checks/"],
+                readinessChecksLocation: ["assurance/readiness_checks/"],
             }),
             reboot: this.formBuilder.group({
-                maxTries: [30, Validators.min(1)],
-                retryInterval: [60, Validators.min(1)],
+                maxRebootTries: [30, Validators.min(1)],
+                rebootRetryInterval: [60, Validators.min(1)],
             }),
             snapshots: this.formBuilder.group({
-                customize: [true],
-                disabled: [false],
-                location: ["assurance/snapshots/"],
-                maxTries: [3, Validators.min(1)],
-                retryInterval: [60, Validators.min(1)],
+                snapshotsLocation: ["assurance/snapshots/"],
+                maxSnapshotTries: [3, Validators.min(1)],
+                snapshotRetryInterval: [60, Validators.min(1)],
                 state: this.formBuilder.group({
-                    arpTable: [false],
-                    contentVersion: [true],
-                    ipSecTunnels: [false],
-                    license: [true],
-                    nics: [true],
-                    routes: [false],
-                    sessionStats: [false],
+                    arpTableSnapshot: [false],
+                    contentVersionSnapshot: [true],
+                    ipSecTunnelsSnapshot: [false],
+                    licenseSnapshot: [true],
+                    nicsSnapshot: [true],
+                    routesSnapshot: [false],
+                    sessionStatsSnapshot: [false],
                 }),
             }),
             timeoutSettings: this.formBuilder.group({
@@ -117,6 +108,18 @@ export class SettingsComponent implements OnInit {
         this._componentPageTitle.title = "Settings";
         // Initialize the form with current settings values
         // TODO: Fetch current settings from the backend API and patch the form
+    }
+
+    formatLabel(value: number): string {
+        if (value >= 1000) {
+            return Math.round(value / 1000) + "k";
+        }
+        return `${value}`;
+    }
+
+    onCancel(): void {
+        this.settingsForm.reset();
+        this.router.navigate(["/inventory"]);
     }
 
     onSubmit(): void {
