@@ -15,11 +15,11 @@ const GUIDES = [
         overview: "Add Angular Material to your project!",
     },
     {
-        id: "schematics",
-        name: "Schematics",
-        document: "/docs-content/guides/schematics.html",
+        id: "key-features",
+        name: "Key Features",
+        document: "/assets/guides/key-features.html",
         overview:
-            "Use schematics to quickly generate views with Material Design components.",
+            "Point out key features of the pan-os-upgrade web application.",
     },
     {
         id: "theming",
