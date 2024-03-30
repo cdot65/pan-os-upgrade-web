@@ -1,149 +1,139 @@
 <!-- src/app/pages/settings/settings.component.html -->
 
-<h2>Settings</h2>
+<settings-page-header></settings-page-header>
+<main focusOnNavigation aria-label="Settings" id="settings" class="settings-details">
+  <form [formGroup]="settingsForm" (ngSubmit)="onSubmit()" class="mat-elevation-z2">
+    <div class="settings-details-grid">
 
-<form [formGroup]="settingsForm" (ngSubmit)="onSubmit()">
-  <div formGroupName="concurrency">
-    <h3>Concurrency</h3>
-    <mat-form-field>
-      <mat-label>Number of concurrent threads</mat-label>
-      <input matInput type="number" formControlName="threads" required>
-    </mat-form-field>
-  </div>
+      <div formGroupName="download">
+        <h3>Download</h3>
+        <div class="form-field">
+          <mat-form-field>
+            <mat-label>PAN-OS maximum download tries</mat-label>
+            <input matInput type="number" formControlName="maxDownloadTries" required>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>PAN-OS download retry interval (seconds)</mat-label>
+            <input matInput type="number" formControlName="downloadRetryInterval" required>
+          </mat-form-field>
+        </div>
+      </div>
 
-  <div formGroupName="download">
-    <h3>Download</h3>
-    <mat-form-field>
-      <mat-label>PAN-OS maximum download tries</mat-label>
-      <input matInput type="number" formControlName="maxTries" required>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>PAN-OS download retry interval (seconds)</mat-label>
-      <input matInput type="number" formControlName="retryInterval" required>
-    </mat-form-field>
-  </div>
+      <div formGroupName="install">
+        <h3>Install</h3>
+        <div class="form-field">
+          <mat-form-field>
+            <mat-label>PAN-OS maximum install attempts</mat-label>
+            <input matInput type="number" formControlName="maxInstallAttempts" required>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>PAN-OS install retry interval (seconds)</mat-label>
+            <input matInput type="number" formControlName="installRetryInterval" required>
+          </mat-form-field>
+        </div>
+      </div>
 
-  <div formGroupName="install">
-    <h3>Install</h3>
-    <mat-form-field>
-      <mat-label>PAN-OS maximum install attempts</mat-label>
-      <input matInput type="number" formControlName="maxTries" required>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>PAN-OS install retry interval (seconds)</mat-label>
-      <input matInput type="number" formControlName="retryInterval" required>
-    </mat-form-field>
-  </div>
+      <div formGroupName="readinessChecks">
+        <h3>Readiness Checks</h3>
+        <div class="form-field">
+          <div formGroupName="checks">
+            <mat-checkbox formControlName="activeSupportCheck">Check if active support is available</mat-checkbox>
+            <mat-checkbox formControlName="arpEntryExistCheck">Check if a given ARP entry is available in the ARP table
+            </mat-checkbox>
+            <mat-checkbox formControlName="candidateConfigCheck">Check if there are pending changes on device
+            </mat-checkbox>
+            <mat-checkbox formControlName="certificatesRequirementsCheck">Check if the certificates' keys meet minimum
+              size requirements</mat-checkbox>
+            <mat-checkbox formControlName="contentVersionCheck">Running Latest Content Version</mat-checkbox>
+            <mat-checkbox formControlName="dynamicUpdatesCheck">Check if any Dynamic Update job is scheduled to run
+              within
+              the specified time window</mat-checkbox>
+            <mat-checkbox formControlName="expiredLicensesCheck">No Expired Licenses</mat-checkbox>
+            <mat-checkbox formControlName="freeDiskSpaceCheck">Check if there is enough space on the `/opt/panrepo`
+              volume
+              for PAN-OS image</mat-checkbox>
+            <mat-checkbox formControlName="haCheck">Check HA pair status from the perspective of the current device
+            </mat-checkbox>
+            <mat-checkbox formControlName="ipSecTunnelStatusCheck">Check if a given IPsec tunnel is in active state
+            </mat-checkbox>
+            <mat-checkbox formControlName="jobsCheck">Check for any job with status different than FIN</mat-checkbox>
+            <mat-checkbox formControlName="ntpSyncCheck">Check if NTP is synchronized</mat-checkbox>
+            <mat-checkbox formControlName="panoramaCheck">Check connectivity with the Panorama appliance</mat-checkbox>
+            <mat-checkbox formControlName="planesClockSyncCheck">Check if the clock is synchronized between dataplane
+              and
+              management plane</mat-checkbox>
+            <mat-checkbox formControlName="sessionExistCheck">Check if a critical session is present in the sessions
+              table
+            </mat-checkbox>
+          </div>
+          <mat-form-field>
+            <mat-label>Readiness Checks Location</mat-label>
+            <input matInput formControlName="readinessChecksLocation" required>
+          </mat-form-field>
+        </div>
+      </div>
 
-  <div formGroupName="logging">
-    <h3>Logging</h3>
-    <mat-form-field>
-      <mat-label>Path for log files</mat-label>
-      <input matInput formControlName="filePath" required>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Logging level</mat-label>
-      <mat-select formControlName="level" required>
-        <mat-option value="INFO">INFO</mat-option>
-        <mat-option value="DEBUG">DEBUG</mat-option>
-        <!-- Add more logging levels as needed -->
-      </mat-select>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Maximum log file size (MB)</mat-label>
-      <input matInput type="number" formControlName="maxSize" required>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Number of upgrade logs to retain</mat-label>
-      <input matInput type="number" formControlName="upgradeLogCount" required>
-    </mat-form-field>
-  </div>
+      <div formGroupName="snapshots">
+        <h3>Snapshots</h3>
+        <div class="form-field">
+          <div formGroupName="state">
+            <mat-checkbox formControlName="arpTableSnapshot">Snapshot of the ARP Table</mat-checkbox>
+            <mat-checkbox formControlName="contentVersionSnapshot">Snapshot of the Content Version</mat-checkbox>
+            <mat-checkbox formControlName="ipSecTunnelsSnapshot">Snapshot of the IPsec Tunnels</mat-checkbox>
+            <mat-checkbox formControlName="licenseSnapshot">Snapshot of the License Information</mat-checkbox>
+            <mat-checkbox formControlName="nicsSnapshot">Snapshot of the Network Interfaces</mat-checkbox>
+            <mat-checkbox formControlName="routesSnapshot">Snapshot of the Routing Table</mat-checkbox>
+            <mat-checkbox formControlName="sessionStatsSnapshot">Snapshot of the Session Statistics</mat-checkbox>
+          </div>
+          <mat-form-field>
+            <mat-label>Snapshots Location</mat-label>
+            <input matInput formControlName="snapshotsLocation" required>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Snapshots maximum tries</mat-label>
+            <input matInput type="number" formControlName="maxSnapshotTries" required>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Snapshots retry interval (seconds)</mat-label>
+            <input matInput type="number" formControlName="snapshotRetryInterval" required>
+          </mat-form-field>
+        </div>
+      </div>
 
-  <div formGroupName="readinessChecks">
-    <h3>Readiness Checks</h3>
-    <mat-checkbox formControlName="disabled">Disable all readiness checks</mat-checkbox>
-    <mat-checkbox formControlName="customize">Customize readiness checks</mat-checkbox>
-    <div formGroupName="checks">
-      <mat-checkbox formControlName="activeSupport">Check if active support is available</mat-checkbox>
-      <mat-checkbox formControlName="arpEntryExist">Check if a given ARP entry is available in the ARP table
-      </mat-checkbox>
-      <mat-checkbox formControlName="candidateConfig">Check if there are pending changes on device</mat-checkbox>
-      <mat-checkbox formControlName="certificatesRequirements">Check if the certificates' keys meet minimum size
-        requirements</mat-checkbox>
-      <mat-checkbox formControlName="contentVersion">Running Latest Content Version</mat-checkbox>
-      <mat-checkbox formControlName="dynamicUpdates">Check if any Dynamic Update job is scheduled to run within the
-        specified time window</mat-checkbox>
-      <mat-checkbox formControlName="expiredLicenses">No Expired Licenses</mat-checkbox>
-      <mat-checkbox formControlName="freeDiskSpace">Check if there is enough space on the `/opt/panrepo` volume for
-        PAN-OS image</mat-checkbox>
-      <mat-checkbox formControlName="ha">Check HA pair status from the perspective of the current device</mat-checkbox>
-      <mat-checkbox formControlName="ipSecTunnelStatus">Check if a given IPsec tunnel is in active state</mat-checkbox>
-      <mat-checkbox formControlName="jobs">Check for any job with status different than FIN</mat-checkbox>
-      <mat-checkbox formControlName="ntpSync">Check if NTP is synchronized</mat-checkbox>
-      <mat-checkbox formControlName="panorama">Check connectivity with the Panorama appliance</mat-checkbox>
-      <mat-checkbox formControlName="planesClockSync">Check if the clock is synchronized between dataplane and
-        management plane</mat-checkbox>
-      <mat-checkbox formControlName="sessionExist">Check if a critical session is present in the sessions table
-      </mat-checkbox>
+
+      <div formGroupName="reboot">
+        <h3>Reboot</h3>
+        <div class="form-field">
+          <mat-form-field>
+            <mat-label>Device maximum reboot tries</mat-label>
+            <input matInput type="number" formControlName="maxRebootTries" required>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Device reboot retry interval (seconds)</mat-label>
+            <input matInput type="number" formControlName="rebootRetryInterval" required>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div formGroupName="timeoutSettings">
+        <h3>Timeout Settings</h3>
+        <div class="form-field">
+          <mat-form-field>
+            <mat-label>Connection timeout (seconds)</mat-label>
+            <input matInput type="number" formControlName="connectionTimeout" required>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Command timeout (seconds)</mat-label>
+            <input matInput type="number" formControlName="commandTimeout" required>
+          </mat-form-field>
+        </div>
+      </div>
     </div>
-    <mat-form-field>
-      <mat-label>Readiness Checks Location</mat-label>
-      <input matInput formControlName="location" required>
-    </mat-form-field>
-  </div>
 
-  <div formGroupName="reboot">
-    <h3>Reboot</h3>
-    <mat-form-field>
-      <mat-label>Device maximum reboot tries</mat-label>
-      <input matInput type="number" formControlName="maxTries" required>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Device reboot retry interval (seconds)</mat-label>
-      <input matInput type="number" formControlName="retryInterval" required>
-    </mat-form-field>
-  </div>
-
-  <div formGroupName="snapshots">
-    <h3>Snapshots</h3>
-    <mat-checkbox formControlName="disabled">Disable all snapshots</mat-checkbox>
-    <mat-checkbox formControlName="customize">Customize snapshots</mat-checkbox>
-    <div formGroupName="state">
-      <mat-checkbox formControlName="arpTable">Snapshot of the ARP Table</mat-checkbox>
-      <mat-checkbox formControlName="contentVersion">Snapshot of the Content Version</mat-checkbox>
-      <mat-checkbox formControlName="ipSecTunnels">Snapshot of the IPsec Tunnels</mat-checkbox>
-      <mat-checkbox formControlName="license">Snapshot of the License Information</mat-checkbox>
-      <mat-checkbox formControlName="nics">Snapshot of the Network Interfaces</mat-checkbox>
-      <mat-checkbox formControlName="routes">Snapshot of the Routing Table</mat-checkbox>
-      <mat-checkbox formControlName="sessionStats">Snapshot of the Session Statistics</mat-checkbox>
+    <!-- container for the Submit and Cancel buttons. -->
+    <div class="button-container">
+      <button mat-raised-button color="warn" type="button" (click)="onCancel()">Cancel</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="settingsForm.invalid">Save</button>
     </div>
-    <mat-form-field>
-      <mat-label>Snapshots Location</mat-label>
-      <input matInput formControlName="location" required>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Snapshots maximum tries</mat-label>
-      <input matInput type="number" formControlName="maxTries" required>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Snapshots retry interval (seconds)</mat-label>
-      <input matInput type="number" formControlName="retryInterval" required>
-    </mat-form-field>
-  </div>
-
-  <div formGroupName="timeoutSettings">
-    <h3>Timeout Settings</h3>
-    <mat-form-field>
-      <mat-label>Connection timeout (seconds)</mat-label>
-      <input matInput type="number" formControlName="connectionTimeout" required>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Command timeout (seconds)</mat-label>
-      <input matInput type="number" formControlName="commandTimeout" required>
-    </mat-form-field>
-  </div>
-
-  <mat-divider></mat-divider>
-
-  <button mat-raised-button color="primary" type="submit" [disabled]="settingsForm.invalid">Save</button>
-</form>
+  </form>
+</main>

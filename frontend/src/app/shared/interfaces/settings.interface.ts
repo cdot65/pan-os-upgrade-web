@@ -1,63 +1,50 @@
 // src/app/shared/interfaces/settings.interface.ts
 
 export interface Settings {
-    concurrency: {
-        threads: number;
-    };
     download: {
-        maxTries: number;
-        retryInterval: number;
+        maxDownloadTries: number;
+        downloadRetryInterval: number;
     };
     install: {
-        maxTries: number;
-        retryInterval: number;
-    };
-    logging: {
-        filePath: string;
-        level: string;
-        maxSize: number;
-        upgradeLogCount: number;
+        maxInstallAttempts: number;
+        installRetryInterval: number;
     };
     readinessChecks: {
         checks: {
-            activeSupport: boolean;
-            arpEntryExist: boolean;
-            candidateConfig: boolean;
-            certificatesRequirements: boolean;
-            contentVersion: boolean;
-            dynamicUpdates: boolean;
-            expiredLicenses: boolean;
-            freeDiskSpace: boolean;
-            ha: boolean;
-            ipSecTunnelStatus: boolean;
-            jobs: boolean;
-            ntpSync: boolean;
-            panorama: boolean;
-            planesClockSync: boolean;
-            sessionExist: boolean;
+            activeSupportCheck: boolean;
+            arpEntryExistCheck: boolean;
+            candidateConfigCheck: boolean;
+            certificatesRequirementsCheck: boolean;
+            contentVersionCheck: boolean;
+            dynamicUpdatesCheck: boolean;
+            expiredLicensesCheck: boolean;
+            freeDiskSpaceCheck: boolean;
+            haCheck: boolean;
+            ipSecTunnelStatusCheck: boolean;
+            jobsCheck: boolean;
+            ntpSyncCheck: boolean;
+            panoramaCheck: boolean;
+            planesClockSyncCheck: boolean;
+            sessionExistCheck: boolean;
         };
-        customize: boolean;
-        disabled: boolean;
-        location: string;
+        readinessChecksLocation: string;
     };
     reboot: {
-        maxTries: number;
-        retryInterval: number;
+        maxRebootTries: number;
+        rebootRetryInterval: number;
     };
     snapshots: {
-        customize: boolean;
-        disabled: boolean;
-        location: string;
-        maxTries: number;
-        retryInterval: number;
+        snapshotsLocation: string;
+        maxSnapshotTries: number;
+        snapshotRetryInterval: number;
         state: {
-            arpTable: boolean;
-            contentVersion: boolean;
-            ipSecTunnels: boolean;
-            license: boolean;
-            nics: boolean;
-            routes: boolean;
-            sessionStats: boolean;
+            arpTableSnapshot: boolean;
+            contentVersionSnapshot: boolean;
+            ipSecTunnelsSnapshot: boolean;
+            licenseSnapshot: boolean;
+            nicsSnapshot: boolean;
+            routesSnapshot: boolean;
+            sessionStatsSnapshot: boolean;
         };
     };
     timeoutSettings: {
