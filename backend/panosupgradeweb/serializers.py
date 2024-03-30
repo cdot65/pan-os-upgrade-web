@@ -7,6 +7,7 @@ from django.conf import settings
 from .models import (
     InventoryItem,
     InventoryPlatform,
+    Settings,
 )
 
 
@@ -135,3 +136,9 @@ class UserSerializer(serializers.ModelSerializer):
         if obj.profile_image:
             return settings.MEDIA_URL + str(obj.profile_image)
         return None
+
+
+class SettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Settings
+        fields = "__all__"

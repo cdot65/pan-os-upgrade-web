@@ -21,6 +21,7 @@ import { MatSliderModule } from "@angular/material/slider";
 import { Router } from "@angular/router";
 import { Settings } from "../../shared/interfaces/settings.interface";
 import { SettingsPageHeader } from "../settings-page-header/settings-page-header";
+import { SettingsService } from "../../shared/services/settings.service";
 
 @Component({
     selector: "app-settings",
@@ -49,6 +50,7 @@ export class SettingsComponent implements OnInit {
         private router: Router,
         private formBuilder: FormBuilder,
         public _componentPageTitle: ComponentPageTitle,
+        private settingsService: SettingsService,
     ) {
         this.settingsForm = this.formBuilder.group({
             download: this.formBuilder.group({
@@ -106,8 +108,18 @@ export class SettingsComponent implements OnInit {
 
     ngOnInit(): void {
         this._componentPageTitle.title = "Settings";
-        // Initialize the form with current settings values
-        // TODO: Fetch current settings from the backend API and patch the form
+        this.fetchSettings();
+    }
+
+    private fetchSettings(): void {
+        this.settingsService.getSettings().subscribe(
+            (settings: Settings) => {
+                this.settingsForm.patchValue(settings);
+            },
+            (error: any) => {
+                console.error("Error fetching settings:", error);
+            },
+        );
     }
 
     formatLabel(value: number): string {

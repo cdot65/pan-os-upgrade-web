@@ -4,6 +4,7 @@ from .views import (
     InventoryExistsView,
     InventoryPlatformViewSet,
     InventoryViewSet,
+    SettingsViewSet,
     UserViewSet,
     UserProfileView,
 )
@@ -14,6 +15,13 @@ router.register(
     InventoryViewSet,
     basename="inventory",
 )
+
+router.register(
+    "settings",
+    SettingsViewSet,
+    basename="settings",
+)
+
 router.register(
     "users",
     UserViewSet,
