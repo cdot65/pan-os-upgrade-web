@@ -7,7 +7,7 @@ from django.conf import settings
 from .models import (
     InventoryItem,
     InventoryPlatform,
-    Settings,
+    SettingsProfile,
 )
 
 
@@ -138,7 +138,126 @@ class UserSerializer(serializers.ModelSerializer):
         return None
 
 
-class SettingsSerializer(serializers.ModelSerializer):
+class SettingsProfileSerializer(serializers.ModelSerializer):
+    authentication = serializers.SerializerMethodField()
+    download = serializers.SerializerMethodField()
+    install = serializers.SerializerMethodField()
+    readiness_checks = serializers.SerializerMethodField()
+    reboot = serializers.SerializerMethodField()
+    snapshots = serializers.SerializerMethodField()
+    timeout_settings = serializers.SerializerMethodField()
+
     class Meta:
-        model = Settings
-        fields = "__all__"
+        model = SettingsProfile
+        fields = (
+            "uuid",
+            "profile",
+            "authentication",
+            "download",
+            "install",
+            "readiness_checks",
+            "reboot",
+            "snapshots",
+            "timeout_settings",
+        )
+
+    def get_authentication(self, obj):
+        return {
+            "pan_username": obj.pan_username,
+            "pan_password": obj.pan_password,
+        }
+
+    def get_download(self, obj):
+        return {
+            "max_download_tries": obj.max_download_tries,
+            "download_retry_interval": obj.download_retry_interval,
+        }
+
+    def get_install(self, obj):
+        return {
+            "max_install_attempts": obj.max_install_attempts,
+            "install_retry_interval": obj.install_retry_interval,
+        }
+
+    def get_readiness_checks(self, obj):
+        return {
+            "checks": {
+                "active_support_check": obj.active_support_check,
+                "arp_entry_exist_check": obj.arp_entry_exist_check,
+                "candidate_config_check": obj.candidate_config_check,
+                "certificates_requirements_check": obj.certificates_requirements_check,
+                "content_version_check": obj.content_version_check,
+                "dynamic_updates_check": obj.dynamic_updates_check,
+                "expired_licenses_check": obj.expired_licenses_check,
+                "free_disk_space_check": obj.free_disk_space_check,
+                "ha_check": obj.ha_check,
+                "ip_sec_tunnel_status_check": obj.ip_sec_tunnel_status_check,
+                "jobs_check": obj.jobs_check,
+                "ntp_sync_check": obj.ntp_sync_check,
+                "panorama_check": obj.panorama_check,
+                "planes_clock_sync_check": obj.planes_clock_sync_check,
+                "session_exist_check": obj.session_exist_check,
+            },
+            "readiness_checks_location": obj.readiness_checks_location,
+        }
+
+    def get_reboot(self, obj):
+        return {
+            "max_reboot_tries": obj.max_reboot_tries,
+            "reboot_retry_interval": obj.reboot_retry_interval,
+        }
+
+    def get_snapshots(self, obj):
+        return {
+            "snapshots_location": obj.snapshots_location,
+            "max_snapshot_tries": obj.max_snapshot_tries,
+            "snapshot_retry_interval": obj.snapshot_retry_interval,
+            "state": {
+                "arp_table_snapshot": obj.arp_table_snapshot,
+                "content_version_snapshot": obj.content_version_snapshot,
+                "ip_sec_tunnels_snapshot": obj.ip_sec_tunnels_snapshot,
+                "license_snapshot": obj.license_snapshot,
+                "nics_snapshot": obj.nics_snapshot,
+                "routes_snapshot": obj.routes_snapshot,
+                "session_stats_snapshot": obj.session_stats_snapshot,
+            },
+        }
+
+    def get_timeout_settings(self, obj):
+        return {
+            "command_timeout": obj.command_timeout,
+            "connection_timeout": obj.connection_timeout,
+        }
+
+    def to_internal_value(self, data):
+        data["pan_username"] = data.get("authentication", {}).get("pan_username")
+        data["pan_password"] = data.get("authentication", {}).get("pan_password")
+        data["max_download_tries"] = data.get("download", {}).get("max_download_tries")
+        data["download_retry_interval"] = data.get("download", {}).get(
+            "download_retry_interval"
+        )
+        data["max_install_attempts"] = data.get("install", {}).get(
+            "max_install_attempts"
+        )
+        data["install_retry_interval"] = data.get("install", {}).get(
+            "install_retry_interval"
+        )
+        data["readiness_checks_location"] = data.get("readiness_checks", {}).get(
+            "readiness_checks_location"
+        )
+        data["max_reboot_tries"] = data.get("reboot", {}).get("max_reboot_tries")
+        data["reboot_retry_interval"] = data.get("reboot", {}).get(
+            "reboot_retry_interval"
+        )
+        data["snapshots_location"] = data.get("snapshots", {}).get("snapshots_location")
+        data["max_snapshot_tries"] = data.get("snapshots", {}).get("max_snapshot_tries")
+        data["snapshot_retry_interval"] = data.get("snapshots", {}).get(
+            "snapshot_retry_interval"
+        )
+        data["command_timeout"] = data.get("timeout_settings", {}).get(
+            "command_timeout"
+        )
+        data["connection_timeout"] = data.get("timeout_settings", {}).get(
+            "connection_timeout"
+        )
+        return super().to_internal_value(data)
