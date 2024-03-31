@@ -139,7 +139,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class SettingsProfileSerializer(serializers.ModelSerializer):
-    authentication = serializers.SerializerMethodField()
     download = serializers.SerializerMethodField()
     install = serializers.SerializerMethodField()
     readiness_checks = serializers.SerializerMethodField()
@@ -152,7 +151,8 @@ class SettingsProfileSerializer(serializers.ModelSerializer):
         fields = (
             "uuid",
             "profile",
-            "authentication",
+            "pan_username",
+            "pan_password",
             "download",
             "install",
             "readiness_checks",
@@ -160,6 +160,27 @@ class SettingsProfileSerializer(serializers.ModelSerializer):
             "snapshots",
             "timeout_settings",
         )
+        extra_kwargs = {
+            "pan_password": {"write_only": True},
+        }
+
+    def create(self, validated_data):
+        pan_username = validated_data.pop("pan_username", "")
+        pan_password = validated_data.pop("pan_password", "")
+        instance = super().create(validated_data)
+        instance.pan_username = pan_username
+        instance.pan_password = pan_password
+        instance.save()
+        return instance
+
+    def update(self, instance, validated_data):
+        pan_username = validated_data.pop("pan_username", "")
+        pan_password = validated_data.pop("pan_password", "")
+        instance = super().update(instance, validated_data)
+        instance.pan_username = pan_username
+        instance.pan_password = pan_password
+        instance.save()
+        return instance
 
     def get_authentication(self, obj):
         return {
@@ -261,3 +282,11 @@ class SettingsProfileSerializer(serializers.ModelSerializer):
             "connection_timeout"
         )
         return super().to_internal_value(data)
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation["authentication"] = {
+            "pan_username": instance.pan_username,
+            "pan_password": "",
+        }
+        return representation

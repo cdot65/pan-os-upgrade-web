@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // src/app/shared/interfaces/settings.interface.ts
 
-export interface Settings {
+export interface SettingsProfile {
     authentication: {
         panUsername: string;
         panPassword: string;
@@ -60,7 +60,7 @@ export interface Settings {
     uuid: number;
 }
 
-export interface SettingsApiResponse {
+export interface SettingsProfileApiResponse {
     uuid: number;
     max_download_tries: number;
     download_retry_interval: number;

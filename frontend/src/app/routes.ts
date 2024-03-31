@@ -16,20 +16,6 @@ export const PANOSUPGRADE_ROUTES: Routes = [
             import("./pages/auth/auth.module").then((m) => m.AuthModule),
     },
     {
-        path: "categories",
-        redirectTo: "/components/categories",
-    },
-    {
-        path: "cdk",
-        pathMatch: "full",
-        redirectTo: "/cdk/categories",
-    },
-    {
-        path: "components",
-        pathMatch: "full",
-        redirectTo: "/components/categories",
-    },
-    {
         path: "guides",
         loadComponent: () =>
             import("./pages/guide-list").then((m) => m.GuideList),
@@ -69,9 +55,22 @@ export const PANOSUPGRADE_ROUTES: Routes = [
     },
     {
         path: "settings",
+        pathMatch: "full",
+        redirectTo: "/settings/profiles",
+    },
+    {
+        path: "settings/profiles",
         loadComponent: () =>
-            import("./pages/settings/settings.component").then(
-                (m) => m.SettingsComponent,
+            import("./pages/settings-profile-list").then(
+                (m) => m.SettingsProfileListComponent,
+            ),
+        canActivate: [authGuard],
+    },
+    {
+        path: "settings/profiles/:id",
+        loadComponent: () =>
+            import("./pages/settings-profile-details").then(
+                (m) => m.SettingsProfileDetailsComponent,
             ),
         canActivate: [authGuard],
     },
