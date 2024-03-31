@@ -112,8 +112,8 @@ export class SettingsProfileListComponent implements OnInit, AfterViewInit {
         }
     }
 
-    navigateToCreateInventory(): void {
-        this.router.navigate(["/settings/profiles"]);
+    navigateToCreateSecurityProfile(): void {
+        this.router.navigate(["/settings/profiles/create"]);
     }
 
     /**
