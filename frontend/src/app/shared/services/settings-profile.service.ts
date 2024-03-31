@@ -2,75 +2,74 @@
 // src/app/shared/services/settings.service.ts
 
 import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { Observable, of } from "rxjs";
 import {
-    Settings,
-    SettingsApiResponse,
-} from "../interfaces/settings.interface";
+    SettingsProfile,
+    SettingsProfileApiResponse,
+} from "../interfaces/settings-profile.interface";
+import { catchError, map } from "rxjs/operators";
 
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
 import { environment } from "../../../environments/environment.prod";
-import { map } from "rxjs/operators";
 
 @Injectable({
     providedIn: "root",
 })
-export class SettingsService {
+export class SettingsProfileService {
     private apiUrl = environment.apiUrl;
 
     constructor(private http: HttpClient) {}
 
-    /**
-     * Fetches the settings data from the API.
-     * @returns An Observable that emits the settings data.
-     */
-    getSettings(): Observable<Settings> {
+    getProfiles(): Observable<SettingsProfile[]> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
         );
-        return this.http
-            .get<
-                SettingsApiResponse[]
-            >(`${this.apiUrl}/api/v1/settings/`, { headers })
-            .pipe(
-                map((response: SettingsApiResponse[]) => {
-                    if (response.length > 0) {
-                        return this.mapSettingsResponse(response[0]);
-                    }
-                    throw new Error("No settings data found");
-                }),
-            );
-    }
-
-    getProfiles(): Observable<string[]> {
-        const authToken = localStorage.getItem("auth_token");
-        const headers = new HttpHeaders().set(
-            "Authorization",
-            `Token ${authToken}`,
-        );
-        return this.http.get<string[]>(
+        return this.http.get<SettingsProfile[]>(
             `${this.apiUrl}/api/v1/settings/profiles/`,
             { headers },
         );
     }
 
-    getSettingsByProfile(profile: string): Observable<Settings> {
+    getSettingsByProfile(profile: string): Observable<SettingsProfile> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
         );
         return this.http
-            .get<SettingsApiResponse>(
+            .get<SettingsProfileApiResponse>(
                 `${this.apiUrl}/api/v1/settings/?profile=${profile}`,
                 { headers },
             )
             .pipe(
-                map((response: SettingsApiResponse) =>
-                    this.mapSettingsResponse(response),
+                map((response: SettingsProfileApiResponse) =>
+                    this.mapApiResponseToSettingsProfile(response),
                 ),
+            );
+    }
+
+    /**
+     * Deletes an inventory item by its UUID.
+     * @param uuid The UUID of the inventory item to delete.
+     * @returns An Observable that emits the response from the server, or null if an error occurs.
+     */
+    deleteSettingsProfile(uuid: number): Observable<any> {
+        const authToken = localStorage.getItem("auth_token");
+        const headers = new HttpHeaders().set(
+            "Authorization",
+            `Token ${authToken}`,
+        );
+        return this.http
+            .delete(`${this.apiUrl}/api/v1/settings/profiles/${uuid}`, {
+                headers,
+            })
+            .pipe(
+                catchError((error) => {
+                    console.error("Error deleting settings profile:", error);
+                    return of(null);
+                }),
             );
     }
 
@@ -79,23 +78,25 @@ export class SettingsService {
      * @param settings - The settings data to update.
      * @returns An Observable that emits the updated settings data.
      */
-    updateSettings(settings: Settings): Observable<Settings> {
-        const apiSettings = this.mapSettingsToApiResponse(settings);
+    updateSettings(settings: SettingsProfile): Observable<SettingsProfile> {
+        const apiSettings = this.mapSettingsProfileToApiRequest(settings);
         return this.http
-            .put<SettingsApiResponse>(this.apiUrl, apiSettings)
+            .put<SettingsProfileApiResponse>(this.apiUrl, apiSettings)
             .pipe(
-                map((response: SettingsApiResponse) =>
-                    this.mapSettingsResponse(response),
+                map((response: SettingsProfileApiResponse) =>
+                    this.mapApiResponseToSettingsProfile(response),
                 ),
             );
     }
 
     /**
-     * Maps the API response to the Settings interface.
+     * Maps the API response to the SettingsProfile interface.
      * @param response - The API response.
-     * @returns The mapped Settings object.
+     * @returns The mapped SettingsProfile object.
      */
-    private mapSettingsResponse(response: SettingsApiResponse): Settings {
+    private mapApiResponseToSettingsProfile(
+        response: SettingsProfileApiResponse,
+    ): SettingsProfile {
         return {
             authentication: {
                 panUsername: response.pan_username,
@@ -158,11 +159,13 @@ export class SettingsService {
     }
 
     /**
-     * Maps the Settings interface to the API request payload.
-     * @param settings - The Settings object.
+     * Maps the SettingsProfile interface to the API request payload.
+     * @param settings - The SettingsProfile object.
      * @returns The mapped API request payload.
      */
-    private mapSettingsToApiResponse(settings: Settings): SettingsApiResponse {
+    private mapSettingsProfileToApiRequest(
+        settings: SettingsProfile,
+    ): SettingsProfileApiResponse {
         return {
             active_support_check:
                 settings.readinessChecks.checks.activeSupportCheck,

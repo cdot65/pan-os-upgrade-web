@@ -1,4 +1,4 @@
-// src/app/pages/settings/settings.component.ts
+// src/app/pages/settings-profile-details/settings-profile-details.ts
 
 import { Component, HostBinding, OnInit } from "@angular/core";
 import {
@@ -17,16 +17,17 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { MatOptionModule } from "@angular/material/core";
 import { MatRadioModule } from "@angular/material/radio";
+import { MatSelectModule } from "@angular/material/select";
 import { MatSliderModule } from "@angular/material/slider";
 import { Router } from "@angular/router";
-import { Settings } from "../../shared/interfaces/settings.interface";
 import { SettingsPageHeader } from "../settings-page-header/settings-page-header";
-import { SettingsService } from "../../shared/services/settings.service";
+import { SettingsProfile } from "../../shared/interfaces/settings-profile.interface";
+import { SettingsProfileService } from "../../shared/services/settings-profile.service";
 
 @Component({
-    selector: "app-settings",
-    templateUrl: "./settings.component.html",
-    styleUrls: ["./settings.component.scss"],
+    selector: "app-settings-profile-details",
+    templateUrl: "./settings-profile-details.html",
+    styleUrls: ["./settings-profile-details.scss"],
     standalone: true,
     imports: [
         ReactiveFormsModule,
@@ -37,20 +38,22 @@ import { SettingsService } from "../../shared/services/settings.service";
         MatFormFieldModule,
         MatInputModule,
         MatOptionModule,
+        MatSelectModule,
         MatRadioModule,
         MatSliderModule,
         SettingsPageHeader,
     ],
 })
-export class SettingsComponent implements OnInit {
+export class SettingsProfileDetailsComponent implements OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     settingsForm: FormGroup;
+    settingsProfiles: SettingsProfile[] = [];
 
     constructor(
         private router: Router,
         private formBuilder: FormBuilder,
         public _componentPageTitle: ComponentPageTitle,
-        private settingsService: SettingsService,
+        private settingsProfileService: SettingsProfileService,
     ) {
         this.settingsForm = this.formBuilder.group({
             authentication: this.formBuilder.group({
@@ -113,38 +116,6 @@ export class SettingsComponent implements OnInit {
 
     ngOnInit(): void {
         this._componentPageTitle.title = "Settings";
-        this.fetchProfiles();
-    }
-
-    private fetchProfiles(): void {
-        this.settingsService.getProfiles().subscribe(
-            (profiles: string[]) => {
-                console.log("Profiles fetched:", profiles);
-                // this.profile = profiles;
-            },
-            (error: any) => {
-                console.error("Error fetching profiles:", error);
-            },
-        );
-    }
-
-    onProfileChange(): void {
-        const selectedProfile = this.settingsForm.get("profile")?.value;
-        if (selectedProfile) {
-            this.settingsService
-                .getSettingsByProfile(selectedProfile)
-                .subscribe(
-                    (settings: Settings) => {
-                        this.settingsForm.patchValue(settings);
-                    },
-                    (error: any) => {
-                        console.error(
-                            "Error fetching settings by profile:",
-                            error,
-                        );
-                    },
-                );
-        }
     }
 
     formatLabel(value: number): string {
@@ -156,12 +127,12 @@ export class SettingsComponent implements OnInit {
 
     onCancel(): void {
         this.settingsForm.reset();
-        this.router.navigate(["/inventory"]);
+        this.router.navigate(["/settings/profiles"]);
     }
 
     onSubmit(): void {
         if (this.settingsForm.valid) {
-            const settings: Settings = this.settingsForm.value;
+            const settings: SettingsProfile = this.settingsForm.value;
             console.log("Settings saved:", settings);
             // TODO: Implement saving the settings to the backend API
         }

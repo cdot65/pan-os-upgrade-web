@@ -1,4 +1,4 @@
-// src/app/pages/inventory-list/inventory-list.ts
+// src/app/pages/settings-profile-list/settings-profile-list.ts
 
 import {
     AfterViewInit,
@@ -12,24 +12,24 @@ import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 
 import { ComponentPageTitle } from "../page-title/page-title";
 import { DeleteDialogComponent } from "../confirmation-dialog/delete-dialog";
-import { InventoryItem } from "../../shared/interfaces/inventory-item.interface";
-import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
-import { InventoryService } from "../../shared/services/inventory.service";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { NgFor } from "@angular/common";
 import { Router } from "@angular/router";
+import { SettingsPageHeader } from "../settings-page-header/settings-page-header";
+import { SettingsProfile } from "../../shared/interfaces/settings-profile.interface";
+import { SettingsProfileService } from "../../shared/services/settings-profile.service";
 
 @Component({
-    selector: "app-inventory-list",
-    templateUrl: "./inventory-list.html",
-    styleUrls: ["./inventory-list.scss"],
+    selector: "app-settings-profile-list",
+    templateUrl: "./settings-profile-list.html",
+    styleUrls: ["./settings-profile-list.scss"],
     standalone: true,
     imports: [
         NgFor,
-        InventoryPageHeader,
+        SettingsPageHeader,
         MatTableModule,
         MatSortModule,
         MatIconModule,
@@ -39,10 +39,10 @@ import { Router } from "@angular/router";
 /**
  * Component for displaying the inventory list.
  */
-export class InventoryList implements OnInit, AfterViewInit {
+export class SettingsProfileListComponent implements OnInit, AfterViewInit {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
-    inventoryItems: InventoryItem[] = [];
+    settingsProfiles: SettingsProfile[] = [];
     displayedColumns: string[] = [
         "hostname",
         "ipv4Address",
@@ -53,13 +53,13 @@ export class InventoryList implements OnInit, AfterViewInit {
         "edit",
         "delete",
     ];
-    dataSource: MatTableDataSource<InventoryItem> =
-        new MatTableDataSource<InventoryItem>([]);
+    dataSource: MatTableDataSource<SettingsProfile> =
+        new MatTableDataSource<SettingsProfile>([]);
 
     @ViewChild(MatSort) sort: MatSort = new MatSort();
 
     constructor(
-        private inventoryService: InventoryService,
+        private settingsProfileService: SettingsProfileService,
         private router: Router,
         private _liveAnnouncer: LiveAnnouncer,
         public _componentPageTitle: ComponentPageTitle,
@@ -71,8 +71,8 @@ export class InventoryList implements OnInit, AfterViewInit {
      * Sets the page title to "Inventory List" and retrieves the inventory items.
      */
     ngOnInit(): void {
-        this._componentPageTitle.title = "Inventory List";
-        this.getInventoryItems();
+        this._componentPageTitle.title = "Settings Profile List";
+        this.getSettingsProfiles();
     }
 
     /**
@@ -87,25 +87,25 @@ export class InventoryList implements OnInit, AfterViewInit {
     /**
      * Retrieves items from the inventory service and sets up the data source for the table.
      */
-    getInventoryItems(): void {
-        this.inventoryService.fetchInventoryData().subscribe(
+    getSettingsProfiles(): void {
+        this.settingsProfileService.getProfiles().subscribe(
             (items) => {
-                this.inventoryItems = items;
-                this.dataSource = new MatTableDataSource(this.inventoryItems);
+                this.settingsProfiles = items;
+                this.dataSource = new MatTableDataSource(this.settingsProfiles);
                 this.dataSource.sort = this.sort;
             },
             (error) => {
-                console.error("Error fetching inventory items:", error);
+                console.error("Error fetching settings profiles:", error);
             },
         );
     }
 
     /**
      * Navigates to the inventory page for editing the specified item.
-     * @param item - The item to be edited. It can be an InventoryItem object.
+     * @param item - The item to be edited. It can be an SettingsProfile object.
      */
-    onEditClick(item: InventoryItem): void {
-        this.router.navigate(["/inventory", item.uuid]);
+    onEditClick(item: SettingsProfile): void {
+        this.router.navigate(["/settings/profiles", item.uuid]);
     }
 
     /**
@@ -122,32 +122,38 @@ export class InventoryList implements OnInit, AfterViewInit {
     }
 
     navigateToCreateInventory(): void {
-        this.router.navigate(["/inventory/create"]);
+        this.router.navigate(["/settings/profiles"]);
     }
 
     /**
      * Opens the delete dialog when the delete button is clicked.
-     * @param item - The item to be deleted. It can be an InventoryItem object.
+     * @param item - The item to be deleted. It can be an SettingsProfile object.
      */
-    onDeleteClick(item: InventoryItem): void {
+    onDeleteClick(item: SettingsProfile): void {
         const dialogRef = this.dialog.open(DeleteDialogComponent, {
             width: "300px",
             data: {
                 title: "Confirm Delete",
-                message: "Are you sure you want to delete this inventory item?",
+                message:
+                    "Are you sure you want to delete this settings profile?",
             },
         });
 
         dialogRef.afterClosed().subscribe((result: boolean) => {
             if (result) {
-                this.inventoryService.deleteInventoryItem(item.uuid).subscribe(
-                    () => {
-                        this.getInventoryItems(); // Refresh the inventory list after deletion
-                    },
-                    (error) => {
-                        console.error("Error deleting inventory item:", error);
-                    },
-                );
+                this.settingsProfileService
+                    .deleteSettingsProfile(item.uuid)
+                    .subscribe(
+                        () => {
+                            this.getSettingsProfiles();
+                        },
+                        (error) => {
+                            console.error(
+                                "Error deleting inventory item:",
+                                error,
+                            );
+                        },
+                    );
             }
         });
     }
