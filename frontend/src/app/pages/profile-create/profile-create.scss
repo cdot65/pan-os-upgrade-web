@@ -1,6 +1,6 @@
-// src/app/pages/settings-profile-create/settings-profile-create.scss
+// src/app/pages/profile-create/profile-create.scss
 
-.settings-profile-create {
+.profile-create {
   width: 97%;
   padding: 25px;
 
@@ -8,7 +8,7 @@
     padding: 20px;
   }
 
-  .settings-profile-create-grid {
+  .profile-create-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;

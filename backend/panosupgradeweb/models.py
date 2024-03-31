@@ -103,7 +103,7 @@ class InventoryItem(models.Model):
         return self.hostname
 
 
-class SettingsProfile(models.Model):
+class Profile(models.Model):
     active_support_check = models.BooleanField(
         default=True,
         verbose_name="Active Support Check",
@@ -201,6 +201,11 @@ class SettingsProfile(models.Model):
         default=3,
         verbose_name="Max Snapshot Tries",
     )
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        verbose_name="Profile Name",
+    )
     nics_snapshot = models.BooleanField(
         default=True,
         verbose_name="NICs Snapshot",
@@ -224,11 +229,6 @@ class SettingsProfile(models.Model):
     planes_clock_sync_check = models.BooleanField(
         default=True,
         verbose_name="Planes Clock Sync Check",
-    )
-    profile = models.CharField(
-        max_length=255,
-        unique=True,
-        verbose_name="Profile",
     )
     readiness_checks_location = models.CharField(
         max_length=255,

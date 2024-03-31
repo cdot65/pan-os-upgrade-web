@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     InventoryItem,
     InventoryPlatform,
-    SettingsProfile,
+    Profile,
 )
 
 
@@ -33,15 +33,16 @@ class InventoryPlatformAdmin(admin.ModelAdmin):
     )
 
 
-class SettingsProfileAdmin(admin.ModelAdmin):
+class ProfileAdmin(admin.ModelAdmin):
     list_display = (
-        "profile",
+        "name",
         "uuid",
         "description",
     )
-    list_filter = ("profile",)
-    search_fields = ("profile", "uuid", "description")
+    list_filter = ("name",)
+    search_fields = ("name", "uuid", "description")
 
 
 admin.site.register(InventoryItem, InventoryItemAdmin)
 admin.site.register(InventoryPlatform, InventoryPlatformAdmin)
+admin.site.register(Profile, ProfileAdmin)

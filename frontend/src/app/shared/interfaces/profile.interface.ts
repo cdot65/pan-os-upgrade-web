@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
-export interface SettingsProfile {
-    uuid: number;
-    description: string;
-    profile: string;
+export interface Profile {
     authentication: {
         pan_username: string;
         pan_password: string;
     };
+    description: string;
     download: {
         max_download_tries: number;
         download_retry_interval: number;
@@ -16,6 +14,7 @@ export interface SettingsProfile {
         max_install_attempts: number;
         install_retry_interval: number;
     };
+    name: string;
     readiness_checks: {
         checks: {
             active_support_check: boolean;
@@ -58,4 +57,5 @@ export interface SettingsProfile {
         command_timeout: number;
         connection_timeout: number;
     };
+    uuid: string;
 }

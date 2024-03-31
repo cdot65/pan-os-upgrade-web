@@ -1,6 +1,6 @@
 <!-- src/app/pages/settings/settings.component.html -->
 
-<settings-page-header></settings-page-header>
+<profile-page-header></profile-page-header>
 <main focusOnNavigation aria-label="Settings" id="settings" class="settings-details">
   <form [formGroup]="settingsForm" (ngSubmit)="submitUpdate()" class="mat-elevation-z2">
     <div class="settings-details-grid">
@@ -9,7 +9,7 @@
         <div class="form-field">
           <mat-form-field>
             <mat-label>Profile Name</mat-label>
-            <input matInput formControlName="profile" required>
+            <input matInput formControlName="name" required>
           </mat-form-field>
         </div>
         <div class="form-field">

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-// src/app/pages/settings-profile-create/settings-profile-create.ts
+// src/app/pages/profile-create/profile-create.ts
 
 import { Component, HostBinding, OnInit } from "@angular/core";
 import {
@@ -16,14 +16,14 @@ import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
+import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
-import { SettingsPageHeader } from "../settings-page-header/settings-page-header";
-import { SettingsProfileService } from "../../shared/services/settings-profile.service";
+import { SettingsPageHeader } from "../profile-page-header/profile-page-header";
 
 @Component({
-    selector: "app-settings-profile-create",
-    templateUrl: "./settings-profile-create.html",
-    styleUrls: ["./settings-profile-create.scss"],
+    selector: "app-profile-create",
+    templateUrl: "./profile-create.html",
+    styleUrls: ["./profile-create.scss"],
     standalone: true,
     imports: [
         CommonModule,
@@ -36,18 +36,21 @@ import { SettingsProfileService } from "../../shared/services/settings-profile.s
         MatSelectModule,
     ],
 })
-export class SettingsProfileCreateComponent implements OnInit {
+export class ProfileCreateComponent implements OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
-    settingsProfileForm: FormGroup;
+    ProfileForm: FormGroup;
 
     constructor(
         private formBuilder: FormBuilder,
-        private settingsProfileService: SettingsProfileService,
+        private profileService: ProfileService,
         private router: Router,
         public _componentPageTitle: ComponentPageTitle,
     ) {
-        this.settingsProfileForm = this.formBuilder.group({
-            profile: ["", Validators.required],
+        this.ProfileForm = this.formBuilder.group({
+            authentication: this.formBuilder.group({
+                pan_username: ["", Validators.required],
+                pan_password: ["", Validators.required],
+            }),
             description: [""],
             download: this.formBuilder.group({
                 max_download_tries: [3],
@@ -57,6 +60,7 @@ export class SettingsProfileCreateComponent implements OnInit {
                 max_install_attempts: [3],
                 install_retry_interval: [60],
             }),
+            name: ["", Validators.required],
             readiness_checks: this.formBuilder.group({
                 checks: this.formBuilder.group({
                     active_support_check: [true],
@@ -99,10 +103,6 @@ export class SettingsProfileCreateComponent implements OnInit {
                 command_timeout: [120],
                 connection_timeout: [30],
             }),
-            authentication: this.formBuilder.group({
-                pan_username: ["", Validators.required],
-                pan_password: ["", Validators.required],
-            }),
         });
     }
 
@@ -111,26 +111,21 @@ export class SettingsProfileCreateComponent implements OnInit {
     }
 
     submitCreateProfile(): void {
-        if (this.settingsProfileForm && this.settingsProfileForm.valid) {
-            const formValue = this.settingsProfileForm.value;
-            this.settingsProfileService
-                .createSettingsProfile(formValue)
-                .subscribe(
-                    () => {
-                        this.router.navigate(["/settings/profiles"]);
-                    },
-                    (error) => {
-                        console.error(
-                            "Error creating settings profile:",
-                            error,
-                        );
-                    },
-                );
+        if (this.ProfileForm && this.ProfileForm.valid) {
+            const formValue = this.ProfileForm.value;
+            this.profileService.createProfile(formValue).subscribe(
+                () => {
+                    this.router.navigate(["/profiles"]);
+                },
+                (error) => {
+                    console.error("Error creating profile:", error);
+                },
+            );
         }
     }
 
     onCancel(): void {
-        this.settingsProfileForm.reset();
-        this.router.navigate(["/settings/profiles"]);
+        this.ProfileForm.reset();
+        this.router.navigate(["/profiles"]);
     }
 }

@@ -4,7 +4,7 @@ from .views import (
     InventoryExistsView,
     InventoryPlatformViewSet,
     InventoryViewSet,
-    SettingsProfileViewSet,
+    ProfileViewSet,
     UserViewSet,
     UserProfileView,
 )
@@ -17,9 +17,9 @@ router.register(
 )
 
 router.register(
-    "settings/profiles",
-    SettingsProfileViewSet,
-    basename="settings-profiles",
+    "profiles",
+    ProfileViewSet,
+    basename="profiles",
 )
 
 router.register(
