@@ -161,9 +161,9 @@ class SettingsProfileSerializer(serializers.ModelSerializer):
             "snapshots",
             "timeout_settings",
         )
-        extra_kwargs = {
-            "pan_password": {"write_only": True},
-        }
+        # extra_kwargs = {
+        #     "pan_password": {"write_only": True},
+        # }
 
     def create(self, validated_data):
         pan_username = validated_data.pop("pan_username", "")

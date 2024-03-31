@@ -40,7 +40,7 @@ export class SettingsProfileService {
         );
         return this.http
             .get<SettingsProfileApiResponse>(
-                `${this.apiUrl}/api/v1/settings/?profile=${profile}`,
+                `${this.apiUrl}/api/v1/settings/profiles/${profile}/`,
                 { headers },
             )
             .pipe(
@@ -78,7 +78,9 @@ export class SettingsProfileService {
      * @param settings - The settings data to update.
      * @returns An Observable that emits the updated settings data.
      */
-    updateSettings(settings: SettingsProfile): Observable<SettingsProfile> {
+    updateSettingsProfile(
+        settings: SettingsProfile,
+    ): Observable<SettingsProfile> {
         const apiSettings = this.mapSettingsProfileToApiRequest(settings);
         return this.http
             .put<SettingsProfileApiResponse>(this.apiUrl, apiSettings)
