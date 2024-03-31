@@ -1,66 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-// src/app/shared/interfaces/settings.interface.ts
 
 export interface SettingsProfile {
-    authentication: {
-        panUsername: string;
-        panPassword: string;
-    };
-    description: string;
-    download: {
-        maxDownloadTries: number;
-        downloadRetryInterval: number;
-    };
-    install: {
-        maxInstallAttempts: number;
-        installRetryInterval: number;
-    };
-    profile: string;
-    readinessChecks: {
-        checks: {
-            activeSupportCheck: boolean;
-            arpEntryExistCheck: boolean;
-            candidateConfigCheck: boolean;
-            certificatesRequirementsCheck: boolean;
-            contentVersionCheck: boolean;
-            dynamicUpdatesCheck: boolean;
-            expiredLicensesCheck: boolean;
-            freeDiskSpaceCheck: boolean;
-            haCheck: boolean;
-            ipSecTunnelStatusCheck: boolean;
-            jobsCheck: boolean;
-            ntpSyncCheck: boolean;
-            panoramaCheck: boolean;
-            planesClockSyncCheck: boolean;
-            sessionExistCheck: boolean;
-        };
-        readinessChecksLocation: string;
-    };
-    reboot: {
-        maxRebootTries: number;
-        rebootRetryInterval: number;
-    };
-    snapshots: {
-        snapshotsLocation: string;
-        maxSnapshotTries: number;
-        snapshotRetryInterval: number;
-        state: {
-            arpTableSnapshot: boolean;
-            contentVersionSnapshot: boolean;
-            ipSecTunnelsSnapshot: boolean;
-            licenseSnapshot: boolean;
-            nicsSnapshot: boolean;
-            routesSnapshot: boolean;
-            sessionStatsSnapshot: boolean;
-        };
-    };
-    timeoutSettings: {
-        commandTimeout: number;
-        connectionTimeout: number;
-    };
-    uuid: number;
-}
-export interface SettingsProfileApiResponse {
     uuid: number;
     description: string;
     profile: string;
