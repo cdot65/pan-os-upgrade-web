@@ -125,7 +125,136 @@ export class SettingsProfileDetailsComponent implements OnInit {
                     .getSettingsByProfile(uuid)
                     .subscribe(
                         (settingsProfile: SettingsProfile) => {
-                            this.settingsForm.patchValue(settingsProfile);
+                            this.settingsForm.patchValue({
+                                profile: settingsProfile.profile,
+                                description: settingsProfile.description,
+                                authentication: {
+                                    panUsername:
+                                        settingsProfile.authentication
+                                            .panUsername,
+                                    panPassword:
+                                        settingsProfile.authentication
+                                            .panPassword,
+                                },
+                                download: {
+                                    maxDownloadTries:
+                                        settingsProfile.download
+                                            .maxDownloadTries,
+                                    downloadRetryInterval:
+                                        settingsProfile.download
+                                            .downloadRetryInterval,
+                                },
+                                install: {
+                                    maxInstallAttempts:
+                                        settingsProfile.install
+                                            .maxInstallAttempts,
+                                    installRetryInterval:
+                                        settingsProfile.install
+                                            .installRetryInterval,
+                                },
+                                readinessChecks: {
+                                    checks: {
+                                        activeSupportCheck:
+                                            settingsProfile.readinessChecks
+                                                .checks.activeSupportCheck,
+                                        arpEntryExistCheck:
+                                            settingsProfile.readinessChecks
+                                                .checks.arpEntryExistCheck,
+                                        candidateConfigCheck:
+                                            settingsProfile.readinessChecks
+                                                .checks.candidateConfigCheck,
+                                        certificatesRequirementsCheck:
+                                            settingsProfile.readinessChecks
+                                                .checks
+                                                .certificatesRequirementsCheck,
+                                        contentVersionCheck:
+                                            settingsProfile.readinessChecks
+                                                .checks.contentVersionCheck,
+                                        dynamicUpdatesCheck:
+                                            settingsProfile.readinessChecks
+                                                .checks.dynamicUpdatesCheck,
+                                        expiredLicensesCheck:
+                                            settingsProfile.readinessChecks
+                                                .checks.expiredLicensesCheck,
+                                        freeDiskSpaceCheck:
+                                            settingsProfile.readinessChecks
+                                                .checks.freeDiskSpaceCheck,
+                                        haCheck:
+                                            settingsProfile.readinessChecks
+                                                .checks.haCheck,
+                                        ipSecTunnelStatusCheck:
+                                            settingsProfile.readinessChecks
+                                                .checks.ipSecTunnelStatusCheck,
+                                        jobsCheck:
+                                            settingsProfile.readinessChecks
+                                                .checks.jobsCheck,
+                                        ntpSyncCheck:
+                                            settingsProfile.readinessChecks
+                                                .checks.ntpSyncCheck,
+                                        panoramaCheck:
+                                            settingsProfile.readinessChecks
+                                                .checks.panoramaCheck,
+                                        planesClockSyncCheck:
+                                            settingsProfile.readinessChecks
+                                                .checks.planesClockSyncCheck,
+                                        sessionExistCheck:
+                                            settingsProfile.readinessChecks
+                                                .checks.sessionExistCheck,
+                                    },
+                                    readinessChecksLocation:
+                                        settingsProfile.readinessChecks
+                                            .readinessChecksLocation,
+                                },
+                                reboot: {
+                                    maxRebootTries:
+                                        settingsProfile.reboot.maxRebootTries,
+                                    rebootRetryInterval:
+                                        settingsProfile.reboot
+                                            .rebootRetryInterval,
+                                },
+                                snapshots: {
+                                    snapshotsLocation:
+                                        settingsProfile.snapshots
+                                            .snapshotsLocation,
+                                    maxSnapshotTries:
+                                        settingsProfile.snapshots
+                                            .maxSnapshotTries,
+                                    snapshotRetryInterval:
+                                        settingsProfile.snapshots
+                                            .snapshotRetryInterval,
+                                    state: {
+                                        arpTableSnapshot:
+                                            settingsProfile.snapshots.state
+                                                .arpTableSnapshot,
+                                        contentVersionSnapshot:
+                                            settingsProfile.snapshots.state
+                                                .contentVersionSnapshot,
+                                        ipSecTunnelsSnapshot:
+                                            settingsProfile.snapshots.state
+                                                .ipSecTunnelsSnapshot,
+                                        licenseSnapshot:
+                                            settingsProfile.snapshots.state
+                                                .licenseSnapshot,
+                                        nicsSnapshot:
+                                            settingsProfile.snapshots.state
+                                                .nicsSnapshot,
+                                        routesSnapshot:
+                                            settingsProfile.snapshots.state
+                                                .routesSnapshot,
+                                        sessionStatsSnapshot:
+                                            settingsProfile.snapshots.state
+                                                .sessionStatsSnapshot,
+                                    },
+                                },
+                                timeoutSettings: {
+                                    commandTimeout:
+                                        settingsProfile.timeoutSettings
+                                            .commandTimeout,
+                                    connectionTimeout:
+                                        settingsProfile.timeoutSettings
+                                            .connectionTimeout,
+                                },
+                            });
                         },
                         (error) => {
                             console.error(

@@ -34,34 +34,6 @@
         </div>
       </div>
 
-      <div formGroupName="download">
-        <h3>Download</h3>
-        <div class="form-field">
-          <mat-form-field>
-            <mat-label>PAN-OS maximum download tries</mat-label>
-            <input matInput type="number" formControlName="maxDownloadTries" required>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>PAN-OS download retry interval (seconds)</mat-label>
-            <input matInput type="number" formControlName="downloadRetryInterval" required>
-          </mat-form-field>
-        </div>
-      </div>
-
-      <div formGroupName="install">
-        <h3>Install</h3>
-        <div class="form-field">
-          <mat-form-field>
-            <mat-label>PAN-OS maximum install attempts</mat-label>
-            <input matInput type="number" formControlName="maxInstallAttempts" required>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>PAN-OS install retry interval (seconds)</mat-label>
-            <input matInput type="number" formControlName="installRetryInterval" required>
-          </mat-form-field>
-        </div>
-      </div>
-
       <div formGroupName="readinessChecks">
         <h3>Readiness Checks</h3>
         <div class="form-field">
@@ -98,20 +70,6 @@
         </div>
       </div>
 
-      <div formGroupName="reboot">
-        <h3>Reboot</h3>
-        <div class="form-field">
-          <mat-form-field>
-            <mat-label>Device maximum reboot tries</mat-label>
-            <input matInput type="number" formControlName="maxRebootTries" required>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>Device reboot retry interval (seconds)</mat-label>
-            <input matInput type="number" formControlName="rebootRetryInterval" required>
-          </mat-form-field>
-        </div>
-      </div>
-
       <div formGroupName="snapshots">
         <h3>Snapshots</h3>
         <div class="form-field">
@@ -138,6 +96,50 @@
           </div>
         </div>
       </div>
+
+      <div formGroupName="download">
+        <h3>Download</h3>
+        <div class="form-field">
+          <mat-form-field>
+            <mat-label>PAN-OS maximum download tries</mat-label>
+            <input matInput type="number" formControlName="maxDownloadTries" required>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>PAN-OS download retry interval (seconds)</mat-label>
+            <input matInput type="number" formControlName="downloadRetryInterval" required>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div formGroupName="install">
+        <h3>Install</h3>
+        <div class="form-field">
+          <mat-form-field>
+            <mat-label>PAN-OS maximum install attempts</mat-label>
+            <input matInput type="number" formControlName="maxInstallAttempts" required>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>PAN-OS install retry interval (seconds)</mat-label>
+            <input matInput type="number" formControlName="installRetryInterval" required>
+          </mat-form-field>
+        </div>
+      </div>
+
+
+      <div formGroupName="reboot">
+        <h3>Reboot</h3>
+        <div class="form-field">
+          <mat-form-field>
+            <mat-label>Device maximum reboot tries</mat-label>
+            <input matInput type="number" formControlName="maxRebootTries" required>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Device reboot retry interval (seconds)</mat-label>
+            <input matInput type="number" formControlName="rebootRetryInterval" required>
+          </mat-form-field>
+        </div>
+      </div>
+
 
       <div formGroupName="timeoutSettings">
         <h3>Timeout Settings</h3>
