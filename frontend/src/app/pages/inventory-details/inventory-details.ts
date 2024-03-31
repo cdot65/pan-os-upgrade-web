@@ -13,6 +13,7 @@ import { MatDialog, MatDialogModule } from "@angular/material/dialog";
 import { CommonModule } from "@angular/common";
 import { ComponentPageTitle } from "../page-title/page-title";
 import { DeleteDialogComponent } from "../confirmation-dialog/delete-dialog";
+import { Footer } from "src/app/shared/footer/footer";
 import { InventoryItem } from "../../shared/interfaces/inventory-item.interface";
 import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
 import { InventoryPlatform } from "src/app/shared/interfaces/inventory-platform.interface";
@@ -42,6 +43,7 @@ import { MatSelectModule } from "@angular/material/select";
         MatIconModule,
         MatInputModule,
         MatSelectModule,
+        Footer,
     ],
 })
 /**

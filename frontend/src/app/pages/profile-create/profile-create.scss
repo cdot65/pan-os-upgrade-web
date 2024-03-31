@@ -1,4 +1,9 @@
 // src/app/pages/profile-create/profile-create.scss
+.profile-create-container {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+}
 
 .profile-create {
   width: 97%;
