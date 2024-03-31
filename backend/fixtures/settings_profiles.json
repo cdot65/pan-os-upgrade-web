@@ -26,7 +26,7 @@
         "max_snapshot_tries": 3,
         "nics_snapshot": true,
         "ntp_sync_check": false,
-        "pan_password": "password",
+        "pan_password": "paloalto123",
         "pan_username": "admin",
         "panorama_check": true,
         "planes_clock_sync_check": true,

@@ -60,8 +60,8 @@ export class SettingsProfileDetailsComponent implements OnInit {
             profile: ["", Validators.required],
             description: [""],
             download: this.formBuilder.group({
-                maxDownloadTries: [3, Validators.min(1)],
-                downloadRetryInterval: [60, Validators.min(1)],
+                maxDownloadTries: [22],
+                downloadRetryInterval: [30],
             }),
             install: this.formBuilder.group({
                 maxInstallAttempts: [3],
@@ -124,6 +124,10 @@ export class SettingsProfileDetailsComponent implements OnInit {
                     .getSettingsByProfile(uuid)
                     .subscribe(
                         (settingsProfile: SettingsProfile) => {
+                            console.log(
+                                "Retrieved SettingsProfile:",
+                                settingsProfile,
+                            );
                             this.settingsForm.setValue({
                                 profile: settingsProfile.profile,
                                 description: settingsProfile.description,
@@ -254,6 +258,7 @@ export class SettingsProfileDetailsComponent implements OnInit {
                                             .connectionTimeout,
                                 },
                             });
+                            console.log("Form Value:", this.settingsForm.value);
                         },
                         (error) => {
                             console.error(
@@ -265,6 +270,7 @@ export class SettingsProfileDetailsComponent implements OnInit {
             }
         });
     }
+
     formatLabel(value: number): string {
         if (value >= 1000) {
             return Math.round(value / 1000) + "k";

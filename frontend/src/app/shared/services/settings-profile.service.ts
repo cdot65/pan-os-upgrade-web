@@ -7,7 +7,7 @@ import {
     SettingsProfile,
     SettingsProfileApiResponse,
 } from "../interfaces/settings-profile.interface";
-import { catchError, map } from "rxjs/operators";
+import { catchError, map, tap } from "rxjs/operators";
 
 import { Injectable } from "@angular/core";
 import { environment } from "../../../environments/environment.prod";
@@ -44,6 +44,9 @@ export class SettingsProfileService {
                 { headers },
             )
             .pipe(
+                tap((response: SettingsProfileApiResponse) => {
+                    console.log("API Response:", response);
+                }),
                 map((response: SettingsProfileApiResponse) =>
                     this.mapApiResponseToSettingsProfile(response),
                 ),
@@ -99,66 +102,90 @@ export class SettingsProfileService {
     private mapApiResponseToSettingsProfile(
         response: SettingsProfileApiResponse,
     ): SettingsProfile {
-        return {
+        const settingsProfile: SettingsProfile = {
             authentication: {
-                panUsername: response.pan_username,
-                panPassword: response.pan_password,
+                panUsername: response.authentication.pan_username,
+                panPassword: response.authentication.pan_password,
             },
             description: response.description,
             download: {
-                maxDownloadTries: response.max_download_tries,
-                downloadRetryInterval: response.download_retry_interval,
+                maxDownloadTries: response.download.max_download_tries,
+                downloadRetryInterval:
+                    response.download.download_retry_interval,
             },
             install: {
-                maxInstallAttempts: response.max_install_attempts,
-                installRetryInterval: response.install_retry_interval,
+                maxInstallAttempts: response.install.max_install_attempts,
+                installRetryInterval: response.install.install_retry_interval,
             },
             profile: response.profile,
             readinessChecks: {
                 checks: {
-                    activeSupportCheck: response.active_support_check,
-                    arpEntryExistCheck: response.arp_entry_exist_check,
-                    candidateConfigCheck: response.candidate_config_check,
+                    activeSupportCheck:
+                        response.readiness_checks.checks.active_support_check,
+                    arpEntryExistCheck:
+                        response.readiness_checks.checks.arp_entry_exist_check,
+                    candidateConfigCheck:
+                        response.readiness_checks.checks.candidate_config_check,
                     certificatesRequirementsCheck:
-                        response.certificates_requirements_check,
-                    contentVersionCheck: response.content_version_check,
-                    dynamicUpdatesCheck: response.dynamic_updates_check,
-                    expiredLicensesCheck: response.expired_licenses_check,
-                    freeDiskSpaceCheck: response.free_disk_space_check,
-                    haCheck: response.ha_check,
-                    ipSecTunnelStatusCheck: response.ip_sec_tunnel_status_check,
-                    jobsCheck: response.jobs_check,
-                    ntpSyncCheck: response.ntp_sync_check,
-                    panoramaCheck: response.panorama_check,
-                    planesClockSyncCheck: response.planes_clock_sync_check,
-                    sessionExistCheck: response.session_exist_check,
+                        response.readiness_checks.checks
+                            .certificates_requirements_check,
+                    contentVersionCheck:
+                        response.readiness_checks.checks.content_version_check,
+                    dynamicUpdatesCheck:
+                        response.readiness_checks.checks.dynamic_updates_check,
+                    expiredLicensesCheck:
+                        response.readiness_checks.checks.expired_licenses_check,
+                    freeDiskSpaceCheck:
+                        response.readiness_checks.checks.free_disk_space_check,
+                    haCheck: response.readiness_checks.checks.ha_check,
+                    ipSecTunnelStatusCheck:
+                        response.readiness_checks.checks
+                            .ip_sec_tunnel_status_check,
+                    jobsCheck: response.readiness_checks.checks.jobs_check,
+                    ntpSyncCheck:
+                        response.readiness_checks.checks.ntp_sync_check,
+                    panoramaCheck:
+                        response.readiness_checks.checks.panorama_check,
+                    planesClockSyncCheck:
+                        response.readiness_checks.checks
+                            .planes_clock_sync_check,
+                    sessionExistCheck:
+                        response.readiness_checks.checks.session_exist_check,
                 },
-                readinessChecksLocation: response.readiness_checks_location,
+                readinessChecksLocation:
+                    response.readiness_checks.readiness_checks_location,
             },
             reboot: {
-                maxRebootTries: response.max_reboot_tries,
-                rebootRetryInterval: response.reboot_retry_interval,
+                maxRebootTries: response.reboot.max_reboot_tries,
+                rebootRetryInterval: response.reboot.reboot_retry_interval,
             },
             snapshots: {
-                snapshotsLocation: response.snapshots_location,
-                maxSnapshotTries: response.max_snapshot_tries,
-                snapshotRetryInterval: response.snapshot_retry_interval,
+                snapshotsLocation: response.snapshots.snapshots_location,
+                maxSnapshotTries: response.snapshots.max_snapshot_tries,
+                snapshotRetryInterval:
+                    response.snapshots.snapshot_retry_interval,
                 state: {
-                    arpTableSnapshot: response.arp_table_snapshot,
-                    contentVersionSnapshot: response.content_version_snapshot,
-                    ipSecTunnelsSnapshot: response.ip_sec_tunnels_snapshot,
-                    licenseSnapshot: response.license_snapshot,
-                    nicsSnapshot: response.nics_snapshot,
-                    routesSnapshot: response.routes_snapshot,
-                    sessionStatsSnapshot: response.session_stats_snapshot,
+                    arpTableSnapshot:
+                        response.snapshots.state.arp_table_snapshot,
+                    contentVersionSnapshot:
+                        response.snapshots.state.content_version_snapshot,
+                    ipSecTunnelsSnapshot:
+                        response.snapshots.state.ip_sec_tunnels_snapshot,
+                    licenseSnapshot: response.snapshots.state.license_snapshot,
+                    nicsSnapshot: response.snapshots.state.nics_snapshot,
+                    routesSnapshot: response.snapshots.state.routes_snapshot,
+                    sessionStatsSnapshot:
+                        response.snapshots.state.session_stats_snapshot,
                 },
             },
             timeoutSettings: {
-                commandTimeout: response.command_timeout,
-                connectionTimeout: response.connection_timeout,
+                commandTimeout: response.timeout_settings.command_timeout,
+                connectionTimeout: response.timeout_settings.connection_timeout,
             },
             uuid: response.uuid,
         };
+        console.log("Mapped SettingsProfile:", settingsProfile);
+        return settingsProfile;
     }
 
     /**
@@ -170,59 +197,83 @@ export class SettingsProfileService {
         settings: SettingsProfile,
     ): SettingsProfileApiResponse {
         return {
-            active_support_check:
-                settings.readinessChecks.checks.activeSupportCheck,
-            arp_entry_exist_check:
-                settings.readinessChecks.checks.arpEntryExistCheck,
-            arp_table_snapshot: settings.snapshots.state.arpTableSnapshot,
-            candidate_config_check:
-                settings.readinessChecks.checks.candidateConfigCheck,
-            certificates_requirements_check:
-                settings.readinessChecks.checks.certificatesRequirementsCheck,
-            command_timeout: settings.timeoutSettings.commandTimeout,
-            connection_timeout: settings.timeoutSettings.connectionTimeout,
-            content_version_check:
-                settings.readinessChecks.checks.contentVersionCheck,
-            content_version_snapshot:
-                settings.snapshots.state.contentVersionSnapshot,
+            authentication: {
+                pan_username: settings.authentication.panUsername,
+                pan_password: settings.authentication.panPassword,
+            },
             description: settings.description,
-            download_retry_interval: settings.download.downloadRetryInterval,
-            dynamic_updates_check:
-                settings.readinessChecks.checks.dynamicUpdatesCheck,
-            expired_licenses_check:
-                settings.readinessChecks.checks.expiredLicensesCheck,
-            free_disk_space_check:
-                settings.readinessChecks.checks.freeDiskSpaceCheck,
-            ha_check: settings.readinessChecks.checks.haCheck,
-            install_retry_interval: settings.install.installRetryInterval,
-            ip_sec_tunnels_snapshot:
-                settings.snapshots.state.ipSecTunnelsSnapshot,
-            ip_sec_tunnel_status_check:
-                settings.readinessChecks.checks.ipSecTunnelStatusCheck,
-            jobs_check: settings.readinessChecks.checks.jobsCheck,
-            license_snapshot: settings.snapshots.state.licenseSnapshot,
-            max_download_tries: settings.download.maxDownloadTries,
-            max_install_attempts: settings.install.maxInstallAttempts,
-            max_reboot_tries: settings.reboot.maxRebootTries,
-            max_snapshot_tries: settings.snapshots.maxSnapshotTries,
-            nics_snapshot: settings.snapshots.state.nicsSnapshot,
-            ntp_sync_check: settings.readinessChecks.checks.ntpSyncCheck,
-            pan_username: settings.authentication.panUsername,
-            pan_password: settings.authentication.panPassword,
-            panorama_check: settings.readinessChecks.checks.panoramaCheck,
-            planes_clock_sync_check:
-                settings.readinessChecks.checks.planesClockSyncCheck,
+            download: {
+                max_download_tries: settings.download.maxDownloadTries,
+                download_retry_interval:
+                    settings.download.downloadRetryInterval,
+            },
+            install: {
+                max_install_attempts: settings.install.maxInstallAttempts,
+                install_retry_interval: settings.install.installRetryInterval,
+            },
             profile: settings.profile,
-            readiness_checks_location:
-                settings.readinessChecks.readinessChecksLocation,
-            reboot_retry_interval: settings.reboot.rebootRetryInterval,
-            routes_snapshot: settings.snapshots.state.routesSnapshot,
-            session_exist_check:
-                settings.readinessChecks.checks.sessionExistCheck,
-            session_stats_snapshot:
-                settings.snapshots.state.sessionStatsSnapshot,
-            snapshot_retry_interval: settings.snapshots.snapshotRetryInterval,
-            snapshots_location: settings.snapshots.snapshotsLocation,
+            readiness_checks: {
+                checks: {
+                    active_support_check:
+                        settings.readinessChecks.checks.activeSupportCheck,
+                    arp_entry_exist_check:
+                        settings.readinessChecks.checks.arpEntryExistCheck,
+                    candidate_config_check:
+                        settings.readinessChecks.checks.candidateConfigCheck,
+                    certificates_requirements_check:
+                        settings.readinessChecks.checks
+                            .certificatesRequirementsCheck,
+                    content_version_check:
+                        settings.readinessChecks.checks.contentVersionCheck,
+                    dynamic_updates_check:
+                        settings.readinessChecks.checks.dynamicUpdatesCheck,
+                    expired_licenses_check:
+                        settings.readinessChecks.checks.expiredLicensesCheck,
+                    free_disk_space_check:
+                        settings.readinessChecks.checks.freeDiskSpaceCheck,
+                    ha_check: settings.readinessChecks.checks.haCheck,
+                    ip_sec_tunnel_status_check:
+                        settings.readinessChecks.checks.ipSecTunnelStatusCheck,
+                    jobs_check: settings.readinessChecks.checks.jobsCheck,
+                    ntp_sync_check:
+                        settings.readinessChecks.checks.ntpSyncCheck,
+                    panorama_check:
+                        settings.readinessChecks.checks.panoramaCheck,
+                    planes_clock_sync_check:
+                        settings.readinessChecks.checks.planesClockSyncCheck,
+                    session_exist_check:
+                        settings.readinessChecks.checks.sessionExistCheck,
+                },
+                readiness_checks_location:
+                    settings.readinessChecks.readinessChecksLocation,
+            },
+            reboot: {
+                max_reboot_tries: settings.reboot.maxRebootTries,
+                reboot_retry_interval: settings.reboot.rebootRetryInterval,
+            },
+            snapshots: {
+                snapshots_location: settings.snapshots.snapshotsLocation,
+                max_snapshot_tries: settings.snapshots.maxSnapshotTries,
+                snapshot_retry_interval:
+                    settings.snapshots.snapshotRetryInterval,
+                state: {
+                    arp_table_snapshot:
+                        settings.snapshots.state.arpTableSnapshot,
+                    content_version_snapshot:
+                        settings.snapshots.state.contentVersionSnapshot,
+                    ip_sec_tunnels_snapshot:
+                        settings.snapshots.state.ipSecTunnelsSnapshot,
+                    license_snapshot: settings.snapshots.state.licenseSnapshot,
+                    nics_snapshot: settings.snapshots.state.nicsSnapshot,
+                    routes_snapshot: settings.snapshots.state.routesSnapshot,
+                    session_stats_snapshot:
+                        settings.snapshots.state.sessionStatsSnapshot,
+                },
+            },
+            timeout_settings: {
+                command_timeout: settings.timeoutSettings.commandTimeout,
+                connection_timeout: settings.timeoutSettings.connectionTimeout,
+            },
             uuid: settings.uuid,
         };
     }
