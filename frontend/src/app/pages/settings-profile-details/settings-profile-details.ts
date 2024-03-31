@@ -1,5 +1,6 @@
 // src/app/pages/settings-profile-details/settings-profile-details.ts
 
+import { ActivatedRoute, Router } from "@angular/router";
 import { Component, HostBinding, OnInit } from "@angular/core";
 import {
     FormBuilder,
@@ -19,7 +20,6 @@ import { MatOptionModule } from "@angular/material/core";
 import { MatRadioModule } from "@angular/material/radio";
 import { MatSelectModule } from "@angular/material/select";
 import { MatSliderModule } from "@angular/material/slider";
-import { Router } from "@angular/router";
 import { SettingsPageHeader } from "../settings-page-header/settings-page-header";
 import { SettingsProfile } from "../../shared/interfaces/settings-profile.interface";
 import { SettingsProfileService } from "../../shared/services/settings-profile.service";
@@ -50,16 +50,15 @@ export class SettingsProfileDetailsComponent implements OnInit {
     settingsProfiles: SettingsProfile[] = [];
 
     constructor(
+        private route: ActivatedRoute,
         private router: Router,
         private formBuilder: FormBuilder,
         public _componentPageTitle: ComponentPageTitle,
         private settingsProfileService: SettingsProfileService,
     ) {
         this.settingsForm = this.formBuilder.group({
-            authentication: this.formBuilder.group({
-                panUsername: [""],
-                panPassword: [""],
-            }),
+            profile: [""],
+            description: [""],
             download: this.formBuilder.group({
                 maxDownloadTries: [3, Validators.min(1)],
                 downloadRetryInterval: [60, Validators.min(1)],
@@ -68,7 +67,6 @@ export class SettingsProfileDetailsComponent implements OnInit {
                 maxInstallAttempts: [3, Validators.min(1)],
                 installRetryInterval: [60, Validators.min(1)],
             }),
-            profile: [""],
             readinessChecks: this.formBuilder.group({
                 checks: this.formBuilder.group({
                     activeSupportCheck: [true],
@@ -111,13 +109,34 @@ export class SettingsProfileDetailsComponent implements OnInit {
                 commandTimeout: [120, Validators.min(1)],
                 connectionTimeout: [30, Validators.min(1)],
             }),
+            authentication: this.formBuilder.group({
+                panUsername: [""],
+                panPassword: [""],
+            }),
         });
     }
 
     ngOnInit(): void {
         this._componentPageTitle.title = "Settings";
+        this.route.paramMap.subscribe((params) => {
+            const uuid = params.get("uuid");
+            if (uuid) {
+                this.settingsProfileService
+                    .getSettingsByProfile(uuid)
+                    .subscribe(
+                        (settingsProfile: SettingsProfile) => {
+                            this.settingsForm.patchValue(settingsProfile);
+                        },
+                        (error) => {
+                            console.error(
+                                "Error fetching settings profile:",
+                                error,
+                            );
+                        },
+                    );
+            }
+        });
     }
-
     formatLabel(value: number): string {
         if (value >= 1000) {
             return Math.round(value / 1000) + "k";

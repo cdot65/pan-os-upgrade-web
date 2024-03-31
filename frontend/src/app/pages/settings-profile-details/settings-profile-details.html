@@ -3,10 +3,8 @@
 <settings-page-header></settings-page-header>
 <main focusOnNavigation aria-label="Settings" id="settings" class="settings-details">
   <form [formGroup]="settingsForm" (ngSubmit)="onSubmit()" class="mat-elevation-z2">
-
-
     <div class="settings-details-grid">
-      <div formGroupName="profile">
+      <div>
         <h3>Profile</h3>
         <div class="form-field">
           <mat-form-field>
@@ -14,14 +12,24 @@
             <input matInput formControlName="profile" required>
           </mat-form-field>
         </div>
-      </div>
-
-      <div formGroupName="description">
-        <h3>Description</h3>
         <div class="form-field">
           <mat-form-field>
             <mat-label>Description</mat-label>
             <input matInput formControlName="description" required>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div formGroupName="authentication">
+        <h3>Authentication</h3>
+        <div class="form-field">
+          <mat-form-field>
+            <mat-label>PAN Username</mat-label>
+            <input matInput formControlName="panUsername" required>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>PAN Password</mat-label>
+            <input matInput type="password" formControlName="panPassword" required>
           </mat-form-field>
         </div>
       </div>
@@ -59,8 +67,7 @@
         <div class="form-field">
           <div formGroupName="checks">
             <mat-checkbox formControlName="activeSupportCheck">Check if active support is available</mat-checkbox>
-            <mat-checkbox formControlName="arpEntryExistCheck">Check if a given ARP entry is available in the ARP
-              table
+            <mat-checkbox formControlName="arpEntryExistCheck">Check if a given ARP entry is available in the ARP table
             </mat-checkbox>
             <mat-checkbox formControlName="candidateConfigCheck">Check if there are pending changes on device
             </mat-checkbox>
@@ -68,26 +75,21 @@
               size requirements</mat-checkbox>
             <mat-checkbox formControlName="contentVersionCheck">Running Latest Content Version</mat-checkbox>
             <mat-checkbox formControlName="dynamicUpdatesCheck">Check if any Dynamic Update job is scheduled to run
-              within
-              the specified time window</mat-checkbox>
+              within the specified time window</mat-checkbox>
             <mat-checkbox formControlName="expiredLicensesCheck">No Expired Licenses</mat-checkbox>
             <mat-checkbox formControlName="freeDiskSpaceCheck">Check if there is enough space on the `/opt/panrepo`
-              volume
-              for PAN-OS image</mat-checkbox>
+              volume for PAN-OS image</mat-checkbox>
             <mat-checkbox formControlName="haCheck">Check HA pair status from the perspective of the current device
             </mat-checkbox>
             <mat-checkbox formControlName="ipSecTunnelStatusCheck">Check if a given IPsec tunnel is in active state
             </mat-checkbox>
             <mat-checkbox formControlName="jobsCheck">Check for any job with status different than FIN</mat-checkbox>
             <mat-checkbox formControlName="ntpSyncCheck">Check if NTP is synchronized</mat-checkbox>
-            <mat-checkbox formControlName="panoramaCheck">Check connectivity with the Panorama appliance
-            </mat-checkbox>
+            <mat-checkbox formControlName="panoramaCheck">Check connectivity with the Panorama appliance</mat-checkbox>
             <mat-checkbox formControlName="planesClockSyncCheck">Check if the clock is synchronized between dataplane
-              and
-              management plane</mat-checkbox>
+              and management plane</mat-checkbox>
             <mat-checkbox formControlName="sessionExistCheck">Check if a critical session is present in the sessions
-              table
-            </mat-checkbox>
+              table</mat-checkbox>
           </div>
           <mat-form-field>
             <mat-label>Readiness Checks Location</mat-label>
@@ -95,34 +97,6 @@
           </mat-form-field>
         </div>
       </div>
-
-      <div formGroupName="snapshots">
-        <h3>Snapshots</h3>
-        <div class="form-field">
-          <div formGroupName="state">
-            <mat-checkbox formControlName="arpTableSnapshot">Snapshot of the ARP Table</mat-checkbox>
-            <mat-checkbox formControlName="contentVersionSnapshot">Snapshot of the Content Version</mat-checkbox>
-            <mat-checkbox formControlName="ipSecTunnelsSnapshot">Snapshot of the IPsec Tunnels</mat-checkbox>
-            <mat-checkbox formControlName="licenseSnapshot">Snapshot of the License Information</mat-checkbox>
-            <mat-checkbox formControlName="nicsSnapshot">Snapshot of the Network Interfaces</mat-checkbox>
-            <mat-checkbox formControlName="routesSnapshot">Snapshot of the Routing Table</mat-checkbox>
-            <mat-checkbox formControlName="sessionStatsSnapshot">Snapshot of the Session Statistics</mat-checkbox>
-          </div>
-          <mat-form-field>
-            <mat-label>Snapshots Location</mat-label>
-            <input matInput formControlName="snapshotsLocation" required>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>Snapshots maximum tries</mat-label>
-            <input matInput type="number" formControlName="maxSnapshotTries" required>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>Snapshots retry interval (seconds)</mat-label>
-            <input matInput type="number" formControlName="snapshotRetryInterval" required>
-          </mat-form-field>
-        </div>
-      </div>
-
 
       <div formGroupName="reboot">
         <h3>Reboot</h3>
@@ -138,16 +112,43 @@
         </div>
       </div>
 
+      <div formGroupName="snapshots">
+        <h3>Snapshots</h3>
+        <div class="form-field">
+          <mat-form-field>
+            <mat-label>Snapshots Location</mat-label>
+            <input matInput formControlName="snapshotsLocation" required>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Snapshots maximum tries</mat-label>
+            <input matInput type="number" formControlName="maxSnapshotTries" required>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Snapshots retry interval (seconds)</mat-label>
+            <input matInput type="number" formControlName="snapshotRetryInterval" required>
+          </mat-form-field>
+          <div formGroupName="state">
+            <mat-checkbox formControlName="arpTableSnapshot">Snapshot of the ARP Table</mat-checkbox>
+            <mat-checkbox formControlName="contentVersionSnapshot">Snapshot of the Content Version</mat-checkbox>
+            <mat-checkbox formControlName="ipSecTunnelsSnapshot">Snapshot of the IPsec Tunnels</mat-checkbox>
+            <mat-checkbox formControlName="licenseSnapshot">Snapshot of the License Information</mat-checkbox>
+            <mat-checkbox formControlName="nicsSnapshot">Snapshot of the Network Interfaces</mat-checkbox>
+            <mat-checkbox formControlName="routesSnapshot">Snapshot of the Routing Table</mat-checkbox>
+            <mat-checkbox formControlName="sessionStatsSnapshot">Snapshot of the Session Statistics</mat-checkbox>
+          </div>
+        </div>
+      </div>
+
       <div formGroupName="timeoutSettings">
         <h3>Timeout Settings</h3>
         <div class="form-field">
           <mat-form-field>
-            <mat-label>Connection timeout (seconds)</mat-label>
-            <input matInput type="number" formControlName="connectionTimeout" required>
-          </mat-form-field>
-          <mat-form-field>
             <mat-label>Command timeout (seconds)</mat-label>
             <input matInput type="number" formControlName="commandTimeout" required>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Connection timeout (seconds)</mat-label>
+            <input matInput type="number" formControlName="connectionTimeout" required>
           </mat-form-field>
         </div>
       </div>
