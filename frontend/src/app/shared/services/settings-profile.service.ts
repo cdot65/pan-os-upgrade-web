@@ -29,7 +29,7 @@ export class SettingsProfileService {
         );
     }
 
-    getSettingsByProfile(profile: string): Observable<SettingsProfile> {
+    getSettingsProfile(profile: string): Observable<SettingsProfile> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
@@ -47,11 +47,27 @@ export class SettingsProfileService {
             );
     }
 
-    /**
-     * Deletes an inventory item by its UUID.
-     * @param uuid The UUID of the inventory item to delete.
-     * @returns An Observable that emits the response from the server, or null if an error occurs.
-     */
+    createSettingsProfile(
+        settingsProfile: SettingsProfile,
+    ): Observable<SettingsProfile> {
+        const authToken = localStorage.getItem("auth_token");
+        const headers = new HttpHeaders().set(
+            "Authorization",
+            `Token ${authToken}`,
+        );
+        return this.http
+            .post<SettingsProfile>(
+                `${this.apiUrl}/api/v1/settings/profiles/`,
+                settingsProfile,
+                { headers },
+            )
+            .pipe(
+                tap((response: SettingsProfile) => {
+                    console.log("API Response:", response);
+                }),
+            );
+    }
+
     deleteSettingsProfile(uuid: number): Observable<any> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
