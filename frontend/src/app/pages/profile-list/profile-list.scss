@@ -1,4 +1,10 @@
 // src/app/pages/profile-list/profile-list.scss
+.profile-list-container {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+}
+
 .profile-list {
   width: 97%;
   padding: 25px;

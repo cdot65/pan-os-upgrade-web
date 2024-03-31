@@ -1,4 +1,12 @@
 // src/app/pages/inventory-list/inventory-list.scss
+
+.inventory-list-container {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+}
+
+
 .inventory-list {
   width: 97%;
   padding: 25px;

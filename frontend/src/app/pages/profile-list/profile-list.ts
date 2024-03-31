@@ -12,6 +12,7 @@ import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 
 import { ComponentPageTitle } from "../page-title/page-title";
 import { DeleteDialogComponent } from "../confirmation-dialog/delete-dialog";
+import { Footer } from "src/app/shared/footer/footer";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialog } from "@angular/material/dialog";
@@ -34,6 +35,7 @@ import { SettingsPageHeader } from "../profile-page-header/profile-page-header";
         MatSortModule,
         MatIconModule,
         MatButtonModule,
+        Footer,
     ],
 })
 /**

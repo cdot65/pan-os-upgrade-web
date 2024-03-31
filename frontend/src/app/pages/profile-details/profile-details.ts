@@ -11,6 +11,7 @@ import {
 } from "@angular/forms";
 
 import { ComponentPageTitle } from "../page-title/page-title";
+import { Footer } from "src/app/shared/footer/footer";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
 import { MatCheckboxModule } from "@angular/material/checkbox";
@@ -43,12 +44,12 @@ import { SettingsPageHeader } from "../profile-page-header/profile-page-header";
         MatRadioModule,
         MatSliderModule,
         SettingsPageHeader,
+        Footer,
     ],
 })
 export class ProfileDetailsComponent implements OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     settingsForm: FormGroup;
-    // profiles: Profile[] = [];
 
     constructor(
         private route: ActivatedRoute,

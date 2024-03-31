@@ -12,6 +12,7 @@ import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 
 import { ComponentPageTitle } from "../page-title/page-title";
 import { DeleteDialogComponent } from "../confirmation-dialog/delete-dialog";
+import { Footer } from "src/app/shared/footer/footer";
 import { InventoryItem } from "../../shared/interfaces/inventory-item.interface";
 import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
 import { InventoryService } from "../../shared/services/inventory.service";
@@ -34,6 +35,7 @@ import { Router } from "@angular/router";
         MatSortModule,
         MatIconModule,
         MatButtonModule,
+        Footer,
     ],
 })
 /**

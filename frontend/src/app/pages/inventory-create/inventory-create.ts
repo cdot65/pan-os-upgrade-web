@@ -10,6 +10,7 @@ import {
 
 import { CommonModule } from "@angular/common";
 import { ComponentPageTitle } from "../page-title/page-title";
+import { Footer } from "src/app/shared/footer/footer";
 import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
 import { InventoryPlatform } from "../../shared/interfaces/inventory-platform.interface";
 import { InventoryService } from "../../shared/services/inventory.service";
@@ -34,6 +35,7 @@ import { Router } from "@angular/router";
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
+        Footer,
     ],
 })
 export class InventoryCreateComponent implements OnInit {
