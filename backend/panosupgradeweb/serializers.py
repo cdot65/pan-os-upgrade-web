@@ -150,6 +150,7 @@ class SettingsProfileSerializer(serializers.ModelSerializer):
         model = SettingsProfile
         fields = (
             "uuid",
+            "description",
             "profile",
             "pan_username",
             "pan_password",

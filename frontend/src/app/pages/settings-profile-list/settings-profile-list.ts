@@ -43,16 +43,7 @@ export class SettingsProfileListComponent implements OnInit, AfterViewInit {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
     settingsProfiles: SettingsProfile[] = [];
-    displayedColumns: string[] = [
-        "hostname",
-        "ipv4Address",
-        "ipv6Address",
-        "platformName",
-        "deviceType",
-        "notes",
-        "edit",
-        "delete",
-    ];
+    displayedColumns: string[] = ["profile", "description", "edit", "delete"];
     dataSource: MatTableDataSource<SettingsProfile> =
         new MatTableDataSource<SettingsProfile>([]);
 
