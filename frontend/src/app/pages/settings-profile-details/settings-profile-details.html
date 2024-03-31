@@ -4,7 +4,27 @@
 <main focusOnNavigation aria-label="Settings" id="settings" class="settings-details">
   <form [formGroup]="settingsForm" (ngSubmit)="onSubmit()" class="mat-elevation-z2">
 
+
     <div class="settings-details-grid">
+      <div formGroupName="profile">
+        <h3>Profile</h3>
+        <div class="form-field">
+          <mat-form-field>
+            <mat-label>Profile Name</mat-label>
+            <input matInput formControlName="profile" required>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div formGroupName="description">
+        <h3>Description</h3>
+        <div class="form-field">
+          <mat-form-field>
+            <mat-label>Description</mat-label>
+            <input matInput formControlName="description" required>
+          </mat-form-field>
+        </div>
+      </div>
 
       <div formGroupName="download">
         <h3>Download</h3>
@@ -39,7 +59,8 @@
         <div class="form-field">
           <div formGroupName="checks">
             <mat-checkbox formControlName="activeSupportCheck">Check if active support is available</mat-checkbox>
-            <mat-checkbox formControlName="arpEntryExistCheck">Check if a given ARP entry is available in the ARP table
+            <mat-checkbox formControlName="arpEntryExistCheck">Check if a given ARP entry is available in the ARP
+              table
             </mat-checkbox>
             <mat-checkbox formControlName="candidateConfigCheck">Check if there are pending changes on device
             </mat-checkbox>
@@ -59,7 +80,8 @@
             </mat-checkbox>
             <mat-checkbox formControlName="jobsCheck">Check for any job with status different than FIN</mat-checkbox>
             <mat-checkbox formControlName="ntpSyncCheck">Check if NTP is synchronized</mat-checkbox>
-            <mat-checkbox formControlName="panoramaCheck">Check connectivity with the Panorama appliance</mat-checkbox>
+            <mat-checkbox formControlName="panoramaCheck">Check connectivity with the Panorama appliance
+            </mat-checkbox>
             <mat-checkbox formControlName="planesClockSyncCheck">Check if the clock is synchronized between dataplane
               and
               management plane</mat-checkbox>

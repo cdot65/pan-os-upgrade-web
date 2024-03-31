@@ -28,10 +28,6 @@ export const PANOSUPGRADE_ROUTES: Routes = [
         canActivate: [authGuard],
     },
     {
-        path: "guide/cdk-table",
-        redirectTo: "/cdk/table/overview",
-    },
-    {
         path: "inventory",
         loadComponent: () =>
             import("./pages/inventory-list").then((m) => m.InventoryList),
