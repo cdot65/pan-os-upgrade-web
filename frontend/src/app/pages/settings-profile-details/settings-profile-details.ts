@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // src/app/pages/settings-profile-details/settings-profile-details.ts
 
 import { ActivatedRoute, Router } from "@angular/router";
@@ -60,58 +61,58 @@ export class SettingsProfileDetailsComponent implements OnInit {
             profile: ["", Validators.required],
             description: [""],
             download: this.formBuilder.group({
-                maxDownloadTries: [22],
-                downloadRetryInterval: [30],
+                max_download_tries: [22],
+                download_retry_interval: [30],
             }),
             install: this.formBuilder.group({
-                maxInstallAttempts: [3],
-                installRetryInterval: [60],
+                max_install_attempts: [3],
+                install_retry_interval: [60],
             }),
-            readinessChecks: this.formBuilder.group({
+            readiness_checks: this.formBuilder.group({
                 checks: this.formBuilder.group({
-                    activeSupportCheck: [true],
-                    arpEntryExistCheck: [false],
-                    candidateConfigCheck: [true],
-                    certificatesRequirementsCheck: [false],
-                    contentVersionCheck: [true],
-                    dynamicUpdatesCheck: [true],
-                    expiredLicensesCheck: [true],
-                    freeDiskSpaceCheck: [true],
-                    haCheck: [true],
-                    ipSecTunnelStatusCheck: [true],
-                    jobsCheck: [false],
-                    ntpSyncCheck: [false],
-                    panoramaCheck: [true],
-                    planesClockSyncCheck: [true],
-                    sessionExistCheck: [false],
+                    active_support_check: [true],
+                    arp_entry_exist_check: [false],
+                    candidate_config_check: [true],
+                    certificates_requirements_check: [false],
+                    content_version_check: [true],
+                    dynamic_updates_check: [true],
+                    expired_licenses_check: [true],
+                    free_disk_space_check: [true],
+                    ha_check: [true],
+                    ip_sec_tunnel_status_check: [true],
+                    jobs_check: [false],
+                    ntp_sync_check: [false],
+                    panorama_check: [true],
+                    planes_clock_sync_check: [true],
+                    session_exist_check: [false],
                 }),
-                readinessChecksLocation: ["assurance/readiness_checks/"],
+                readiness_checks_location: ["assurance/readiness_checks/"],
             }),
             reboot: this.formBuilder.group({
-                maxRebootTries: [30],
-                rebootRetryInterval: [60],
+                max_reboot_tries: [30],
+                reboot_retry_interval: [60],
             }),
             snapshots: this.formBuilder.group({
-                snapshotsLocation: ["assurance/snapshots/"],
-                maxSnapshotTries: [3],
-                snapshotRetryInterval: [60],
+                snapshots_location: ["assurance/snapshots/"],
+                max_snapshot_tries: [3],
+                snapshot_retry_interval: [60],
                 state: this.formBuilder.group({
-                    arpTableSnapshot: [false],
-                    contentVersionSnapshot: [true],
-                    ipSecTunnelsSnapshot: [false],
-                    licenseSnapshot: [true],
-                    nicsSnapshot: [true],
-                    routesSnapshot: [false],
-                    sessionStatsSnapshot: [false],
+                    arp_table_snapshot: [false],
+                    content_version_snapshot: [true],
+                    ip_sec_tunnels_snapshot: [false],
+                    license_snapshot: [true],
+                    nics_snapshot: [true],
+                    routes_snapshot: [false],
+                    session_stats_snapshot: [false],
                 }),
             }),
-            timeoutSettings: this.formBuilder.group({
-                commandTimeout: [120],
-                connectionTimeout: [30],
+            timeout_settings: this.formBuilder.group({
+                command_timeout: [120],
+                connection_timeout: [30],
             }),
             authentication: this.formBuilder.group({
-                panUsername: ["", Validators.required],
-                panPassword: ["", Validators.required],
+                pan_username: ["", Validators.required],
+                pan_password: ["", Validators.required],
             }),
         });
     }
@@ -132,130 +133,131 @@ export class SettingsProfileDetailsComponent implements OnInit {
                                 profile: settingsProfile.profile,
                                 description: settingsProfile.description,
                                 authentication: {
-                                    panUsername:
+                                    pan_username:
                                         settingsProfile.authentication
-                                            .panUsername,
-                                    panPassword:
+                                            .pan_username,
+                                    pan_password:
                                         settingsProfile.authentication
-                                            .panPassword,
+                                            .pan_password,
                                 },
                                 download: {
-                                    maxDownloadTries:
+                                    max_download_tries:
                                         settingsProfile.download
-                                            .maxDownloadTries,
-                                    downloadRetryInterval:
+                                            .max_download_tries,
+                                    download_retry_interval:
                                         settingsProfile.download
-                                            .downloadRetryInterval,
+                                            .download_retry_interval,
                                 },
                                 install: {
-                                    maxInstallAttempts:
+                                    max_install_attempts:
                                         settingsProfile.install
-                                            .maxInstallAttempts,
-                                    installRetryInterval:
+                                            .max_install_attempts,
+                                    install_retry_interval:
                                         settingsProfile.install
-                                            .installRetryInterval,
+                                            .install_retry_interval,
                                 },
-                                readinessChecks: {
+                                readiness_checks: {
                                     checks: {
-                                        activeSupportCheck:
-                                            settingsProfile.readinessChecks
-                                                .checks.activeSupportCheck,
-                                        arpEntryExistCheck:
-                                            settingsProfile.readinessChecks
-                                                .checks.arpEntryExistCheck,
-                                        candidateConfigCheck:
-                                            settingsProfile.readinessChecks
-                                                .checks.candidateConfigCheck,
-                                        certificatesRequirementsCheck:
-                                            settingsProfile.readinessChecks
+                                        active_support_check:
+                                            settingsProfile.readiness_checks
+                                                .checks.active_support_check,
+                                        arp_entry_exist_check:
+                                            settingsProfile.readiness_checks
+                                                .checks.arp_entry_exist_check,
+                                        candidate_config_check:
+                                            settingsProfile.readiness_checks
+                                                .checks.candidate_config_check,
+                                        certificates_requirements_check:
+                                            settingsProfile.readiness_checks
                                                 .checks
-                                                .certificatesRequirementsCheck,
-                                        contentVersionCheck:
-                                            settingsProfile.readinessChecks
-                                                .checks.contentVersionCheck,
-                                        dynamicUpdatesCheck:
-                                            settingsProfile.readinessChecks
-                                                .checks.dynamicUpdatesCheck,
-                                        expiredLicensesCheck:
-                                            settingsProfile.readinessChecks
-                                                .checks.expiredLicensesCheck,
-                                        freeDiskSpaceCheck:
-                                            settingsProfile.readinessChecks
-                                                .checks.freeDiskSpaceCheck,
-                                        haCheck:
-                                            settingsProfile.readinessChecks
-                                                .checks.haCheck,
-                                        ipSecTunnelStatusCheck:
-                                            settingsProfile.readinessChecks
-                                                .checks.ipSecTunnelStatusCheck,
-                                        jobsCheck:
-                                            settingsProfile.readinessChecks
-                                                .checks.jobsCheck,
-                                        ntpSyncCheck:
-                                            settingsProfile.readinessChecks
-                                                .checks.ntpSyncCheck,
-                                        panoramaCheck:
-                                            settingsProfile.readinessChecks
-                                                .checks.panoramaCheck,
-                                        planesClockSyncCheck:
-                                            settingsProfile.readinessChecks
-                                                .checks.planesClockSyncCheck,
-                                        sessionExistCheck:
-                                            settingsProfile.readinessChecks
-                                                .checks.sessionExistCheck,
+                                                .certificates_requirements_check,
+                                        content_version_check:
+                                            settingsProfile.readiness_checks
+                                                .checks.content_version_check,
+                                        dynamic_updates_check:
+                                            settingsProfile.readiness_checks
+                                                .checks.dynamic_updates_check,
+                                        expired_licenses_check:
+                                            settingsProfile.readiness_checks
+                                                .checks.expired_licenses_check,
+                                        free_disk_space_check:
+                                            settingsProfile.readiness_checks
+                                                .checks.free_disk_space_check,
+                                        ha_check:
+                                            settingsProfile.readiness_checks
+                                                .checks.ha_check,
+                                        ip_sec_tunnel_status_check:
+                                            settingsProfile.readiness_checks
+                                                .checks
+                                                .ip_sec_tunnel_status_check,
+                                        jobs_check:
+                                            settingsProfile.readiness_checks
+                                                .checks.jobs_check,
+                                        ntp_sync_check:
+                                            settingsProfile.readiness_checks
+                                                .checks.ntp_sync_check,
+                                        panorama_check:
+                                            settingsProfile.readiness_checks
+                                                .checks.panorama_check,
+                                        planes_clock_sync_check:
+                                            settingsProfile.readiness_checks
+                                                .checks.planes_clock_sync_check,
+                                        session_exist_check:
+                                            settingsProfile.readiness_checks
+                                                .checks.session_exist_check,
                                     },
-                                    readinessChecksLocation:
-                                        settingsProfile.readinessChecks
-                                            .readinessChecksLocation,
+                                    readiness_checks_location:
+                                        settingsProfile.readiness_checks
+                                            .readiness_checks_location,
                                 },
                                 reboot: {
-                                    maxRebootTries:
-                                        settingsProfile.reboot.maxRebootTries,
-                                    rebootRetryInterval:
+                                    max_reboot_tries:
+                                        settingsProfile.reboot.max_reboot_tries,
+                                    reboot_retry_interval:
                                         settingsProfile.reboot
-                                            .rebootRetryInterval,
+                                            .reboot_retry_interval,
                                 },
                                 snapshots: {
-                                    snapshotsLocation:
+                                    snapshots_location:
                                         settingsProfile.snapshots
-                                            .snapshotsLocation,
-                                    maxSnapshotTries:
+                                            .snapshots_location,
+                                    max_snapshot_tries:
                                         settingsProfile.snapshots
-                                            .maxSnapshotTries,
-                                    snapshotRetryInterval:
+                                            .max_snapshot_tries,
+                                    snapshot_retry_interval:
                                         settingsProfile.snapshots
-                                            .snapshotRetryInterval,
+                                            .snapshot_retry_interval,
                                     state: {
-                                        arpTableSnapshot:
+                                        arp_table_snapshot:
                                             settingsProfile.snapshots.state
-                                                .arpTableSnapshot,
-                                        contentVersionSnapshot:
+                                                .arp_table_snapshot,
+                                        content_version_snapshot:
                                             settingsProfile.snapshots.state
-                                                .contentVersionSnapshot,
-                                        ipSecTunnelsSnapshot:
+                                                .content_version_snapshot,
+                                        ip_sec_tunnels_snapshot:
                                             settingsProfile.snapshots.state
-                                                .ipSecTunnelsSnapshot,
-                                        licenseSnapshot:
+                                                .ip_sec_tunnels_snapshot,
+                                        license_snapshot:
                                             settingsProfile.snapshots.state
-                                                .licenseSnapshot,
-                                        nicsSnapshot:
+                                                .license_snapshot,
+                                        nics_snapshot:
                                             settingsProfile.snapshots.state
-                                                .nicsSnapshot,
-                                        routesSnapshot:
+                                                .nics_snapshot,
+                                        routes_snapshot:
                                             settingsProfile.snapshots.state
-                                                .routesSnapshot,
-                                        sessionStatsSnapshot:
+                                                .routes_snapshot,
+                                        session_stats_snapshot:
                                             settingsProfile.snapshots.state
-                                                .sessionStatsSnapshot,
+                                                .session_stats_snapshot,
                                     },
                                 },
-                                timeoutSettings: {
-                                    commandTimeout:
-                                        settingsProfile.timeoutSettings
-                                            .commandTimeout,
-                                    connectionTimeout:
-                                        settingsProfile.timeoutSettings
-                                            .connectionTimeout,
+                                timeout_settings: {
+                                    command_timeout:
+                                        settingsProfile.timeout_settings
+                                            .command_timeout,
+                                    connection_timeout:
+                                        settingsProfile.timeout_settings
+                                            .connection_timeout,
                                 },
                             });
                             console.log("Form Value:", this.settingsForm.value);
