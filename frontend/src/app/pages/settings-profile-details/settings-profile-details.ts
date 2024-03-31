@@ -57,15 +57,15 @@ export class SettingsProfileDetailsComponent implements OnInit {
         private settingsProfileService: SettingsProfileService,
     ) {
         this.settingsForm = this.formBuilder.group({
-            profile: [""],
+            profile: ["", Validators.required],
             description: [""],
             download: this.formBuilder.group({
                 maxDownloadTries: [3, Validators.min(1)],
                 downloadRetryInterval: [60, Validators.min(1)],
             }),
             install: this.formBuilder.group({
-                maxInstallAttempts: [3, Validators.min(1)],
-                installRetryInterval: [60, Validators.min(1)],
+                maxInstallAttempts: [3],
+                installRetryInterval: [60],
             }),
             readinessChecks: this.formBuilder.group({
                 checks: this.formBuilder.group({
@@ -88,13 +88,13 @@ export class SettingsProfileDetailsComponent implements OnInit {
                 readinessChecksLocation: ["assurance/readiness_checks/"],
             }),
             reboot: this.formBuilder.group({
-                maxRebootTries: [30, Validators.min(1)],
-                rebootRetryInterval: [60, Validators.min(1)],
+                maxRebootTries: [30],
+                rebootRetryInterval: [60],
             }),
             snapshots: this.formBuilder.group({
                 snapshotsLocation: ["assurance/snapshots/"],
-                maxSnapshotTries: [3, Validators.min(1)],
-                snapshotRetryInterval: [60, Validators.min(1)],
+                maxSnapshotTries: [3],
+                snapshotRetryInterval: [60],
                 state: this.formBuilder.group({
                     arpTableSnapshot: [false],
                     contentVersionSnapshot: [true],
@@ -106,16 +106,15 @@ export class SettingsProfileDetailsComponent implements OnInit {
                 }),
             }),
             timeoutSettings: this.formBuilder.group({
-                commandTimeout: [120, Validators.min(1)],
-                connectionTimeout: [30, Validators.min(1)],
+                commandTimeout: [120],
+                connectionTimeout: [30],
             }),
             authentication: this.formBuilder.group({
-                panUsername: [""],
-                panPassword: [""],
+                panUsername: ["", Validators.required],
+                panPassword: ["", Validators.required],
             }),
         });
     }
-
     ngOnInit(): void {
         this._componentPageTitle.title = "Settings";
         this.route.paramMap.subscribe((params) => {

@@ -15,7 +15,7 @@
         <div class="form-field">
           <mat-form-field>
             <mat-label>Description</mat-label>
-            <input matInput formControlName="description" required>
+            <input matInput formControlName="description">
           </mat-form-field>
         </div>
       </div>
@@ -65,7 +65,7 @@
           </div>
           <mat-form-field>
             <mat-label>Readiness Checks Location</mat-label>
-            <input matInput formControlName="readinessChecksLocation" required>
+            <input matInput formControlName="readinessChecksLocation">
           </mat-form-field>
         </div>
       </div>
@@ -75,15 +75,15 @@
         <div class="form-field">
           <mat-form-field>
             <mat-label>Snapshots Location</mat-label>
-            <input matInput formControlName="snapshotsLocation" required>
+            <input matInput formControlName="snapshotsLocation">
           </mat-form-field>
           <mat-form-field>
             <mat-label>Snapshots maximum tries</mat-label>
-            <input matInput type="number" formControlName="maxSnapshotTries" required>
+            <input matInput type="number" formControlName="maxSnapshotTries">
           </mat-form-field>
           <mat-form-field>
             <mat-label>Snapshots retry interval (seconds)</mat-label>
-            <input matInput type="number" formControlName="snapshotRetryInterval" required>
+            <input matInput type="number" formControlName="snapshotRetryInterval">
           </mat-form-field>
           <div formGroupName="state">
             <mat-checkbox formControlName="arpTableSnapshot">Snapshot of the ARP Table</mat-checkbox>
@@ -102,11 +102,11 @@
         <div class="form-field">
           <mat-form-field>
             <mat-label>PAN-OS maximum download tries</mat-label>
-            <input matInput type="number" formControlName="maxDownloadTries" required>
+            <input matInput type="number" formControlName="maxDownloadTries">
           </mat-form-field>
           <mat-form-field>
             <mat-label>PAN-OS download retry interval (seconds)</mat-label>
-            <input matInput type="number" formControlName="downloadRetryInterval" required>
+            <input matInput type="number" formControlName="downloadRetryInterval">
           </mat-form-field>
         </div>
       </div>
@@ -116,11 +116,11 @@
         <div class="form-field">
           <mat-form-field>
             <mat-label>PAN-OS maximum install attempts</mat-label>
-            <input matInput type="number" formControlName="maxInstallAttempts" required>
+            <input matInput type="number" formControlName="maxInstallAttempts">
           </mat-form-field>
           <mat-form-field>
             <mat-label>PAN-OS install retry interval (seconds)</mat-label>
-            <input matInput type="number" formControlName="installRetryInterval" required>
+            <input matInput type="number" formControlName="installRetryInterval">
           </mat-form-field>
         </div>
       </div>
@@ -131,11 +131,11 @@
         <div class="form-field">
           <mat-form-field>
             <mat-label>Device maximum reboot tries</mat-label>
-            <input matInput type="number" formControlName="maxRebootTries" required>
+            <input matInput type="number" formControlName="maxRebootTries">
           </mat-form-field>
           <mat-form-field>
             <mat-label>Device reboot retry interval (seconds)</mat-label>
-            <input matInput type="number" formControlName="rebootRetryInterval" required>
+            <input matInput type="number" formControlName="rebootRetryInterval">
           </mat-form-field>
         </div>
       </div>
@@ -146,11 +146,11 @@
         <div class="form-field">
           <mat-form-field>
             <mat-label>Command timeout (seconds)</mat-label>
-            <input matInput type="number" formControlName="commandTimeout" required>
+            <input matInput type="number" formControlName="commandTimeout">
           </mat-form-field>
           <mat-form-field>
             <mat-label>Connection timeout (seconds)</mat-label>
-            <input matInput type="number" formControlName="connectionTimeout" required>
+            <input matInput type="number" formControlName="connectionTimeout">
           </mat-form-field>
         </div>
       </div>
