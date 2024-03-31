@@ -140,6 +140,11 @@ class SettingsProfile(models.Model):
         default=True,
         verbose_name="Content Version Snapshot",
     )
+    description = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Description",
+    )
     download_retry_interval = models.IntegerField(
         default=60,
         verbose_name="Download Retry Interval",

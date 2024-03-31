@@ -102,6 +102,7 @@ export class SettingsProfileService {
                 panUsername: response.pan_username,
                 panPassword: response.pan_password,
             },
+            description: response.description,
             download: {
                 maxDownloadTries: response.max_download_tries,
                 downloadRetryInterval: response.download_retry_interval,
@@ -182,6 +183,7 @@ export class SettingsProfileService {
                 settings.readinessChecks.checks.contentVersionCheck,
             content_version_snapshot:
                 settings.snapshots.state.contentVersionSnapshot,
+            description: settings.description,
             download_retry_interval: settings.download.downloadRetryInterval,
             dynamic_updates_check:
                 settings.readinessChecks.checks.dynamicUpdatesCheck,

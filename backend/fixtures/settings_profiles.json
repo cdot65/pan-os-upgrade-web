@@ -9,6 +9,7 @@
         "connection_timeout": 30,
         "content_version_check": true,
         "content_version_snapshot": true,
+        "description": "Default settings profile",
         "download_retry_interval": 60,
         "dynamic_updates_check": true,
         "expired_licenses_check": true,
