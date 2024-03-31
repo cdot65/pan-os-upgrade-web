@@ -62,11 +62,11 @@ export class SettingsProfileDetailsComponent implements OnInit {
             description: [""],
             download: this.formBuilder.group({
                 max_download_tries: [22],
-                download_retry_interval: [30],
+                download_retry_interval: [33],
             }),
             install: this.formBuilder.group({
-                max_install_attempts: [3],
-                install_retry_interval: [60],
+                max_install_attempts: [33],
+                install_retry_interval: [66],
             }),
             readiness_checks: this.formBuilder.group({
                 checks: this.formBuilder.group({
@@ -89,13 +89,13 @@ export class SettingsProfileDetailsComponent implements OnInit {
                 readiness_checks_location: ["assurance/readiness_checks/"],
             }),
             reboot: this.formBuilder.group({
-                max_reboot_tries: [30],
-                reboot_retry_interval: [60],
+                max_reboot_tries: [33],
+                reboot_retry_interval: [66],
             }),
             snapshots: this.formBuilder.group({
                 snapshots_location: ["assurance/snapshots/"],
-                max_snapshot_tries: [3],
-                snapshot_retry_interval: [60],
+                max_snapshot_tries: [33],
+                snapshot_retry_interval: [66],
                 state: this.formBuilder.group({
                     arp_table_snapshot: [false],
                     content_version_snapshot: [true],
@@ -107,8 +107,8 @@ export class SettingsProfileDetailsComponent implements OnInit {
                 }),
             }),
             timeout_settings: this.formBuilder.group({
-                command_timeout: [120],
-                connection_timeout: [30],
+                command_timeout: [123321],
+                connection_timeout: [33],
             }),
             authentication: this.formBuilder.group({
                 pan_username: ["", Validators.required],
@@ -266,19 +266,12 @@ export class SettingsProfileDetailsComponent implements OnInit {
         });
     }
 
-    formatLabel(value: number): string {
-        if (value >= 1000) {
-            return Math.round(value / 1000) + "k";
-        }
-        return `${value}`;
-    }
-
     onCancel(): void {
         this.settingsForm.reset();
         this.router.navigate(["/settings/profiles"]);
     }
 
-    onSubmit(): void {
+    submitUpdate(): void {
         if (this.settingsForm.valid) {
             const settings: SettingsProfile = this.settingsForm.value;
             console.log("Settings saved:", settings);
