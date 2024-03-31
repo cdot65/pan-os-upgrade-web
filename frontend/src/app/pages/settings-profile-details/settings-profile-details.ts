@@ -125,7 +125,7 @@ export class SettingsProfileDetailsComponent implements OnInit {
                     .getSettingsByProfile(uuid)
                     .subscribe(
                         (settingsProfile: SettingsProfile) => {
-                            this.settingsForm.patchValue({
+                            this.settingsForm.setValue({
                                 profile: settingsProfile.profile,
                                 description: settingsProfile.description,
                                 authentication: {
