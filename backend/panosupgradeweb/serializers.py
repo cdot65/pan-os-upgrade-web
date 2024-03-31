@@ -139,6 +139,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class SettingsProfileSerializer(serializers.ModelSerializer):
+    authentication = serializers.SerializerMethodField()
     download = serializers.SerializerMethodField()
     install = serializers.SerializerMethodField()
     readiness_checks = serializers.SerializerMethodField()
@@ -152,8 +153,7 @@ class SettingsProfileSerializer(serializers.ModelSerializer):
             "uuid",
             "description",
             "profile",
-            "pan_username",
-            "pan_password",
+            "authentication",
             "download",
             "install",
             "readiness_checks",
@@ -161,27 +161,6 @@ class SettingsProfileSerializer(serializers.ModelSerializer):
             "snapshots",
             "timeout_settings",
         )
-        # extra_kwargs = {
-        #     "pan_password": {"write_only": True},
-        # }
-
-    def create(self, validated_data):
-        pan_username = validated_data.pop("pan_username", "")
-        pan_password = validated_data.pop("pan_password", "")
-        instance = super().create(validated_data)
-        instance.pan_username = pan_username
-        instance.pan_password = pan_password
-        instance.save()
-        return instance
-
-    def update(self, instance, validated_data):
-        pan_username = validated_data.pop("pan_username", "")
-        pan_password = validated_data.pop("pan_password", "")
-        instance = super().update(instance, validated_data)
-        instance.pan_username = pan_username
-        instance.pan_password = pan_password
-        instance.save()
-        return instance
 
     def get_authentication(self, obj):
         return {
@@ -252,42 +231,100 @@ class SettingsProfileSerializer(serializers.ModelSerializer):
         }
 
     def to_internal_value(self, data):
-        data["pan_username"] = data.get("authentication", {}).get("pan_username")
-        data["pan_password"] = data.get("authentication", {}).get("pan_password")
-        data["max_download_tries"] = data.get("download", {}).get("max_download_tries")
-        data["download_retry_interval"] = data.get("download", {}).get(
-            "download_retry_interval"
+        authentication_data = data.get("authentication", {})
+        download_data = data.get("download", {})
+        install_data = data.get("install", {})
+        readiness_checks_data = data.get("readiness_checks", {})
+        reboot_data = data.get("reboot", {})
+        snapshots_data = data.get("snapshots", {})
+        timeout_settings_data = data.get("timeout_settings", {})
+
+        internal_value = super().to_internal_value(data)
+        internal_value.update(
+            {
+                "pan_username": authentication_data.get("pan_username"),
+                "pan_password": authentication_data.get("pan_password"),
+                "max_download_tries": download_data.get("max_download_tries"),
+                "download_retry_interval": download_data.get("download_retry_interval"),
+                "max_install_attempts": install_data.get("max_install_attempts"),
+                "install_retry_interval": install_data.get("install_retry_interval"),
+                "readiness_checks_location": readiness_checks_data.get(
+                    "readiness_checks_location"
+                ),
+                "active_support_check": readiness_checks_data.get("checks", {}).get(
+                    "active_support_check"
+                ),
+                "arp_entry_exist_check": readiness_checks_data.get("checks", {}).get(
+                    "arp_entry_exist_check"
+                ),
+                "candidate_config_check": readiness_checks_data.get("checks", {}).get(
+                    "candidate_config_check"
+                ),
+                "certificates_requirements_check": readiness_checks_data.get(
+                    "checks", {}
+                ).get("certificates_requirements_check"),
+                "content_version_check": readiness_checks_data.get("checks", {}).get(
+                    "content_version_check"
+                ),
+                "dynamic_updates_check": readiness_checks_data.get("checks", {}).get(
+                    "dynamic_updates_check"
+                ),
+                "expired_licenses_check": readiness_checks_data.get("checks", {}).get(
+                    "expired_licenses_check"
+                ),
+                "free_disk_space_check": readiness_checks_data.get("checks", {}).get(
+                    "free_disk_space_check"
+                ),
+                "ha_check": readiness_checks_data.get("checks", {}).get("ha_check"),
+                "ip_sec_tunnel_status_check": readiness_checks_data.get(
+                    "checks", {}
+                ).get("ip_sec_tunnel_status_check"),
+                "jobs_check": readiness_checks_data.get("checks", {}).get("jobs_check"),
+                "ntp_sync_check": readiness_checks_data.get("checks", {}).get(
+                    "ntp_sync_check"
+                ),
+                "panorama_check": readiness_checks_data.get("checks", {}).get(
+                    "panorama_check"
+                ),
+                "planes_clock_sync_check": readiness_checks_data.get("checks", {}).get(
+                    "planes_clock_sync_check"
+                ),
+                "session_exist_check": readiness_checks_data.get("checks", {}).get(
+                    "session_exist_check"
+                ),
+                "max_reboot_tries": reboot_data.get("max_reboot_tries"),
+                "reboot_retry_interval": reboot_data.get("reboot_retry_interval"),
+                "snapshots_location": snapshots_data.get("snapshots_location"),
+                "max_snapshot_tries": snapshots_data.get("max_snapshot_tries"),
+                "snapshot_retry_interval": snapshots_data.get(
+                    "snapshot_retry_interval"
+                ),
+                "arp_table_snapshot": snapshots_data.get("state", {}).get(
+                    "arp_table_snapshot"
+                ),
+                "content_version_snapshot": snapshots_data.get("state", {}).get(
+                    "content_version_snapshot"
+                ),
+                "ip_sec_tunnels_snapshot": snapshots_data.get("state", {}).get(
+                    "ip_sec_tunnels_snapshot"
+                ),
+                "license_snapshot": snapshots_data.get("state", {}).get(
+                    "license_snapshot"
+                ),
+                "nics_snapshot": snapshots_data.get("state", {}).get("nics_snapshot"),
+                "routes_snapshot": snapshots_data.get("state", {}).get(
+                    "routes_snapshot"
+                ),
+                "session_stats_snapshot": snapshots_data.get("state", {}).get(
+                    "session_stats_snapshot"
+                ),
+                "command_timeout": timeout_settings_data.get("command_timeout"),
+                "connection_timeout": timeout_settings_data.get("connection_timeout"),
+            }
         )
-        data["max_install_attempts"] = data.get("install", {}).get(
-            "max_install_attempts"
-        )
-        data["install_retry_interval"] = data.get("install", {}).get(
-            "install_retry_interval"
-        )
-        data["readiness_checks_location"] = data.get("readiness_checks", {}).get(
-            "readiness_checks_location"
-        )
-        data["max_reboot_tries"] = data.get("reboot", {}).get("max_reboot_tries")
-        data["reboot_retry_interval"] = data.get("reboot", {}).get(
-            "reboot_retry_interval"
-        )
-        data["snapshots_location"] = data.get("snapshots", {}).get("snapshots_location")
-        data["max_snapshot_tries"] = data.get("snapshots", {}).get("max_snapshot_tries")
-        data["snapshot_retry_interval"] = data.get("snapshots", {}).get(
-            "snapshot_retry_interval"
-        )
-        data["command_timeout"] = data.get("timeout_settings", {}).get(
-            "command_timeout"
-        )
-        data["connection_timeout"] = data.get("timeout_settings", {}).get(
-            "connection_timeout"
-        )
-        return super().to_internal_value(data)
+        return internal_value
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation["authentication"] = {
-            "pan_username": instance.pan_username,
-            "pan_password": "",
-        }
+        representation["authentication"] = self.get_authentication(instance)
         return representation
