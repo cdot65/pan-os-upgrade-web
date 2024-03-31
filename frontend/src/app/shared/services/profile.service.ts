@@ -6,96 +6,88 @@ import { Observable, of } from "rxjs";
 import { catchError, tap } from "rxjs/operators";
 
 import { Injectable } from "@angular/core";
-import { SettingsProfile } from "../interfaces/settings-profile.interface";
+import { Profile } from "../interfaces/profile.interface";
 import { environment } from "../../../environments/environment.prod";
 
 @Injectable({
     providedIn: "root",
 })
-export class SettingsProfileService {
+export class ProfileService {
     private apiUrl = environment.apiUrl;
 
     constructor(private http: HttpClient) {}
 
-    getProfiles(): Observable<SettingsProfile[]> {
+    getProfiles(): Observable<Profile[]> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
         );
-        return this.http.get<SettingsProfile[]>(
-            `${this.apiUrl}/api/v1/settings/profiles/`,
-            { headers },
-        );
+        return this.http.get<Profile[]>(`${this.apiUrl}/api/v1/profiles/`, {
+            headers,
+        });
     }
 
-    getSettingsProfile(profile: string): Observable<SettingsProfile> {
+    getProfile(uuid: string): Observable<Profile> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
         );
         return this.http
-            .get<SettingsProfile>(
-                `${this.apiUrl}/api/v1/settings/profiles/${profile}/`,
-                { headers },
-            )
+            .get<Profile>(`${this.apiUrl}/api/v1/profiles/${uuid}/`, {
+                headers,
+            })
             .pipe(
-                tap((response: SettingsProfile) => {
+                tap((response: Profile) => {
                     console.log("API Response:", response);
                 }),
             );
     }
 
-    createSettingsProfile(
-        settingsProfile: SettingsProfile,
-    ): Observable<SettingsProfile> {
+    createProfile(profileForm: Profile): Observable<Profile> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
         );
         return this.http
-            .post<SettingsProfile>(
-                `${this.apiUrl}/api/v1/settings/profiles/`,
-                settingsProfile,
-                { headers },
-            )
+            .post<Profile>(`${this.apiUrl}/api/v1/profiles/`, profileForm, {
+                headers,
+            })
             .pipe(
-                tap((response: SettingsProfile) => {
+                tap((response: Profile) => {
                     console.log("API Response:", response);
                 }),
             );
     }
 
-    deleteSettingsProfile(uuid: number): Observable<any> {
+    deleteProfile(uuid: string): Observable<any> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
         );
         return this.http
-            .delete(`${this.apiUrl}/api/v1/settings/profiles/${uuid}`, {
+            .delete(`${this.apiUrl}/api/v1/profiles/${uuid}`, {
                 headers,
             })
             .pipe(
                 catchError((error) => {
-                    console.error("Error deleting settings profile:", error);
+                    console.error("Error deleting profile:", error);
                     return of(null);
                 }),
             );
     }
 
-    updateSettingsProfile(
-        settings: SettingsProfile,
-    ): Observable<SettingsProfile> {
+    updateProfile(profileForm: Profile): Observable<Profile> {
         return this.http
-            .put<SettingsProfile>(
-                `${this.apiUrl}/api/v1/settings/profiles/${settings.uuid}/`,
-                settings,
+            .put<Profile>(
+                `${this.apiUrl}/api/v1/profiles/${profileForm.uuid}/`,
+                profileForm,
             )
             .pipe(
-                tap((response: SettingsProfile) => {
+                tap((response: Profile) => {
                     console.log("API Response:", response);
                 }),
             );

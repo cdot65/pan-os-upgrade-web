@@ -15,8 +15,8 @@ export interface DocSection {
 }
 
 const INVENTORY = "inventory";
+const PROFILES = "profiles";
 const UPGRADE = "upgrade";
-const SETTINGS = "settings";
 
 const SECTIONS: { [key: string]: DocSection } = {
     [INVENTORY]: {
@@ -25,14 +25,14 @@ const SECTIONS: { [key: string]: DocSection } = {
             "Manage your environments inventory of Palo Alto Networks firewalls and" +
             " Panorama appliances.",
     },
-    [UPGRADE]: {
-        name: "Upgrade",
+    [PROFILES]: {
+        name: "Profiles",
         summary:
             "Manage your environments inventory of Palo Alto Networks firewalls and" +
             " Panorama appliances.",
     },
-    [SETTINGS]: {
-        name: "Settings",
+    [UPGRADE]: {
+        name: "Upgrade",
         summary:
             "Manage your environments inventory of Palo Alto Networks firewalls and" +
             " Panorama appliances.",

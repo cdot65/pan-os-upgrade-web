@@ -18,13 +18,13 @@ from rest_framework.serializers import ValidationError
 from .models import (
     InventoryPlatform,
     InventoryItem,
-    SettingsProfile,
+    Profile,
 )
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     InventoryItemSerializer,
     InventoryPlatformSerializer,
-    SettingsProfileSerializer,
+    ProfileSerializer,
     UserSerializer,
 )
 
@@ -104,17 +104,17 @@ class InventoryPlatformViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-class SettingsProfileViewSet(viewsets.ModelViewSet):
-    queryset = SettingsProfile.objects.all()
-    serializer_class = SettingsProfileSerializer
+class ProfileViewSet(viewsets.ModelViewSet):
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = "uuid"
 
     def get_queryset(self):
-        queryset = SettingsProfile.objects.all()
-        profile = self.request.query_params.get("profile", None)
-        if profile is not None:
-            queryset = queryset.filter(profile=profile)
+        queryset = Profile.objects.all()
+        name = self.request.query_params.get("name", None)
+        if name is not None:
+            queryset = queryset.filter(name=name)
         return queryset
 
     def list(self, request, *args, **kwargs):

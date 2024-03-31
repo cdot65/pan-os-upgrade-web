@@ -7,7 +7,7 @@ from django.conf import settings
 from .models import (
     InventoryItem,
     InventoryPlatform,
-    SettingsProfile,
+    Profile,
 )
 
 
@@ -138,7 +138,7 @@ class UserSerializer(serializers.ModelSerializer):
         return None
 
 
-class SettingsProfileSerializer(serializers.ModelSerializer):
+class ProfileSerializer(serializers.ModelSerializer):
     authentication = serializers.SerializerMethodField()
     download = serializers.SerializerMethodField()
     install = serializers.SerializerMethodField()
@@ -148,11 +148,11 @@ class SettingsProfileSerializer(serializers.ModelSerializer):
     timeout_settings = serializers.SerializerMethodField()
 
     class Meta:
-        model = SettingsProfile
+        model = Profile
         fields = (
             "uuid",
             "description",
-            "profile",
+            "name",
             "authentication",
             "download",
             "install",

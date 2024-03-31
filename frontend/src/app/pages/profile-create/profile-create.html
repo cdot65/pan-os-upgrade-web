@@ -1,16 +1,16 @@
 <!-- src/app/pages/settings/settings.component.html -->
 
-<settings-page-header></settings-page-header>
-<main focusOnNavigation aria-label="Settings" id="settings-profile-create" class="settings-profile-create">
-  <form [formGroup]="settingsProfileForm" (ngSubmit)="submitCreateProfile()" class="mat-elevation-z2">
-    <div class="settings-profile-create-grid">
+<profile-page-header></profile-page-header>
+<main focusOnNavigation aria-label="Settings" id="profile-create" class="profile-create">
+  <form [formGroup]="ProfileForm" (ngSubmit)="submitCreateProfile()" class="mat-elevation-z2">
+    <div class="profile-create-grid">
 
       <!-- form field for the profile name input. -->
       <div class="form-field">
         <h3>Profile</h3>
         <mat-form-field>
           <mat-label>Profile Name</mat-label>
-          <input matInput formControlName="profile" required>
+          <input matInput formControlName="name" required>
         </mat-form-field>
         <mat-form-field>
           <mat-label>Description</mat-label>
@@ -162,7 +162,7 @@
       <!-- container for the Submit and Cancel buttons. -->
       <div class="button-container">
         <button mat-raised-button color="warn" type="button" (click)="onCancel()">Cancel</button>
-        <button mat-raised-button color="primary" type="submit" [disabled]="settingsProfileForm.invalid">Create</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="ProfileForm.invalid">Create</button>
       </div>
     </div>
   </form>
