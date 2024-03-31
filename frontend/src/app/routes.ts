@@ -63,18 +63,18 @@ export const PANOSUPGRADE_ROUTES: Routes = [
         canActivate: [authGuard],
     },
     {
-        path: "settings/profiles/:uuid",
-        loadComponent: () =>
-            import("./pages/settings-profile-details").then(
-                (m) => m.SettingsProfileDetailsComponent,
-            ),
-        canActivate: [authGuard],
-    },
-    {
         path: "settings/profiles/create",
         loadComponent: () =>
             import("./pages/settings-profile-create").then(
                 (m) => m.SettingsProfileCreateComponent,
+            ),
+        canActivate: [authGuard],
+    },
+    {
+        path: "settings/profiles/:uuid",
+        loadComponent: () =>
+            import("./pages/settings-profile-details").then(
+                (m) => m.SettingsProfileDetailsComponent,
             ),
         canActivate: [authGuard],
     },
