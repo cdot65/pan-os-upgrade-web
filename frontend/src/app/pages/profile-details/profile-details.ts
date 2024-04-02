@@ -49,7 +49,7 @@ import { SettingsPageHeader } from "../profile-page-header/profile-page-header";
 })
 export class ProfileDetailsComponent implements OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
-    settingsForm: FormGroup;
+    updateProfileForm: FormGroup;
 
     constructor(
         private route: ActivatedRoute,
@@ -58,7 +58,7 @@ export class ProfileDetailsComponent implements OnInit {
         public _componentPageTitle: ComponentPageTitle,
         private profileService: ProfileService,
     ) {
-        this.settingsForm = this.formBuilder.group({
+        this.updateProfileForm = this.formBuilder.group({
             description: [""],
             download: this.formBuilder.group({
                 max_download_tries: [22],
@@ -125,7 +125,7 @@ export class ProfileDetailsComponent implements OnInit {
                 this.profileService.getProfile(uuid).subscribe(
                     (profile: Profile) => {
                         console.log("Retrieved Profile:", profile);
-                        this.settingsForm.setValue({
+                        this.updateProfileForm.setValue({
                             authentication: {
                                 pan_username:
                                     profile.authentication.pan_username,
@@ -240,7 +240,10 @@ export class ProfileDetailsComponent implements OnInit {
                                     profile.timeout_settings.connection_timeout,
                             },
                         });
-                        console.log("Form Value:", this.settingsForm.value);
+                        console.log(
+                            "Form Value:",
+                            this.updateProfileForm.value,
+                        );
                     },
                     (error) => {
                         console.error("Error fetching profile:", error);
@@ -251,13 +254,13 @@ export class ProfileDetailsComponent implements OnInit {
     }
 
     onCancel(): void {
-        this.settingsForm.reset();
+        this.updateProfileForm.reset();
         this.router.navigate(["/profiles"]);
     }
 
-    submitUpdate(): void {
-        if (this.settingsForm.valid) {
-            const settings: Profile = this.settingsForm.value;
+    submitUpdateProfile(): void {
+        if (this.updateProfileForm.valid) {
+            const settings: Profile = this.updateProfileForm.value;
             console.log("Settings saved:", settings);
             // TODO: Implement saving the settings to the backend API
         }

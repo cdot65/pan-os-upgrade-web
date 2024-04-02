@@ -1,10 +1,12 @@
-<!-- src/app/pages/settings/settings.component.html -->
+<!-- src/app/pages/profile-details/profile-details.html -->
 <div class="profile-details-container">
 
   <profile-page-header></profile-page-header>
-  <main focusOnNavigation aria-label="Settings" id="settings" class="settings-details">
-    <form [formGroup]="settingsForm" (ngSubmit)="submitUpdate()" class="mat-elevation-z2">
-      <div class="settings-details-grid">
+  <main focusOnNavigation aria-label="Profile Details" id="profile-details" class="profile-details">
+    <form [formGroup]="updateProfileForm" (ngSubmit)="submitUpdateProfile()" class="mat-elevation-z2">
+      <div class="profile-details-grid">
+
+        <!-- form field for the profile name input. -->
         <div>
           <h3>Profile</h3>
           <div class="form-field">
@@ -21,6 +23,7 @@
           </div>
         </div>
 
+        <!-- form field for the authentication inputs. -->
         <div formGroupName="authentication">
           <h3>Authentication</h3>
           <div class="form-field">
@@ -35,6 +38,7 @@
           </div>
         </div>
 
+        <!-- form field for the readiness check inputs. -->
         <div formGroupName="readiness_checks">
           <h3>Readiness Checks</h3>
           <div class="form-field">
@@ -76,6 +80,7 @@
           </div>
         </div>
 
+        <!-- form field for the snapshot inputs. -->
         <div formGroupName="snapshots">
           <h3>Snapshots</h3>
           <div class="form-field">
@@ -103,6 +108,7 @@
           </div>
         </div>
 
+        <!-- form field for the download inputs. -->
         <div formGroupName="download">
           <h3>Download</h3>
           <div class="form-field">
@@ -117,6 +123,7 @@
           </div>
         </div>
 
+        <!-- form field for the install inputs. -->
         <div formGroupName="install">
           <h3>Install</h3>
           <div class="form-field">
@@ -131,7 +138,7 @@
           </div>
         </div>
 
-
+        <!-- form field for the reboot inputs. -->
         <div formGroupName="reboot">
           <h3>Reboot</h3>
           <div class="form-field">
@@ -146,7 +153,7 @@
           </div>
         </div>
 
-
+        <!-- form field for the timeout inputs. -->
         <div formGroupName="timeout_settings">
           <h3>Timeout Settings</h3>
           <div class="form-field">
@@ -165,7 +172,7 @@
       <!-- container for the Submit and Cancel buttons. -->
       <div class="button-container">
         <button mat-raised-button color="warn" type="button" (click)="onCancel()">Cancel</button>
-        <button mat-raised-button color="primary" type="submit" [disabled]="settingsForm.invalid">Save</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="updateProfileForm.invalid">Save</button>
       </div>
     </form>
   </main>
