@@ -40,7 +40,7 @@ import { SettingsPageHeader } from "../profile-page-header/profile-page-header";
 })
 export class ProfileCreateComponent implements OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
-    ProfileForm: FormGroup;
+    createProfileForm: FormGroup;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -48,7 +48,7 @@ export class ProfileCreateComponent implements OnInit {
         private router: Router,
         public _componentPageTitle: ComponentPageTitle,
     ) {
-        this.ProfileForm = this.formBuilder.group({
+        this.createProfileForm = this.formBuilder.group({
             authentication: this.formBuilder.group({
                 pan_username: ["", Validators.required],
                 pan_password: ["", Validators.required],
@@ -113,8 +113,8 @@ export class ProfileCreateComponent implements OnInit {
     }
 
     submitCreateProfile(): void {
-        if (this.ProfileForm && this.ProfileForm.valid) {
-            const formValue = this.ProfileForm.value;
+        if (this.createProfileForm && this.createProfileForm.valid) {
+            const formValue = this.createProfileForm.value;
             this.profileService.createProfile(formValue).subscribe(
                 () => {
                     this.router.navigate(["/profiles"]);
@@ -127,7 +127,7 @@ export class ProfileCreateComponent implements OnInit {
     }
 
     onCancel(): void {
-        this.ProfileForm.reset();
+        this.createProfileForm.reset();
         this.router.navigate(["/profiles"]);
     }
 }

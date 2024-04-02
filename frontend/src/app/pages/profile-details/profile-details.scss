@@ -1,12 +1,11 @@
 // src/app/pages/profile-details/profile-details.scss
-.profile-create-container {
+.profile-details-container {
   display: grid;
   grid-template-rows: auto 1fr auto;
   min-height: 100vh;
 }
 
-
-.settings-details {
+.profile-details {
   width: 97%;
   padding: 25px;
 
@@ -14,7 +13,7 @@
     padding: 20px;
   }
 
-  .settings-details-grid {
+  .profile-details-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;

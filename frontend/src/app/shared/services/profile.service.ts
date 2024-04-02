@@ -45,16 +45,20 @@ export class ProfileService {
             );
     }
 
-    createProfile(profileForm: Profile): Observable<Profile> {
+    createProfile(createProfileForm: Profile): Observable<Profile> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
         );
         return this.http
-            .post<Profile>(`${this.apiUrl}/api/v1/profiles/`, profileForm, {
-                headers,
-            })
+            .post<Profile>(
+                `${this.apiUrl}/api/v1/profiles/`,
+                createProfileForm,
+                {
+                    headers,
+                },
+            )
             .pipe(
                 tap((response: Profile) => {
                     console.log("API Response:", response);
@@ -80,11 +84,11 @@ export class ProfileService {
             );
     }
 
-    updateProfile(profileForm: Profile): Observable<Profile> {
+    updateProfile(updateProfileForm: Profile): Observable<Profile> {
         return this.http
             .put<Profile>(
-                `${this.apiUrl}/api/v1/profiles/${profileForm.uuid}/`,
-                profileForm,
+                `${this.apiUrl}/api/v1/profiles/${updateProfileForm.uuid}/`,
+                updateProfileForm,
             )
             .pipe(
                 tap((response: Profile) => {

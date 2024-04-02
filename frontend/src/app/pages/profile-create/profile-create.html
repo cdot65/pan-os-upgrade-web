@@ -2,21 +2,25 @@
 <div class="profile-create-container">
 
   <profile-page-header></profile-page-header>
-  <main focusOnNavigation aria-label="Settings" id="profile-create" class="profile-create">
-    <form [formGroup]="ProfileForm" (ngSubmit)="submitCreateProfile()" class="mat-elevation-z2">
+  <main focusOnNavigation aria-label="Profile Create" id="profile-create" class="profile-create">
+    <form [formGroup]="createProfileForm" (ngSubmit)="submitCreateProfile()" class="mat-elevation-z2">
       <div class="profile-create-grid">
 
         <!-- form field for the profile name input. -->
-        <div class="form-field">
+        <div>
           <h3>Profile</h3>
-          <mat-form-field>
-            <mat-label>Profile Name</mat-label>
-            <input matInput formControlName="name" required>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>Description</mat-label>
-            <input matInput formControlName="description">
-          </mat-form-field>
+          <div class="form-field">
+            <mat-form-field>
+              <mat-label>Profile Name</mat-label>
+              <input matInput formControlName="name" required>
+            </mat-form-field>
+          </div>
+          <div class="form-field">
+            <mat-form-field>
+              <mat-label>Description</mat-label>
+              <input matInput formControlName="description">
+            </mat-form-field>
+          </div>
         </div>
 
         <!-- form field for the authentication inputs. -->
@@ -49,24 +53,28 @@
                 minimum
                 size requirements</mat-checkbox>
               <mat-checkbox formControlName="content_version_check">Running Latest Content Version</mat-checkbox>
-              <mat-checkbox formControlName="dynamic_updates_check">Check if any Dynamic Update job is scheduled to run
+              <mat-checkbox formControlName="dynamic_updates_check">Check if any Dynamic Update job is scheduled to
+                run
                 within the specified time window</mat-checkbox>
               <mat-checkbox formControlName="expired_licenses_check">No Expired Licenses</mat-checkbox>
-              <mat-checkbox formControlName="free_disk_space_check">Check if there is enough space on the `/opt/panrepo`
+              <mat-checkbox formControlName="free_disk_space_check">Check if there is enough space on the
+                `/opt/panrepo`
                 volume for PAN-OS image</mat-checkbox>
               <mat-checkbox formControlName="ha_check">Check HA pair status from the perspective of the current device
               </mat-checkbox>
               <mat-checkbox formControlName="ip_sec_tunnel_status_check">Check if a given IPsec tunnel is in active
                 state
               </mat-checkbox>
-              <mat-checkbox formControlName="jobs_check">Check for any job with status different than FIN</mat-checkbox>
+              <mat-checkbox formControlName="jobs_check">Check for any job with status different than FIN
+              </mat-checkbox>
               <mat-checkbox formControlName="ntp_sync_check">Check if NTP is synchronized</mat-checkbox>
               <mat-checkbox formControlName="panorama_check">Check connectivity with the Panorama appliance
               </mat-checkbox>
               <mat-checkbox formControlName="planes_clock_sync_check">Check if the clock is synchronized between
                 dataplane
                 and management plane</mat-checkbox>
-              <mat-checkbox formControlName="session_exist_check">Check if a critical session is present in the sessions
+              <mat-checkbox formControlName="session_exist_check">Check if a critical session is present in the
+                sessions
                 table</mat-checkbox>
             </div>
             <mat-form-field>
@@ -168,7 +176,7 @@
       <!-- container for the Submit and Cancel buttons. -->
       <div class="button-container">
         <button mat-raised-button color="warn" type="button" (click)="onCancel()">Cancel</button>
-        <button mat-raised-button color="primary" type="submit" [disabled]="ProfileForm.invalid">Create</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="createProfileForm.invalid">Create</button>
       </div>
     </form>
   </main>

@@ -18,9 +18,24 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
 
-    .form-field {
-      mat-form-field {
+    >div {
+      width: 100%;
+
+      h3 {
+        margin-bottom: 10px;
+      }
+
+      .form-field {
         width: 100%;
+
+        mat-form-field {
+          width: 100%;
+        }
+      }
+
+      mat-checkbox {
+        display: block;
+        margin-bottom: 10px;
       }
     }
   }
