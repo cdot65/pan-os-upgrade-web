@@ -34,7 +34,7 @@ import { MatSelectModule } from "@angular/material/select";
     imports: [
         CommonModule,
         InventoryPageHeader,
-        ReactiveFormsModule,
+        Footer,
         MatButtonModule,
         MatCardModule,
         MatCheckboxModule,
@@ -43,9 +43,10 @@ import { MatSelectModule } from "@angular/material/select";
         MatIconModule,
         MatInputModule,
         MatSelectModule,
-        Footer,
+        ReactiveFormsModule,
     ],
 })
+
 /**
  * Represents the component for displaying and managing inventory details.
  */
@@ -58,11 +59,11 @@ export class InventoryDetailsComponent implements OnInit {
     panoramaPlatforms: InventoryPlatform[] = [];
 
     constructor(
-        private route: ActivatedRoute,
-        private router: Router,
-        private inventoryService: InventoryService,
         private formBuilder: FormBuilder,
         private dialog: MatDialog,
+        private inventoryService: InventoryService,
+        private route: ActivatedRoute,
+        private router: Router,
         public _componentPageTitle: ComponentPageTitle,
     ) {
         // Update the form group
