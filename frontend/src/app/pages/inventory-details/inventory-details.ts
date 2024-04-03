@@ -171,7 +171,6 @@ export class InventoryDetailsComponent implements OnInit {
             (item: InventoryItem) => {
                 this.inventoryItem = item;
                 this.updateInventoryForm.patchValue(item);
-                console.log("inventoryItem: ", this.inventoryItem);
             },
             (error: any) => {
                 console.error("Error fetching inventory item:", error);
@@ -195,7 +194,6 @@ export class InventoryDetailsComponent implements OnInit {
                 delete updatedItem.panoramaAppliance;
                 delete updatedItem.panoramaManaged;
             }
-            console.log("updatedItem", updatedItem);
             this.inventoryService
                 .updateInventoryItem(updatedItem, this.inventoryItem.uuid)
                 .subscribe(

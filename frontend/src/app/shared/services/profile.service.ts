@@ -3,10 +3,10 @@
 
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable, of } from "rxjs";
-import { catchError, tap } from "rxjs/operators";
 
 import { Injectable } from "@angular/core";
 import { Profile } from "../interfaces/profile.interface";
+import { catchError } from "rxjs/operators";
 import { environment } from "../../../environments/environment.prod";
 
 @Injectable({
@@ -34,15 +34,12 @@ export class ProfileService {
             "Authorization",
             `Token ${authToken}`,
         );
-        return this.http
-            .get<Profile>(`${this.apiUrl}/api/v1/profiles/${uuid}/`, {
+        return this.http.get<Profile>(
+            `${this.apiUrl}/api/v1/profiles/${uuid}/`,
+            {
                 headers,
-            })
-            .pipe(
-                tap((response: Profile) => {
-                    console.log("API Response:", response);
-                }),
-            );
+            },
+        );
     }
 
     createProfile(createProfileForm: Profile): Observable<Profile> {
@@ -51,19 +48,13 @@ export class ProfileService {
             "Authorization",
             `Token ${authToken}`,
         );
-        return this.http
-            .post<Profile>(
-                `${this.apiUrl}/api/v1/profiles/`,
-                createProfileForm,
-                {
-                    headers,
-                },
-            )
-            .pipe(
-                tap((response: Profile) => {
-                    console.log("API Response:", response);
-                }),
-            );
+        return this.http.post<Profile>(
+            `${this.apiUrl}/api/v1/profiles/`,
+            createProfileForm,
+            {
+                headers,
+            },
+        );
     }
 
     deleteProfile(uuid: string): Observable<any> {

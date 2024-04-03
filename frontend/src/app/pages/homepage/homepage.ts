@@ -1,6 +1,12 @@
 // src/app/pages/homepage/homepage.ts
 
-import { Component, HostBinding, Inject, OnInit, Optional } from "@angular/core";
+import {
+    Component,
+    HostBinding,
+    Inject,
+    OnInit,
+    Optional,
+} from "@angular/core";
 import { ANIMATION_MODULE_TYPE } from "@angular/platform-browser/animations";
 
 import { MatButtonModule } from "@angular/material/button";
@@ -15,14 +21,6 @@ import { GuideItems } from "../../shared/guide-items/guide-items";
 import { NgFor } from "@angular/common";
 
 import { Carousel, CarouselItem } from "../../shared/carousel/carousel";
-
-// const TOP_COMPONENTS = [
-//     "datepicker",
-//     "input",
-//     "slide-toggle",
-//     "slider",
-//     "button",
-// ];
 
 @Component({
     selector: "app-homepage",
@@ -58,8 +56,4 @@ export class Homepage implements OnInit {
     ngOnInit(): void {
         this._componentPageTitle.title = "";
     }
-
-    // getTopComponents(): string[] {
-    //     return TOP_COMPONENTS;
-    // }
 }
