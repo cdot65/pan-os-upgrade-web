@@ -77,17 +77,8 @@ class InventoryItemSerializer(serializers.ModelSerializer):
             "uuid",
         )
 
-    def to_internal_value(self, data):
-        data["device_group"] = data.pop("deviceGroup", None)
-        data["panorama_appliance"] = data.pop("panoramaAppliance", None)
-        data["panorama_managed"] = data.pop("panoramaManaged", None)
-        data["ha_peer"] = data.pop("haPeer", None)
-        data["ipv4_address"] = data.pop("ipv4Address", None)
-        data["ipv6_address"] = data.pop("ipv6Address", None)
-        return super().to_internal_value(data)
-
     def create(self, validated_data):
-        platform_name = self.initial_data.get("platformName")
+        platform_name = self.initial_data.get("platform_name")
         if platform_name:
             try:
                 platform = InventoryPlatform.objects.get(name=platform_name)
@@ -97,7 +88,7 @@ class InventoryItemSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        platform_name = self.initial_data.get("platformName")
+        platform_name = self.initial_data.get("platform_name")
         if platform_name:
             try:
                 platform = InventoryPlatform.objects.get(name=platform_name)

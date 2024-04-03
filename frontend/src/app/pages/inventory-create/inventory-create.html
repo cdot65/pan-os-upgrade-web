@@ -38,9 +38,9 @@
           <div class="form-field">
             <mat-form-field>
               <mat-label>Inventory Type</mat-label>
-              <!-- Select dropdown for choosing the device type, bound to the 'deviceType' form control -->
+              <!-- Select dropdown for choosing the device type, bound to the 'device_type' form control -->
               <!-- The 'aria-labelledby' attribute improves accessibility by associating the label with the select element -->
-              <mat-select id="deviceType" formControlName="deviceType" aria-labelledby="deviceTypeLabel">
+              <mat-select id="device_type" formControlName="device_type" aria-labelledby="device_typeLabel">
                 <!-- Option for selecting 'Firewall' as the device type -->
                 <mat-option value="Firewall">Firewall</mat-option>
                 <!-- Option for selecting 'Panorama' as the device type -->
@@ -53,16 +53,16 @@
           <div class="form-field">
             <mat-form-field>
               <mat-label>Platform</mat-label>
-              <!-- Select dropdown for choosing the platform, bound to the 'platformName' form control -->
+              <!-- Select dropdown for choosing the platform, bound to the 'platform_name' form control -->
               <!-- The 'aria-labelledby' attribute improves accessibility by associating the label with the select element -->
-              <mat-select formControlName="platformName" aria-labelledby="platformLabel">
+              <mat-select formControlName="platform_name" aria-labelledby="platform_label">
                 <!-- Option for each platform name based on the selected device type -->
                 <!-- Uses an *ngFor directive to iterate over the platform names -->
                 <!-- Conditionally selects the platform names based on the selected device type -->
                 <mat-option
-                  *ngFor="let platformName of createInventoryForm.get('deviceType')?.value === 'Firewall' ? firewallPlatforms : panoramaPlatforms"
-                  [value]="platformName.name">
-                  {{platformName.name}}
+                  *ngFor="let platform_name of createInventoryForm.get('device_type')?.value === 'Firewall' ? firewallPlatforms : panoramaPlatforms"
+                  [value]="platform_name.name">
+                  {{platform_name.name}}
                 </mat-option>
               </mat-select>
             </mat-form-field>
@@ -77,9 +77,9 @@
           <div class="form-field">
             <mat-form-field>
               <mat-label>IPv4 Address</mat-label>
-              <!-- Input field for the IPv4 address, bound to the 'ipv4Address' form control -->
+              <!-- Input field for the IPv4 address, bound to the 'ipv4_address' form control -->
               <!-- The 'required' attribute ensures that the field is mandatory -->
-              <input matInput id="ipv4Address" formControlName="ipv4Address" required>
+              <input matInput id="ipv4_address" formControlName="ipv4_address" required>
             </mat-form-field>
           </div>
 
@@ -87,9 +87,9 @@
           <div class="form-field">
             <mat-form-field>
               <mat-label>IPv6 Address</mat-label>
-              <!-- Input field for the IPv6 address, bound to the 'ipv6Address' form control -->
+              <!-- Input field for the IPv6 address, bound to the 'ipv6_address' form control -->
               <!-- The IPv6 address field is optional -->
-              <input matInput id="ipv6Address" formControlName="ipv6Address">
+              <input matInput id="ipv6_address" formControlName="ipv6_address">
             </mat-form-field>
           </div>
         </div>
@@ -109,39 +109,39 @@
           <div class="form-field" *ngIf="createInventoryForm.get('ha')?.value === true">
             <mat-form-field>
               <mat-label>HA Peer</mat-label>
-              <!-- Input field for the HA peer, bound to the 'haPeer' form control -->
-              <input matInput id="haPeer" formControlName="haPeer">
+              <!-- Input field for the HA peer, bound to the 'ha_peer' form control -->
+              <input matInput id="ha_peer" formControlName="ha_peer">
             </mat-form-field>
           </div>
         </div>
 
         <!-- Conditional section for Panorama information, displayed only if the selected device type is 'Firewall' -->
-        <div *ngIf="createInventoryForm.get('deviceType')?.value === 'Firewall'">
+        <div *ngIf="createInventoryForm.get('device_type')?.value === 'Firewall'">
           <!-- Heading for the Panorama information section -->
           <h3>Panorama Information</h3>
 
           <!-- Checkbox for indicating if the firewall is managed by Panorama -->
-          <div class="form-field" *ngIf="createInventoryForm.get('deviceType')?.value === 'Firewall'">
-            <mat-checkbox formControlName="panoramaManaged">Panorama Managed</mat-checkbox>
+          <div class="form-field" *ngIf="createInventoryForm.get('device_type')?.value === 'Firewall'">
+            <mat-checkbox formControlName="panorama_managed">Panorama Managed</mat-checkbox>
           </div>
 
           <!-- Form field for entering the Panorama appliance, displayed only if the firewall is managed by Panorama -->
           <div class="form-field"
-            *ngIf="createInventoryForm.get('deviceType')?.value === 'Firewall' && createInventoryForm.get('panoramaManaged')?.value === true">
+            *ngIf="createInventoryForm.get('device_type')?.value === 'Firewall' && createInventoryForm.get('panorama_managed')?.value === true">
             <mat-form-field>
               <mat-label>Panorama Appliance</mat-label>
-              <!-- Input field for the Panorama appliance, bound to the 'panoramaAppliance' form control -->
-              <input matInput id="panoramaAppliance" formControlName="panoramaAppliance">
+              <!-- Input field for the Panorama appliance, bound to the 'panorama_appliance' form control -->
+              <input matInput id="panorama_appliance" formControlName="panorama_appliance">
             </mat-form-field>
           </div>
 
           <!-- Form field for entering the device group, displayed only if the firewall is managed by Panorama -->
           <div class="form-field"
-            *ngIf="createInventoryForm.get('deviceType')?.value === 'Firewall' && createInventoryForm.get('panoramaManaged')?.value === true">
+            *ngIf="createInventoryForm.get('device_type')?.value === 'Firewall' && createInventoryForm.get('panorama_managed')?.value === true">
             <mat-form-field>
               <mat-label>Device Group</mat-label>
-              <!-- Input field for the device group, bound to the 'deviceGroup' form control -->
-              <input matInput id="deviceGroup" formControlName="deviceGroup">
+              <!-- Input field for the device group, bound to the 'device_group' form control -->
+              <input matInput id="device_group" formControlName="device_group">
             </mat-form-field>
           </div>
         </div>

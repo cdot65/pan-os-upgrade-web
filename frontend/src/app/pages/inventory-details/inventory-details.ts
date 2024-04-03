@@ -68,17 +68,17 @@ export class InventoryDetailsComponent implements OnInit {
         // Update the form group
         this.updateInventoryForm = this.formBuilder.group({
             // author: localStorage.getItem("author"),
-            deviceGroup: [""],
-            deviceType: [""],
+            device_group: [""],
+            device_type: [""],
             ha: [false],
-            haPeer: [""],
+            ha_peer: [""],
             hostname: ["", Validators.required],
-            ipv4Address: ["", Validators.required],
-            ipv6Address: [""],
+            ipv4_address: ["", Validators.required],
+            ipv6_address: [""],
             notes: [""],
-            panoramaAppliance: [""],
-            panoramaManaged: [false],
-            platformName: ["", Validators.required],
+            panorama_appliance: [""],
+            panorama_managed: [false],
+            platform_name: ["", Validators.required],
         });
     }
 
@@ -96,39 +96,39 @@ export class InventoryDetailsComponent implements OnInit {
         }
 
         this.updateInventoryForm
-            .get("deviceType")
-            ?.valueChanges.subscribe((deviceType) => {
-                if (deviceType === "Firewall") {
-                    this.fetchFirewallPlatforms();
+            .get("device_type")
+            ?.valueChanges.subscribe((device_type) => {
+                if (device_type === "Firewall") {
+                    this.getFirewallPlatforms();
                     this.updateInventoryForm
-                        .get("deviceGroup")
+                        .get("device_group")
                         ?.setValidators([]);
                     this.updateInventoryForm
-                        .get("panoramaAppliance")
+                        .get("panorama_appliance")
                         ?.setValidators([]);
                     this.updateInventoryForm
-                        .get("panoramaManaged")
+                        .get("panorama_managed")
                         ?.setValidators([]);
-                } else if (deviceType === "Panorama") {
-                    this.fetchPanoramaPlatforms();
+                } else if (device_type === "Panorama") {
+                    this.getPanoramaPlatforms();
                     this.updateInventoryForm
-                        .get("deviceGroup")
+                        .get("device_group")
                         ?.clearValidators();
                     this.updateInventoryForm
-                        .get("panoramaAppliance")
+                        .get("panorama_appliance")
                         ?.clearValidators();
                     this.updateInventoryForm
-                        .get("panoramaManaged")
+                        .get("panorama_managed")
                         ?.clearValidators();
                 }
                 this.updateInventoryForm
-                    .get("deviceGroup")
+                    .get("device_group")
                     ?.updateValueAndValidity();
                 this.updateInventoryForm
-                    .get("panoramaAppliance")
+                    .get("panorama_appliance")
                     ?.updateValueAndValidity();
                 this.updateInventoryForm
-                    .get("panoramaManaged")
+                    .get("panorama_managed")
                     ?.updateValueAndValidity();
             });
     }
@@ -136,8 +136,8 @@ export class InventoryDetailsComponent implements OnInit {
     /**
      * Fetches the firewall platforms from the inventory service.
      */
-    fetchFirewallPlatforms(): void {
-        this.inventoryService.fetchFirewallPlatforms().subscribe(
+    getFirewallPlatforms(): void {
+        this.inventoryService.getFirewallPlatforms().subscribe(
             (platforms: InventoryPlatform[]) => {
                 this.firewallPlatforms = platforms;
             },
@@ -150,8 +150,8 @@ export class InventoryDetailsComponent implements OnInit {
     /**
      * Fetches the Panorama platforms from the inventory service.
      */
-    fetchPanoramaPlatforms(): void {
-        this.inventoryService.fetchPanoramaPlatforms().subscribe(
+    getPanoramaPlatforms(): void {
+        this.inventoryService.getPanoramaPlatforms().subscribe(
             (platforms: InventoryPlatform[]) => {
                 this.panoramaPlatforms = platforms;
             },
@@ -189,9 +189,9 @@ export class InventoryDetailsComponent implements OnInit {
                 ...this.inventoryItem,
                 ...this.updateInventoryForm.value,
             };
-            if (updatedItem.deviceType === "Panorama") {
-                delete updatedItem.deviceGroup;
-                delete updatedItem.panoramaAppliance;
+            if (updatedItem.device_type === "Panorama") {
+                delete updatedItem.device_group;
+                delete updatedItem.panorama_appliance;
                 delete updatedItem.panoramaManaged;
             }
             this.inventoryService
