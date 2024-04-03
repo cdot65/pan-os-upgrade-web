@@ -10,6 +10,7 @@ import {
     Validators,
 } from "@angular/forms";
 
+import { CommonModule } from "@angular/common";
 import { ComponentPageTitle } from "../page-title/page-title";
 import { Footer } from "src/app/shared/footer/footer";
 import { MatButtonModule } from "@angular/material/button";
@@ -32,7 +33,8 @@ import { ProfileService } from "../../shared/services/profile.service";
     styleUrls: ["./profile-details.scss"],
     standalone: true,
     imports: [
-        ReactiveFormsModule,
+        CommonModule,
+        Footer,
         MatButtonModule,
         MatCardModule,
         MatCheckboxModule,
@@ -44,10 +46,15 @@ import { ProfileService } from "../../shared/services/profile.service";
         MatRadioModule,
         MatSliderModule,
         ProfilePageHeader,
-        Footer,
+        ReactiveFormsModule,
     ],
 })
+
+/**
+ * Represents the component for displaying and managing an upgrade profile details.
+ */
 export class ProfileDetailsComponent implements OnInit {
+    // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
     updateProfileForm: FormGroup;
 
