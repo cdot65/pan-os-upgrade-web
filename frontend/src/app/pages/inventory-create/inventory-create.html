@@ -6,61 +6,59 @@
     <form [formGroup]="createInventoryForm" (ngSubmit)="createInventoryItem()" class="mat-elevation-z2">
       <div class="inventory-create-grid">
 
-        <!--
-            This code represents a form field for entering the hostname.
-            It uses Angular Material's mat-form-field and mat-input components.
-            The input field has an id of "hostname" and is bound to the "hostname" form control.
-            The input is required, meaning it must be filled in before the form can be submitted.
-
-            This code represents a form field for entering notes.
-            It uses Angular Material's mat-form-field and mat-input components.
-            The input field is bound to the "notes" form control.
-        -->
         <div>
+          <!-- Heading for the firewall information section -->
           <h3>Firewall Information</h3>
+
+          <!-- Form field for entering the hostname -->
           <div class="form-field">
             <mat-form-field>
               <mat-label>Hostname</mat-label>
+              <!-- Input field for the hostname, bound to the 'hostname' form control -->
+              <!-- The 'required' attribute ensures that the field is mandatory -->
               <input matInput id="hostname" formControlName="hostname" required>
             </mat-form-field>
           </div>
 
+          <!-- Form field for entering additional notes -->
           <div class="form-field">
             <mat-form-field>
               <mat-label>Notes</mat-label>
+              <!-- Input field for notes, bound to the 'notes' form control -->
               <input matInput id="notes" formControlName="notes">
             </mat-form-field>
           </div>
         </div>
 
-        <!--
-            This code represents a selection field for the inventory type.
-            It allows the user to choose between "Firewall" and "Panorama" options.
-            The selected value will be stored in the "deviceType" form control.
-
-            This code represents a form field for selecting a platform.
-            It uses Angular Material components to display a dropdown select menu.
-            The available options are determined by the value of the 'deviceType' form control.
-            If the 'deviceType' is set to 'Firewall', the 'firewallPlatforms' array is used for options.
-            Otherwise, the 'panoramaPlatforms' array is used.
-            The selected platform name is bound to the 'platformName' form control.
-        -->
         <div>
+          <!-- Heading for the platform information section -->
           <h3>Platform Information</h3>
+
+          <!-- Form field for selecting the inventory type -->
           <div class="form-field">
             <mat-form-field>
               <mat-label>Inventory Type</mat-label>
+              <!-- Select dropdown for choosing the device type, bound to the 'deviceType' form control -->
+              <!-- The 'aria-labelledby' attribute improves accessibility by associating the label with the select element -->
               <mat-select id="deviceType" formControlName="deviceType" aria-labelledby="deviceTypeLabel">
+                <!-- Option for selecting 'Firewall' as the device type -->
                 <mat-option value="Firewall">Firewall</mat-option>
+                <!-- Option for selecting 'Panorama' as the device type -->
                 <mat-option value="Panorama">Panorama</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
 
+          <!-- Form field for selecting the platform -->
           <div class="form-field">
             <mat-form-field>
               <mat-label>Platform</mat-label>
+              <!-- Select dropdown for choosing the platform, bound to the 'platformName' form control -->
+              <!-- The 'aria-labelledby' attribute improves accessibility by associating the label with the select element -->
               <mat-select formControlName="platformName" aria-labelledby="platformLabel">
+                <!-- Option for each platform name based on the selected device type -->
+                <!-- Uses an *ngFor directive to iterate over the platform names -->
+                <!-- Conditionally selects the platform names based on the selected device type -->
                 <mat-option
                   *ngFor="let platformName of createInventoryForm.get('deviceType')?.value === 'Firewall' ? firewallPlatforms : panoramaPlatforms"
                   [value]="platformName.name">
@@ -71,102 +69,94 @@
           </div>
         </div>
 
-        <!--
-            This code represents a form field for entering an IPv4 address.
-            It uses Angular Material's mat-form-field and mat-input components.
-            The input element has an id of "ipv4Address" and is bound to a form control named "ipv4Address".
-            The input is required, meaning it must have a value before the form can be submitted.
-
-            This HTML code represents a form field for entering an IPv6 address.
-            It is used in the inventory-create page of the PAN-OS Upgrade Web application.
-            The input element has an id of "ipv6Address" and is bound to the "ipv6Address" form control.
-        -->
         <div>
+          <!-- Heading for the network information section -->
           <h3>Network Information</h3>
+
+          <!-- Form field for entering the IPv4 address -->
           <div class="form-field">
             <mat-form-field>
               <mat-label>IPv4 Address</mat-label>
+              <!-- Input field for the IPv4 address, bound to the 'ipv4Address' form control -->
+              <!-- The 'required' attribute ensures that the field is mandatory -->
               <input matInput id="ipv4Address" formControlName="ipv4Address" required>
             </mat-form-field>
           </div>
 
+          <!-- Form field for entering the IPv6 address -->
           <div class="form-field">
             <mat-form-field>
               <mat-label>IPv6 Address</mat-label>
+              <!-- Input field for the IPv6 address, bound to the 'ipv6Address' form control -->
+              <!-- The IPv6 address field is optional -->
               <input matInput id="ipv6Address" formControlName="ipv6Address">
             </mat-form-field>
           </div>
         </div>
 
-
-        <!--
-            This section represents a form field for the HA (High Availability) checkbox.
-            Users can select this checkbox to indicate whether the device should be configured for high availability.
-
-            This code represents a form field for the "HA Peer" input in the inventory creation page.
-            It uses Angular Material's mat-form-field and mat-input components to display the input field.
-            The input field is bound to the "haPeer" form control using the formControlName attribute.
-        -->
         <div>
+          <!-- Heading for the high availability section -->
           <h3>High Availability</h3>
+
+          <!-- Form field for enabling/disabling high availability -->
           <div class="form-field">
+            <!-- Checkbox for toggling high availability, bound to the 'ha' form control -->
             <mat-checkbox formControlName="ha">HA Enabled</mat-checkbox>
           </div>
 
+          <!-- Conditional form field for specifying the HA peer -->
+          <!-- Displayed only when high availability is enabled -->
           <div class="form-field" *ngIf="createInventoryForm.get('ha')?.value === true">
             <mat-form-field>
               <mat-label>HA Peer</mat-label>
+              <!-- Input field for the HA peer, bound to the 'haPeer' form control -->
               <input matInput id="haPeer" formControlName="haPeer">
             </mat-form-field>
           </div>
         </div>
 
-        <!--
-            This code block represents a form field that is conditionally displayed based on the value of 'deviceType' in the createInventoryForm.
-            If the value is 'Firewall', a checkbox with the label 'Panorama Managed' is displayed.
-
-            This code block represents a form field that is conditionally displayed based on the value of 'deviceType' in the createInventoryForm.
-            If the value is 'Firewall', the form field will be displayed.
-
-            This code represents a form field that is conditionally displayed based on the value of 'deviceType' in the createInventoryForm.
-            If the value of 'deviceType' is 'Firewall', the form field will be displayed.
-            Otherwise, it will be hidden.
-        -->
+        <!-- Conditional section for Panorama information, displayed only if the selected device type is 'Firewall' -->
         <div *ngIf="createInventoryForm.get('deviceType')?.value === 'Firewall'">
+          <!-- Heading for the Panorama information section -->
           <h3>Panorama Information</h3>
 
+          <!-- Checkbox for indicating if the firewall is managed by Panorama -->
           <div class="form-field" *ngIf="createInventoryForm.get('deviceType')?.value === 'Firewall'">
             <mat-checkbox formControlName="panoramaManaged">Panorama Managed</mat-checkbox>
           </div>
 
+          <!-- Form field for entering the Panorama appliance, displayed only if the firewall is managed by Panorama -->
           <div class="form-field"
             *ngIf="createInventoryForm.get('deviceType')?.value === 'Firewall' && createInventoryForm.get('panoramaManaged')?.value === true">
             <mat-form-field>
               <mat-label>Panorama Appliance</mat-label>
+              <!-- Input field for the Panorama appliance, bound to the 'panoramaAppliance' form control -->
               <input matInput id="panoramaAppliance" formControlName="panoramaAppliance">
             </mat-form-field>
           </div>
 
+          <!-- Form field for entering the device group, displayed only if the firewall is managed by Panorama -->
           <div class="form-field"
             *ngIf="createInventoryForm.get('deviceType')?.value === 'Firewall' && createInventoryForm.get('panoramaManaged')?.value === true">
             <mat-form-field>
               <mat-label>Device Group</mat-label>
+              <!-- Input field for the device group, bound to the 'deviceGroup' form control -->
               <input matInput id="deviceGroup" formControlName="deviceGroup">
             </mat-form-field>
           </div>
         </div>
       </div>
 
-      <!--
-        This HTML code represents a button container for creating an inventory.
-        It contains two buttons: "Cancel" and "Create".
-        The "Cancel" button is used to cancel the inventory creation process.
-        The "Create" button is used to submit the form and create the inventory.
-        The "Create" button is disabled when the createInventoryForm is invalid.
-      -->
       <div class="button-container">
-        <button mat-raised-button color="warn" type="button" (click)="onCancel()">Cancel</button>
-        <button mat-raised-button color="primary" type="submit" [disabled]="createInventoryForm.invalid">Create</button>
+        <!-- Cancel button -->
+        <button mat-raised-button color="warn" type="button" (click)="onCancel()">
+          Cancel
+        </button>
+
+        <!-- Create button -->
+        <button mat-raised-button color="primary" type="submit" [disabled]="createInventoryForm.invalid">
+          Create
+        </button>
       </div>
     </form>
   </main>
