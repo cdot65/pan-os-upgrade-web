@@ -53,7 +53,7 @@ export class InventoryDetailsComponent implements OnInit {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
     inventoryItem: InventoryItem | undefined;
-    inventoryForm: FormGroup;
+    updateInventoryForm: FormGroup;
     firewallPlatforms: InventoryPlatform[] = [];
     panoramaPlatforms: InventoryPlatform[] = [];
 
@@ -66,7 +66,7 @@ export class InventoryDetailsComponent implements OnInit {
         public _componentPageTitle: ComponentPageTitle,
     ) {
         // Update the form group
-        this.inventoryForm = this.formBuilder.group({
+        this.updateInventoryForm = this.formBuilder.group({
             // author: localStorage.getItem("author"),
             deviceGroup: [""],
             deviceType: [""],
@@ -96,33 +96,39 @@ export class InventoryDetailsComponent implements OnInit {
             this.getInventoryItem(itemId);
         }
 
-        this.inventoryForm
+        this.updateInventoryForm
             .get("deviceType")
             ?.valueChanges.subscribe((deviceType) => {
                 if (deviceType === "Firewall") {
                     this.fetchFirewallPlatforms();
-                    this.inventoryForm.get("deviceGroup")?.setValidators([]);
-                    this.inventoryForm
+                    this.updateInventoryForm
+                        .get("deviceGroup")
+                        ?.setValidators([]);
+                    this.updateInventoryForm
                         .get("panoramaAppliance")
                         ?.setValidators([]);
-                    this.inventoryForm
+                    this.updateInventoryForm
                         .get("panoramaManaged")
                         ?.setValidators([]);
                 } else if (deviceType === "Panorama") {
                     this.fetchPanoramaPlatforms();
-                    this.inventoryForm.get("deviceGroup")?.clearValidators();
-                    this.inventoryForm
+                    this.updateInventoryForm
+                        .get("deviceGroup")
+                        ?.clearValidators();
+                    this.updateInventoryForm
                         .get("panoramaAppliance")
                         ?.clearValidators();
-                    this.inventoryForm
+                    this.updateInventoryForm
                         .get("panoramaManaged")
                         ?.clearValidators();
                 }
-                this.inventoryForm.get("deviceGroup")?.updateValueAndValidity();
-                this.inventoryForm
+                this.updateInventoryForm
+                    .get("deviceGroup")
+                    ?.updateValueAndValidity();
+                this.updateInventoryForm
                     .get("panoramaAppliance")
                     ?.updateValueAndValidity();
-                this.inventoryForm
+                this.updateInventoryForm
                     .get("panoramaManaged")
                     ?.updateValueAndValidity();
             });
@@ -165,7 +171,7 @@ export class InventoryDetailsComponent implements OnInit {
         this.inventoryService.getInventoryItem(itemId).subscribe(
             (item: InventoryItem) => {
                 this.inventoryItem = item;
-                this.inventoryForm.patchValue(item);
+                this.updateInventoryForm.patchValue(item);
                 console.log("inventoryItem: ", this.inventoryItem);
             },
             (error: any) => {
@@ -180,10 +186,10 @@ export class InventoryDetailsComponent implements OnInit {
      * Logs an error if the update fails.
      */
     updateInventoryItem(): void {
-        if (this.inventoryItem && this.inventoryForm.valid) {
+        if (this.inventoryItem && this.updateInventoryForm.valid) {
             const updatedItem = {
                 ...this.inventoryItem,
-                ...this.inventoryForm.value,
+                ...this.updateInventoryForm.value,
             };
             if (updatedItem.deviceType === "Panorama") {
                 delete updatedItem.deviceGroup;
@@ -239,7 +245,7 @@ export class InventoryDetailsComponent implements OnInit {
     }
 
     onCancel(): void {
-        this.inventoryForm.reset();
+        this.updateInventoryForm.reset();
         this.router.navigate(["/inventory"]);
     }
 }
