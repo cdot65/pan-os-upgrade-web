@@ -45,14 +45,7 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
     profiles: Profile[] = [];
-    displayedColumns: string[] = [
-        "name",
-        "description",
-        "pan_username",
-        "pan_password",
-        "edit",
-        "delete",
-    ];
+    displayedColumns: string[] = ["name", "description", "edit", "delete"];
     dataSource: MatTableDataSource<Profile> = new MatTableDataSource<Profile>(
         [],
     );
