@@ -147,15 +147,16 @@
         </div>
       </div>
 
+      <!-- container for the Update and Cancel buttons. -->
       <div class="button-container">
         <!-- Cancel button -->
         <button mat-raised-button color="warn" type="button" (click)="onCancel()">
           Cancel
         </button>
 
-        <!-- Create button -->
+        <!-- Update button -->
         <button mat-raised-button color="primary" type="submit" [disabled]="updateInventoryForm.invalid">
-          Create
+          Update
         </button>
       </div>
     </form>
