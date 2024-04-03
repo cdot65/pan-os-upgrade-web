@@ -83,29 +83,6 @@ export class InventoryCreateComponent implements OnInit {
             });
     }
 
-    updateFormValidation(device_type: string): void {
-        const device_groupControl =
-            this.createInventoryForm.get("device_group");
-        const panorama_applianceControl =
-            this.createInventoryForm.get("panorama_appliance");
-        const panorama_managedControl =
-            this.createInventoryForm.get("panorama_managed");
-
-        if (device_type === "Firewall") {
-            device_groupControl?.setValidators([]);
-            panorama_applianceControl?.setValidators([]);
-            panorama_managedControl?.setValidators([]);
-        } else if (device_type === "Panorama") {
-            device_groupControl?.clearValidators();
-            panorama_applianceControl?.clearValidators();
-            panorama_managedControl?.clearValidators();
-        }
-
-        device_groupControl?.updateValueAndValidity();
-        panorama_applianceControl?.updateValueAndValidity();
-        panorama_managedControl?.updateValueAndValidity();
-    }
-
     getFirewallPlatforms(): void {
         this.inventoryService.getFirewallPlatforms().subscribe(
             (platforms: InventoryPlatform[]) => {
@@ -150,5 +127,28 @@ export class InventoryCreateComponent implements OnInit {
     onCancel(): void {
         this.createInventoryForm.reset();
         this.router.navigate(["/inventory"]);
+    }
+
+    updateFormValidation(device_type: string): void {
+        const device_groupControl =
+            this.createInventoryForm.get("device_group");
+        const panorama_applianceControl =
+            this.createInventoryForm.get("panorama_appliance");
+        const panorama_managedControl =
+            this.createInventoryForm.get("panorama_managed");
+
+        if (device_type === "Firewall") {
+            device_groupControl?.setValidators([]);
+            panorama_applianceControl?.setValidators([]);
+            panorama_managedControl?.setValidators([]);
+        } else if (device_type === "Panorama") {
+            device_groupControl?.clearValidators();
+            panorama_applianceControl?.clearValidators();
+            panorama_managedControl?.clearValidators();
+        }
+
+        device_groupControl?.updateValueAndValidity();
+        panorama_applianceControl?.updateValueAndValidity();
+        panorama_managedControl?.updateValueAndValidity();
     }
 }
