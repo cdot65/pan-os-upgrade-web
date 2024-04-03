@@ -112,7 +112,7 @@ export class ProfileCreateComponent implements OnInit {
         this._componentPageTitle.title = "Create Settings Profile";
     }
 
-    submitCreateProfile(): void {
+    createProfile(): void {
         if (this.createProfileForm && this.createProfileForm.valid) {
             const formValue = this.createProfileForm.value;
             this.profileService.createProfile(formValue).subscribe(
