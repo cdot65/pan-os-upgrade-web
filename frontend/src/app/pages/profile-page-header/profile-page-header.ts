@@ -11,7 +11,7 @@ import { MatIconModule } from "@angular/material/icon";
     standalone: true,
     imports: [MatButtonModule, MatIconModule],
 })
-export class SettingsPageHeader {
+export class ProfilePageHeader {
     constructor(public _componentPageTitle: ComponentPageTitle) {}
 
     @Output() toggleSidenav = new EventEmitter<void>();
