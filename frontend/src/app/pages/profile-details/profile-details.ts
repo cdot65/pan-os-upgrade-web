@@ -126,11 +126,6 @@ export class ProfileDetailsComponent implements OnInit {
         });
     }
 
-    /**
-     * Initializes the component.
-     * Sets the page title to "Profile Details".
-     * Retrieves the profile based on the provided uuid.
-     */
     ngOnInit(): void {
         this._componentPageTitle.title = "Profile Details";
         const uuid = this.route.snapshot.paramMap.get("uuid");
@@ -139,11 +134,6 @@ export class ProfileDetailsComponent implements OnInit {
         }
     }
 
-    /**
-     * Retrieves an inventory item by its ID.
-     *
-     * @param itemId - The ID of the inventory item to retrieve.
-     */
     getProfile(uuid: string): void {
         this.profileService.getProfile(uuid).subscribe(
             (profile: Profile) => {
@@ -156,19 +146,11 @@ export class ProfileDetailsComponent implements OnInit {
         );
     }
 
-    /**
-     * Resets the update profile form and navigates to the profiles page.
-     */
     onCancel(): void {
         this.updateProfileForm.reset();
         this.router.navigate(["/profiles"]);
     }
 
-    /**
-     * Updates the profile with the values from the profile form.
-     * Navigates to the profiles page after successful update.
-     * Logs an error if the update fails.
-     */
     updateProfile(): void {
         if (this.profile && this.updateProfileForm.valid) {
             const updatedProfile = {
