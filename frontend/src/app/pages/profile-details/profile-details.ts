@@ -157,16 +157,36 @@ export class ProfileDetailsComponent implements OnInit {
         );
     }
 
+    /**
+     * Resets the update profile form and navigates to the profiles page.
+     */
     onCancel(): void {
         this.updateProfileForm.reset();
         this.router.navigate(["/profiles"]);
     }
 
-    submitUpdateProfile(): void {
-        if (this.updateProfileForm.valid) {
-            const settings: Profile = this.updateProfileForm.value;
-            console.log("Settings saved:", settings);
-            // TODO: Implement saving the settings to the backend API
+    /**
+     * Updates the profile with the values from the profile form.
+     * Navigates to the profiles page after successful update.
+     * Logs an error if the update fails.
+     */
+    updateProfile(): void {
+        if (this.profile && this.updateProfileForm.valid) {
+            const updatedProfile = {
+                ...this.profile,
+                ...this.updateProfileForm.value,
+            };
+            console.log("updatedProfile", updatedProfile);
+            this.profileService
+                .updateProfile(updatedProfile, this.profile.uuid)
+                .subscribe(
+                    () => {
+                        this.router.navigate(["/profiles"]);
+                    },
+                    (error) => {
+                        console.error("Error updating profile:", error);
+                    },
+                );
         }
     }
 }
