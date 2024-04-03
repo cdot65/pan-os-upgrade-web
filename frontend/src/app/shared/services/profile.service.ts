@@ -84,15 +84,20 @@ export class ProfileService {
             );
     }
 
-    updateProfile(updateProfileForm: Profile): Observable<Profile> {
+    updateProfile(profile: Profile, uuid: string): Observable<Profile> {
+        const authToken = localStorage.getItem("auth_token");
+        const headers = new HttpHeaders().set(
+            "Authorization",
+            `Token ${authToken}`,
+        );
         return this.http
-            .put<Profile>(
-                `${this.apiUrl}/api/v1/profiles/${updateProfileForm.uuid}/`,
-                updateProfileForm,
-            )
+            .put<Profile>(`${this.apiUrl}/api/v1/profiles/${uuid}/`, profile, {
+                headers,
+            })
             .pipe(
-                tap((response: Profile) => {
-                    console.log("API Response:", response);
+                catchError((error: any) => {
+                    console.error("Error updating profile:", error);
+                    throw error;
                 }),
             );
     }
