@@ -56,6 +56,7 @@ import { ProfileService } from "../../shared/services/profile.service";
 export class ProfileDetailsComponent implements OnInit {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
+    profile: Profile | undefined;
     updateProfileForm: FormGroup;
 
     constructor(
@@ -124,140 +125,36 @@ export class ProfileDetailsComponent implements OnInit {
             }),
         });
     }
+
+    /**
+     * Initializes the component.
+     * Sets the page title to "Profile Details".
+     * Retrieves the profile based on the provided uuid.
+     */
     ngOnInit(): void {
-        this._componentPageTitle.title = "Settings";
-        this.route.paramMap.subscribe((params) => {
-            const uuid = params.get("uuid");
-            if (uuid) {
-                this.profileService.getProfile(uuid).subscribe(
-                    (profile: Profile) => {
-                        console.log("Retrieved Profile:", profile);
-                        this.updateProfileForm.setValue({
-                            authentication: {
-                                pan_username:
-                                    profile.authentication.pan_username,
-                                pan_password:
-                                    profile.authentication.pan_password,
-                            },
-                            description: profile.description,
-                            download: {
-                                max_download_tries:
-                                    profile.download.max_download_tries,
-                                download_retry_interval:
-                                    profile.download.download_retry_interval,
-                            },
-                            install: {
-                                max_install_attempts:
-                                    profile.install.max_install_attempts,
-                                install_retry_interval:
-                                    profile.install.install_retry_interval,
-                            },
-                            name: profile.name,
-                            readiness_checks: {
-                                checks: {
-                                    active_support_check:
-                                        profile.readiness_checks.checks
-                                            .active_support_check,
-                                    arp_entry_exist_check:
-                                        profile.readiness_checks.checks
-                                            .arp_entry_exist_check,
-                                    candidate_config_check:
-                                        profile.readiness_checks.checks
-                                            .candidate_config_check,
-                                    certificates_requirements_check:
-                                        profile.readiness_checks.checks
-                                            .certificates_requirements_check,
-                                    content_version_check:
-                                        profile.readiness_checks.checks
-                                            .content_version_check,
-                                    dynamic_updates_check:
-                                        profile.readiness_checks.checks
-                                            .dynamic_updates_check,
-                                    expired_licenses_check:
-                                        profile.readiness_checks.checks
-                                            .expired_licenses_check,
-                                    free_disk_space_check:
-                                        profile.readiness_checks.checks
-                                            .free_disk_space_check,
-                                    ha_check:
-                                        profile.readiness_checks.checks
-                                            .ha_check,
-                                    ip_sec_tunnel_status_check:
-                                        profile.readiness_checks.checks
-                                            .ip_sec_tunnel_status_check,
-                                    jobs_check:
-                                        profile.readiness_checks.checks
-                                            .jobs_check,
-                                    ntp_sync_check:
-                                        profile.readiness_checks.checks
-                                            .ntp_sync_check,
-                                    panorama_check:
-                                        profile.readiness_checks.checks
-                                            .panorama_check,
-                                    planes_clock_sync_check:
-                                        profile.readiness_checks.checks
-                                            .planes_clock_sync_check,
-                                    session_exist_check:
-                                        profile.readiness_checks.checks
-                                            .session_exist_check,
-                                },
-                                readiness_checks_location:
-                                    profile.readiness_checks
-                                        .readiness_checks_location,
-                            },
-                            reboot: {
-                                max_reboot_tries:
-                                    profile.reboot.max_reboot_tries,
-                                reboot_retry_interval:
-                                    profile.reboot.reboot_retry_interval,
-                            },
-                            snapshots: {
-                                snapshots_location:
-                                    profile.snapshots.snapshots_location,
-                                max_snapshot_tries:
-                                    profile.snapshots.max_snapshot_tries,
-                                snapshot_retry_interval:
-                                    profile.snapshots.snapshot_retry_interval,
-                                state: {
-                                    arp_table_snapshot:
-                                        profile.snapshots.state
-                                            .arp_table_snapshot,
-                                    content_version_snapshot:
-                                        profile.snapshots.state
-                                            .content_version_snapshot,
-                                    ip_sec_tunnels_snapshot:
-                                        profile.snapshots.state
-                                            .ip_sec_tunnels_snapshot,
-                                    license_snapshot:
-                                        profile.snapshots.state
-                                            .license_snapshot,
-                                    nics_snapshot:
-                                        profile.snapshots.state.nics_snapshot,
-                                    routes_snapshot:
-                                        profile.snapshots.state.routes_snapshot,
-                                    session_stats_snapshot:
-                                        profile.snapshots.state
-                                            .session_stats_snapshot,
-                                },
-                            },
-                            timeout_settings: {
-                                command_timeout:
-                                    profile.timeout_settings.command_timeout,
-                                connection_timeout:
-                                    profile.timeout_settings.connection_timeout,
-                            },
-                        });
-                        console.log(
-                            "Form Value:",
-                            this.updateProfileForm.value,
-                        );
-                    },
-                    (error) => {
-                        console.error("Error fetching profile:", error);
-                    },
-                );
-            }
-        });
+        this._componentPageTitle.title = "Profile Details";
+        const uuid = this.route.snapshot.paramMap.get("uuid");
+        if (uuid) {
+            this.getProfile(uuid);
+        }
+    }
+
+    /**
+     * Retrieves an inventory item by its ID.
+     *
+     * @param itemId - The ID of the inventory item to retrieve.
+     */
+    getProfile(uuid: string): void {
+        this.profileService.getProfile(uuid).subscribe(
+            (profile: Profile) => {
+                this.profile = profile;
+                this.updateProfileForm.patchValue(profile);
+                console.log("profile: ", this.profile);
+            },
+            (error: any) => {
+                console.error("Error fetching profile:", error);
+            },
+        );
     }
 
     onCancel(): void {
