@@ -12,7 +12,6 @@ import { MatDialog, MatDialogModule } from "@angular/material/dialog";
 
 import { CommonModule } from "@angular/common";
 import { ComponentPageTitle } from "../page-title/page-title";
-import { DeleteDialogComponent } from "../confirmation-dialog/delete-dialog";
 import { Footer } from "src/app/shared/footer/footer";
 import { InventoryItem } from "../../shared/interfaces/inventory-item.interface";
 import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
@@ -91,7 +90,6 @@ export class InventoryDetailsComponent implements OnInit {
      */
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory Details";
-        // console.log(localStorage.getItem("author"));
         const itemId = this.route.snapshot.paramMap.get("id");
         if (itemId) {
             this.getInventoryItem(itemId);
@@ -208,40 +206,6 @@ export class InventoryDetailsComponent implements OnInit {
                         console.error("Error updating inventory item:", error);
                     },
                 );
-        }
-    }
-
-    /**
-     * Deletes the inventory item.
-     */
-    deleteInventoryItem(): void {
-        if (this.inventoryItem) {
-            const dialogRef = this.dialog.open(DeleteDialogComponent, {
-                width: "300px",
-                data: {
-                    title: "Confirm Delete",
-                    message:
-                        "Are you sure you want to delete this inventory item?",
-                },
-            });
-
-            dialogRef.afterClosed().subscribe((result: boolean) => {
-                if (result) {
-                    this.inventoryService
-                        .deleteInventoryItem(this.inventoryItem!.uuid)
-                        .subscribe(
-                            () => {
-                                this.router.navigate(["/inventory"]);
-                            },
-                            (error) => {
-                                console.error(
-                                    "Error deleting inventory item:",
-                                    error,
-                                );
-                            },
-                        );
-                }
-            });
         }
     }
 
