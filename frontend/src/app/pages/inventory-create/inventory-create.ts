@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // src/app/pages/inventory-create/inventory-create.ts
 
 import { Component, HostBinding, OnInit } from "@angular/core";
@@ -52,60 +53,61 @@ export class InventoryCreateComponent implements OnInit {
     ) {
         this.createInventoryForm = this.formBuilder.group({
             author: localStorage.getItem("author"),
-            deviceGroup: [""],
-            deviceType: ["Firewall", Validators.required],
+            device_group: [""],
+            device_type: ["Firewall", Validators.required],
             ha: [false],
-            haPeer: [""],
+            ha_peer: [""],
             hostname: ["", Validators.required],
-            ipv4Address: ["", Validators.required],
-            ipv6Address: [""],
+            ipv4_address: ["", Validators.required],
+            ipv6_address: [""],
             notes: [""],
-            panoramaAppliance: [""],
-            panoramaManaged: [false],
-            platformName: ["", Validators.required],
+            panorama_appliance: [""],
+            panorama_managed: [false],
+            platform_name: ["", Validators.required],
         });
     }
 
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory Create";
-        this.fetchFirewallPlatforms();
+        this.getFirewallPlatforms();
 
         this.createInventoryForm
-            .get("deviceType")
-            ?.valueChanges.subscribe((deviceType) => {
-                if (deviceType === "Firewall") {
-                    this.fetchFirewallPlatforms();
-                } else if (deviceType === "Panorama") {
-                    this.fetchPanoramaPlatforms();
+            .get("device_type")
+            ?.valueChanges.subscribe((device_type) => {
+                if (device_type === "Firewall") {
+                    this.getFirewallPlatforms();
+                } else if (device_type === "Panorama") {
+                    this.getPanoramaPlatforms();
                 }
-                this.updateFormValidation(deviceType);
+                this.updateFormValidation(device_type);
             });
     }
 
-    updateFormValidation(deviceType: string): void {
-        const deviceGroupControl = this.createInventoryForm.get("deviceGroup");
-        const panoramaApplianceControl =
-            this.createInventoryForm.get("panoramaAppliance");
-        const panoramaManagedControl =
-            this.createInventoryForm.get("panoramaManaged");
+    updateFormValidation(device_type: string): void {
+        const device_groupControl =
+            this.createInventoryForm.get("device_group");
+        const panorama_applianceControl =
+            this.createInventoryForm.get("panorama_appliance");
+        const panorama_managedControl =
+            this.createInventoryForm.get("panorama_managed");
 
-        if (deviceType === "Firewall") {
-            deviceGroupControl?.setValidators([]);
-            panoramaApplianceControl?.setValidators([]);
-            panoramaManagedControl?.setValidators([]);
-        } else if (deviceType === "Panorama") {
-            deviceGroupControl?.clearValidators();
-            panoramaApplianceControl?.clearValidators();
-            panoramaManagedControl?.clearValidators();
+        if (device_type === "Firewall") {
+            device_groupControl?.setValidators([]);
+            panorama_applianceControl?.setValidators([]);
+            panorama_managedControl?.setValidators([]);
+        } else if (device_type === "Panorama") {
+            device_groupControl?.clearValidators();
+            panorama_applianceControl?.clearValidators();
+            panorama_managedControl?.clearValidators();
         }
 
-        deviceGroupControl?.updateValueAndValidity();
-        panoramaApplianceControl?.updateValueAndValidity();
-        panoramaManagedControl?.updateValueAndValidity();
+        device_groupControl?.updateValueAndValidity();
+        panorama_applianceControl?.updateValueAndValidity();
+        panorama_managedControl?.updateValueAndValidity();
     }
 
-    fetchFirewallPlatforms(): void {
-        this.inventoryService.fetchFirewallPlatforms().subscribe(
+    getFirewallPlatforms(): void {
+        this.inventoryService.getFirewallPlatforms().subscribe(
             (platforms: InventoryPlatform[]) => {
                 this.firewallPlatforms = platforms;
             },
@@ -115,8 +117,8 @@ export class InventoryCreateComponent implements OnInit {
         );
     }
 
-    fetchPanoramaPlatforms(): void {
-        this.inventoryService.fetchPanoramaPlatforms().subscribe(
+    getPanoramaPlatforms(): void {
+        this.inventoryService.getPanoramaPlatforms().subscribe(
             (platforms: InventoryPlatform[]) => {
                 this.panoramaPlatforms = platforms;
             },
@@ -129,10 +131,10 @@ export class InventoryCreateComponent implements OnInit {
     createInventoryItem(): void {
         if (this.createInventoryForm && this.createInventoryForm.valid) {
             const formValue = this.createInventoryForm.value;
-            if (formValue.deviceType === "Panorama") {
-                delete formValue.deviceGroup;
-                delete formValue.panoramaAppliance;
-                delete formValue.panoramaManaged;
+            if (formValue.device_type === "Panorama") {
+                delete formValue.device_group;
+                delete formValue.panorama_appliance;
+                delete formValue.panorama_managed;
             }
             this.inventoryService.createInventoryItem(formValue).subscribe(
                 () => {

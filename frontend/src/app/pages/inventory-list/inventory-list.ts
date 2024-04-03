@@ -47,11 +47,11 @@ export class InventoryList implements OnInit, AfterViewInit {
     inventoryItems: InventoryItem[] = [];
     displayedColumns: string[] = [
         "hostname",
-        "ipv4Address",
-        "ipv6Address",
-        "platformName",
-        "deviceType",
         "notes",
+        "ipv4_address",
+        "ipv6_address",
+        "device_type",
+        "platform_name",
         "edit",
         "delete",
     ];
@@ -61,11 +61,11 @@ export class InventoryList implements OnInit, AfterViewInit {
     @ViewChild(MatSort) sort: MatSort = new MatSort();
 
     constructor(
+        private dialog: MatDialog,
         private inventoryService: InventoryService,
         private router: Router,
         private _liveAnnouncer: LiveAnnouncer,
         public _componentPageTitle: ComponentPageTitle,
-        private dialog: MatDialog,
     ) {}
 
     /**
@@ -90,7 +90,7 @@ export class InventoryList implements OnInit, AfterViewInit {
      * Retrieves items from the inventory service and sets up the data source for the table.
      */
     getInventoryItems(): void {
-        this.inventoryService.fetchInventoryData().subscribe(
+        this.inventoryService.getInventoryItems().subscribe(
             (items) => {
                 this.inventoryItems = items;
                 this.dataSource = new MatTableDataSource(this.inventoryItems);
