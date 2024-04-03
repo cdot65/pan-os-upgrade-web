@@ -45,7 +45,14 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
     profiles: Profile[] = [];
-    displayedColumns: string[] = ["name", "description", "edit", "delete"];
+    displayedColumns: string[] = [
+        "name",
+        "description",
+        "pan_username",
+        "pan_password",
+        "edit",
+        "delete",
+    ];
     dataSource: MatTableDataSource<Profile> = new MatTableDataSource<Profile>(
         [],
     );
@@ -69,10 +76,20 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
         this.dataSource.sort = this.sort;
     }
 
+    announceSortChange(sortState: Sort) {
+        if (sortState.direction) {
+            this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
+        } else {
+            this._liveAnnouncer.announce("Sorting cleared");
+        }
+    }
+
     getProfiles(): void {
         this.profileService.getProfiles().subscribe(
             (items) => {
                 this.profiles = items;
+                this.profiles.sort((a, b) => a.name.localeCompare(b.name));
+
                 this.dataSource = new MatTableDataSource(this.profiles);
                 this.dataSource.sort = this.sort;
             },
@@ -82,26 +99,10 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
         );
     }
 
-    onEditClick(item: Profile): void {
-        this.router.navigate(["/profiles", item.uuid]);
-    }
-
-    announceSortChange(sortState: Sort) {
-        if (sortState.direction) {
-            this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
-        } else {
-            this._liveAnnouncer.announce("Sorting cleared");
-        }
-    }
-
     navigateToCreateSecurityProfile(): void {
         this.router.navigate(["/profiles/create"]);
     }
 
-    /**
-     * Opens the delete dialog when the delete button is clicked.
-     * @param item - The item to be deleted. It can be an Profile object.
-     */
     onDeleteClick(profile: Profile): void {
         const dialogRef = this.dialog.open(DeleteDialogComponent, {
             width: "300px",
@@ -123,5 +124,9 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
                 );
             }
         });
+    }
+
+    onEditClick(item: Profile): void {
+        this.router.navigate(["/profiles", item.uuid]);
     }
 }

@@ -68,27 +68,23 @@ export class InventoryList implements OnInit, AfterViewInit {
         public _componentPageTitle: ComponentPageTitle,
     ) {}
 
-    /**
-     * Initializes the component.
-     * Sets the page title to "Inventory List" and retrieves the inventory items.
-     */
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory List";
         this.getInventoryItems();
     }
 
-    /**
-     * Lifecycle hook that is called after Angular has fully initialized the component's view.
-     * It is called after the view has been rendered and all child views have been initialized.
-     * This hook performs additional initialization tasks that require the view to be rendered.
-     */
     ngAfterViewInit() {
         this.dataSource.sort = this.sort;
     }
 
-    /**
-     * Retrieves items from the inventory service and sets up the data source for the table.
-     */
+    announceSortChange(sortState: Sort) {
+        if (sortState.direction) {
+            this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
+        } else {
+            this._liveAnnouncer.announce("Sorting cleared");
+        }
+    }
+
     getInventoryItems(): void {
         this.inventoryService.getInventoryItems().subscribe(
             (items) => {
@@ -105,35 +101,10 @@ export class InventoryList implements OnInit, AfterViewInit {
         );
     }
 
-    /**
-     * Navigates to the inventory page for editing the specified item.
-     * @param item - The item to be edited. It can be an InventoryItem object.
-     */
-    onEditClick(item: InventoryItem): void {
-        this.router.navigate(["/inventory", item.uuid]);
-    }
-
-    /**
-     * Announces the change in sorting state.
-     *
-     * @param sortState - The new sorting state.
-     */
-    announceSortChange(sortState: Sort) {
-        if (sortState.direction) {
-            this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
-        } else {
-            this._liveAnnouncer.announce("Sorting cleared");
-        }
-    }
-
     navigateToCreateInventory(): void {
         this.router.navigate(["/inventory/create"]);
     }
 
-    /**
-     * Opens the delete dialog when the delete button is clicked.
-     * @param item - The item to be deleted. It can be an InventoryItem object.
-     */
     onDeleteClick(item: InventoryItem): void {
         const dialogRef = this.dialog.open(DeleteDialogComponent, {
             width: "300px",
@@ -155,5 +126,9 @@ export class InventoryList implements OnInit, AfterViewInit {
                 );
             }
         });
+    }
+
+    onEditClick(item: InventoryItem): void {
+        this.router.navigate(["/inventory", item.uuid]);
     }
 }
