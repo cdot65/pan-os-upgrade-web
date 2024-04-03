@@ -209,6 +209,9 @@ export class InventoryDetailsComponent implements OnInit {
         }
     }
 
+    /**
+     * Resets the updateInventoryForm and navigates to the inventory page.
+     */
     onCancel(): void {
         this.updateInventoryForm.reset();
         this.router.navigate(["/inventory"]);
