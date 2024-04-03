@@ -38,7 +38,6 @@ export class AuthService {
 
         return this.http.post<any>(`${this.tokenUrl}`, body, { headers }).pipe(
             tap((response) => {
-                console.log("Login response:", response); // Log the response object
                 if (response && response.key) {
                     // Check if the token is present in the response
                     localStorage.setItem("auth_token", response.key);
@@ -62,7 +61,6 @@ export class AuthService {
             "application/json",
         );
         const body = JSON.stringify({ username, email, password1, password2 });
-        console.log("Register request body:", body);
         return this.http.post<any>(this.registrationUrl, body, { headers });
     }
 

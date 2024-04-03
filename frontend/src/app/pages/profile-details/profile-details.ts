@@ -149,7 +149,6 @@ export class ProfileDetailsComponent implements OnInit {
             (profile: Profile) => {
                 this.profile = profile;
                 this.updateProfileForm.patchValue(profile);
-                console.log("profile: ", this.profile);
             },
             (error: any) => {
                 console.error("Error fetching profile:", error);
@@ -176,7 +175,6 @@ export class ProfileDetailsComponent implements OnInit {
                 ...this.profile,
                 ...this.updateProfileForm.value,
             };
-            console.log("updatedProfile", updatedProfile);
             this.profileService
                 .updateProfile(updatedProfile, this.profile.uuid)
                 .subscribe(
