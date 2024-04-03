@@ -93,6 +93,9 @@ export class InventoryList implements OnInit, AfterViewInit {
         this.inventoryService.getInventoryItems().subscribe(
             (items) => {
                 this.inventoryItems = items;
+                this.inventoryItems.sort((a, b) =>
+                    a.hostname.localeCompare(b.hostname),
+                );
                 this.dataSource = new MatTableDataSource(this.inventoryItems);
                 this.dataSource.sort = this.sort;
             },
