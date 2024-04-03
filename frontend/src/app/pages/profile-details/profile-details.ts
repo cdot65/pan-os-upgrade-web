@@ -23,8 +23,8 @@ import { MatRadioModule } from "@angular/material/radio";
 import { MatSelectModule } from "@angular/material/select";
 import { MatSliderModule } from "@angular/material/slider";
 import { Profile } from "../../shared/interfaces/profile.interface";
+import { ProfilePageHeader } from "../profile-page-header/profile-page-header";
 import { ProfileService } from "../../shared/services/profile.service";
-import { SettingsPageHeader } from "../profile-page-header/profile-page-header";
 
 @Component({
     selector: "app-profile-details",
@@ -43,7 +43,7 @@ import { SettingsPageHeader } from "../profile-page-header/profile-page-header";
         MatSelectModule,
         MatRadioModule,
         MatSliderModule,
-        SettingsPageHeader,
+        ProfilePageHeader,
         Footer,
     ],
 })

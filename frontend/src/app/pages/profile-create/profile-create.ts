@@ -17,9 +17,9 @@ import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
+import { ProfilePageHeader } from "../profile-page-header/profile-page-header";
 import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
-import { SettingsPageHeader } from "../profile-page-header/profile-page-header";
 
 @Component({
     selector: "app-profile-create",
@@ -28,7 +28,7 @@ import { SettingsPageHeader } from "../profile-page-header/profile-page-header";
     standalone: true,
     imports: [
         CommonModule,
-        SettingsPageHeader,
+        ProfilePageHeader,
         ReactiveFormsModule,
         MatButtonModule,
         MatCheckboxModule,

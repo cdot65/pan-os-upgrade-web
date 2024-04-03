@@ -19,9 +19,9 @@ import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { NgFor } from "@angular/common";
 import { Profile } from "../../shared/interfaces/profile.interface";
+import { ProfilePageHeader } from "../profile-page-header/profile-page-header";
 import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
-import { SettingsPageHeader } from "../profile-page-header/profile-page-header";
 
 @Component({
     selector: "app-profile-list",
@@ -30,7 +30,7 @@ import { SettingsPageHeader } from "../profile-page-header/profile-page-header";
     standalone: true,
     imports: [
         NgFor,
-        SettingsPageHeader,
+        ProfilePageHeader,
         MatTableModule,
         MatSortModule,
         MatIconModule,
