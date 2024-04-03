@@ -75,37 +75,33 @@ export class InventoryCreateComponent implements OnInit {
             ?.valueChanges.subscribe((deviceType) => {
                 if (deviceType === "Firewall") {
                     this.fetchFirewallPlatforms();
-                    this.createInventoryForm
-                        .get("deviceGroup")
-                        ?.setValidators([]);
-                    this.createInventoryForm
-                        .get("panoramaAppliance")
-                        ?.setValidators([]);
-                    this.createInventoryForm
-                        .get("panoramaManaged")
-                        ?.setValidators([]);
                 } else if (deviceType === "Panorama") {
                     this.fetchPanoramaPlatforms();
-                    this.createInventoryForm
-                        .get("deviceGroup")
-                        ?.clearValidators();
-                    this.createInventoryForm
-                        .get("panoramaAppliance")
-                        ?.clearValidators();
-                    this.createInventoryForm
-                        .get("panoramaManaged")
-                        ?.clearValidators();
                 }
-                this.createInventoryForm
-                    .get("deviceGroup")
-                    ?.updateValueAndValidity();
-                this.createInventoryForm
-                    .get("panoramaAppliance")
-                    ?.updateValueAndValidity();
-                this.createInventoryForm
-                    .get("panoramaManaged")
-                    ?.updateValueAndValidity();
+                this.updateFormValidation(deviceType);
             });
+    }
+
+    updateFormValidation(deviceType: string): void {
+        const deviceGroupControl = this.createInventoryForm.get("deviceGroup");
+        const panoramaApplianceControl =
+            this.createInventoryForm.get("panoramaAppliance");
+        const panoramaManagedControl =
+            this.createInventoryForm.get("panoramaManaged");
+
+        if (deviceType === "Firewall") {
+            deviceGroupControl?.setValidators([]);
+            panoramaApplianceControl?.setValidators([]);
+            panoramaManagedControl?.setValidators([]);
+        } else if (deviceType === "Panorama") {
+            deviceGroupControl?.clearValidators();
+            panoramaApplianceControl?.clearValidators();
+            panoramaManagedControl?.clearValidators();
+        }
+
+        deviceGroupControl?.updateValueAndValidity();
+        panoramaApplianceControl?.updateValueAndValidity();
+        panoramaManagedControl?.updateValueAndValidity();
     }
 
     fetchFirewallPlatforms(): void {
