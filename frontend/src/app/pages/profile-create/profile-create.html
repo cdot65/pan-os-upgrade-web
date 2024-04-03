@@ -16,7 +16,7 @@
               <mat-label>Profile Name</mat-label>
               <!-- Input field for the profile name, bound to the 'name' form control -->
               <!-- The 'required' attribute ensures that the field is mandatory -->
-              <input matInput formControlName="name" required>
+              <input matInput id="name" formControlName="name" required>
             </mat-form-field>
           </div>
 
@@ -25,7 +25,7 @@
             <mat-form-field>
               <mat-label>Description</mat-label>
               <!-- Input field for the profile description, bound to the 'description' form control -->
-              <input matInput formControlName="description">
+              <input matInput id="description" formControlName="description">
             </mat-form-field>
           </div>
         </div>
@@ -43,7 +43,7 @@
               <!-- Input field for the PAN username, bound to the 'pan_username' form control -->
               <!-- The 'autocomplete' attribute is set to "username" for browser autofill support -->
               <!-- The 'required' attribute ensures that the field is mandatory -->
-              <input matInput autocomplete="username" formControlName="pan_username" required>
+              <input matInput id="pan_username" autocomplete="username" formControlName="pan_username" required>
             </mat-form-field>
 
             <!-- Form field for entering the PAN password -->
@@ -53,7 +53,8 @@
               <!-- The 'type' attribute is set to "password" to mask the input -->
               <!-- The 'autocomplete' attribute is set to "current-password" for browser autofill support -->
               <!-- The 'required' attribute ensures that the field is mandatory -->
-              <input matInput type="password" autocomplete="current-password" formControlName="pan_password" required>
+              <input matInput id="pan_password" type="password" autocomplete="current-password"
+                formControlName="pan_password" required>
             </mat-form-field>
           </div>
         </div>
@@ -124,7 +125,7 @@
             <!-- Form field for entering the readiness checks location -->
             <mat-form-field>
               <mat-label>Readiness Checks Location</mat-label>
-              <input matInput formControlName="readiness_checks_location">
+              <input matInput id="readiness_checks_location" formControlName="readiness_checks_location">
             </mat-form-field>
           </div>
         </div>
@@ -138,19 +139,19 @@
             <!-- Form field for entering the snapshots location -->
             <mat-form-field>
               <mat-label>Snapshots Location</mat-label>
-              <input matInput formControlName="snapshots_location">
+              <input matInput id="snapshots_location" formControlName="snapshots_location">
             </mat-form-field>
 
             <!-- Form field for entering the maximum number of snapshot tries -->
             <mat-form-field>
               <mat-label>Snapshots maximum tries</mat-label>
-              <input matInput type="number" formControlName="max_snapshot_tries">
+              <input matInput id="max_snapshot_tries" type="number" formControlName="max_snapshot_tries">
             </mat-form-field>
 
             <!-- Form field for entering the snapshot retry interval in seconds -->
             <mat-form-field>
               <mat-label>Snapshots retry interval (seconds)</mat-label>
-              <input matInput type="number" formControlName="snapshot_retry_interval">
+              <input matInput id="snapshot_retry_interval" type="number" formControlName="snapshot_retry_interval">
             </mat-form-field>
 
             <!-- Form group for the snapshot state options -->
@@ -190,7 +191,7 @@
               <mat-label>PAN-OS maximum download tries</mat-label>
               <!-- Input field for the maximum download tries, bound to the 'max_download_tries' form control -->
               <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
-              <input matInput type="number" formControlName="max_download_tries">
+              <input matInput id="max_download_tries" type="number" formControlName="max_download_tries">
             </mat-form-field>
 
             <!-- Form field for setting the download retry interval -->
@@ -198,7 +199,7 @@
               <mat-label>PAN-OS download retry interval (seconds)</mat-label>
               <!-- Input field for the download retry interval, bound to the 'download_retry_interval' form control -->
               <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
-              <input matInput type="number" formControlName="download_retry_interval">
+              <input matInput id="download_retry_interval" type="number" formControlName="download_retry_interval">
             </mat-form-field>
           </div>
         </div>
@@ -215,7 +216,7 @@
               <!-- Input field for the maximum install attempts -->
               <!-- The 'type' attribute is set to 'number' for numeric input -->
               <!-- The 'formControlName' binds the input to the 'max_install_attempts' form control -->
-              <input matInput type="number" formControlName="max_install_attempts">
+              <input matInput id="max_install_attempts" type="number" formControlName="max_install_attempts">
             </mat-form-field>
 
             <!-- Form field for setting the install retry interval -->
@@ -224,7 +225,7 @@
               <!-- Input field for the install retry interval -->
               <!-- The 'type' attribute is set to 'number' for numeric input -->
               <!-- The 'formControlName' binds the input to the 'install_retry_interval' form control -->
-              <input matInput type="number" formControlName="install_retry_interval">
+              <input matInput id="install_retry_interval" type="number" formControlName="install_retry_interval">
             </mat-form-field>
           </div>
         </div>
@@ -240,7 +241,7 @@
               <mat-label>Device maximum reboot tries</mat-label>
               <!-- Input field for the maximum reboot tries, bound to the 'max_reboot_tries' form control -->
               <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
-              <input matInput type="number" formControlName="max_reboot_tries">
+              <input matInput id="max_reboot_tries" type="number" formControlName="max_reboot_tries">
             </mat-form-field>
 
             <!-- Form field for setting the reboot retry interval -->
@@ -248,7 +249,7 @@
               <mat-label>Device reboot retry interval (seconds)</mat-label>
               <!-- Input field for the reboot retry interval, bound to the 'reboot_retry_interval' form control -->
               <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
-              <input matInput type="number" formControlName="reboot_retry_interval">
+              <input matInput id="reboot_retry_interval" type="number" formControlName="reboot_retry_interval">
             </mat-form-field>
           </div>
         </div>
@@ -265,7 +266,7 @@
               <!-- Input field for the command timeout value -->
               <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
               <!-- The 'formControlName' attribute binds the input to the 'command_timeout' form control -->
-              <input matInput type="number" formControlName="command_timeout">
+              <input matInput id="command_timeout" type="number" formControlName="command_timeout">
             </mat-form-field>
 
             <!-- Form field for setting the connection timeout -->
@@ -274,13 +275,13 @@
               <!-- Input field for the connection timeout value -->
               <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
               <!-- The 'formControlName' attribute binds the input to the 'connection_timeout' form control -->
-              <input matInput type="number" formControlName="connection_timeout">
+              <input matInput id="connection_timeout" type="number" formControlName="connection_timeout">
             </mat-form-field>
           </div>
         </div>
       </div>
 
-      <!-- container for the Submit and Cancel buttons. -->
+      <!-- container for the Create and Cancel buttons. -->
       <div class="button-container">
         <!-- Cancel button -->
         <button mat-raised-button color="warn" type="button" (click)="onCancel()">
