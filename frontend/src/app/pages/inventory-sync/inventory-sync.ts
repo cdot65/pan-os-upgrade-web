@@ -17,9 +17,12 @@ import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
 import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
 import { Observable } from "rxjs";
+import { Profile } from "../../shared/interfaces/profile.interface";
+import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
 
 @Component({
@@ -32,6 +35,7 @@ import { Router } from "@angular/router";
         MatButtonModule,
         MatCardModule,
         MatFormFieldModule,
+        MatIconModule,
         MatInputModule,
         MatSelectModule,
         InventoryPageHeader,
@@ -46,23 +50,25 @@ export class InventorySyncComponent implements OnInit {
     panoramaDevices$: Observable<InventoryItem[]> = new Observable<
         InventoryItem[]
     >();
+    profiles$: Observable<Profile[]> = new Observable<Profile[]>();
 
     constructor(
         private formBuilder: FormBuilder,
         private router: Router,
         private inventoryService: InventoryService,
+        private profileService: ProfileService,
         public _componentPageTitle: ComponentPageTitle,
     ) {
         this.syncInventoryForm = this.formBuilder.group({
             panoramaDevice: ["", Validators.required],
-            panoramaUsername: ["", Validators.required],
-            panoramaPassword: ["", Validators.required],
+            profile: ["", Validators.required],
         });
     }
 
     ngOnInit(): void {
         this._componentPageTitle.title = "Sync Inventory from Panorama";
         this.panoramaDevices$ = this.inventoryService.getPanoramaDevices();
+        this.profiles$ = this.profileService.getProfiles();
     }
 
     onCancel(): void {
