@@ -42,6 +42,14 @@ export const PANOSUPGRADE_ROUTES: Routes = [
         canActivate: [authGuard],
     },
     {
+        path: "inventory/sync",
+        loadComponent: () =>
+            import("./pages/inventory-sync").then(
+                (m) => m.InventorySyncComponent,
+            ),
+        canActivate: [authGuard],
+    },
+    {
         path: "inventory/:id",
         loadComponent: () =>
             import("./pages/inventory-details").then(

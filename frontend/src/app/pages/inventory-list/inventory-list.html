@@ -5,6 +5,11 @@
   <main focusOnNavigation aria-label="Inventory list" id="inventory-list" class="inventory-list">
     <div class="table-header">
       <h2>Devices</h2>
+      <button mat-raised-button color="accent" (click)="navigateToSyncInventory()"
+        aria-label="Sync Devices from Panorama">
+        <mat-icon>sync</mat-icon>
+        Sync Devices from Panorama
+      </button>
       <button mat-raised-button color="primary" (click)="navigateToCreateInventory()" aria-label="Add a new device">
         <mat-icon>add</mat-icon>
         Add a new device
