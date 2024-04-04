@@ -13,7 +13,7 @@
           <div class="form-field">
             <mat-form-field>
               <mat-label>Panorama Device</mat-label>
-              <mat-select id="panoramaDevice" formControlName="panoramaDevice" required>
+              <mat-select id="panorama_device" formControlName="panorama_device" required>
                 <mat-option *ngFor="let device of panoramaDevices$ | async" [value]="device.uuid">
                   {{ device.hostname }} ({{ device.ipv4_address }})
                 </mat-option>

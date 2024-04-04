@@ -6,6 +6,7 @@ import { Observable, of } from "rxjs";
 import { Injectable } from "@angular/core";
 import { InventoryItem } from "../interfaces/inventory-item.interface";
 import { InventoryPlatform } from "../interfaces/inventory-platform.interface";
+import { InventorySyncForm } from "../interfaces/inventory-sync-form.interface";
 import { catchError } from "rxjs/operators";
 import { environment } from "../../../environments/environment.prod";
 
@@ -169,6 +170,24 @@ export class InventoryService {
             .pipe(
                 catchError((error) => {
                     console.error("Error deleting Inventory item:", error);
+                    return of(null);
+                }),
+            );
+    }
+
+    syncInventory(syncForm: InventorySyncForm): Observable<any> {
+        const authToken = localStorage.getItem("auth_token");
+        const headers = new HttpHeaders().set(
+            "Authorization",
+            `Token ${authToken}`,
+        );
+        return this.http
+            .post(`${this.apiUrl}/api/v1/inventory/sync/`, syncForm, {
+                headers,
+            })
+            .pipe(
+                catchError((error) => {
+                    console.error("Error syncing inventory:", error);
                     return of(null);
                 }),
             );
