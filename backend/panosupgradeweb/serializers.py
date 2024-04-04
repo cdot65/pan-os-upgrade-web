@@ -110,6 +110,7 @@ class InventoryPlatformSerializer(serializers.ModelSerializer):
 
 
 class InventorySyncSerializer(serializers.Serializer):
+    author = serializers.IntegerField(required=True)
     panorama_device = serializers.UUIDField(required=True)
     profile = serializers.UUIDField(required=True)
 

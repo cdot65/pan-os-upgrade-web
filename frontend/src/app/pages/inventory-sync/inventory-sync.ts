@@ -80,7 +80,9 @@ export class InventorySyncComponent implements OnInit {
 
     syncInventory(): void {
         if (this.syncInventoryForm.valid) {
+            const author = localStorage.getItem("author");
             const syncForm: InventorySyncForm = {
+                author: author ? parseInt(author, 10) : 0,
                 panorama_device:
                     this.syncInventoryForm.get("panorama_device")?.value,
                 profile: this.syncInventoryForm.get("profile")?.value,
