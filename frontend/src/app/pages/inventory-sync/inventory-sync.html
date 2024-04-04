@@ -1,0 +1,39 @@
+<!-- src/app/pages/inventory-sync/inventory-sync.html -->
+<div class="inventory-sync-container">
+
+  <inventory-page-header></inventory-page-header>
+  <main focusOnNavigation aria-label="Sync Inventory from Panorama" id="inventory-sync" class="inventory-sync">
+    <form [formGroup]="syncInventoryForm" (ngSubmit)="syncInventory()" class="mat-elevation-z2">
+      <div class="form-field">
+        <mat-form-field>
+          <mat-label>Panorama URL</mat-label>
+          <input matInput id="panoramaUrl" formControlName="panoramaUrl" required>
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <mat-form-field>
+          <mat-label>Panorama Username</mat-label>
+          <input matInput id="panoramaUsername" formControlName="panoramaUsername" required>
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <mat-form-field>
+          <mat-label>Panorama Password</mat-label>
+          <input matInput id="panoramaPassword" type="password" formControlName="panoramaPassword" required>
+        </mat-form-field>
+      </div>
+
+      <div class="button-container">
+        <button mat-raised-button color="warn" type="button" (click)="onCancel()">
+          Cancel
+        </button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="syncInventoryForm.invalid">
+          Sync Inventory
+        </button>
+      </div>
+    </form>
+  </main>
+  <app-footer></app-footer>
+</div>

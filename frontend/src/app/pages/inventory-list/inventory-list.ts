@@ -105,6 +105,10 @@ export class InventoryList implements OnInit, AfterViewInit {
         this.router.navigate(["/inventory/create"]);
     }
 
+    navigateToSyncInventory(): void {
+        this.router.navigate(["/inventory/sync"]);
+    }
+
     onDeleteClick(item: InventoryItem): void {
         const dialogRef = this.dialog.open(DeleteDialogComponent, {
             width: "300px",
