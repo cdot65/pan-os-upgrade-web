@@ -1,5 +1,6 @@
 // src/app/pages/inventory-sync/inventory-sync.ts
 
+import { AsyncPipe, NgForOf } from "@angular/common";
 import { Component, HostBinding, OnInit } from "@angular/core";
 import {
     FormBuilder,
@@ -10,11 +11,15 @@ import {
 
 import { ComponentPageTitle } from "../page-title/page-title";
 import { Footer } from "src/app/shared/footer/footer";
+import { InventoryItem } from "../../shared/interfaces/inventory-item.interface";
 import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
+import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
+import { MatSelectModule } from "@angular/material/select";
+import { Observable } from "rxjs";
 import { Router } from "@angular/router";
 
 @Component({
@@ -28,21 +33,28 @@ import { Router } from "@angular/router";
         MatCardModule,
         MatFormFieldModule,
         MatInputModule,
+        MatSelectModule,
         InventoryPageHeader,
         Footer,
+        AsyncPipe,
+        NgForOf,
     ],
 })
 export class InventorySyncComponent implements OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     syncInventoryForm: FormGroup;
+    panoramaDevices$: Observable<InventoryItem[]> = new Observable<
+        InventoryItem[]
+    >();
 
     constructor(
         private formBuilder: FormBuilder,
         private router: Router,
+        private inventoryService: InventoryService,
         public _componentPageTitle: ComponentPageTitle,
     ) {
         this.syncInventoryForm = this.formBuilder.group({
-            panoramaUrl: ["", Validators.required],
+            panoramaDevice: ["", Validators.required],
             panoramaUsername: ["", Validators.required],
             panoramaPassword: ["", Validators.required],
         });
@@ -50,6 +62,7 @@ export class InventorySyncComponent implements OnInit {
 
     ngOnInit(): void {
         this._componentPageTitle.title = "Sync Inventory from Panorama";
+        this.panoramaDevices$ = this.inventoryService.getPanoramaDevices();
     }
 
     onCancel(): void {

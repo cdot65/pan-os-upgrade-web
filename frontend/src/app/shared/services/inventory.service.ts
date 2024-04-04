@@ -66,6 +66,24 @@ export class InventoryService {
             );
     }
 
+    getPanoramaDevices(): Observable<InventoryItem[]> {
+        const authToken = localStorage.getItem("auth_token");
+        const headers = new HttpHeaders().set(
+            "Authorization",
+            `Token ${authToken}`,
+        );
+        return this.http
+            .get<
+                InventoryItem[]
+            >(`${this.apiUrl}/api/v1/inventory/?device_type=Panorama`, { headers })
+            .pipe(
+                catchError((error) => {
+                    console.error("Error fetching Panorama devices:", error);
+                    return of([]);
+                }),
+            );
+    }
+
     getPanoramaPlatforms(): Observable<InventoryPlatform[]> {
         return this.http
             .get<
