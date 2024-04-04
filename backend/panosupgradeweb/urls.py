@@ -36,7 +36,7 @@ urlpatterns = [
     ),
     path(
         "inventory/sync/",
-        InventoryPlatformViewSet.as_view(),
+        InventoryViewSet.as_view({"post": "sync_inventory"}),
         name="inventory-sync",
     ),
     path(
