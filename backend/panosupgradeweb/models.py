@@ -103,6 +103,18 @@ class InventoryItem(models.Model):
         return self.hostname
 
 
+class Job(models.Model):
+    task_id = models.CharField(max_length=255, unique=True, primary_key=True)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    job_type = models.CharField(max_length=255)
+    json_data = models.JSONField(null=True, blank=True)
+
+    def __str__(self):
+        return self.task_id
+
+
 class Profile(models.Model):
     active_support_check = models.BooleanField(
         default=True,

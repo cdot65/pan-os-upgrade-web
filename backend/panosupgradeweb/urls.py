@@ -4,6 +4,7 @@ from .views import (
     InventoryExistsView,
     InventoryPlatformViewSet,
     InventoryViewSet,
+    JobViewSet,
     ProfileViewSet,
     UserViewSet,
     UserProfileView,
@@ -14,6 +15,12 @@ router.register(
     "inventory",
     InventoryViewSet,
     basename="inventory",
+)
+
+router.register(
+    "jobs",
+    JobViewSet,
+    basename="jobs",
 )
 
 router.register(
