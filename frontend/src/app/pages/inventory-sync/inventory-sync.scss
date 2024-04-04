@@ -6,49 +6,48 @@
   min-height: 100vh;
 }
 
-
 .inventory-sync {
   width: 97%;
   padding: 25px;
 
-  .table-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+  form {
+    padding: 20px;
+  }
 
-    h2 {
-      margin: 0;
-    }
+  .inventory-sync-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
 
-    button {
-      mat-icon {
-        margin-right: 5px;
+    >div {
+      width: 100%;
+
+      h3 {
+        margin-bottom: 10px;
+      }
+
+
+      .form-field {
+        width: 100%;
+
+        mat-form-field {
+          width: 100%;
+        }
+      }
+
+      mat-checkbox {
+        display: block;
+        margin-bottom: 10px;
       }
     }
   }
 
-  .mat-table {
-    width: 100%;
+  .button-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
 
-    .mat-row {
-      &:hover {
-        .mat-cell {
-          background-color: rgba(0, 0, 0, 0.2);
-        }
-      }
-    }
-
-    .mat-cell {
-      padding-right: 20px;
-      transition: background-color 0.3s;
-    }
-
-    .mat-header-cell {
-      font-weight: bold;
-    }
-
-    .edit-button {
+    button {
       margin-left: 10px;
     }
   }

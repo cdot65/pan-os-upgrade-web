@@ -1,31 +1,41 @@
 <!-- src/app/pages/inventory-sync/inventory-sync.html -->
 <div class="inventory-sync-container">
+
   <inventory-page-header></inventory-page-header>
   <main focusOnNavigation aria-label="Sync Inventory from Panorama" id="inventory-sync" class="inventory-sync">
+
     <form [formGroup]="syncInventoryForm" (ngSubmit)="syncInventory()" class="mat-elevation-z2">
-      <div class="form-field">
-        <mat-form-field>
-          <mat-label>Panorama Device</mat-label>
-          <mat-select id="panoramaDevice" formControlName="panoramaDevice" required>
-            <mat-option *ngFor="let device of panoramaDevices$ | async" [value]="device.uuid">
-              {{ device.hostname }} ({{ device.ipv4_address }})
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
+      <div class="inventory-sync-grid">
 
-      <div class="form-field">
-        <mat-form-field>
-          <mat-label>Panorama Username</mat-label>
-          <input matInput id="panoramaUsername" formControlName="panoramaUsername" required>
-        </mat-form-field>
-      </div>
+        <div>
+          <!-- Heading for the Panorama section -->
+          <h3>Select Panorama Appliance</h3>
+          <div class="form-field">
+            <mat-form-field>
+              <mat-label>Panorama Device</mat-label>
+              <mat-select id="panoramaDevice" formControlName="panoramaDevice" required>
+                <mat-option *ngFor="let device of panoramaDevices$ | async" [value]="device.uuid">
+                  {{ device.hostname }} ({{ device.ipv4_address }})
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
 
-      <div class="form-field">
-        <mat-form-field>
-          <mat-label>Panorama Password</mat-label>
-          <input matInput id="panoramaPassword" type="password" formControlName="panoramaPassword" required>
-        </mat-form-field>
+        <div>
+          <!-- Heading for the settings profile section -->
+          <h3>Select Settings Profile</h3>
+          <div class="form-field">
+            <mat-form-field>
+              <mat-label>Profile</mat-label>
+              <mat-select id="profile" formControlName="profile" required>
+                <mat-option *ngFor="let profile of profiles$ | async" [value]="profile.uuid">
+                  {{ profile.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
       </div>
 
       <div class="button-container">
