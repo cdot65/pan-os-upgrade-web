@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // src/app/pages/inventory-sync/inventory-sync.ts
 
 import { AsyncPipe, NgForOf } from "@angular/common";
@@ -14,6 +15,7 @@ import { Footer } from "src/app/shared/footer/footer";
 import { InventoryItem } from "../../shared/interfaces/inventory-item.interface";
 import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
 import { InventoryService } from "../../shared/services/inventory.service";
+import { InventorySyncForm } from "../../shared/interfaces/inventory-sync-form.interface";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
 import { MatFormFieldModule } from "@angular/material/form-field";
@@ -60,7 +62,7 @@ export class InventorySyncComponent implements OnInit {
         public _componentPageTitle: ComponentPageTitle,
     ) {
         this.syncInventoryForm = this.formBuilder.group({
-            panoramaDevice: ["", Validators.required],
+            panorama_device: ["", Validators.required],
             profile: ["", Validators.required],
         });
     }
@@ -78,10 +80,19 @@ export class InventorySyncComponent implements OnInit {
 
     syncInventory(): void {
         if (this.syncInventoryForm.valid) {
-            // TODO: Implement the inventory sync logic
-            console.log(
-                "Syncing inventory from Panorama:",
-                this.syncInventoryForm.value,
+            const syncForm: InventorySyncForm = {
+                panorama_device:
+                    this.syncInventoryForm.get("panorama_device")?.value,
+                profile: this.syncInventoryForm.get("profile")?.value,
+            };
+            this.inventoryService.syncInventory(syncForm).subscribe(
+                () => {
+                    console.log("Inventory synced successfully");
+                    this.router.navigate(["/inventory"]);
+                },
+                (error) => {
+                    console.error("Error syncing inventory:", error);
+                },
             );
         }
     }

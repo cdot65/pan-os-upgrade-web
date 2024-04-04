@@ -35,6 +35,11 @@ urlpatterns = [
         name="inventory-platforms-list",
     ),
     path(
+        "inventory/sync/",
+        InventoryPlatformViewSet.as_view(),
+        name="inventory-sync",
+    ),
+    path(
         "inventory/platforms/<int:pk>/",
         InventoryPlatformViewSet.as_view({"get": "retrieve"}),
         name="inventory-platforms-detail",
