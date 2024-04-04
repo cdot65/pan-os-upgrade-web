@@ -9,10 +9,11 @@ from django.shortcuts import get_object_or_404
 
 # django rest framework imports
 from rest_framework import viewsets, status, permissions
-from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework.generics import RetrieveAPIView
-from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
+from rest_framework.views import APIView
 
 # directory object imports
 from .models import (
@@ -24,6 +25,7 @@ from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     InventoryItemSerializer,
     InventoryPlatformSerializer,
+    InventorySyncSerializer,
     ProfileSerializer,
     UserSerializer,
 )
@@ -87,6 +89,46 @@ class InventoryViewSet(viewsets.ModelViewSet):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=["post"], url_path="sync")
+    def sync_inventory(self, request):
+        serializer = InventorySyncSerializer(data=request.data)
+        if serializer.is_valid():
+            panorama_device_uuid = serializer.validated_data["panorama_device"]
+            profile_uuid = serializer.validated_data["profile"]
+
+            try:
+                panorama_device = InventoryItem.objects.get(uuid=panorama_device_uuid)
+                profile = Profile.objects.get(uuid=profile_uuid)
+
+                print(f"Syncing inventory for {panorama_device.hostname}...")
+                print(f"Profile: {profile.name}")
+
+                # TODO: Implement the inventory sync logic here
+                # - Connect to the Panorama device using the provided credentials
+                # - Retrieve the list of devices managed by Panorama
+                # - Create or update the corresponding InventoryItem objects in the database
+
+                return Response(
+                    {"message": "Inventory synced successfully"},
+                    status=status.HTTP_200_OK,
+                )
+
+            except InventoryItem.DoesNotExist:
+                return Response(
+                    {"error": "Invalid Panorama device"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            except Profile.DoesNotExist:
+                return Response(
+                    {"error": "Invalid profile"}, status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
