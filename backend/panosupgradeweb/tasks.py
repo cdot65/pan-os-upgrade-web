@@ -1,12 +1,19 @@
+# backend/panosupgradeweb/tasks.py
+
 import sys
 import os
 import django
 import logging
+import traceback
 
+from celery import shared_task
 from django.contrib.auth import get_user_model
+from panosupgradeweb.models import Job
 
-# third party library imports
-from environs import Env
+# import your inventory sync script
+from panosupgradeweb.scripts import (
+    run_inventory_sync,
+)
 
 # ----------------------------------------------------------------------------
 # Configure logging
@@ -15,18 +22,49 @@ logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s"
 )
 
-# ----------------------------------------------------------------------------
-# Load environment variables from .env file
-# ----------------------------------------------------------------------------
-env = Env()
-env.read_env()
-
-sendgrid_api_key = env(
-    "SENDGRID_API_KEY",
-    "go to https://docs.sendgrid.com/ui/account-and-settings/api-keys",
-)
-
 sys.path.append("/code/backend")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_project.settings")
 django.setup()
 User = get_user_model()
+
+
+# ----------------------------------------------------------------------------
+# Inventory Sync Task
+# ----------------------------------------------------------------------------
+@shared_task(bind=True)
+def execute_inventory_sync(
+    self,
+    panorama_device_uuid,
+    profile_uuid,
+    author_id,
+):
+    logging.debug("Inventory sync task started!")
+    # Retrieve the user object by id
+    author = User.objects.get(id=author_id)
+    logging.debug(f"Author: {author}")
+
+    # Create a new Job entry
+    job = Job.objects.create(
+        job_type="inventory_sync",
+        json_data=None,
+        author=author,
+        task_id=self.request.id,
+    )
+    logging.debug(f"Job ID: {job.pk}")
+
+    try:
+        json_report = run_inventory_sync(
+            panorama_device_uuid,
+            profile_uuid,
+        )
+        if json_report is None:
+            logging.error("json_report is None")
+        logging.debug(json_report)
+        job.json_data = json_report
+    except Exception as e:
+        job.json_data = f"Job ID: {job.pk}\nError: {e}"
+        logging.error(f"Exception Type: {type(e).__name__}")
+        logging.error(f"Traceback: {traceback.format_exc()}")
+
+    # Save the updated job information
+    job.save()

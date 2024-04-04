@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import (
     InventoryItem,
     InventoryPlatform,
+    Job,
     Profile,
 )
 
@@ -33,6 +34,17 @@ class InventoryPlatformAdmin(admin.ModelAdmin):
     )
 
 
+class JobAdmin(admin.ModelAdmin):
+    list_display = (
+        "job_type",
+        "author",
+        "created_at",
+        "updated_at",
+    )
+    list_filter = ("job_type", "author")
+    search_fields = ("job_type", "author")
+
+
 class ProfileAdmin(admin.ModelAdmin):
     list_display = (
         "name",
@@ -45,4 +57,5 @@ class ProfileAdmin(admin.ModelAdmin):
 
 admin.site.register(InventoryItem, InventoryItemAdmin)
 admin.site.register(InventoryPlatform, InventoryPlatformAdmin)
+admin.site.register(Job, JobAdmin)
 admin.site.register(Profile, ProfileAdmin)

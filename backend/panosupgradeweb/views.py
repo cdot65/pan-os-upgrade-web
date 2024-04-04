@@ -19,6 +19,7 @@ from rest_framework.views import APIView
 from .models import (
     InventoryPlatform,
     InventoryItem,
+    Job,
     Profile,
 )
 from .permissions import IsAuthorOrReadOnly
@@ -26,8 +27,12 @@ from .serializers import (
     InventoryItemSerializer,
     InventoryPlatformSerializer,
     InventorySyncSerializer,
+    JobSerializer,
     ProfileSerializer,
     UserSerializer,
+)
+from .tasks import (
+    execute_inventory_sync as inventory_sync_task,
 )
 
 
@@ -106,10 +111,12 @@ class InventoryViewSet(viewsets.ModelViewSet):
                 print(f"Syncing inventory for {panorama_device.hostname}...")
                 print(f"Profile: {profile.name}")
 
-                # TODO: Implement the inventory sync logic here
-                # - Connect to the Panorama device using the provided credentials
-                # - Retrieve the list of devices managed by Panorama
-                # - Create or update the corresponding InventoryItem objects in the database
+                # Trigger the Celery task
+                inventory_sync_task.delay(
+                    panorama_device_uuid,
+                    profile_uuid,
+                    request.user.id,
+                )
 
                 return Response(
                     {"message": "Inventory synced successfully"},
@@ -144,6 +151,34 @@ class InventoryPlatformViewSet(viewsets.ModelViewSet):
         if device_type is not None:
             queryset = queryset.filter(device_type=device_type)
         return queryset
+
+
+class JobViewSet(viewsets.ModelViewSet):
+    queryset = Job.objects.all()
+    serializer_class = JobSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                serializer.save(author=self.request.user)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self, request, pk=None, format=None):
+        instance = self.get_object()
+        response_data = {
+            "task_id": instance.task_id,
+            "author": instance.author.id,
+            "created_at": instance.created_at.isoformat(),
+            "updated_at": instance.updated_at.isoformat(),
+            "job_type": instance.job_type,
+            "json_data": instance.json_data if instance.json_data is not None else {},
+        }
+        return JsonResponse(response_data, status=200)
 
 
 class ProfileViewSet(viewsets.ModelViewSet):

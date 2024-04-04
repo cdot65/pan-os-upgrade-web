@@ -7,6 +7,7 @@ from django.conf import settings
 from .models import (
     InventoryItem,
     InventoryPlatform,
+    Job,
     Profile,
 )
 
@@ -111,6 +112,21 @@ class InventoryPlatformSerializer(serializers.ModelSerializer):
 class InventorySyncSerializer(serializers.Serializer):
     panorama_device = serializers.UUIDField(required=True)
     profile = serializers.UUIDField(required=True)
+
+
+class JobSerializer(serializers.ModelSerializer):
+    task_id = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Job
+        fields = (
+            "task_id",
+            "author",
+            "created_at",
+            "updated_at",
+            "job_type",
+            "json_data",
+        )
 
 
 class UserSerializer(serializers.ModelSerializer):
