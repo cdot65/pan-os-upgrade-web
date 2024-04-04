@@ -4,6 +4,7 @@ import json
 import logging
 import xml.etree.ElementTree as ET
 
+from panos.firewall import Firewall
 from panos.panorama import Panorama
 from panosupgradeweb.models import InventoryItem, InventoryPlatform, Profile
 
@@ -70,6 +71,11 @@ def run_inventory_sync(
             ipv4_address = device["ip-address"]
             platform_name = device["model"]
 
+            # Connect to the firewall device
+            firewall = Firewall(serial=device["serial"])
+            pan.add(firewall)
+            info = firewall.show_system_info()
+
             # Retrieve the InventoryPlatform object based on the platform_name
             try:
                 platform = InventoryPlatform.objects.get(name=platform_name)
@@ -86,7 +92,10 @@ def run_inventory_sync(
                 defaults={
                     "author_id": author_id,
                     "ipv4_address": ipv4_address,
+                    "notes": info,
                     "platform": platform,
+                    "panorama_managed": True,
+                    "panorama_appliance": pan.hostname,
                 },
             )
 
