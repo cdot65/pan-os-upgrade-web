@@ -103,6 +103,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             panorama_device_uuid = serializer.validated_data["panorama_device"]
             profile_uuid = serializer.validated_data["profile"]
+            author_id = serializer.validated_data["author"]
 
             try:
                 panorama_device = InventoryItem.objects.get(uuid=panorama_device_uuid)
@@ -115,7 +116,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
                 inventory_sync_task.delay(
                     panorama_device_uuid,
                     profile_uuid,
-                    request.user.id,
+                    author_id,
                 )
 
                 return Response(

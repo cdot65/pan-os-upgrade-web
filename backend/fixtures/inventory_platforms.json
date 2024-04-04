@@ -239,7 +239,7 @@
   {
     "fields": {
       "device_type": "Firewall",
-      "name": "VM-Series"
+      "name": "PA-VM"
     },
     "model": "panosupgradeweb.inventoryplatform"
   }
