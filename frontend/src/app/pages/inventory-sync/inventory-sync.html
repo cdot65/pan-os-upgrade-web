@@ -1,13 +1,16 @@
 <!-- src/app/pages/inventory-sync/inventory-sync.html -->
 <div class="inventory-sync-container">
-
   <inventory-page-header></inventory-page-header>
   <main focusOnNavigation aria-label="Sync Inventory from Panorama" id="inventory-sync" class="inventory-sync">
     <form [formGroup]="syncInventoryForm" (ngSubmit)="syncInventory()" class="mat-elevation-z2">
       <div class="form-field">
         <mat-form-field>
-          <mat-label>Panorama URL</mat-label>
-          <input matInput id="panoramaUrl" formControlName="panoramaUrl" required>
+          <mat-label>Panorama Device</mat-label>
+          <mat-select id="panoramaDevice" formControlName="panoramaDevice" required>
+            <mat-option *ngFor="let device of panoramaDevices$ | async" [value]="device.uuid">
+              {{ device.hostname }} ({{ device.ipv4_address }})
+            </mat-option>
+          </mat-select>
         </mat-form-field>
       </div>
 
