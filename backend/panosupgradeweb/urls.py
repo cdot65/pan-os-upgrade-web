@@ -1,3 +1,5 @@
+# backend/panosupgradeweb/urls.py
+
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 from .views import (
@@ -40,6 +42,11 @@ urlpatterns = [
         "inventory/platforms/",
         DeviceTypeViewSet.as_view({"get": "list"}),
         name="inventory-platforms-list",
+    ),
+    path(
+        "inventory/refresh/",
+        InventoryViewSet.as_view({"post": "refresh_device"}),
+        name="inventory-refresh",
     ),
     path(
         "inventory/sync/",

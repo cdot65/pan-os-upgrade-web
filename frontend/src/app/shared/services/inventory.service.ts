@@ -177,16 +177,7 @@ export class InventoryService {
             );
     }
 
-    /**
-     * Refreshes the device details by retrieving the latest information from the server.
-     *
-     * @param uuid - The UUID of the device to refresh.
-     * @returns An Observable of the updated device details.
-     */
-    refreshDevice(
-        uuid: string,
-        profileUuid: string,
-    ): Observable<Device | null> {
+    refreshDevice(refreshForm: any): Observable<Device | null> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
@@ -194,8 +185,8 @@ export class InventoryService {
         );
         return this.http
             .post<Device>(
-                `${this.apiUrl}/api/v1/inventory/${uuid}/refresh/`,
-                { profile_uuid: profileUuid },
+                `${this.apiUrl}/api/v1/inventory/refresh/`,
+                refreshForm,
                 {
                     headers,
                 },

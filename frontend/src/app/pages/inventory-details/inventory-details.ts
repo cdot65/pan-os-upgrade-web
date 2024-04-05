@@ -227,28 +227,30 @@ export class InventoryDetailsComponent implements OnInit {
 
         dialogRef.afterClosed().subscribe((selectedProfileUuid) => {
             if (selectedProfileUuid && this.inventoryItem) {
-                this.inventoryService
-                    .refreshDevice(this.inventoryItem.uuid, selectedProfileUuid)
-                    .subscribe(
-                        (updatedItem: Device | null) => {
-                            if (updatedItem) {
-                                this.inventoryItem = updatedItem;
-                                this.updateInventoryForm.patchValue(
-                                    updatedItem,
-                                );
-                                // Show a success toast or message
-                            } else {
-                                // Show an error toast or message
-                            }
-                        },
-                        (error) => {
-                            console.error(
-                                "Error refreshing device details:",
-                                error,
-                            );
+                const author = localStorage.getItem("author");
+                const refreshForm = {
+                    author: author ? parseInt(author, 10) : 0,
+                    device: this.inventoryItem.uuid,
+                    profile: selectedProfileUuid,
+                };
+                this.inventoryService.refreshDevice(refreshForm).subscribe(
+                    (updatedItem: Device | null) => {
+                        if (updatedItem) {
+                            this.inventoryItem = updatedItem;
+                            this.updateInventoryForm.patchValue(updatedItem);
+                            // Show a success toast or message
+                        } else {
                             // Show an error toast or message
-                        },
-                    );
+                        }
+                    },
+                    (error) => {
+                        console.error(
+                            "Error refreshing device details:",
+                            error,
+                        );
+                        // Show an error toast or message
+                    },
+                );
             }
         });
     }
