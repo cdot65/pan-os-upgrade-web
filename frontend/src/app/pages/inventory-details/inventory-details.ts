@@ -25,6 +25,7 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
+import { ProfileDialogComponent } from "../profile-select-dialog/profile-select-dialog.component";
 
 @Component({
     selector: "app-inventory-details",
@@ -216,5 +217,39 @@ export class InventoryDetailsComponent implements OnInit {
     onCancel(): void {
         this.updateInventoryForm.reset();
         this.router.navigate(["/inventory"]);
+    }
+
+    refreshDeviceDetails(): void {
+        const dialogRef = this.dialog.open(ProfileDialogComponent, {
+            width: "400px",
+            data: { message: "Select a profile to refresh device details" },
+        });
+
+        dialogRef.afterClosed().subscribe((selectedProfileUuid) => {
+            if (selectedProfileUuid && this.inventoryItem) {
+                this.inventoryService
+                    .refreshDevice(this.inventoryItem.uuid, selectedProfileUuid)
+                    .subscribe(
+                        (updatedItem: Device | null) => {
+                            if (updatedItem) {
+                                this.inventoryItem = updatedItem;
+                                this.updateInventoryForm.patchValue(
+                                    updatedItem,
+                                );
+                                // Show a success toast or message
+                            } else {
+                                // Show an error toast or message
+                            }
+                        },
+                        (error) => {
+                            console.error(
+                                "Error refreshing device details:",
+                                error,
+                            );
+                            // Show an error toast or message
+                        },
+                    );
+            }
+        });
     }
 }

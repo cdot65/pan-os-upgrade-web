@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // frontend/src/app/shared/services/inventory.service.ts
 
 import { HttpClient, HttpHeaders } from "@angular/common/http";
@@ -171,6 +172,37 @@ export class InventoryService {
             .pipe(
                 catchError((error) => {
                     console.error("Error deleting Inventory item:", error);
+                    return of(null);
+                }),
+            );
+    }
+
+    /**
+     * Refreshes the device details by retrieving the latest information from the server.
+     *
+     * @param uuid - The UUID of the device to refresh.
+     * @returns An Observable of the updated device details.
+     */
+    refreshDevice(
+        uuid: string,
+        profileUuid: string,
+    ): Observable<Device | null> {
+        const authToken = localStorage.getItem("auth_token");
+        const headers = new HttpHeaders().set(
+            "Authorization",
+            `Token ${authToken}`,
+        );
+        return this.http
+            .post<Device>(
+                `${this.apiUrl}/api/v1/inventory/${uuid}/refresh/`,
+                { profile_uuid: profileUuid },
+                {
+                    headers,
+                },
+            )
+            .pipe(
+                catchError((error) => {
+                    console.error("Error refreshing device details:", error);
                     return of(null);
                 }),
             );

@@ -4,8 +4,17 @@
   <inventory-page-header></inventory-page-header>
   <main focusOnNavigation aria-label="Inventory details" id="inventory-details" class="inventory-details">
     <form [formGroup]="updateInventoryForm" (ngSubmit)="updateDevice()" class="mat-elevation-z2">
-      <div class="inventory-details-grid">
 
+      <div class="table-header">
+        <h2>Devices</h2>
+        <button mat-raised-button color="accent" type="button" (click)="refreshDeviceDetails()"
+          aria-label="Refresh Device Details">
+          <mat-icon>sync</mat-icon>
+          Refresh Device Details
+        </button>
+      </div>
+
+      <div class="inventory-details-grid">
         <div>
           <!-- Heading for the firewall information section -->
           <h3>Firewall Information</h3>
