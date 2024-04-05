@@ -25,6 +25,7 @@ from .models import (
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     DeviceSerializer,
+    DeviceRefreshSerializer,
     DeviceTypeSerializer,
     InventorySyncSerializer,
     JobSerializer,
@@ -33,6 +34,7 @@ from .serializers import (
 )
 from .tasks import (
     execute_inventory_sync as inventory_sync_task,
+    refresh_device_task as refresh_device_task,
 )
 
 
@@ -132,6 +134,48 @@ class InventoryViewSet(viewsets.ModelViewSet):
             except Profile.DoesNotExist:
                 return Response(
                     {"error": "Invalid profile"}, status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=["post"], url_path="refresh")
+    def refresh_device(self, request):
+        serializer = DeviceRefreshSerializer(data=request.data)
+        if serializer.is_valid():
+            device_uuid = serializer.validated_data["device"]
+            profile_uuid = serializer.validated_data["profile"]
+            author_id = serializer.validated_data["author"]
+
+            try:
+                device = Device.objects.get(uuid=device_uuid)
+                profile = Profile.objects.get(uuid=profile_uuid)
+
+                print(f"Refreshing device {device.hostname}...")
+                print(f"Profile: {profile.name}")
+
+                # Trigger the Celery task for device refresh
+                refresh_device_task.delay(
+                    device_uuid,
+                    profile_uuid,
+                    author_id,
+                )
+
+                return Response(
+                    {"message": "Device refresh initiated."},
+                    status=status.HTTP_200_OK,
+                )
+
+            except Device.DoesNotExist:
+                return Response(
+                    {"error": "Invalid device."}, status=status.HTTP_400_BAD_REQUEST
+                )
+            except Profile.DoesNotExist:
+                return Response(
+                    {"error": "Invalid profile."}, status=status.HTTP_400_BAD_REQUEST
                 )
             except Exception as e:
                 return Response(

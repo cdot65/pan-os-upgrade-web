@@ -141,6 +141,12 @@ class DeviceSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+class DeviceRefreshSerializer(serializers.Serializer):
+    author = serializers.IntegerField(required=True)
+    device = serializers.UUIDField(required=True)
+    profile = serializers.UUIDField(required=True)
+
+
 class DeviceTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeviceType
