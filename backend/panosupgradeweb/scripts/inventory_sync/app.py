@@ -67,11 +67,12 @@ def run_inventory_sync(
             pan_password,
         )
 
+        # Retrieve the system information from the Panorama device
         system_info = pan.show_system_info()
         panorama_hostname = system_info["system"]["hostname"]
 
+        # Retrieve the device group mappings from the Panorama device
         device_group_mappings = []
-
         device_groups = pan.op("show devicegroups")
 
         # Iterate over each 'entry' element under 'devicegroups'
@@ -130,14 +131,14 @@ def run_inventory_sync(
             if ha_info[0] != "disabled":
                 ha_state = True
                 ha_details = flatten_xml_to_dict(element=ha_info[1])
-                # ha_mode = ha_details["result"]["group"]["local-info"]["mode"]
-                # ha_status = ha_details["result"]["group"]["local-info"]["state"]
+                ha_mode = ha_details["result"]["group"]["local-info"]["mode"]
+                ha_status = ha_details["result"]["group"]["local-info"]["state"]
                 ha_peer = ha_details["result"]["group"]["peer-info"]["mgmt-ip"]
             else:
                 ha_state = False
                 ha_details = None
-                # ha_mode = None
-                # ha_status = None
+                ha_mode = None
+                ha_status = None
                 ha_peer = None
 
             # Create or update the Device object
@@ -150,7 +151,9 @@ def run_inventory_sync(
                         device_group_mappings, device["serial"]
                     ),
                     "ha": ha_state,
+                    "ha_mode": ha_mode,
                     "ha_peer": ha_peer,
+                    "ha_status": ha_status,
                     "ipv4_address": info["system"]["ip-address"],
                     "ipv6_address": (
                         info["system"]["ipv6-address"]

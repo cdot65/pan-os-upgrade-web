@@ -109,9 +109,19 @@
           <!-- Displayed only when high availability is enabled -->
           <div class="form-field" *ngIf="createInventoryForm.get('ha')?.value === true">
             <mat-form-field>
+              <mat-label>HA Mode</mat-label>
+              <!-- Input field for the HA mode, bound to the 'ha_mode' form control -->
+              <input matInput id="ha_mode" formControlName="ha_mode">
+            </mat-form-field>
+            <mat-form-field>
               <mat-label>HA Peer</mat-label>
               <!-- Input field for the HA peer, bound to the 'ha_peer' form control -->
               <input matInput id="ha_peer" formControlName="ha_peer">
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>HA Status</mat-label>
+              <!-- Input field for the HA status, bound to the 'ha_status' form control -->
+              <input matInput id="ha_status" formControlName="ha_status">
             </mat-form-field>
           </div>
         </div>
@@ -120,11 +130,6 @@
         <div *ngIf="createInventoryForm.get('device_type')?.value === 'Firewall'">
           <!-- Heading for the Panorama information section -->
           <h3>Panorama Information</h3>
-
-          <!-- Checkbox for indicating if the firewall is managed by Panorama -->
-          <div class="form-field" *ngIf="createInventoryForm.get('device_type')?.value === 'Firewall'">
-            <mat-checkbox formControlName="panorama_managed">Panorama Managed</mat-checkbox>
-          </div>
 
           <!-- Form field for entering the Panorama appliance, displayed only if the firewall is managed by Panorama -->
           <div class="form-field"
@@ -145,6 +150,12 @@
               <input matInput id="device_group" formControlName="device_group">
             </mat-form-field>
           </div>
+
+          <!-- Checkbox for indicating if the firewall is managed by Panorama -->
+          <div class="form-field" *ngIf="createInventoryForm.get('device_type')?.value === 'Firewall'">
+            <mat-checkbox formControlName="panorama_managed">Panorama Managed</mat-checkbox>
+          </div>
+
         </div>
       </div>
 

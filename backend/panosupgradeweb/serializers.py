@@ -38,7 +38,17 @@ class DeviceSerializer(serializers.ModelSerializer):
         source="platform.device_type",
         read_only=True,
     )
+    ha_mode = serializers.CharField(
+        allow_blank=True,
+        required=False,
+        allow_null=True,
+    )
     ha_peer = serializers.CharField(
+        allow_blank=True,
+        required=False,
+        allow_null=True,
+    )
+    ha_status = serializers.CharField(
         allow_blank=True,
         required=False,
         allow_null=True,
@@ -93,7 +103,9 @@ class DeviceSerializer(serializers.ModelSerializer):
             "device_group",
             "device_type",
             "ha",
+            "ha_mode",
             "ha_peer",
+            "ha_status",
             "hostname",
             "ipv4_address",
             "ipv6_address",

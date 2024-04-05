@@ -47,11 +47,23 @@ class Device(models.Model):
         default=False,
         verbose_name="HA Enabled",
     )
+    ha_mode = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="HA Mode",
+    )
     ha_peer = models.CharField(
         max_length=100,
         blank=True,
         null=True,
         verbose_name="HA Peer",
+    )
+    ha_status = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="HA Status",
     )
     hostname = models.CharField(
         max_length=100,
