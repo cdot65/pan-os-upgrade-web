@@ -5,8 +5,8 @@ from dj_rest_auth.serializers import TokenSerializer
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from .models import (
-    InventoryItem,
-    InventoryPlatform,
+    Device,
+    DeviceType,
     Job,
     Profile,
 )
@@ -23,7 +23,12 @@ class CustomTokenSerializer(TokenSerializer):
         fields = TokenSerializer.Meta.fields + ("author",)
 
 
-class InventoryItemSerializer(serializers.ModelSerializer):
+class DeviceSerializer(serializers.ModelSerializer):
+    app_version = serializers.CharField(
+        allow_blank=True,
+        required=False,
+        allow_null=True,
+    )
     device_group = serializers.CharField(
         allow_blank=True,
         required=False,
@@ -59,10 +64,31 @@ class InventoryItemSerializer(serializers.ModelSerializer):
         source="platform.name",
         read_only=True,
     )
+    serial = serializers.CharField(
+        allow_blank=True,
+        required=False,
+        allow_null=True,
+    )
+    sw_version = serializers.CharField(
+        allow_blank=True,
+        required=False,
+        allow_null=True,
+    )
+    threat_version = serializers.CharField(
+        allow_blank=True,
+        required=False,
+        allow_null=True,
+    )
+    uptime = serializers.CharField(
+        allow_blank=True,
+        required=False,
+        allow_null=True,
+    )
 
     class Meta:
-        model = InventoryItem
+        model = Device
         fields = (
+            "app_version",
             "created_at",
             "device_group",
             "device_type",
@@ -75,6 +101,10 @@ class InventoryItemSerializer(serializers.ModelSerializer):
             "panorama_appliance",
             "panorama_managed",
             "platform_name",
+            "serial",
+            "sw_version",
+            "threat_version",
+            "uptime",
             "uuid",
         )
 
@@ -82,9 +112,9 @@ class InventoryItemSerializer(serializers.ModelSerializer):
         platform_name = self.initial_data.get("platform_name")
         if platform_name:
             try:
-                platform = InventoryPlatform.objects.get(name=platform_name)
+                platform = DeviceType.objects.get(name=platform_name)
                 validated_data["platform"] = platform
-            except InventoryPlatform.DoesNotExist:
+            except DeviceType.DoesNotExist:
                 raise serializers.ValidationError("Invalid platform")
         return super().create(validated_data)
 
@@ -92,16 +122,16 @@ class InventoryItemSerializer(serializers.ModelSerializer):
         platform_name = self.initial_data.get("platform_name")
         if platform_name:
             try:
-                platform = InventoryPlatform.objects.get(name=platform_name)
+                platform = DeviceType.objects.get(name=platform_name)
                 instance.platform = platform
-            except InventoryPlatform.DoesNotExist:
+            except DeviceType.DoesNotExist:
                 raise serializers.ValidationError("Invalid platform")
         return super().update(instance, validated_data)
 
 
-class InventoryPlatformSerializer(serializers.ModelSerializer):
+class DeviceTypeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = InventoryPlatform
+        model = DeviceType
         fields = (
             "device_type",
             "id",

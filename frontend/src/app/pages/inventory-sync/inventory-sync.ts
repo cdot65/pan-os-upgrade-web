@@ -11,8 +11,8 @@ import {
 } from "@angular/forms";
 
 import { ComponentPageTitle } from "../page-title/page-title";
+import { Device } from "../../shared/interfaces/device.interface";
 import { Footer } from "src/app/shared/footer/footer";
-import { InventoryItem } from "../../shared/interfaces/inventory-item.interface";
 import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { InventorySyncForm } from "../../shared/interfaces/inventory-sync-form.interface";
@@ -49,9 +49,7 @@ import { Router } from "@angular/router";
 export class InventorySyncComponent implements OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     syncInventoryForm: FormGroup;
-    panoramaDevices$: Observable<InventoryItem[]> = new Observable<
-        InventoryItem[]
-    >();
+    panoramaDevices$: Observable<Device[]> = new Observable<Device[]>();
     profiles$: Observable<Profile[]> = new Observable<Profile[]>();
 
     constructor(

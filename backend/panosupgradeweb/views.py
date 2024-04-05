@@ -17,15 +17,15 @@ from rest_framework.views import APIView
 
 # directory object imports
 from .models import (
-    InventoryPlatform,
-    InventoryItem,
+    DeviceType,
+    Device,
     Job,
     Profile,
 )
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
-    InventoryItemSerializer,
-    InventoryPlatformSerializer,
+    DeviceSerializer,
+    DeviceTypeSerializer,
     InventorySyncSerializer,
     JobSerializer,
     ProfileSerializer,
@@ -49,7 +49,7 @@ class InventoryExistsView(APIView):
             )
             exists = (
                 (
-                    InventoryItem.objects.annotate(
+                    Device.objects.annotate(
                         formatted_hostname=Replace(
                             Replace(Lower("hostname"), V(" "), V("_")), V("-"), V("_")
                         )
@@ -70,11 +70,11 @@ class InventoryExistsView(APIView):
 
 class InventoryViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnly,)
-    queryset = InventoryItem.objects.all()
-    serializer_class = InventoryItemSerializer
+    queryset = Device.objects.all()
+    serializer_class = DeviceSerializer
 
     def get_queryset(self):
-        queryset = InventoryItem.objects.all()
+        queryset = Device.objects.all()
         device_type = self.request.query_params.get("device_type", None)
         if device_type is not None:
             queryset = queryset.filter(platform__device_type=device_type)
@@ -88,7 +88,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
             try:
                 platform_name = request.data.get("platform")
                 if platform_name:
-                    platform = InventoryPlatform.objects.get(name=platform_name)
+                    platform = DeviceType.objects.get(name=platform_name)
                     serializer.validated_data["platform"] = platform
                 serializer.save(author=request.user)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -106,7 +106,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
             author_id = serializer.validated_data["author"]
 
             try:
-                panorama_device = InventoryItem.objects.get(uuid=panorama_device_uuid)
+                panorama_device = Device.objects.get(uuid=panorama_device_uuid)
                 profile = Profile.objects.get(uuid=profile_uuid)
 
                 print(f"Syncing inventory for {panorama_device.hostname}...")
@@ -124,7 +124,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_200_OK,
                 )
 
-            except InventoryItem.DoesNotExist:
+            except Device.DoesNotExist:
                 return Response(
                     {"error": "Invalid Panorama device"},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -141,13 +141,13 @@ class InventoryViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class InventoryPlatformViewSet(viewsets.ModelViewSet):
+class DeviceTypeViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnly,)
-    queryset = InventoryPlatform.objects.all()
-    serializer_class = InventoryPlatformSerializer
+    queryset = DeviceType.objects.all()
+    serializer_class = DeviceTypeSerializer
 
     def get_queryset(self):
-        queryset = InventoryPlatform.objects.all()
+        queryset = DeviceType.objects.all()
         device_type = self.kwargs.get("device_type", None)
         if device_type is not None:
             queryset = queryset.filter(device_type=device_type)

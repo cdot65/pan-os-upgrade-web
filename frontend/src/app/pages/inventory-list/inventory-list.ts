@@ -12,8 +12,8 @@ import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 
 import { ComponentPageTitle } from "../page-title/page-title";
 import { DeleteDialogComponent } from "../confirmation-dialog/delete-dialog";
+import { Device } from "../../shared/interfaces/device.interface";
 import { Footer } from "src/app/shared/footer/footer";
-import { InventoryItem } from "../../shared/interfaces/inventory-item.interface";
 import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
@@ -44,7 +44,7 @@ import { Router } from "@angular/router";
 export class InventoryList implements OnInit, AfterViewInit {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
-    inventoryItems: InventoryItem[] = [];
+    inventoryItems: Device[] = [];
     displayedColumns: string[] = [
         "hostname",
         "notes",
@@ -55,8 +55,7 @@ export class InventoryList implements OnInit, AfterViewInit {
         "edit",
         "delete",
     ];
-    dataSource: MatTableDataSource<InventoryItem> =
-        new MatTableDataSource<InventoryItem>([]);
+    dataSource: MatTableDataSource<Device> = new MatTableDataSource<Device>([]);
 
     @ViewChild(MatSort) sort: MatSort = new MatSort();
 
@@ -70,7 +69,7 @@ export class InventoryList implements OnInit, AfterViewInit {
 
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory List";
-        this.getInventoryItems();
+        this.getDevices();
     }
 
     ngAfterViewInit() {
@@ -85,8 +84,8 @@ export class InventoryList implements OnInit, AfterViewInit {
         }
     }
 
-    getInventoryItems(): void {
-        this.inventoryService.getInventoryItems().subscribe(
+    getDevices(): void {
+        this.inventoryService.getDevices().subscribe(
             (items) => {
                 this.inventoryItems = items;
                 this.inventoryItems.sort((a, b) =>
@@ -109,7 +108,7 @@ export class InventoryList implements OnInit, AfterViewInit {
         this.router.navigate(["/inventory/sync"]);
     }
 
-    onDeleteClick(item: InventoryItem): void {
+    onDeleteClick(item: Device): void {
         const dialogRef = this.dialog.open(DeleteDialogComponent, {
             width: "300px",
             data: {
@@ -120,9 +119,9 @@ export class InventoryList implements OnInit, AfterViewInit {
 
         dialogRef.afterClosed().subscribe((result: boolean) => {
             if (result) {
-                this.inventoryService.deleteInventoryItem(item.uuid).subscribe(
+                this.inventoryService.deleteDevice(item.uuid).subscribe(
                     () => {
-                        this.getInventoryItems(); // Refresh the inventory list after deletion
+                        this.getDevices(); // Refresh the inventory list after deletion
                     },
                     (error) => {
                         console.error("Error deleting inventory item:", error);
@@ -132,7 +131,7 @@ export class InventoryList implements OnInit, AfterViewInit {
         });
     }
 
-    onEditClick(item: InventoryItem): void {
+    onEditClick(item: Device): void {
         this.router.navigate(["/inventory", item.uuid]);
     }
 }
