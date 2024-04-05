@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework.routers import SimpleRouter
 from .views import (
     InventoryExistsView,
-    InventoryPlatformViewSet,
+    DeviceTypeViewSet,
     InventoryViewSet,
     JobViewSet,
     ProfileViewSet,
@@ -38,7 +38,7 @@ router.register(
 urlpatterns = [
     path(
         "inventory/platforms/",
-        InventoryPlatformViewSet.as_view({"get": "list"}),
+        DeviceTypeViewSet.as_view({"get": "list"}),
         name="inventory-platforms-list",
     ),
     path(
@@ -48,18 +48,18 @@ urlpatterns = [
     ),
     path(
         "inventory/platforms/<int:pk>/",
-        InventoryPlatformViewSet.as_view({"get": "retrieve"}),
+        DeviceTypeViewSet.as_view({"get": "retrieve"}),
         name="inventory-platforms-detail",
     ),
     path(
         "inventory/platforms/firewall/",
-        InventoryPlatformViewSet.as_view({"get": "list"}),
+        DeviceTypeViewSet.as_view({"get": "list"}),
         {"device_type": "Firewall"},
         name="firewall-platforms",
     ),
     path(
         "inventory/platforms/panorama/",
-        InventoryPlatformViewSet.as_view({"get": "list"}),
+        DeviceTypeViewSet.as_view({"get": "list"}),
         {"device_type": "Panorama"},
         name="panorama-platforms",
     ),

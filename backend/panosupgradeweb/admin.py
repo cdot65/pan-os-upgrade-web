@@ -1,13 +1,13 @@
 from django.contrib import admin
 from .models import (
-    InventoryItem,
-    InventoryPlatform,
+    Device,
+    DeviceType,
     Job,
     Profile,
 )
 
 
-class InventoryItemAdmin(admin.ModelAdmin):
+class DeviceAdmin(admin.ModelAdmin):
     list_display = (
         "hostname",
         "device_group",
@@ -23,7 +23,7 @@ class InventoryItemAdmin(admin.ModelAdmin):
     search_fields = ("hostname", "ipv4_address", "ipv6_address", "notes")
 
 
-class InventoryPlatformAdmin(admin.ModelAdmin):
+class DeviceTypeAdmin(admin.ModelAdmin):
     list_display = (
         "device_type",
         "name",
@@ -55,7 +55,7 @@ class ProfileAdmin(admin.ModelAdmin):
     search_fields = ("name", "uuid", "description")
 
 
-admin.site.register(InventoryItem, InventoryItemAdmin)
-admin.site.register(InventoryPlatform, InventoryPlatformAdmin)
+admin.site.register(Device, DeviceAdmin)
+admin.site.register(DeviceType, DeviceTypeAdmin)
 admin.site.register(Job, JobAdmin)
 admin.site.register(Profile, ProfileAdmin)

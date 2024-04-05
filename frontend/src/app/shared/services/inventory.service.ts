@@ -3,9 +3,9 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable, of } from "rxjs";
 
+import { Device } from "../interfaces/device.interface";
+import { DeviceType } from "../interfaces/device-type.interface";
 import { Injectable } from "@angular/core";
-import { InventoryItem } from "../interfaces/inventory-item.interface";
-import { InventoryPlatform } from "../interfaces/inventory-platform.interface";
 import { InventorySyncForm } from "../interfaces/inventory-sync-form.interface";
 import { catchError } from "rxjs/operators";
 import { environment } from "../../../environments/environment.prod";
@@ -18,16 +18,14 @@ export class InventoryService {
 
     constructor(private http: HttpClient) {}
 
-    getInventoryItems(): Observable<InventoryItem[]> {
+    getDevices(): Observable<Device[]> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
         );
         return this.http
-            .get<
-                InventoryItem[]
-            >(`${this.apiUrl}/api/v1/inventory/`, { headers })
+            .get<Device[]>(`${this.apiUrl}/api/v1/inventory/`, { headers })
             .pipe(
                 catchError((error) => {
                     console.error("Error fetching Inventory data:", error);
@@ -36,14 +34,14 @@ export class InventoryService {
             );
     }
 
-    getInventoryItem(uuid: string): Observable<InventoryItem> {
+    getDevice(uuid: string): Observable<Device> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
         );
         return this.http
-            .get<InventoryItem>(`${this.apiUrl}/api/v1/inventory/${uuid}/`, {
+            .get<Device>(`${this.apiUrl}/api/v1/inventory/${uuid}/`, {
                 headers,
             })
             .pipe(
@@ -54,10 +52,10 @@ export class InventoryService {
             );
     }
 
-    getFirewallPlatforms(): Observable<InventoryPlatform[]> {
+    getFirewallPlatforms(): Observable<DeviceType[]> {
         return this.http
             .get<
-                InventoryPlatform[]
+                DeviceType[]
             >(`${this.apiUrl}/api/v1/inventory/platforms/firewall/`)
             .pipe(
                 catchError((error) => {
@@ -67,7 +65,7 @@ export class InventoryService {
             );
     }
 
-    getPanoramaDevices(): Observable<InventoryItem[]> {
+    getPanoramaDevices(): Observable<Device[]> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
@@ -75,7 +73,7 @@ export class InventoryService {
         );
         return this.http
             .get<
-                InventoryItem[]
+                Device[]
             >(`${this.apiUrl}/api/v1/inventory/?device_type=Panorama`, { headers })
             .pipe(
                 catchError((error) => {
@@ -85,10 +83,10 @@ export class InventoryService {
             );
     }
 
-    getPanoramaPlatforms(): Observable<InventoryPlatform[]> {
+    getPanoramaPlatforms(): Observable<DeviceType[]> {
         return this.http
             .get<
-                InventoryPlatform[]
+                DeviceType[]
             >(`${this.apiUrl}/api/v1/inventory/platforms/panorama/`)
             .pipe(
                 catchError((error) => {
@@ -114,20 +112,16 @@ export class InventoryService {
             );
     }
 
-    createInventoryItem(
-        inventoryItem: InventoryItem,
-    ): Observable<InventoryItem> {
+    createDevice(inventoryItem: Device): Observable<Device> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
         );
         return this.http
-            .post<InventoryItem>(
-                `${this.apiUrl}/api/v1/inventory/`,
-                inventoryItem,
-                { headers },
-            )
+            .post<Device>(`${this.apiUrl}/api/v1/inventory/`, inventoryItem, {
+                headers,
+            })
             .pipe(
                 catchError((error) => {
                     console.error("Error creating inventory item:", error);
@@ -136,17 +130,14 @@ export class InventoryService {
             );
     }
 
-    updateInventoryItem(
-        inventoryItem: InventoryItem,
-        uuid: string,
-    ): Observable<InventoryItem> {
+    updateDevice(inventoryItem: Device, uuid: string): Observable<Device> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
         );
         return this.http
-            .patch<InventoryItem>(
+            .patch<Device>(
                 `${this.apiUrl}/api/v1/inventory/${uuid}/`,
                 inventoryItem,
                 { headers },
@@ -159,7 +150,7 @@ export class InventoryService {
             );
     }
 
-    deleteInventoryItem(uuid: string): Observable<any> {
+    deleteDevice(uuid: string): Observable<any> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",

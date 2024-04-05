@@ -12,10 +12,10 @@ import { MatDialog, MatDialogModule } from "@angular/material/dialog";
 
 import { CommonModule } from "@angular/common";
 import { ComponentPageTitle } from "../page-title/page-title";
+import { Device } from "../../shared/interfaces/device.interface";
+import { DeviceType } from "src/app/shared/interfaces/device-type.interface";
 import { Footer } from "src/app/shared/footer/footer";
-import { InventoryItem } from "../../shared/interfaces/inventory-item.interface";
 import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
-import { InventoryPlatform } from "src/app/shared/interfaces/inventory-platform.interface";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
@@ -52,10 +52,10 @@ import { MatSelectModule } from "@angular/material/select";
 export class InventoryDetailsComponent implements OnInit {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
-    inventoryItem: InventoryItem | undefined;
+    inventoryItem: Device | undefined;
     updateInventoryForm: FormGroup;
-    firewallPlatforms: InventoryPlatform[] = [];
-    panoramaPlatforms: InventoryPlatform[] = [];
+    firewallPlatforms: DeviceType[] = [];
+    panoramaPlatforms: DeviceType[] = [];
 
     constructor(
         private formBuilder: FormBuilder,
@@ -92,7 +92,7 @@ export class InventoryDetailsComponent implements OnInit {
         this._componentPageTitle.title = "Inventory Details";
         const itemId = this.route.snapshot.paramMap.get("id");
         if (itemId) {
-            this.getInventoryItem(itemId);
+            this.getDevice(itemId);
         }
 
         this.updateInventoryForm
@@ -138,7 +138,7 @@ export class InventoryDetailsComponent implements OnInit {
      */
     getFirewallPlatforms(): void {
         this.inventoryService.getFirewallPlatforms().subscribe(
-            (platforms: InventoryPlatform[]) => {
+            (platforms: DeviceType[]) => {
                 this.firewallPlatforms = platforms;
             },
             (error: any) => {
@@ -152,7 +152,7 @@ export class InventoryDetailsComponent implements OnInit {
      */
     getPanoramaPlatforms(): void {
         this.inventoryService.getPanoramaPlatforms().subscribe(
-            (platforms: InventoryPlatform[]) => {
+            (platforms: DeviceType[]) => {
                 this.panoramaPlatforms = platforms;
             },
             (error: any) => {
@@ -166,9 +166,9 @@ export class InventoryDetailsComponent implements OnInit {
      *
      * @param itemId - The ID of the inventory item to retrieve.
      */
-    getInventoryItem(itemId: string): void {
-        this.inventoryService.getInventoryItem(itemId).subscribe(
-            (item: InventoryItem) => {
+    getDevice(itemId: string): void {
+        this.inventoryService.getDevice(itemId).subscribe(
+            (item: Device) => {
                 this.inventoryItem = item;
                 this.updateInventoryForm.patchValue(item);
             },
@@ -183,7 +183,7 @@ export class InventoryDetailsComponent implements OnInit {
      * Navigates to the inventory page after successful update.
      * Logs an error if the update fails.
      */
-    updateInventoryItem(): void {
+    updateDevice(): void {
         if (this.inventoryItem && this.updateInventoryForm.valid) {
             const updatedItem = {
                 ...this.inventoryItem,
@@ -195,7 +195,7 @@ export class InventoryDetailsComponent implements OnInit {
                 delete updatedItem.panoramaManaged;
             }
             this.inventoryService
-                .updateInventoryItem(updatedItem, this.inventoryItem.uuid)
+                .updateDevice(updatedItem, this.inventoryItem.uuid)
                 .subscribe(
                     () => {
                         this.router.navigate(["/inventory"]);

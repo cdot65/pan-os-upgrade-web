@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db import models
 
 
-class InventoryPlatform(models.Model):
+class DeviceType(models.Model):
     device_type = models.CharField(
         max_length=32,
         verbose_name="Device Type",
@@ -20,7 +20,13 @@ class InventoryPlatform(models.Model):
         return self.name
 
 
-class InventoryItem(models.Model):
+class Device(models.Model):
+    app_version = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="App Version",
+    )
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -81,16 +87,40 @@ class InventoryItem(models.Model):
         verbose_name="Panorama Managed",
     )
     platform = models.ForeignKey(
-        InventoryPlatform,
+        DeviceType,
         blank=True,
         null=True,
         on_delete=models.CASCADE,
         verbose_name="Platform",
     )
+    serial = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Serial",
+    )
+    sw_version = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Software Version",
+    )
+    threat_version = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Threat Version",
+    )
     updated_at = models.DateTimeField(
         auto_now=True,
         editable=False,
         verbose_name="Updated At",
+    )
+    uptime = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Uptime",
     )
     uuid = models.UUIDField(
         primary_key=True,

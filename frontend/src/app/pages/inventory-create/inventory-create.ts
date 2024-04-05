@@ -11,9 +11,9 @@ import {
 
 import { CommonModule } from "@angular/common";
 import { ComponentPageTitle } from "../page-title/page-title";
+import { DeviceType } from "../../shared/interfaces/device-type.interface";
 import { Footer } from "src/app/shared/footer/footer";
 import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
-import { InventoryPlatform } from "../../shared/interfaces/inventory-platform.interface";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
@@ -42,8 +42,8 @@ import { Router } from "@angular/router";
 export class InventoryCreateComponent implements OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     createInventoryForm: FormGroup;
-    firewallPlatforms: InventoryPlatform[] = [];
-    panoramaPlatforms: InventoryPlatform[] = [];
+    firewallPlatforms: DeviceType[] = [];
+    panoramaPlatforms: DeviceType[] = [];
 
     constructor(
         private formBuilder: FormBuilder,
@@ -85,7 +85,7 @@ export class InventoryCreateComponent implements OnInit {
 
     getFirewallPlatforms(): void {
         this.inventoryService.getFirewallPlatforms().subscribe(
-            (platforms: InventoryPlatform[]) => {
+            (platforms: DeviceType[]) => {
                 this.firewallPlatforms = platforms;
             },
             (error: any) => {
@@ -96,7 +96,7 @@ export class InventoryCreateComponent implements OnInit {
 
     getPanoramaPlatforms(): void {
         this.inventoryService.getPanoramaPlatforms().subscribe(
-            (platforms: InventoryPlatform[]) => {
+            (platforms: DeviceType[]) => {
                 this.panoramaPlatforms = platforms;
             },
             (error: any) => {
@@ -105,7 +105,7 @@ export class InventoryCreateComponent implements OnInit {
         );
     }
 
-    createInventoryItem(): void {
+    createDevice(): void {
         if (this.createInventoryForm && this.createInventoryForm.valid) {
             const formValue = this.createInventoryForm.value;
             if (formValue.device_type === "Panorama") {
@@ -113,7 +113,7 @@ export class InventoryCreateComponent implements OnInit {
                 delete formValue.panorama_appliance;
                 delete formValue.panorama_managed;
             }
-            this.inventoryService.createInventoryItem(formValue).subscribe(
+            this.inventoryService.createDevice(formValue).subscribe(
                 () => {
                     this.router.navigate(["/inventory"]);
                 },
