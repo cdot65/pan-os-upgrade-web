@@ -33,6 +33,17 @@ mat-form-field {
 .error-message {
   color: #f44336;
   margin-bottom: 16px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.info-message {
+  color: #333;
+  margin-bottom: 16px;
+  position: relative;
+  display: flex;
+  justify-content: center;
 }
 
 .button-flex-container {

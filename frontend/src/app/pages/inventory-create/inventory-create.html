@@ -99,15 +99,11 @@
           <!-- Heading for the high availability section -->
           <h3>High Availability</h3>
 
-          <!-- Form field for enabling/disabling high availability -->
-          <div class="form-field">
-            <!-- Checkbox for toggling high availability, bound to the 'ha' form control -->
-            <mat-checkbox formControlName="ha">HA Enabled</mat-checkbox>
-          </div>
 
           <!-- Conditional form field for specifying the HA peer -->
+          @if (createInventoryForm.get('ha')?.value === true) {
           <!-- Displayed only when high availability is enabled -->
-          <div class="form-field" *ngIf="createInventoryForm.get('ha')?.value === true">
+          <div class="form-field">
             <mat-form-field>
               <mat-label>HA Mode</mat-label>
               <!-- Input field for the HA mode, bound to the 'ha_mode' form control -->
@@ -124,39 +120,44 @@
               <input matInput id="ha_status" formControlName="ha_status">
             </mat-form-field>
           </div>
+          }
+
+          <!-- Form field for enabling/disabling high availability -->
+          <div class="form-field">
+            <!-- Checkbox for toggling high availability, bound to the 'ha' form control -->
+            <mat-checkbox formControlName="ha">HA Enabled</mat-checkbox>
+          </div>
         </div>
 
         <!-- Conditional section for Panorama information, displayed only if the selected device type is 'Firewall' -->
-        <div *ngIf="createInventoryForm.get('device_type')?.value === 'Firewall'">
+        @if (createInventoryForm.get('device_type')?.value === 'Firewall') {
+        <div>
           <!-- Heading for the Panorama information section -->
           <h3>Panorama Information</h3>
-
           <!-- Form field for entering the Panorama appliance, displayed only if the firewall is managed by Panorama -->
-          <div class="form-field"
-            *ngIf="createInventoryForm.get('device_type')?.value === 'Firewall' && createInventoryForm.get('panorama_managed')?.value === true">
+          @if (createInventoryForm.get('panorama_managed')?.value) {
+          <div class="form-field">
             <mat-form-field>
               <mat-label>Panorama Appliance</mat-label>
               <!-- Input field for the Panorama appliance, bound to the 'panorama_appliance' form control -->
               <input matInput id="panorama_appliance" formControlName="panorama_appliance">
             </mat-form-field>
           </div>
-
           <!-- Form field for entering the device group, displayed only if the firewall is managed by Panorama -->
-          <div class="form-field"
-            *ngIf="createInventoryForm.get('device_type')?.value === 'Firewall' && createInventoryForm.get('panorama_managed')?.value === true">
+          <div class="form-field">
             <mat-form-field>
               <mat-label>Device Group</mat-label>
               <!-- Input field for the device group, bound to the 'device_group' form control -->
               <input matInput id="device_group" formControlName="device_group">
             </mat-form-field>
           </div>
-
+          }
           <!-- Checkbox for indicating if the firewall is managed by Panorama -->
-          <div class="form-field" *ngIf="createInventoryForm.get('device_type')?.value === 'Firewall'">
+          <div class="form-field">
             <mat-checkbox formControlName="panorama_managed">Panorama Managed</mat-checkbox>
           </div>
-
         </div>
+        }
       </div>
 
       <!-- container for the Create and Cancel buttons. -->
