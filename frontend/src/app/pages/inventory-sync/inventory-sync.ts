@@ -49,6 +49,7 @@ import { Router } from "@angular/router";
 export class InventorySyncComponent implements OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     syncInventoryForm: FormGroup;
+    panoramaDevices: Device[] = [];
     panoramaDevices$: Observable<Device[]> = new Observable<Device[]>();
     profiles$: Observable<Profile[]> = new Observable<Profile[]>();
 
