@@ -16,9 +16,15 @@
             autocomplete="current-password">
           <mat-icon matSuffix>lock</mat-icon>
         </mat-form-field>
-        <div class="error-message" *ngIf="errorMessage">
+        @if (errorMessage) {
+        <div class="error-message">
           {{ errorMessage }}
         </div>
+        } @else {
+        <div class="info-message">
+          Please enter your credentials.
+        </div>
+        }
         <div class="button-flex-container">
           <button mat-raised-button color="primary" type="submit">Login</button>
         </div>

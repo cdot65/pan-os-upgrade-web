@@ -38,6 +38,7 @@ export class InventoryService {
                 }),
             );
     }
+
     getDevice(uuid: string): Observable<Device> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
