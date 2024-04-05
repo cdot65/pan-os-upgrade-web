@@ -2,12 +2,12 @@
 
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable, of } from "rxjs";
+import { catchError, map } from "rxjs/operators";
 
 import { Device } from "../interfaces/device.interface";
 import { DeviceType } from "../interfaces/device-type.interface";
 import { Injectable } from "@angular/core";
 import { InventorySyncForm } from "../interfaces/inventory-sync-form.interface";
-import { catchError } from "rxjs/operators";
 import { environment } from "../../../environments/environment.prod";
 
 @Injectable({
@@ -27,13 +27,17 @@ export class InventoryService {
         return this.http
             .get<Device[]>(`${this.apiUrl}/api/v1/inventory/`, { headers })
             .pipe(
+                map((devices) =>
+                    devices.sort((a, b) =>
+                        a.hostname.localeCompare(b.hostname),
+                    ),
+                ),
                 catchError((error) => {
                     console.error("Error fetching Inventory data:", error);
                     return of([]);
                 }),
             );
     }
-
     getDevice(uuid: string): Observable<Device> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
@@ -76,6 +80,11 @@ export class InventoryService {
                 Device[]
             >(`${this.apiUrl}/api/v1/inventory/?device_type=Panorama`, { headers })
             .pipe(
+                map((devices) =>
+                    devices.sort((a, b) =>
+                        a.hostname.localeCompare(b.hostname),
+                    ),
+                ),
                 catchError((error) => {
                     console.error("Error fetching Panorama devices:", error);
                     return of([]);
