@@ -8,7 +8,9 @@ export interface Device {
     device_group: string | null;
     device_type: string;
     ha: boolean;
+    ha_mode: string | null;
     ha_peer: string | null;
+    ha_status: string | null;
     hostname: string;
     ipv4_address: string;
     ipv6_address: string | null;

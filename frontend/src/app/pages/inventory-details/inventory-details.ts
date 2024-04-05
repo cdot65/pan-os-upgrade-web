@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // src/app/pages/inventory-details/inventory-details.ts
 
 import { ActivatedRoute, Router } from "@angular/router";
@@ -71,7 +72,9 @@ export class InventoryDetailsComponent implements OnInit {
             device_group: [""],
             device_type: [""],
             ha: [false],
+            ha_mode: [""],
             ha_peer: [""],
+            ha_status: [""],
             hostname: ["", Validators.required],
             ipv4_address: ["", Validators.required],
             ipv6_address: [""],
