@@ -14,6 +14,14 @@
         </button>
       </div>
 
+      <!-- Display the progress bar when a user has requested a refresh-->
+      @if (showRefreshProgress) {
+      <p class="refresh-header">Refreshing information from live device</p>
+      <div class="refresh-progress">
+        <mat-progress-bar mode="buffer"></mat-progress-bar>
+      </div>
+      }
+
       <div class="inventory-details-grid">
         <div>
           <!-- Heading for the firewall information section -->

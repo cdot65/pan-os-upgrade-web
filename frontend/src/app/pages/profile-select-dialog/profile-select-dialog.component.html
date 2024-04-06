@@ -5,13 +5,16 @@
     <mat-form-field>
       <mat-label>Select Profile</mat-label>
       <mat-select [(ngModel)]="selectedProfile" required>
-        <mat-option *ngFor="let profile of profiles$ | async" [value]="profile.uuid"> {{ profile.name }} </mat-option>
+        <mat-option *ngFor="let profile of profiles$ | async" [value]="profile.uuid">
+          {{ profile.name }}
+        </mat-option>
       </mat-select>
     </mat-form-field>
   </div>
 </div>
 <div class="button-container">
   <button mat-button (click)="onCancelClick()">Cancel</button>
-  <button mat-button color="primary" type="submit" (click)="onSelectClick()"
-    [disabled]="!selectedProfile">Select</button>
+  <button mat-button color="primary" type="submit" (click)="onSelectClick()" [disabled]="!selectedProfile">
+    Select
+  </button>
 </div>

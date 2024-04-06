@@ -12,6 +12,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatSelectModule } from "@angular/material/select";
 import { AsyncPipe, NgForOf } from "@angular/common";
 import { FormsModule } from "@angular/forms";
+import { MatProgressBarModule } from "@angular/material/progress-bar";
 
 @Component({
     selector: "app-profile-select-dialog",
@@ -21,6 +22,7 @@ import { FormsModule } from "@angular/forms";
     imports: [
         MatButtonModule,
         MatDialogModule,
+        MatProgressBarModule,
         MatSelectModule,
         AsyncPipe,
         NgForOf,
@@ -30,6 +32,7 @@ import { FormsModule } from "@angular/forms";
 export class ProfileDialogComponent implements OnInit {
     profiles$: Observable<Profile[]> = new Observable<Profile[]>();
     selectedProfile: string = "";
+    showProgress: boolean = false;
 
     constructor(
         public dialogRef: MatDialogRef<ProfileDialogComponent>,
@@ -46,6 +49,7 @@ export class ProfileDialogComponent implements OnInit {
     }
 
     onSelectClick(): void {
+        this.showProgress = true;
         this.dialogRef.close(this.selectedProfile);
     }
 }
