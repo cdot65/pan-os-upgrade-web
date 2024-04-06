@@ -21,6 +21,7 @@ import { MatCardModule } from "@angular/material/card";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
+import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { MatSelectModule } from "@angular/material/select";
 import { Observable } from "rxjs";
 import { Profile } from "../../shared/interfaces/profile.interface";
@@ -39,6 +40,7 @@ import { Router } from "@angular/router";
         MatFormFieldModule,
         MatIconModule,
         MatInputModule,
+        MatProgressBarModule,
         MatSelectModule,
         InventoryPageHeader,
         Footer,
@@ -52,6 +54,9 @@ export class InventorySyncComponent implements OnInit {
     panoramaDevices: Device[] = [];
     panoramaDevices$: Observable<Device[]> = new Observable<Device[]>();
     profiles$: Observable<Profile[]> = new Observable<Profile[]>();
+    showSyncProgress: boolean = false;
+    showSyncError: boolean = false;
+    jobId: string | null = null;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -86,13 +91,37 @@ export class InventorySyncComponent implements OnInit {
                     this.syncInventoryForm.get("panorama_device")?.value,
                 profile: this.syncInventoryForm.get("profile")?.value,
             };
+            this.showSyncProgress = true;
+            this.showSyncError = false;
             this.inventoryService.syncInventory(syncForm).subscribe(
-                () => {
-                    console.log("Inventory synced successfully");
-                    this.router.navigate(["/inventory"]);
+                (jobId) => {
+                    this.jobId = jobId;
+                    this.checkJobStatus();
                 },
                 (error) => {
                     console.error("Error syncing inventory:", error);
+                    this.showSyncProgress = false;
+                    this.showSyncError = true;
+                },
+            );
+        }
+    }
+
+    checkJobStatus(): void {
+        if (this.jobId) {
+            this.inventoryService.getJobStatus(this.jobId).subscribe(
+                (response) => {
+                    if (response.status === "completed") {
+                        this.showSyncProgress = false;
+                        this.router.navigate(["/inventory"]);
+                    } else {
+                        setTimeout(() => this.checkJobStatus(), 2000);
+                    }
+                },
+                (error) => {
+                    console.error("Error checking job status:", error);
+                    this.showSyncProgress = false;
+                    this.showSyncError = true;
                 },
             );
         }
