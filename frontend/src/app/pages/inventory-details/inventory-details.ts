@@ -24,6 +24,7 @@ import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
+import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { MatSelectModule } from "@angular/material/select";
 import { ProfileDialogComponent } from "../profile-select-dialog/profile-select-dialog.component";
 
@@ -43,6 +44,7 @@ import { ProfileDialogComponent } from "../profile-select-dialog/profile-select-
         MatFormFieldModule,
         MatIconModule,
         MatInputModule,
+        MatProgressBarModule,
         MatSelectModule,
         ReactiveFormsModule,
     ],
@@ -58,6 +60,8 @@ export class InventoryDetailsComponent implements OnInit {
     updateInventoryForm: FormGroup;
     firewallPlatforms: DeviceType[] = [];
     panoramaPlatforms: DeviceType[] = [];
+    showRefreshProgress: boolean = false;
+    refreshJobCompleted: boolean = false;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -233,14 +237,18 @@ export class InventoryDetailsComponent implements OnInit {
                     device: this.inventoryItem.uuid,
                     profile: selectedProfileUuid,
                 };
+                this.showRefreshProgress = true;
+                this.refreshJobCompleted = false;
                 this.inventoryService.refreshDevice(refreshForm).subscribe(
                     (updatedItem: Device | null) => {
                         if (updatedItem) {
                             this.inventoryItem = updatedItem;
                             this.updateInventoryForm.patchValue(updatedItem);
-                            // Show a success toast or message
+                            // this.refreshJobCompleted = true;
+                            this.checkRefreshStatus();
                         } else {
-                            // Show an error toast or message
+                            // this.refreshJobCompleted = true;
+                            this.checkRefreshStatus();
                         }
                     },
                     (error) => {
@@ -253,5 +261,18 @@ export class InventoryDetailsComponent implements OnInit {
                 );
             }
         });
+    }
+
+    checkRefreshStatus(): void {
+        if (this.refreshJobCompleted) {
+            this.showRefreshProgress = false;
+            // Perform page refresh or any other necessary actions
+            // this.router.navigate(["/inventory"]);
+        } else {
+            // Recheck the refresh status after a certain interval
+            setTimeout(() => {
+                this.checkRefreshStatus();
+            }, 1000);
+        }
     }
 }
