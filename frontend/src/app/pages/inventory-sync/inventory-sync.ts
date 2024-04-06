@@ -107,7 +107,7 @@ export class InventorySyncComponent implements OnInit {
                         this.showSyncError = true;
                     },
                 );
-            }, 1000);
+            }, 2000);
         }
     }
 

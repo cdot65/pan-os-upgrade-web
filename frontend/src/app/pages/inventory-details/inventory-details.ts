@@ -258,7 +258,7 @@ export class InventoryDetailsComponent implements OnInit {
                             this.showRefreshError = true;
                         },
                     );
-                }, 1000);
+                }, 2000);
             }
         });
     }
