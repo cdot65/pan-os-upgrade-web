@@ -42,6 +42,35 @@ def flatten_xml_to_dict(element: ET.Element) -> dict:
     return result
 
 
+def get_device_group_mapping(panorama: Panorama):
+    device_group_mappings = []
+    device_groups = panorama.op("show devicegroups")
+
+    # Iterate over each 'entry' element under 'devicegroups'
+    for entry in device_groups.findall(".//devicegroups/entry"):
+        entry_dict = {"@name": entry.get("name")}
+
+        # Check if the 'entry' has 'devices' element
+        devices_elem = entry.find("devices")
+        if devices_elem is not None:
+            devices = []
+
+            # Iterate over each 'entry' element under 'devices'
+            for device in devices_elem.findall("entry"):
+                device_dict = {
+                    "@name": device.get("name"),
+                    "serial": device.find("serial").text,
+                    "connected": device.find("connected").text,
+                }
+                devices.append(device_dict)
+
+            entry_dict["devices"] = devices
+
+        device_group_mappings.append(entry_dict)
+
+    return device_group_mappings
+
+
 def run_device_refresh(
     device_uuid,
     profile_uuid,
@@ -78,6 +107,13 @@ def run_device_refresh(
             )
             panorama.add(pan_device)
 
+            # Retrieve device group
+            device_group_mappings = get_device_group_mapping(panorama)
+            device_group = find_devicegroup_by_serial(
+                device_group_mappings,
+                device.serial,
+            )
+
         else:
 
             # Connect to the Panorama device using the retrieved credentials
@@ -88,7 +124,7 @@ def run_device_refresh(
             )
 
     except Exception as e:
-        logging.error(f"Error during inventory sync: {str(e)}")
+        logging.error(f"Error while building the PAN object: {str(e)}")
         raise e
 
     # Connect to the PAN device and retrieve the system information
@@ -97,11 +133,11 @@ def run_device_refresh(
         # Retrieve the system information from the firewall device
         system_info = pan_device.show_system_info()
 
-        # Firewalls return model so they can be updated, Panorama does not
-        if platform.device_type == "Firewall":
-            platform_name = system_info["system"]["model"]
-        else:
-            platform_name = platform.name
+        # disable model update for now
+        # if platform.device_type == "Firewall":
+        #     platform_name = system_info["system"]["model"]
+        # else:
+        #     platform_name = platform.name
 
         # Retrieve the HA state information from the firewall device
         ha_info = pan_device.show_highavailability_state()
@@ -131,9 +167,17 @@ def run_device_refresh(
         inventory_item, created = Device.objects.update_or_create(
             hostname=system_info["system"]["hostname"],
             defaults={
-                "app_version": system_info["system"]["app-version"],
+                "app_version": (
+                    system_info["system"]["app-version"]
+                    if platform.device_type == "Firewall"
+                    else None
+                ),
                 "author_id": author_id,
-                "device_group": None,
+                "device_group": (
+                    device_group
+                    if platform.device_type == "Firewall" and device.panorama_managed
+                    else None
+                ),
                 "ha": ha_state,
                 "ha_mode": ha_mode,
                 "ha_peer": ha_peer,
@@ -144,15 +188,19 @@ def run_device_refresh(
                     if system_info["system"]["ipv6-address"] != "unknown"
                     else None
                 ),
-                "notes": None,
-                "platform": platform_name,
+                # "notes": None,
+                # "platform": platform_name,
                 "panorama_managed": device.panorama_managed,
                 "panorama_appliance": (
                     device.panorama_appliance if device.panorama_managed else None
                 ),
                 "serial": system_info["system"]["serial"],
                 "sw_version": system_info["system"]["sw-version"],
-                "threat_version": system_info["system"]["threat-version"],
+                "threat_version": (
+                    system_info["system"]["threat-version"]
+                    if platform.device_type == "Firewall"
+                    else None
+                ),
                 "uptime": system_info["system"]["uptime"],
             },
         )

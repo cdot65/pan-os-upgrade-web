@@ -42,6 +42,35 @@ def flatten_xml_to_dict(element: ET.Element) -> dict:
     return result
 
 
+def get_device_group_mapping(pan: Panorama):
+    device_group_mappings = []
+    device_groups = pan.op("show devicegroups")
+
+    # Iterate over each 'entry' element under 'devicegroups'
+    for entry in device_groups.findall(".//devicegroups/entry"):
+        entry_dict = {"@name": entry.get("name")}
+
+        # Check if the 'entry' has 'devices' element
+        devices_elem = entry.find("devices")
+        if devices_elem is not None:
+            devices = []
+
+            # Iterate over each 'entry' element under 'devices'
+            for device in devices_elem.findall("entry"):
+                device_dict = {
+                    "@name": device.get("name"),
+                    "serial": device.find("serial").text,
+                    "connected": device.find("connected").text,
+                }
+                devices.append(device_dict)
+
+            entry_dict["devices"] = devices
+
+        device_group_mappings.append(entry_dict)
+
+    return device_group_mappings
+
+
 def run_inventory_sync(
     panorama_device_uuid,
     profile_uuid,
@@ -76,30 +105,7 @@ def run_inventory_sync(
         panorama_hostname = system_info["system"]["hostname"]
 
         # Retrieve the device group mappings from the Panorama device
-        device_group_mappings = []
-        device_groups = pan.op("show devicegroups")
-
-        # Iterate over each 'entry' element under 'devicegroups'
-        for entry in device_groups.findall(".//devicegroups/entry"):
-            entry_dict = {"@name": entry.get("name")}
-
-            # Check if the 'entry' has 'devices' element
-            devices_elem = entry.find("devices")
-            if devices_elem is not None:
-                devices = []
-
-                # Iterate over each 'entry' element under 'devices'
-                for device in devices_elem.findall("entry"):
-                    device_dict = {
-                        "@name": device.get("name"),
-                        "serial": device.find("serial").text,
-                        "connected": device.find("connected").text,
-                    }
-                    devices.append(device_dict)
-
-                entry_dict["devices"] = devices
-
-            device_group_mappings.append(entry_dict)
+        device_group_mappings = get_device_group_mapping(pan)
 
         # Retrieve the connected devices
         connected_devices = pan.op("show devices connected")
