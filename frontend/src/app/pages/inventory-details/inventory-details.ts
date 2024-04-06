@@ -64,6 +64,7 @@ export class InventoryDetailsComponent implements OnInit {
     showRefreshError: boolean = false;
     refreshJobCompleted: boolean = false;
     jobId: string | null = null;
+    private retryCount = 0;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -270,14 +271,24 @@ export class InventoryDetailsComponent implements OnInit {
                     if (response.status === "completed") {
                         this.showRefreshProgress = false;
                         this.getDevice(this.inventoryItem!.uuid);
+                        this.retryCount = 0; // Reset the retry count on success
                     } else {
                         setTimeout(() => this.checkJobStatus(), 2000);
                     }
                 },
                 (error) => {
                     console.error("Error checking job status:", error);
-                    this.showRefreshProgress = false;
-                    this.showRefreshError = true;
+                    if (error.status === 400 && this.retryCount < 3) {
+                        this.retryCount++;
+                        console.log(
+                            `Retrying job status check (attempt ${this.retryCount})`,
+                        );
+                        setTimeout(() => this.checkJobStatus(), 2000);
+                    } else {
+                        this.showRefreshProgress = false;
+                        this.showRefreshError = true;
+                        this.retryCount = 0; // Reset the retry count on failure
+                    }
                 },
             );
         }
