@@ -34,9 +34,11 @@
             <mat-form-field>
               <mat-label>Panorama Device</mat-label>
               <mat-select id="panorama_device" formControlName="panorama_device" required>
-                <mat-option *ngFor="let device of panoramaDevices$ | async" [value]="device.uuid">
+                @for (device of panoramaDevices$ | async; track device) {
+                <mat-option [value]="device.uuid">
                   {{ device.hostname }} ({{ device.ipv4_address }})
                 </mat-option>
+                }
               </mat-select>
             </mat-form-field>
           </div>
@@ -49,9 +51,11 @@
             <mat-form-field>
               <mat-label>Profile</mat-label>
               <mat-select id="profile" formControlName="profile" required>
-                <mat-option *ngFor="let profile of profiles$ | async" [value]="profile.uuid">
+                @for (profile of profiles$ | async; track profile) {
+                <mat-option [value]="profile.uuid">
                   {{ profile.name }}
                 </mat-option>
+                }
               </mat-select>
             </mat-form-field>
           </div>

@@ -60,11 +60,12 @@
                 <!-- Option for each platform name based on the selected device type -->
                 <!-- Uses an *ngFor directive to iterate over the platform names -->
                 <!-- Conditionally selects the platform names based on the selected device type -->
-                <mat-option
-                  *ngFor="let platform_name of createInventoryForm.get('device_type')?.value === 'Firewall' ? firewallPlatforms : panoramaPlatforms"
-                  [value]="platform_name.name">
+                @for (platform_name of createInventoryForm.get('device_type')?.value === 'Firewall' ? firewallPlatforms
+                : panoramaPlatforms; track platform_name) {
+                <mat-option [value]="platform_name.name">
                   {{platform_name.name}}
                 </mat-option>
+                }
               </mat-select>
             </mat-form-field>
           </div>

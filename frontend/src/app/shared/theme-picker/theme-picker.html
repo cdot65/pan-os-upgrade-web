@@ -3,7 +3,8 @@
 </button>
 
 <mat-menu #themeMenu="matMenu" xPosition="before" class="panosupgrade-theme-picker-menu">
-  <button mat-menu-item *ngFor="let theme of themes" (click)="selectTheme(theme.name)">
+  @for (theme of themes; track theme) {
+  <button mat-menu-item (click)="selectTheme(theme.name)">
     <mat-icon [class.panosupgrade-theme-selected-icon]="currentTheme === theme"
       [color]="currentTheme === theme ? 'accent' : undefined">
       {{currentTheme === theme ? 'radio_button_checked' :
@@ -12,4 +13,5 @@
     <span>{{theme.displayName}}</span>
     <mat-icon [class]="'theme-example-icon ' + theme.name" svgIcon="theme-example"></mat-icon>
   </button>
+  }
 </mat-menu>

@@ -5,9 +5,11 @@
     <mat-form-field>
       <mat-label>Select Profile</mat-label>
       <mat-select [(ngModel)]="selectedProfile" required>
-        <mat-option *ngFor="let profile of profiles$ | async" [value]="profile.uuid">
+        @for (profile of profiles$ | async; track profile) {
+        <mat-option [value]="profile.uuid">
           {{ profile.name }}
         </mat-option>
+        }
       </mat-select>
     </mat-form-field>
   </div>

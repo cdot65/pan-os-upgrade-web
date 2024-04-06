@@ -6,7 +6,8 @@
 
 <main focusOnNavigation aria-label="Guide list" id="guide-list" class="docs-guide">
   <div class="docs-guide-list">
-    <a class="docs-guide-item" *ngFor="let guide of guideItems.getAllItems()" routerLink="/guide/{{guide.id}}">
+    @for (guide of guideItems.getAllItems(); track guide) {
+    <a class="docs-guide-item" routerLink="/guide/{{guide.id}}">
       <mat-card class="docs-guide-card">
         <mat-card-title>{{guide.name}}</mat-card-title>
         <div class="docs-guide-card-divider"></div>
@@ -15,6 +16,7 @@
         </mat-card-content>
       </mat-card>
     </a>
+    }
   </div>
 </main>
 
