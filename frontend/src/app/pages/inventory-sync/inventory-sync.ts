@@ -114,7 +114,7 @@ export class InventorySyncComponent implements OnInit {
                         this.showSyncError = true;
                     },
                 );
-            }, 2000);
+            }, 2500);
         }
     }
 
@@ -127,7 +127,7 @@ export class InventorySyncComponent implements OnInit {
                         this.router.navigate(["/inventory"]);
                         this.retryCount = 0; // Reset the retry count on success
                     } else {
-                        setTimeout(() => this.checkJobStatus(), 2000);
+                        setTimeout(() => this.checkJobStatus(), 2500);
                     }
                 },
                 (error) => {
@@ -137,7 +137,7 @@ export class InventorySyncComponent implements OnInit {
                         console.log(
                             `Retrying job status check (attempt ${this.retryCount})`,
                         );
-                        setTimeout(() => this.checkJobStatus(), 2000);
+                        setTimeout(() => this.checkJobStatus(), 2500);
                     } else {
                         this.showSyncProgress = false;
                         this.showSyncError = true;
