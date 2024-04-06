@@ -5,6 +5,21 @@
   <main focusOnNavigation aria-label="Sync Inventory from Panorama" id="inventory-sync" class="inventory-sync">
 
     <form [formGroup]="syncInventoryForm" (ngSubmit)="syncInventory()" class="mat-elevation-z2">
+      <!-- Display the progress bar when a user has initiated a sync -->
+      @if (showSyncProgress) {
+      <p class="sync-header">Syncing inventory from Panorama device</p>
+      <div class="sync-progress">
+        <mat-progress-bar mode="buffer"></mat-progress-bar>
+      </div>
+      }
+
+      <!-- Display the error message if there is a problem with the sync job -->
+      @if (showSyncError) {
+      <div class="sync-error">
+        <p>There was a problem with the sync job. Please refresh the page and try again.</p>
+      </div>
+      }
+
       <div class="inventory-sync-grid">
 
         <div>

@@ -33,8 +33,8 @@ from .serializers import (
     UserSerializer,
 )
 from .tasks import (
-    execute_inventory_sync as inventory_sync_task,
-    refresh_device_task as refresh_device_task,
+    execute_inventory_sync,
+    refresh_device_task,
 )
 
 
@@ -174,15 +174,15 @@ class InventoryViewSet(viewsets.ModelViewSet):
                 print(f"Syncing inventory for {panorama_device.hostname}...")
                 print(f"Profile: {profile.name}")
 
-                # Trigger the Celery task
-                inventory_sync_task.delay(
+                # Trigger the Celery task and get the task ID
+                task = execute_inventory_sync.delay(
                     panorama_device_uuid,
                     profile_uuid,
                     author_id,
                 )
 
                 return Response(
-                    {"message": "Inventory synced successfully"},
+                    {"job_id": task.id},
                     status=status.HTTP_200_OK,
                 )
 

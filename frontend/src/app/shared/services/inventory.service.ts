@@ -212,17 +212,22 @@ export class InventoryService {
         );
     }
 
-    syncInventory(syncForm: InventorySyncForm): Observable<any> {
+    syncInventory(syncForm: InventorySyncForm): Observable<string | null> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
         );
         return this.http
-            .post(`${this.apiUrl}/api/v1/inventory/sync/`, syncForm, {
-                headers,
-            })
+            .post<{ job_id: string }>(
+                `${this.apiUrl}/api/v1/inventory/sync/`,
+                syncForm,
+                {
+                    headers,
+                },
+            )
             .pipe(
+                map((response) => response.job_id),
                 catchError((error) => {
                     console.error("Error syncing inventory:", error);
                     return of(null);
