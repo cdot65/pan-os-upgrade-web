@@ -241,20 +241,24 @@ export class InventoryDetailsComponent implements OnInit {
                 };
                 this.showRefreshProgress = true;
                 this.showRefreshError = false; // Reset the error state
-                this.inventoryService.refreshDevice(refreshForm).subscribe(
-                    (jobId) => {
-                        this.jobId = jobId;
-                        this.checkJobStatus();
-                    },
-                    (error) => {
-                        console.error(
-                            "Error refreshing device details:",
-                            error,
-                        );
-                        this.showRefreshProgress = false;
-                        this.showRefreshError = true;
-                    },
-                );
+
+                // Insert a one second delay to allow the API to initialize the job
+                setTimeout(() => {
+                    this.inventoryService.refreshDevice(refreshForm).subscribe(
+                        (jobId) => {
+                            this.jobId = jobId;
+                            this.checkJobStatus();
+                        },
+                        (error) => {
+                            console.error(
+                                "Error refreshing device details:",
+                                error,
+                            );
+                            this.showRefreshProgress = false;
+                            this.showRefreshError = true;
+                        },
+                    );
+                }, 1000);
             }
         });
     }

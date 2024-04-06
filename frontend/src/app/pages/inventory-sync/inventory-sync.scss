@@ -14,6 +14,31 @@
     padding: 20px;
   }
 
+  .sync-progress {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+
+  }
+
+  .sync-header {
+    outline: none;
+    // padding: 24px 8px;
+    font-size: 20px;
+    text-align: center;
+    color: accent;
+  }
+
+  .sync-error {
+    outline: none;
+    // padding: 24px 8px;
+    font-size: 20px;
+    text-align: center;
+    color: red;
+  }
+
+
   .inventory-sync-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
