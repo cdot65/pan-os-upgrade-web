@@ -61,6 +61,7 @@ export class InventoryDetailsComponent implements OnInit {
     firewallPlatforms: DeviceType[] = [];
     panoramaPlatforms: DeviceType[] = [];
     showRefreshProgress: boolean = false;
+    showRefreshError: boolean = false;
     refreshJobCompleted: boolean = false;
     jobId: string | null = null;
 
@@ -239,6 +240,7 @@ export class InventoryDetailsComponent implements OnInit {
                     profile: selectedProfileUuid,
                 };
                 this.showRefreshProgress = true;
+                this.showRefreshError = false; // Reset the error state
                 this.inventoryService.refreshDevice(refreshForm).subscribe(
                     (jobId) => {
                         this.jobId = jobId;
@@ -249,7 +251,8 @@ export class InventoryDetailsComponent implements OnInit {
                             "Error refreshing device details:",
                             error,
                         );
-                        // Show an error toast or message
+                        this.showRefreshProgress = false;
+                        this.showRefreshError = true;
                     },
                 );
             }
@@ -262,16 +265,15 @@ export class InventoryDetailsComponent implements OnInit {
                 (response) => {
                     if (response.status === "completed") {
                         this.showRefreshProgress = false;
-                        // Perform any necessary actions after the job is completed
                         this.getDevice(this.inventoryItem!.uuid);
                     } else {
-                        // Continue checking the job status periodically
                         setTimeout(() => this.checkJobStatus(), 2000);
                     }
                 },
                 (error) => {
                     console.error("Error checking job status:", error);
-                    // Show an error toast or message
+                    this.showRefreshProgress = false;
+                    this.showRefreshError = true;
                 },
             );
         }

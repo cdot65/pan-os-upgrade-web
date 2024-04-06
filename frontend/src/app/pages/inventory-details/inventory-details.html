@@ -7,11 +7,16 @@
 
       <div class="table-header">
         <h2>Devices</h2>
-        <button mat-raised-button color="accent" type="button" (click)="refreshDeviceDetails()"
-          aria-label="Refresh Device Details">
-          <mat-icon>sync</mat-icon>
-          Refresh Device Details
-        </button>
+
+        <!-- container for the Refresh button. -->
+        <div class="button-container">
+          <button mat-raised-button color="accent" type="button" (click)="refreshDeviceDetails()"
+            aria-label="Refresh Device Details" [disabled]="showRefreshProgress">
+            <mat-icon>sync</mat-icon>
+            Refresh Device Details
+          </button>
+        </div>
+
       </div>
 
       <!-- Display the progress bar when a user has requested a refresh-->
@@ -19,6 +24,13 @@
       <p class="refresh-header">Refreshing information from live device</p>
       <div class="refresh-progress">
         <mat-progress-bar mode="buffer"></mat-progress-bar>
+      </div>
+      }
+
+      <!-- Display the error message if there is a problem with the job -->
+      @if (showRefreshError) {
+      <div class="refresh-error">
+        <p>There was a problem with the refresh job. Please refresh the page and try again.</p>
       </div>
       }
 
