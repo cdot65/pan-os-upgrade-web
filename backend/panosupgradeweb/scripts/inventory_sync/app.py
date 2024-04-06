@@ -62,7 +62,11 @@ def run_inventory_sync(
 
         # Connect to the Panorama device using the retrieved credentials
         pan = Panorama(
-            panorama_device.ipv4_address,
+            (
+                panorama_device.ipv4_address
+                if panorama_device.ipv4_address
+                else panorama_device.ipv6_address
+            ),
             pan_username,
             pan_password,
         )
@@ -133,7 +137,9 @@ def run_inventory_sync(
                 ha_details = flatten_xml_to_dict(element=ha_info[1])
                 ha_mode = ha_details["result"]["group"]["local-info"]["mode"]
                 ha_status = ha_details["result"]["group"]["local-info"]["state"]
-                ha_peer = ha_details["result"]["group"]["peer-info"]["mgmt-ip"]
+                ha_peer = ha_details["result"]["group"]["peer-info"]["mgmt-ip"].split(
+                    "/"
+                )[0]
             else:
                 ha_state = False
                 ha_details = None
@@ -154,7 +160,11 @@ def run_inventory_sync(
                     "ha_mode": ha_mode,
                     "ha_peer": ha_peer,
                     "ha_status": ha_status,
-                    "ipv4_address": info["system"]["ip-address"],
+                    "ipv4_address": (
+                        info["system"]["ip-address"]
+                        if info["system"]["ip-address"] != "unknown"
+                        else None
+                    ),
                     "ipv6_address": (
                         info["system"]["ipv6-address"]
                         if info["system"]["ipv6-address"] != "unknown"
@@ -162,8 +172,10 @@ def run_inventory_sync(
                     ),
                     "notes": None,
                     "platform": platform,
-                    "panorama_managed": True,
                     "panorama_appliance": panorama_hostname,
+                    "panorama_managed": True,
+                    "panorama_ipv4_address": panorama_device.ipv4_address,
+                    "panorama_ipv6_address": panorama_device.ipv6_address,
                     "serial": info["system"]["serial"],
                     "sw_version": info["system"]["sw-version"],
                     "threat_version": info["system"]["threat-version"],
