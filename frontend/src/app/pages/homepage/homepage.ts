@@ -19,6 +19,7 @@ import { MatDividerModule } from "@angular/material/divider";
 import { MatCardModule } from "@angular/material/card";
 import { GuideItems } from "../../shared/guide-items/guide-items";
 import { NgFor } from "@angular/common";
+import { YouTubePlayer } from "@angular/youtube-player";
 
 import { Carousel, CarouselItem } from "../../shared/carousel/carousel";
 
@@ -37,6 +38,7 @@ import { Carousel, CarouselItem } from "../../shared/carousel/carousel";
         NgFor,
         CarouselItem,
         MatCardModule,
+        YouTubePlayer,
         Footer,
     ],
 })
