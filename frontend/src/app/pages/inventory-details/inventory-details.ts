@@ -62,6 +62,7 @@ export class InventoryDetailsComponent implements OnInit {
     panoramaPlatforms: DeviceType[] = [];
     showRefreshProgress: boolean = false;
     refreshJobCompleted: boolean = false;
+    jobId: string | null = null;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -238,18 +239,10 @@ export class InventoryDetailsComponent implements OnInit {
                     profile: selectedProfileUuid,
                 };
                 this.showRefreshProgress = true;
-                this.refreshJobCompleted = false;
                 this.inventoryService.refreshDevice(refreshForm).subscribe(
-                    (updatedItem: Device | null) => {
-                        if (updatedItem) {
-                            this.inventoryItem = updatedItem;
-                            this.updateInventoryForm.patchValue(updatedItem);
-                            // this.refreshJobCompleted = true;
-                            this.checkRefreshStatus();
-                        } else {
-                            // this.refreshJobCompleted = true;
-                            this.checkRefreshStatus();
-                        }
+                    (jobId) => {
+                        this.jobId = jobId;
+                        this.checkJobStatus();
                     },
                     (error) => {
                         console.error(
@@ -263,16 +256,24 @@ export class InventoryDetailsComponent implements OnInit {
         });
     }
 
-    checkRefreshStatus(): void {
-        if (this.refreshJobCompleted) {
-            this.showRefreshProgress = false;
-            // Perform page refresh or any other necessary actions
-            // this.router.navigate(["/inventory"]);
-        } else {
-            // Recheck the refresh status after a certain interval
-            setTimeout(() => {
-                this.checkRefreshStatus();
-            }, 1000);
+    checkJobStatus(): void {
+        if (this.jobId) {
+            this.inventoryService.getJobStatus(this.jobId).subscribe(
+                (response) => {
+                    if (response.status === "completed") {
+                        this.showRefreshProgress = false;
+                        // Perform any necessary actions after the job is completed
+                        this.getDevice(this.inventoryItem!.uuid);
+                    } else {
+                        // Continue checking the job status periodically
+                        setTimeout(() => this.checkJobStatus(), 2000);
+                    }
+                },
+                (error) => {
+                    console.error("Error checking job status:", error);
+                    // Show an error toast or message
+                },
+            );
         }
     }
 }
