@@ -5,15 +5,39 @@
   <main focusOnNavigation aria-label="Settings Profile list" id="profile-list" class="profile-list">
     <div class="table-header">
       <h2>Profile</h2>
-      <button mat-raised-button color="primary" (click)="navigateToCreateSecurityProfile()"
-        aria-label="Add a new profile">
-        <mat-icon>add</mat-icon>
-        Add a new profile
-      </button>
+
+      <div class="button-container">
+        <button mat-raised-button color="primary" (click)="navigateToCreateSecurityProfile()"
+          aria-label="Add a new profile">
+          <mat-icon>add</mat-icon>
+          Add a new profile
+        </button>
+
+        <button mat-raised-button color="warn" (click)="onDeleteSelectedClick()"
+          [disabled]="selection.selected.length === 0">
+          <mat-icon>delete</mat-icon>
+          Delete Selected
+        </button>
+
+      </div>
     </div>
 
     <table mat-table [dataSource]="dataSource" matSort (matSortChange)="announceSortChange($event)"
       class="mat-elevation-z2">
+
+      <!-- Checkbox Column -->
+      <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-checkbox (change)="$event ? masterToggle() : null" [checked]="selection.hasValue() && isAllSelected()"
+            [indeterminate]="selection.hasValue() && !isAllSelected()" [aria-label]="checkboxLabel()">
+          </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let row">
+          <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+            [checked]="selection.isSelected(row)" [aria-label]="checkboxLabel(row)">
+          </mat-checkbox>
+        </td>
+      </ng-container>
 
       <!-- Profile Column -->
       <ng-container matColumnDef="name">

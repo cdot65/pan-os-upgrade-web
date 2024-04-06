@@ -15,6 +15,7 @@ import { DeleteDialogComponent } from "../confirmation-dialog/delete-dialog";
 import { Footer } from "src/app/shared/footer/footer";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { MatButtonModule } from "@angular/material/button";
+import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { NgFor } from "@angular/common";
@@ -22,6 +23,8 @@ import { Profile } from "../../shared/interfaces/profile.interface";
 import { ProfilePageHeader } from "../profile-page-header/profile-page-header";
 import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
+import { SelectionModel } from "@angular/cdk/collections";
+import { forkJoin } from "rxjs";
 
 @Component({
     selector: "app-profile-list",
@@ -31,6 +34,7 @@ import { Router } from "@angular/router";
     imports: [
         NgFor,
         ProfilePageHeader,
+        MatCheckboxModule,
         MatTableModule,
         MatSortModule,
         MatIconModule,
@@ -45,10 +49,11 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
     profiles: Profile[] = [];
-    displayedColumns: string[] = ["name", "description", "edit", "delete"];
+    displayedColumns: string[] = ["select", "name", "description", "edit"];
     dataSource: MatTableDataSource<Profile> = new MatTableDataSource<Profile>(
         [],
     );
+    selection = new SelectionModel<Profile>(true, []);
 
     @ViewChild(MatSort) sort: MatSort = new MatSort();
 
@@ -92,6 +97,30 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
         );
     }
 
+    /** Whether the number of selected elements matches the total number of rows. */
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const numRows = this.dataSource.data.length;
+        return numSelected === numRows;
+    }
+
+    /** Selects all rows if they are not all selected; otherwise clear selection. */
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selection.clear();
+        } else {
+            this.dataSource.data.forEach((row) => this.selection.select(row));
+        }
+    }
+
+    /** The label for the checkbox on the passed row */
+    checkboxLabel(row?: Profile): string {
+        if (!row) {
+            return `${this.isAllSelected() ? "select" : "deselect"} all`;
+        }
+        return `${this.selection.isSelected(row) ? "deselect" : "select"} row ${row.name}`;
+    }
+
     navigateToCreateSecurityProfile(): void {
         this.router.navigate(["/profiles/create"]);
     }
@@ -121,5 +150,34 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
 
     onEditClick(item: Profile): void {
         this.router.navigate(["/profiles", item.uuid]);
+    }
+
+    onDeleteSelectedClick() {
+        const selectedItems = this.selection.selected;
+        const dialogRef = this.dialog.open(DeleteDialogComponent, {
+            width: "300px",
+            data: {
+                title: "Confirm Delete",
+                // eslint-disable-next-line max-len
+                message: `Are you sure you want to delete ${selectedItems.length} selected profiles(s)?`,
+            },
+        });
+
+        dialogRef.afterClosed().subscribe((result: boolean) => {
+            if (result) {
+                const deleteRequests = selectedItems.map((item) =>
+                    this.profileService.deleteProfile(item.uuid),
+                );
+                forkJoin(deleteRequests).subscribe(
+                    () => {
+                        this.selection.clear();
+                        this.getProfiles();
+                    },
+                    (error) => {
+                        console.error("Error deleting inventory items:", error);
+                    },
+                );
+            }
+        });
     }
 }
