@@ -98,6 +98,18 @@ class Device(models.Model):
         null=True,
         verbose_name="Panorama Managed",
     )
+    panorama_ipv4_address = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Panorama IPv4 Address",
+    )
+    panorama_ipv6_address = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Panorama IPv6 Address",
+    )
     platform = models.ForeignKey(
         DeviceType,
         blank=True,
