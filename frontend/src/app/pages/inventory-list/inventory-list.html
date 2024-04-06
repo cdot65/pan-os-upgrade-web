@@ -5,15 +5,19 @@
   <main focusOnNavigation aria-label="Inventory list" id="inventory-list" class="inventory-list">
     <div class="table-header">
       <h2>Devices</h2>
-      <button mat-raised-button color="accent" (click)="navigateToSyncInventory()"
-        aria-label="Sync Devices from Panorama">
-        <mat-icon>sync</mat-icon>
-        Sync Devices from Panorama
-      </button>
-      <button mat-raised-button color="primary" (click)="navigateToCreateInventory()" aria-label="Add a new device">
-        <mat-icon>add</mat-icon>
-        Add a new device
-      </button>
+
+      <div class="button-container">
+        <button mat-raised-button color="accent" (click)="navigateToSyncInventory()"
+          aria-label="Sync Devices from Panorama">
+          <mat-icon>sync</mat-icon>
+          Sync Devices from Panorama
+        </button>
+        <button mat-raised-button color="primary" (click)="navigateToCreateInventory()" aria-label="Add a new device">
+          <mat-icon>add</mat-icon>
+          Add a new device
+        </button>
+      </div>
+
     </div>
 
     <table mat-table [dataSource]="dataSource" matSort (matSortChange)="announceSortChange($event)"
@@ -68,7 +72,9 @@
 
       <!-- Edit Column -->
       <ng-container matColumnDef="edit">
-        <th mat-header-cell *matHeaderCellDef></th>
+        <th mat-header-cell *matHeaderCellDef>
+          Edit
+        </th>
         <td mat-cell *matCellDef="let item">
           <button mat-icon-button (click)="onEditClick(item)" class="edit-button">
             <mat-icon>edit</mat-icon>
@@ -78,7 +84,9 @@
 
       <!-- Delete Column -->
       <ng-container matColumnDef="delete">
-        <th mat-header-cell *matHeaderCellDef></th>
+        <th mat-header-cell *matHeaderCellDef>
+          Delete
+        </th>
         <td mat-cell *matCellDef="let item">
           <button mat-icon-button (click)="onDeleteClick(item)" class="delete-button">
             <mat-icon>delete</mat-icon>
