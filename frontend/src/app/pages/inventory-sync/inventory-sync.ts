@@ -57,6 +57,7 @@ export class InventorySyncComponent implements OnInit {
     showSyncProgress: boolean = false;
     showSyncError: boolean = false;
     jobId: string | null = null;
+    private retryCount = 0;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -94,10 +95,16 @@ export class InventorySyncComponent implements OnInit {
             this.showSyncProgress = true;
             this.showSyncError = false;
 
+            console.log("Syncing inventory with form:", syncForm);
+
             // Insert a one second delay to allow the API to initialize the job
             setTimeout(() => {
                 this.inventoryService.syncInventory(syncForm).subscribe(
                     (jobId) => {
+                        console.log(
+                            "Inventory sync job created with ID:",
+                            jobId,
+                        );
                         this.jobId = jobId;
                         this.checkJobStatus();
                     },
@@ -118,14 +125,24 @@ export class InventorySyncComponent implements OnInit {
                     if (response.status === "completed") {
                         this.showSyncProgress = false;
                         this.router.navigate(["/inventory"]);
+                        this.retryCount = 0; // Reset the retry count on success
                     } else {
                         setTimeout(() => this.checkJobStatus(), 2000);
                     }
                 },
                 (error) => {
                     console.error("Error checking job status:", error);
-                    this.showSyncProgress = false;
-                    this.showSyncError = true;
+                    if (error.status === 400 && this.retryCount < 3) {
+                        this.retryCount++;
+                        console.log(
+                            `Retrying job status check (attempt ${this.retryCount})`,
+                        );
+                        setTimeout(() => this.checkJobStatus(), 2000);
+                    } else {
+                        this.showSyncProgress = false;
+                        this.showSyncError = true;
+                        this.retryCount = 0; // Reset the retry count on failure
+                    }
                 },
             );
         }

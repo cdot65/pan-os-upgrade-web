@@ -2,8 +2,8 @@
 // frontend/src/app/shared/services/inventory.service.ts
 
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Observable, of } from "rxjs";
-import { catchError, map } from "rxjs/operators";
+import { Observable, of, throwError } from "rxjs";
+import { catchError, map, tap } from "rxjs/operators";
 
 import { Device } from "../interfaces/device.interface";
 import { DeviceType } from "../interfaces/device-type.interface";
@@ -206,10 +206,23 @@ export class InventoryService {
             "Authorization",
             `Token ${authToken}`,
         );
-        return this.http.get<{ status: string }>(
-            `${this.apiUrl}/api/v1/inventory/job-status/?job_id=${jobId}`,
-            { headers },
-        );
+        return this.http
+            .get<{
+                status: string;
+            }>(`${this.apiUrl}/api/v1/inventory/job-status/?job_id=${jobId}`, {
+                headers,
+            })
+            .pipe(
+                tap((response) => {
+                    console.log(
+                        `Job status for job ID ${jobId}: ${response.status}`,
+                    );
+                }),
+                catchError((error) => {
+                    console.error("Error fetching job status:", error);
+                    return throwError(error);
+                }),
+            );
     }
 
     syncInventory(syncForm: InventorySyncForm): Observable<string | null> {
