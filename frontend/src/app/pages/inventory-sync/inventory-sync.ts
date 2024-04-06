@@ -72,7 +72,7 @@ export class InventorySyncComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this._componentPageTitle.title = "Sync Inventory from Panorama";
+        this._componentPageTitle.title = "Inventory Sync";
         this.panoramaDevices$ = this.inventoryService.getPanoramaDevices();
         this.profiles$ = this.profileService.getProfiles();
     }
@@ -93,17 +93,21 @@ export class InventorySyncComponent implements OnInit {
             };
             this.showSyncProgress = true;
             this.showSyncError = false;
-            this.inventoryService.syncInventory(syncForm).subscribe(
-                (jobId) => {
-                    this.jobId = jobId;
-                    this.checkJobStatus();
-                },
-                (error) => {
-                    console.error("Error syncing inventory:", error);
-                    this.showSyncProgress = false;
-                    this.showSyncError = true;
-                },
-            );
+
+            // Insert a one second delay to allow the API to initialize the job
+            setTimeout(() => {
+                this.inventoryService.syncInventory(syncForm).subscribe(
+                    (jobId) => {
+                        this.jobId = jobId;
+                        this.checkJobStatus();
+                    },
+                    (error) => {
+                        console.error("Error syncing inventory:", error);
+                        this.showSyncProgress = false;
+                        this.showSyncError = true;
+                    },
+                );
+            }, 1000);
         }
     }
 

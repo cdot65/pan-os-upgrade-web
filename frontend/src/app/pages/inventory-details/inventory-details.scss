@@ -43,6 +43,14 @@
     color: accent;
   }
 
+  .refresh-error {
+    outline: none;
+    // padding: 24px 8px;
+    font-size: 20px;
+    text-align: center;
+    color: red;
+  }
+
   form {
     padding: 20px;
   }
