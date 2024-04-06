@@ -99,6 +99,66 @@ class InventoryViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=False, methods=["get"], url_path="job-status")
+    def get_job_status(self, request):
+        job_id = request.query_params.get("job_id")
+        if job_id:
+            try:
+                job = Job.objects.get(task_id=job_id)
+                # Check the status of the job based on the job object
+                if job.json_data:
+                    status = "completed"
+                else:
+                    status = "running"
+
+                return JsonResponse({"job_id": job_id, "status": status})
+            except Job.DoesNotExist:
+                return JsonResponse({"error": "Invalid job ID."}, status=400)
+        else:
+            return JsonResponse({"error": "Missing job ID."}, status=400)
+
+    @action(detail=False, methods=["post"], url_path="refresh")
+    def refresh_device(self, request):
+        serializer = DeviceRefreshSerializer(data=request.data)
+        if serializer.is_valid():
+            device_uuid = serializer.validated_data["device"]
+            profile_uuid = serializer.validated_data["profile"]
+            author_id = serializer.validated_data["author"]
+
+            try:
+                device = Device.objects.get(uuid=device_uuid)
+                profile = Profile.objects.get(uuid=profile_uuid)
+
+                print(f"Refreshing device {device.hostname}...")
+                print(f"Profile: {profile.name}")
+
+                # Trigger the Celery task for device refresh and get the task ID
+                task = refresh_device_task.delay(
+                    device_uuid,
+                    profile_uuid,
+                    author_id,
+                )
+
+                return Response(
+                    {"job_id": task.id},
+                    status=status.HTTP_200_OK,
+                )
+
+            except Device.DoesNotExist:
+                return Response(
+                    {"error": "Invalid device."}, status=status.HTTP_400_BAD_REQUEST
+                )
+            except Profile.DoesNotExist:
+                return Response(
+                    {"error": "Invalid profile."}, status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     @action(detail=False, methods=["post"], url_path="sync")
     def sync_inventory(self, request):
         serializer = InventorySyncSerializer(data=request.data)
@@ -134,48 +194,6 @@ class InventoryViewSet(viewsets.ModelViewSet):
             except Profile.DoesNotExist:
                 return Response(
                     {"error": "Invalid profile"}, status=status.HTTP_400_BAD_REQUEST
-                )
-            except Exception as e:
-                return Response(
-                    {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=False, methods=["post"], url_path="refresh")
-    def refresh_device(self, request):
-        serializer = DeviceRefreshSerializer(data=request.data)
-        if serializer.is_valid():
-            device_uuid = serializer.validated_data["device"]
-            profile_uuid = serializer.validated_data["profile"]
-            author_id = serializer.validated_data["author"]
-
-            try:
-                device = Device.objects.get(uuid=device_uuid)
-                profile = Profile.objects.get(uuid=profile_uuid)
-
-                print(f"Refreshing device {device.hostname}...")
-                print(f"Profile: {profile.name}")
-
-                # Trigger the Celery task for device refresh
-                refresh_device_task.delay(
-                    device_uuid,
-                    profile_uuid,
-                    author_id,
-                )
-
-                return Response(
-                    {"message": "Device refresh initiated."},
-                    status=status.HTTP_200_OK,
-                )
-
-            except Device.DoesNotExist:
-                return Response(
-                    {"error": "Invalid device."}, status=status.HTTP_400_BAD_REQUEST
-                )
-            except Profile.DoesNotExist:
-                return Response(
-                    {"error": "Invalid profile."}, status=status.HTTP_400_BAD_REQUEST
                 )
             except Exception as e:
                 return Response(

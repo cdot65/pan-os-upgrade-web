@@ -177,14 +177,14 @@ export class InventoryService {
             );
     }
 
-    refreshDevice(refreshForm: any): Observable<Device | null> {
+    refreshDevice(refreshForm: any): Observable<string | null> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
         );
         return this.http
-            .post<Device>(
+            .post<{ job_id: string }>(
                 `${this.apiUrl}/api/v1/inventory/refresh/`,
                 refreshForm,
                 {
@@ -192,11 +192,24 @@ export class InventoryService {
                 },
             )
             .pipe(
+                map((response) => response.job_id),
                 catchError((error) => {
                     console.error("Error refreshing device details:", error);
                     return of(null);
                 }),
             );
+    }
+
+    getJobStatus(jobId: string): Observable<{ status: string }> {
+        const authToken = localStorage.getItem("auth_token");
+        const headers = new HttpHeaders().set(
+            "Authorization",
+            `Token ${authToken}`,
+        );
+        return this.http.get<{ status: string }>(
+            `${this.apiUrl}/api/v1/inventory/job-status/?job_id=${jobId}`,
+            { headers },
+        );
     }
 
     syncInventory(syncForm: InventorySyncForm): Observable<any> {

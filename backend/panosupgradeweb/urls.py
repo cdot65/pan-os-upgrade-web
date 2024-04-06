@@ -49,6 +49,11 @@ urlpatterns = [
         name="inventory-refresh",
     ),
     path(
+        "inventory/job-status/",
+        InventoryViewSet.as_view({"get": "get_job_status"}),
+        name="job-status",
+    ),
+    path(
         "inventory/sync/",
         InventoryViewSet.as_view({"post": "sync_inventory"}),
         name="inventory-sync",
