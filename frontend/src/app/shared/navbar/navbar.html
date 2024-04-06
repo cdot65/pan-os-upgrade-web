@@ -36,6 +36,8 @@
   }
 </nav>
 <nav class="docs-navbar docs-navbar-show-small" aria-label="Section Nav Bar">
-  <a mat-button class="docs-navbar-link" *ngFor="let key of sectionKeys" [routerLink]="key">{{sections[key].name}}</a>
+  @for (key of sectionKeys; track key) {
+  <a mat-button class="docs-navbar-link" [routerLink]="key">{{sections[key].name}}</a>
+  }
   <a mat-button class="docs-navbar-link" routerLink="guides">Guides</a>
 </nav>
