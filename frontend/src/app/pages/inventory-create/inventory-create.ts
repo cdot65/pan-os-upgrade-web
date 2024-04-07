@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // src/app/pages/inventory-create/inventory-create.ts
 
-import { Component, HostBinding, OnInit } from "@angular/core";
+import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
 import {
     FormBuilder,
     FormGroup,
@@ -20,7 +20,10 @@ import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { Router } from "@angular/router";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
 @Component({
     selector: "app-inventory-create",
@@ -39,16 +42,18 @@ import { Router } from "@angular/router";
         Footer,
     ],
 })
-export class InventoryCreateComponent implements OnInit {
+export class InventoryCreateComponent implements OnDestroy, OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     createInventoryForm: FormGroup;
     firewallPlatforms: DeviceType[] = [];
     panoramaPlatforms: DeviceType[] = [];
+    private destroy$ = new Subject<void>();
 
     constructor(
         private formBuilder: FormBuilder,
         private inventoryService: InventoryService,
         private router: Router,
+        private snackBar: MatSnackBar,
         public _componentPageTitle: ComponentPageTitle,
     ) {
         this.createInventoryForm = this.formBuilder.group({
@@ -75,7 +80,8 @@ export class InventoryCreateComponent implements OnInit {
 
         this.createInventoryForm
             .get("device_type")
-            ?.valueChanges.subscribe((device_type) => {
+            ?.valueChanges.pipe(takeUntil(this.destroy$))
+            .subscribe((device_type) => {
                 if (device_type === "Firewall") {
                     this.getFirewallPlatforms();
                 } else if (device_type === "Panorama") {
@@ -85,26 +91,51 @@ export class InventoryCreateComponent implements OnInit {
             });
     }
 
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
     getFirewallPlatforms(): void {
-        this.inventoryService.getFirewallPlatforms().subscribe(
-            (platforms: DeviceType[]) => {
-                this.firewallPlatforms = platforms;
-            },
-            (error: any) => {
-                console.error("Error fetching firewall platforms:", error);
-            },
-        );
+        this.inventoryService
+            .getFirewallPlatforms()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (platforms: DeviceType[]) => {
+                    this.firewallPlatforms = platforms;
+                },
+                (error: any) => {
+                    console.error("Error fetching firewall platforms:", error);
+                    this.snackBar.open(
+                        "Failed to fetch firewall platforms. Please try again.",
+                        "Close",
+                        {
+                            duration: 3000,
+                        },
+                    );
+                },
+            );
     }
 
     getPanoramaPlatforms(): void {
-        this.inventoryService.getPanoramaPlatforms().subscribe(
-            (platforms: DeviceType[]) => {
-                this.panoramaPlatforms = platforms;
-            },
-            (error: any) => {
-                console.error("Error fetching panorama platforms:", error);
-            },
-        );
+        this.inventoryService
+            .getPanoramaPlatforms()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (platforms: DeviceType[]) => {
+                    this.panoramaPlatforms = platforms;
+                },
+                (error: any) => {
+                    console.error("Error fetching panorama platforms:", error);
+                    this.snackBar.open(
+                        "Failed to fetch panorama platforms. Please try again.",
+                        "Close",
+                        {
+                            duration: 3000,
+                        },
+                    );
+                },
+            );
     }
 
     createDevice(): void {
@@ -115,14 +146,24 @@ export class InventoryCreateComponent implements OnInit {
                 delete formValue.panorama_appliance;
                 delete formValue.panorama_managed;
             }
-            this.inventoryService.createDevice(formValue).subscribe(
-                () => {
-                    this.router.navigate(["/inventory"]);
-                },
-                (error) => {
-                    console.error("Error creating inventory item:", error);
-                },
-            );
+            this.inventoryService
+                .createDevice(formValue)
+                .pipe(takeUntil(this.destroy$))
+                .subscribe(
+                    () => {
+                        this.router.navigate(["/inventory"]);
+                    },
+                    (error) => {
+                        console.error("Error creating inventory item:", error);
+                        this.snackBar.open(
+                            "Failed to create inventory item. Please try again.",
+                            "Close",
+                            {
+                                duration: 3000,
+                            },
+                        );
+                    },
+                );
         }
     }
 
