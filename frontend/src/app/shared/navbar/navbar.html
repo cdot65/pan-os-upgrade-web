@@ -19,8 +19,6 @@
     {{sections[key].name}}
   </a>
   }
-  <a mat-button class="panosupgrade-navbar-hide-small panosupgrade-button" routerLink="guides"
-    routerLinkActive="panosupgrade-navbar-header-item-selected">Help</a>
   <div class="flex-spacer"></div>
   <theme-picker></theme-picker>
   @if (!hasAuthToken) {
@@ -39,5 +37,4 @@
   @for (key of sectionKeys; track key) {
   <a mat-button class="docs-navbar-link" [routerLink]="key">{{sections[key].name}}</a>
   }
-  <a mat-button class="docs-navbar-link" routerLink="guides">Guides</a>
 </nav>

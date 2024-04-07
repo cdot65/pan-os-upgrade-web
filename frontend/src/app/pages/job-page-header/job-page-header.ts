@@ -5,13 +5,13 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 
 @Component({
-    selector: "app-inventory-page-header",
-    templateUrl: "./inventory-page-header.html",
-    styleUrls: ["./inventory-page-header.scss"],
+    selector: "app-job-page-header",
+    templateUrl: "./job-page-header.html",
+    styleUrls: ["./job-page-header.scss"],
     standalone: true,
     imports: [MatButtonModule, MatIconModule],
 })
-export class InventoryPageHeader {
+export class JobPageHeader {
     constructor(public _componentPageTitle: ComponentPageTitle) {}
 
     @Output() toggleSidenav = new EventEmitter<void>();

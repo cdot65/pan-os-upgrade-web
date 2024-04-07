@@ -58,6 +58,18 @@ export const PANOSUPGRADE_ROUTES: Routes = [
         canActivate: [authGuard],
     },
     {
+        path: "jobs",
+        loadComponent: () =>
+            import("./pages/job-list").then((m) => m.JobListComponent),
+        canActivate: [authGuard],
+    },
+    {
+        path: "jobs/:id",
+        loadComponent: () =>
+            import("./pages/job-details").then((m) => m.JobDetailsComponent),
+        canActivate: [authGuard],
+    },
+    {
         path: "profiles",
         loadComponent: () =>
             import("./pages/profile-list").then((m) => m.ProfileListComponent),

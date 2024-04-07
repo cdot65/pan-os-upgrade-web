@@ -1,0 +1,85 @@
+// src/app/pages/job-details/job-details.scss
+
+.job-details-container {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+}
+
+.job-details {
+  width: 97%;
+  padding: 25px;
+
+  form {
+    padding: 20px;
+  }
+
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    h2 {
+      margin: 0;
+    }
+
+    button {
+      mat-icon {
+        margin-right: 5px;
+      }
+    }
+
+    .refresh-header {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .refresh-progress {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+
+  }
+
+  .refresh-header {
+    outline: none;
+    // padding: 24px 8px;
+    font-size: 20px;
+    text-align: center;
+    color: accent;
+  }
+
+  .refresh-error {
+    outline: none;
+    // padding: 24px 8px;
+    font-size: 20px;
+    text-align: center;
+    color: red;
+  }
+
+  .job-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+
+    .form-field {
+      mat-form-field {
+        width: 100%;
+        padding: 20px;
+      }
+    }
+  }
+
+  .button-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+
+    button {
+      margin-left: 10px;
+    }
+  }
+}
