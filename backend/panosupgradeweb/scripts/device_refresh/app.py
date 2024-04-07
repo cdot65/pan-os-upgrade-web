@@ -80,6 +80,9 @@ def run_device_refresh(
     logging.debug(f"Using profile: {profile_uuid}")
     logging.debug(f"Author ID: {author_id}")
 
+    # Initialize an empty dictionary to store the device data
+    device_data = {}
+
     # Retrieve the PAN device, device type, and profile objects from the database
     device = Device.objects.get(uuid=device_uuid)
     profile = Profile.objects.get(uuid=profile_uuid)
@@ -109,13 +112,12 @@ def run_device_refresh(
 
             # Retrieve device group
             device_group_mappings = get_device_group_mapping(panorama)
-            device_group = find_devicegroup_by_serial(
+            device_data["device_group"] = find_devicegroup_by_serial(
                 device_group_mappings,
                 device.serial,
             )
 
         else:
-
             # Connect to the Panorama device using the retrieved credentials
             pan_device = Panorama(
                 device.ipv4_address,
@@ -129,83 +131,87 @@ def run_device_refresh(
 
     # Connect to the PAN device and retrieve the system information
     try:
-
         # Retrieve the system information from the firewall device
         system_info = pan_device.show_system_info()
 
-        # disable model update for now
-        # if platform.device_type == "Firewall":
-        #     platform_name = system_info["system"]["model"]
-        # else:
-        #     platform_name = platform.name
+        # Store the relevant system information in the device_data dictionary
+        device_data["hostname"] = system_info["system"]["hostname"]
+        device_data["ipv4_address"] = system_info["system"]["ip-address"]
+        device_data["ipv6_address"] = (
+            system_info["system"]["ipv6-address"]
+            if system_info["system"]["ipv6-address"] != "unknown"
+            else None
+        )
+        device_data["serial"] = system_info["system"]["serial"]
+        device_data["sw_version"] = system_info["system"]["sw-version"]
+        device_data["app_version"] = (
+            system_info["system"]["app-version"]
+            if platform.device_type == "Firewall"
+            else None
+        )
+        device_data["threat_version"] = (
+            system_info["system"]["threat-version"]
+            if platform.device_type == "Firewall"
+            else None
+        )
+        device_data["uptime"] = system_info["system"]["uptime"]
+        device_data["platform"] = platform.name
 
         # Retrieve the HA state information from the firewall device
         ha_info = pan_device.show_highavailability_state()
 
-        # Parse the HA state information
+        # Parse the HA state information and store it in the device_data dictionary
         if platform.device_type == "Firewall" and ha_info[0] != "disabled":
-            ha_state = True
+            device_data["ha"] = True
             ha_details = flatten_xml_to_dict(element=ha_info[1])
-            ha_mode = ha_details["result"]["group"]["local-info"]["mode"]
-            ha_status = ha_details["result"]["group"]["local-info"]["state"]
-            ha_peer = ha_details["result"]["group"]["peer-info"]["mgmt-ip"].split("/")[
-                0
-            ]
+            device_data["ha_mode"] = ha_details.get("result", {}).get("group", {}).get("local-info", {}).get("mode")
+            device_data["ha_status"] = ha_details.get("result", {}).get("group", {}).get("local-info", {}).get("state")
+            device_data["ha_peer"] = ha_details.get("result", {}).get("group", {}).get("peer-info", {}).get("mgmt-ip", "").split("/")[0]
         elif platform.device_type == "Panorama" and ha_info[0] != "disabled":
-            ha_state = True
+            device_data["ha"] = True
             ha_details = flatten_xml_to_dict(element=ha_info[1])
-            ha_mode = ha_details["result"]["local-info"]["mode"]
-            ha_status = ha_details["result"]["local-info"]["state"]
-            ha_peer = ha_details["result"]["peer-info"]["mgmt-ip"].split("/")[0]
+            device_data["ha_mode"] = ha_details.get("result", {}).get("local-info", {}).get("mode")
+            device_data["ha_status"] = ha_details.get("result", {}).get("local-info", {}).get("state")
+            device_data["ha_peer"] = ha_details.get("result", {}).get("peer-info", {}).get("mgmt-ip", "").split("/")[0]
         else:
-            ha_state = False
-            ha_mode = None
-            ha_status = None
-            ha_peer = None
+            device_data["ha"] = False
+            device_data["ha_mode"] = None
+            device_data["ha_status"] = None
+            device_data["ha_peer"] = None
 
-        # Create or update the Device object
+        # Store additional device information in the device_data dictionary
+        device_data["panorama_managed"] = device.panorama_managed
+        device_data["panorama_appliance"] = (
+            device.panorama_appliance if device.panorama_managed else None
+        )
+
+        # Create or update the Device object using the device_data dictionary
         inventory_item, created = Device.objects.update_or_create(
-            hostname=system_info["system"]["hostname"],
+            hostname=device_data["hostname"],
             defaults={
-                "app_version": (
-                    system_info["system"]["app-version"]
-                    if platform.device_type == "Firewall"
-                    else None
-                ),
+                "app_version": device_data["app_version"],
                 "author_id": author_id,
-                "device_group": (
-                    device_group
-                    if platform.device_type == "Firewall" and device.panorama_managed
-                    else None
-                ),
-                "ha": ha_state,
-                "ha_mode": ha_mode,
-                "ha_peer": ha_peer,
-                "ha_status": ha_status,
-                "ipv4_address": system_info["system"]["ip-address"],
-                "ipv6_address": (
-                    system_info["system"]["ipv6-address"]
-                    if system_info["system"]["ipv6-address"] != "unknown"
-                    else None
-                ),
-                # "notes": None,
-                # "platform": platform_name,
-                "panorama_managed": device.panorama_managed,
-                "panorama_appliance": (
-                    device.panorama_appliance if device.panorama_managed else None
-                ),
-                "serial": system_info["system"]["serial"],
-                "sw_version": system_info["system"]["sw-version"],
-                "threat_version": (
-                    system_info["system"]["threat-version"]
-                    if platform.device_type == "Firewall"
-                    else None
-                ),
-                "uptime": system_info["system"]["uptime"],
+                "device_group": device_data.get("device_group"),
+                "ha": device_data["ha"],
+                "ha_mode": device_data["ha_mode"],
+                "ha_peer": device_data["ha_peer"],
+                "ha_status": device_data["ha_status"],
+                "ipv4_address": device_data["ipv4_address"],
+                "ipv6_address": device_data["ipv6_address"],
+                "panorama_managed": device_data["panorama_managed"],
+                "panorama_appliance": device_data["panorama_appliance"],
+                "serial": device_data["serial"],
+                "sw_version": device_data["sw_version"],
+                "threat_version": device_data["threat_version"],
+                "uptime": device_data["uptime"],
             },
         )
 
-        return json.dumps(created, indent=2)
+        # Add the created flag to the device_data dictionary
+        device_data["created"] = created
+
+        # Serialize the device_data dictionary to JSON
+        return json.dumps(device_data, indent=2)
 
     except Exception as e:
         logging.error(f"Error during inventory sync: {str(e)}")
