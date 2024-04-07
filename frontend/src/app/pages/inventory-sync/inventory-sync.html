@@ -1,74 +1,105 @@
 <!-- src/app/pages/inventory-sync/inventory-sync.html -->
 <div class="inventory-sync-container">
+    <app-inventory-page-header></app-inventory-page-header>
+    <main
+        focusOnNavigation
+        aria-label="Sync Inventory from Panorama"
+        id="inventory-sync"
+        class="inventory-sync"
+    >
+        <form
+            [formGroup]="syncInventoryForm"
+            (ngSubmit)="syncInventory()"
+            class="mat-elevation-z2"
+        >
+            <div class="table-header">
+                <h2>Sync Firewalls From Panorama</h2>
+            </div>
 
-  <inventory-page-header></inventory-page-header>
-  <main focusOnNavigation aria-label="Sync Inventory from Panorama" id="inventory-sync" class="inventory-sync">
-    <form [formGroup]="syncInventoryForm" (ngSubmit)="syncInventory()" class="mat-elevation-z2">
+            <!-- Display the progress bar when a user has requested a sync-->
+            @if (showSyncProgress) {
+            <p class="sync-header">Syncing inventory from Panorama device</p>
+            <div class="sync-progress">
+                <mat-progress-bar mode="buffer"></mat-progress-bar>
+            </div>
+            }
 
-      <div class="table-header">
-        <h2>Sync Firewalls From Panorama</h2>
-      </div>
+            <!-- Display the error message if there is a problem with the sync job -->
+            @if (showSyncError) {
+            <div class="sync-error">
+                <p>
+                    There was a problem with the sync job. Please refresh the
+                    page and try again.
+                </p>
+            </div>
+            }
 
-      <!-- Display the progress bar when a user has requested a sync-->
-      @if (showSyncProgress) {
-      <p class="sync-header">Syncing inventory from Panorama device</p>
-      <div class="sync-progress">
-        <mat-progress-bar mode="buffer"></mat-progress-bar>
-      </div>
-      }
+            <div class="inventory-sync-grid">
+                <div>
+                    <!-- Heading for the Panorama section -->
+                    <!-- <h3>Select Panorama Appliance</h3> -->
+                    <div class="form-field">
+                        <mat-form-field>
+                            <mat-label>Panorama Device</mat-label>
+                            <mat-select
+                                id="panorama_device"
+                                formControlName="panorama_device"
+                                required
+                            >
+                                @for (device of panoramaDevices$ | async; track
+                                device) {
+                                <mat-option [value]="device.uuid">
+                                    {{ device.hostname }} ({{
+                                    device.ipv4_address }})
+                                </mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
 
-      <!-- Display the error message if there is a problem with the sync job -->
-      @if (showSyncError) {
-      <div class="sync-error">
-        <p>There was a problem with the sync job. Please refresh the page and try again.</p>
-      </div>
-      }
+                <div>
+                    <!-- Heading for the settings profile section -->
+                    <!-- <h3>Select Settings Profile</h3> -->
+                    <div class="form-field">
+                        <mat-form-field>
+                            <mat-label>Profile</mat-label>
+                            <mat-select
+                                id="profile"
+                                formControlName="profile"
+                                required
+                            >
+                                @for (profile of profiles$ | async; track
+                                profile) {
+                                <mat-option [value]="profile.uuid">
+                                    {{ profile.name }}
+                                </mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </div>
 
-      <div class="inventory-sync-grid">
-        <div>
-          <!-- Heading for the Panorama section -->
-          <!-- <h3>Select Panorama Appliance</h3> -->
-          <div class="form-field">
-            <mat-form-field>
-              <mat-label>Panorama Device</mat-label>
-              <mat-select id="panorama_device" formControlName="panorama_device" required>
-                @for (device of panoramaDevices$ | async; track device) {
-                <mat-option [value]="device.uuid">
-                  {{ device.hostname }} ({{ device.ipv4_address }})
-                </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </div>
-
-        <div>
-          <!-- Heading for the settings profile section -->
-          <!-- <h3>Select Settings Profile</h3> -->
-          <div class="form-field">
-            <mat-form-field>
-              <mat-label>Profile</mat-label>
-              <mat-select id="profile" formControlName="profile" required>
-                @for (profile of profiles$ | async; track profile) {
-                <mat-option [value]="profile.uuid">
-                  {{ profile.name }}
-                </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </div>
-      </div>
-
-      <div class="button-container">
-        <button mat-raised-button color="warn" type="button" (click)="onCancel()">
-          Cancel
-        </button>
-        <button mat-raised-button color="primary" type="submit" [disabled]="syncInventoryForm.invalid">
-          Sync Inventory
-        </button>
-      </div>
-    </form>
-  </main>
-  <app-footer></app-footer>
+            <div class="button-container">
+                <button
+                    mat-raised-button
+                    color="warn"
+                    type="button"
+                    (click)="onCancel()"
+                >
+                    Cancel
+                </button>
+                <button
+                    mat-raised-button
+                    color="primary"
+                    type="submit"
+                    [disabled]="syncInventoryForm.invalid"
+                >
+                    Sync Inventory
+                </button>
+            </div>
+        </form>
+    </main>
+    <app-footer></app-footer>
 </div>

@@ -1,0 +1,117 @@
+<!-- src/app/pages/job-list/job-list.html -->
+<div class="job-list-container">
+    <app-job-page-header></app-job-page-header>
+    <main
+        focusOnNavigation
+        aria-label="Job list"
+        id="job-list"
+        class="job-list"
+    >
+        <div class="table-header">
+            <h2>Jobs</h2>
+
+            <div class="button-container">
+                <button
+                    mat-raised-button
+                    color="warn"
+                    (click)="onDeleteSelectedClick()"
+                    [disabled]="selection.selected.length === 0"
+                >
+                    <mat-icon>delete</mat-icon>
+                    Delete Selected
+                </button>
+            </div>
+        </div>
+
+        <table
+            mat-table
+            [dataSource]="dataSource"
+            matSort
+            (matSortChange)="announceSortChange($event)"
+            class="mat-elevation-z2"
+        >
+            <!-- Checkbox Column -->
+            <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef>
+                    <mat-checkbox
+                        (change)="$event ? masterToggle() : null"
+                        [checked]="selection.hasValue() && isAllSelected()"
+                        [indeterminate]="selection.hasValue() && !isAllSelected()"
+                        [aria-label]="checkboxLabel()"
+                    >
+                    </mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let row">
+                    <mat-checkbox
+                        (click)="$event.stopPropagation()"
+                        (change)="$event ? selection.toggle(row) : null"
+                        [checked]="selection.isSelected(row)"
+                        [aria-label]="checkboxLabel(row)"
+                    >
+                    </mat-checkbox>
+                </td>
+            </ng-container>
+
+            <!-- Hostname Column -->
+            <ng-container matColumnDef="task_id">
+                <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    sortActionDescription="Sort by Job ID"
+                >
+                    Job ID
+                </th>
+                <td mat-cell *matCellDef="let item">{{item.task_id}}</td>
+            </ng-container>
+
+            <!-- IPv4/IPv6 Address Column -->
+            <ng-container matColumnDef="job_type">
+                <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    sortActionDescription="Sort by Job Type"
+                >
+                    Job Type
+                </th>
+                <td mat-cell *matCellDef="let item">{{item.job_type}}</td>
+            </ng-container>
+
+            <!-- Platform Column -->
+            <ng-container matColumnDef="created_at">
+                <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    sortActionDescription="Sort by time stamp"
+                >
+                    Timestamp
+                </th>
+                <td mat-cell *matCellDef="let item">{{item.created_at}}</td>
+            </ng-container>
+
+            <!-- View Details Column -->
+            <ng-container matColumnDef="view_details">
+                <th mat-header-cell *matHeaderCellDef>View Details</th>
+                <td mat-cell *matCellDef="let item">
+                    <button
+                        mat-icon-button
+                        (click)="onViewClick(item)"
+                        class="view-button"
+                    >
+                        <mat-icon>visibility</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr
+                mat-row
+                *matRowDef="let row; columns: displayedColumns;"
+                (click)="selection.toggle(row)"
+            ></tr>
+        </table>
+    </main>
+    <app-footer></app-footer>
+</div>

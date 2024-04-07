@@ -1,0 +1,62 @@
+<!-- src/app/pages/job-details/job-details.html -->
+<div class="job-details-container">
+    <app-job-page-header></app-job-page-header>
+    <main
+        focusOnNavigation
+        aria-label="Job details"
+        id="job-details"
+        class="job-details"
+    >
+        <div class="mat-elevation-z2">
+            <div class="table-header">
+                <h2>Job Details</h2>
+            </div>
+
+            <div class="job-details-grid">
+                <div>
+                    <h3>Job Information</h3>
+                    <div class="form-field">
+                        <mat-form-field>
+                            <mat-label>Task ID</mat-label>
+                            <input
+                                matInput
+                                [value]="jobItem?.task_id"
+                                readonly
+                            />
+                        </mat-form-field>
+                    </div>
+                    <div class="form-field">
+                        <mat-form-field>
+                            <mat-label>Job Type</mat-label>
+                            <input
+                                matInput
+                                [value]="jobItem?.job_type"
+                                readonly
+                            />
+                        </mat-form-field>
+                    </div>
+                    <div class="form-field">
+                        <mat-form-field>
+                            <mat-label>Created At</mat-label>
+                            <input
+                                matInput
+                                [value]="jobItem?.created_at | date:'medium'"
+                                readonly
+                            />
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div>
+                    <h3>Job Data</h3>
+                    <div class="form-field">
+                        <ngx-json-viewer
+                            [json]="parsedJsonData"
+                        ></ngx-json-viewer>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <app-footer></app-footer>
+</div>
