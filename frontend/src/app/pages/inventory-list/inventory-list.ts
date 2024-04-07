@@ -24,7 +24,6 @@ import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { NgFor } from "@angular/common";
 import { Router } from "@angular/router";
 import { SelectionModel } from "@angular/cdk/collections";
 import { takeUntil } from "rxjs/operators";
@@ -35,14 +34,13 @@ import { takeUntil } from "rxjs/operators";
     styleUrls: ["./inventory-list.scss"],
     standalone: true,
     imports: [
-        NgFor,
+        Footer,
         InventoryPageHeader,
         MatCheckboxModule,
         MatTableModule,
         MatSortModule,
         MatIconModule,
         MatButtonModule,
-        Footer,
     ],
 })
 /**
@@ -77,26 +75,19 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         public _componentPageTitle: ComponentPageTitle,
     ) {}
 
-    ngOnInit(): void {
-        this._componentPageTitle.title = "Inventory List";
-        this.getDevices();
-    }
-
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
-    }
-
-    ngAfterViewInit() {
-        this.dataSource.sort = this.sort;
-    }
-
     announceSortChange(sortState: Sort) {
         if (sortState.direction) {
             this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
         } else {
             this._liveAnnouncer.announce("Sorting cleared");
         }
+    }
+
+    checkboxLabel(row?: Device): string {
+        if (!row) {
+            return `${this.isAllSelected() ? "select" : "deselect"} all`;
+        }
+        return `${this.selection.isSelected(row) ? "deselect" : "select"} row ${row.hostname}`;
     }
 
     getDevices(): void {
@@ -127,12 +118,40 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
             );
     }
 
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const numRows = this.dataSource.data.length;
+        return numSelected === numRows;
+    }
+
+    masterToggle() {
+        if (this.isAllSelected()) {
+            this.selection.clear();
+        } else {
+            this.dataSource.data.forEach((row) => this.selection.select(row));
+        }
+    }
+
     navigateToCreateInventory(): void {
         this.router.navigate(["/inventory/create"]);
     }
 
     navigateToSyncInventory(): void {
         this.router.navigate(["/inventory/sync"]);
+    }
+
+    ngAfterViewInit() {
+        this.dataSource.sort = this.sort;
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    ngOnInit(): void {
+        this._componentPageTitle.title = "Inventory List";
+        this.getDevices();
     }
 
     onDeleteClick(item: Device): void {
@@ -169,43 +188,6 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
                     );
                 }
             });
-    }
-
-    onEditClick(item: Device): void {
-        this.router.navigate(["/inventory", item.uuid]);
-    }
-
-    toggleAllRows() {
-        if (this.isAllSelected()) {
-            this.selection.clear();
-            return;
-        }
-
-        this.selection.select(...this.dataSource.data);
-    }
-
-    /** Whether the number of selected elements matches the total number of rows. */
-    isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const numRows = this.dataSource.data.length;
-        return numSelected === numRows;
-    }
-
-    /** Selects all rows if they are not all selected; otherwise clear selection. */
-    masterToggle() {
-        if (this.isAllSelected()) {
-            this.selection.clear();
-        } else {
-            this.dataSource.data.forEach((row) => this.selection.select(row));
-        }
-    }
-
-    /** The label for the checkbox on the passed row */
-    checkboxLabel(row?: Device): string {
-        if (!row) {
-            return `${this.isAllSelected() ? "select" : "deselect"} all`;
-        }
-        return `${this.selection.isSelected(row) ? "deselect" : "select"} row ${row.hostname}`;
     }
 
     onDeleteSelectedClick() {
@@ -248,5 +230,18 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
                     );
                 }
             });
+    }
+
+    onEditClick(item: Device): void {
+        this.router.navigate(["/inventory", item.uuid]);
+    }
+
+    toggleAllRows() {
+        if (this.isAllSelected()) {
+            this.selection.clear();
+            return;
+        }
+
+        this.selection.select(...this.dataSource.data);
     }
 }

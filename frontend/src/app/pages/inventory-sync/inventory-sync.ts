@@ -106,7 +106,7 @@ export class InventorySyncComponent implements OnInit {
                             jobId,
                         );
                         this.jobId = jobId;
-                        this.checkJobStatus();
+                        this.getJobStatus();
                     },
                     (error) => {
                         console.error("Error syncing inventory:", error);
@@ -118,7 +118,7 @@ export class InventorySyncComponent implements OnInit {
         }
     }
 
-    checkJobStatus(): void {
+    getJobStatus(): void {
         if (this.jobId) {
             this.inventoryService.getJobStatus(this.jobId).subscribe(
                 (response) => {
@@ -127,7 +127,7 @@ export class InventorySyncComponent implements OnInit {
                         this.router.navigate(["/inventory"]);
                         this.retryCount = 0; // Reset the retry count on success
                     } else {
-                        setTimeout(() => this.checkJobStatus(), 2500);
+                        setTimeout(() => this.getJobStatus(), 2500);
                     }
                 },
                 (error) => {
@@ -137,7 +137,7 @@ export class InventorySyncComponent implements OnInit {
                         console.log(
                             `Retrying job status check (attempt ${this.retryCount})`,
                         );
-                        setTimeout(() => this.checkJobStatus(), 2500);
+                        setTimeout(() => this.getJobStatus(), 2500);
                     } else {
                         this.showSyncProgress = false;
                         this.showSyncError = true;

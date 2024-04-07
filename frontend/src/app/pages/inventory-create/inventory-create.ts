@@ -32,14 +32,14 @@ import { takeUntil } from "rxjs/operators";
     standalone: true,
     imports: [
         CommonModule,
+        Footer,
         InventoryPageHeader,
-        ReactiveFormsModule,
         MatButtonModule,
         MatCheckboxModule,
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
-        Footer,
+        ReactiveFormsModule,
     ],
 })
 export class InventoryCreateComponent implements OnDestroy, OnInit {
@@ -74,26 +74,33 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
         });
     }
 
-    ngOnInit(): void {
-        this._componentPageTitle.title = "Inventory Create";
-        this.getFirewallPlatforms();
-
-        this.createInventoryForm
-            .get("device_type")
-            ?.valueChanges.pipe(takeUntil(this.destroy$))
-            .subscribe((device_type) => {
-                if (device_type === "Firewall") {
-                    this.getFirewallPlatforms();
-                } else if (device_type === "Panorama") {
-                    this.getPanoramaPlatforms();
-                }
-                this.updateFormValidation(device_type);
-            });
-    }
-
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
+    createDevice(): void {
+        if (this.createInventoryForm && this.createInventoryForm.valid) {
+            const formValue = this.createInventoryForm.value;
+            if (formValue.device_type === "Panorama") {
+                delete formValue.device_group;
+                delete formValue.panorama_appliance;
+                delete formValue.panorama_managed;
+            }
+            this.inventoryService
+                .createDevice(formValue)
+                .pipe(takeUntil(this.destroy$))
+                .subscribe(
+                    () => {
+                        this.router.navigate(["/inventory"]);
+                    },
+                    (error) => {
+                        console.error("Error creating inventory item:", error);
+                        this.snackBar.open(
+                            "Failed to create inventory item. Please try again.",
+                            "Close",
+                            {
+                                duration: 3000,
+                            },
+                        );
+                    },
+                );
+        }
     }
 
     getFirewallPlatforms(): void {
@@ -138,33 +145,26 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
             );
     }
 
-    createDevice(): void {
-        if (this.createInventoryForm && this.createInventoryForm.valid) {
-            const formValue = this.createInventoryForm.value;
-            if (formValue.device_type === "Panorama") {
-                delete formValue.device_group;
-                delete formValue.panorama_appliance;
-                delete formValue.panorama_managed;
-            }
-            this.inventoryService
-                .createDevice(formValue)
-                .pipe(takeUntil(this.destroy$))
-                .subscribe(
-                    () => {
-                        this.router.navigate(["/inventory"]);
-                    },
-                    (error) => {
-                        console.error("Error creating inventory item:", error);
-                        this.snackBar.open(
-                            "Failed to create inventory item. Please try again.",
-                            "Close",
-                            {
-                                duration: 3000,
-                            },
-                        );
-                    },
-                );
-        }
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    ngOnInit(): void {
+        this._componentPageTitle.title = "Inventory Create";
+        this.getFirewallPlatforms();
+
+        this.createInventoryForm
+            .get("device_type")
+            ?.valueChanges.pipe(takeUntil(this.destroy$))
+            .subscribe((device_type) => {
+                if (device_type === "Firewall") {
+                    this.getFirewallPlatforms();
+                } else if (device_type === "Panorama") {
+                    this.getPanoramaPlatforms();
+                }
+                this.updateFormValidation(device_type);
+            });
     }
 
     onCancel(): void {
