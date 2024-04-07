@@ -4,11 +4,13 @@ import {
     AfterViewInit,
     Component,
     HostBinding,
+    OnDestroy,
     OnInit,
     ViewChild,
 } from "@angular/core";
 import { MatSort, MatSortModule, Sort } from "@angular/material/sort";
 import { MatTableDataSource, MatTableModule } from "@angular/material/table";
+import { Subject, forkJoin } from "rxjs";
 
 import { ComponentPageTitle } from "../page-title/page-title";
 import { DeleteDialogComponent } from "../confirmation-dialog/delete-dialog";
@@ -21,10 +23,11 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { NgFor } from "@angular/common";
 import { Router } from "@angular/router";
 import { SelectionModel } from "@angular/cdk/collections";
-import { forkJoin } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
 @Component({
     selector: "app-inventory-list",
@@ -45,7 +48,7 @@ import { forkJoin } from "rxjs";
 /**
  * Component for displaying the inventory list.
  */
-export class InventoryList implements OnInit, AfterViewInit {
+export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
     inventoryItems: Device[] = [];
@@ -61,6 +64,7 @@ export class InventoryList implements OnInit, AfterViewInit {
     ];
     selection = new SelectionModel<Device>(true, []);
     dataSource: MatTableDataSource<Device> = new MatTableDataSource<Device>([]);
+    private destroy$ = new Subject<void>();
 
     @ViewChild(MatSort) sort: MatSort = new MatSort();
 
@@ -68,6 +72,7 @@ export class InventoryList implements OnInit, AfterViewInit {
         private dialog: MatDialog,
         private inventoryService: InventoryService,
         private router: Router,
+        private snackBar: MatSnackBar,
         private _liveAnnouncer: LiveAnnouncer,
         public _componentPageTitle: ComponentPageTitle,
     ) {}
@@ -75,6 +80,11 @@ export class InventoryList implements OnInit, AfterViewInit {
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory List";
         this.getDevices();
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     ngAfterViewInit() {
@@ -90,19 +100,31 @@ export class InventoryList implements OnInit, AfterViewInit {
     }
 
     getDevices(): void {
-        this.inventoryService.getDevices().subscribe(
-            (items) => {
-                this.inventoryItems = items;
-                this.inventoryItems.sort((a, b) =>
-                    a.hostname.localeCompare(b.hostname),
-                );
-                this.dataSource = new MatTableDataSource(this.inventoryItems);
-                this.dataSource.sort = this.sort;
-            },
-            (error) => {
-                console.error("Error fetching inventory items:", error);
-            },
-        );
+        this.inventoryService
+            .getDevices()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (items) => {
+                    this.inventoryItems = items;
+                    this.inventoryItems.sort((a, b) =>
+                        a.hostname.localeCompare(b.hostname),
+                    );
+                    this.dataSource = new MatTableDataSource(
+                        this.inventoryItems,
+                    );
+                    this.dataSource.sort = this.sort;
+                },
+                (error) => {
+                    console.error("Error fetching inventory items:", error);
+                    this.snackBar.open(
+                        "Failed to fetch inventory items. Please try again.",
+                        "Close",
+                        {
+                            duration: 3000,
+                        },
+                    );
+                },
+            );
     }
 
     navigateToCreateInventory(): void {
@@ -122,18 +144,31 @@ export class InventoryList implements OnInit, AfterViewInit {
             },
         });
 
-        dialogRef.afterClosed().subscribe((result: boolean) => {
-            if (result) {
-                this.inventoryService.deleteDevice(item.uuid).subscribe(
-                    () => {
-                        this.getDevices(); // Refresh the inventory list after deletion
-                    },
-                    (error) => {
-                        console.error("Error deleting inventory item:", error);
-                    },
-                );
-            }
-        });
+        dialogRef
+            .afterClosed()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((result: boolean) => {
+                if (result) {
+                    this.inventoryService.deleteDevice(item.uuid).subscribe(
+                        () => {
+                            this.getDevices(); // Refresh the inventory list after deletion
+                        },
+                        (error) => {
+                            console.error(
+                                "Error deleting inventory item:",
+                                error,
+                            );
+                            this.snackBar.open(
+                                "Failed to delete inventory item. Please try again.",
+                                "Close",
+                                {
+                                    duration: 3000,
+                                },
+                            );
+                        },
+                    );
+                }
+            });
     }
 
     onEditClick(item: Device): void {
@@ -184,21 +219,34 @@ export class InventoryList implements OnInit, AfterViewInit {
             },
         });
 
-        dialogRef.afterClosed().subscribe((result: boolean) => {
-            if (result) {
-                const deleteRequests = selectedItems.map((item) =>
-                    this.inventoryService.deleteDevice(item.uuid),
-                );
-                forkJoin(deleteRequests).subscribe(
-                    () => {
-                        this.selection.clear();
-                        this.getDevices();
-                    },
-                    (error) => {
-                        console.error("Error deleting inventory items:", error);
-                    },
-                );
-            }
-        });
+        dialogRef
+            .afterClosed()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((result: boolean) => {
+                if (result) {
+                    const deleteRequests = selectedItems.map((item) =>
+                        this.inventoryService.deleteDevice(item.uuid),
+                    );
+                    forkJoin(deleteRequests).subscribe(
+                        () => {
+                            this.selection.clear();
+                            this.getDevices();
+                        },
+                        (error) => {
+                            console.error(
+                                "Error deleting inventory items:",
+                                error,
+                            );
+                            this.snackBar.open(
+                                "Failed to delete selected inventory items. Please try again.",
+                                "Close",
+                                {
+                                    duration: 3000,
+                                },
+                            );
+                        },
+                    );
+                }
+            });
     }
 }
