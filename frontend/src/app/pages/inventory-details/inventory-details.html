@@ -9,7 +9,7 @@
         <h2>Devices</h2>
 
         <!-- container for the Refresh button. -->
-        <div class="button-container">
+        <div class="refresh-header">
           <button mat-raised-button color="accent" type="button" (click)="refreshDeviceDetails()"
             aria-label="Refresh Device Details" [disabled]="showRefreshProgress">
             <mat-icon>sync</mat-icon>
@@ -46,6 +46,15 @@
               <!-- Input field for the hostname, bound to the 'hostname' form control -->
               <!-- The 'required' attribute ensures that the field is mandatory -->
               <input matInput id="hostname" formControlName="hostname" required>
+            </mat-form-field>
+          </div>
+
+          <!-- Form field for entering the serial number -->
+          <div class="form-field">
+            <mat-form-field>
+              <mat-label>Serial Number</mat-label>
+              <!-- Input field for serial, bound to the 'serial' form control -->
+              <input matInput id="serial" formControlName="serial">
             </mat-form-field>
           </div>
 
@@ -124,7 +133,6 @@
           </div>
         </div>
 
-        <!-- Network Information -->
         <div>
           <!-- Heading for the network information section -->
           <h3>Network Information</h3>
@@ -134,8 +142,8 @@
             <mat-form-field>
               <mat-label>IPv4 Address</mat-label>
               <!-- Input field for the IPv4 address, bound to the 'ipv4_address' form control -->
-              <!-- The 'required' attribute ensures that the field is mandatory -->
-              <input matInput id="ipv4_address" formControlName="ipv4_address" required>
+              <!-- The IPv4 address field is optional -->
+              <input matInput id="ipv4_address" formControlName="ipv4_address">
             </mat-form-field>
           </div>
 
@@ -148,6 +156,21 @@
               <input matInput id="ipv6_address" formControlName="ipv6_address">
             </mat-form-field>
           </div>
+
+          <!-- Validation to require either IPv4 or IPv6 address -->
+          <div class="form-field">
+            @if (updateInventoryForm.hasError('requireIpAddress')) {
+            <mat-hint>
+              Please enter either an IPv4 address or an IPv6 address.
+            </mat-hint>
+            }
+            @if (updateInventoryForm.hasError('invalidIpAddress')) {
+            <mat-error>
+              Please enter a valid IPv4 or IPv6 address.
+            </mat-error>
+            }
+          </div>
+
         </div>
 
         <!-- HA -->
@@ -192,8 +215,7 @@
           <h3>Panorama Information</h3>
 
           <!-- Form field for entering the Panorama appliance, displayed only if the firewall is managed by Panorama -->
-          @if (updateInventoryForm.get('panorama_managed')?.value && updateInventoryForm.get('device_type')?.value ===
-          'Firewall') {
+          @if (updateInventoryForm.get('panorama_managed')?.value) {
           <div class="form-field">
             <mat-form-field>
               <mat-label>Panorama Appliance</mat-label>
@@ -201,28 +223,6 @@
               <input matInput id="panorama_appliance" formControlName="panorama_appliance">
             </mat-form-field>
           </div>
-
-          <!-- Form field for entering the IPv4 Address, displayed only if the firewall is managed by Panorama and IPv4 address is defined -->
-          @if (updateInventoryForm.get('panorama_ipv4_address')?.value) {
-          <div class="form-field">
-            <mat-form-field>
-              <mat-label>Panorama IPv4 Address</mat-label>
-              <!-- Input field for the IPv4 address, bound to the 'panorama_ipv4_address' form control -->
-              <input matInput id="panorama_ipv4_address" formControlName="panorama_ipv4_address">
-            </mat-form-field>
-          </div>
-          }
-
-          <!-- Form field for entering the IPv6 Address, displayed only if the firewall is managed by Panorama and IPv6 address is defined -->
-          @if (updateInventoryForm.get('panorama_ipv6_address')?.value) {
-          <div class="form-field">
-            <mat-form-field>
-              <mat-label>Panorama IPv6 Address</mat-label>
-              <!-- Input field for the IPv6 address, bound to the 'panorama_ipv6_address' form control -->
-              <input matInput id="panorama_ipv6_address" formControlName="panorama_ipv6_address">
-            </mat-form-field>
-          </div>
-          }
 
           <!-- Form field for entering the device group, displayed only if the firewall is managed by Panorama -->
           <div class="form-field">
@@ -232,6 +232,39 @@
               <input matInput id="device_group" formControlName="device_group">
             </mat-form-field>
           </div>
+
+          <div class="form-field">
+            <mat-form-field>
+              <mat-label>Panorama IPv4 Address</mat-label>
+              <!-- Input field for the IPv4 address, bound to the 'panorama_ipv4_address' form control -->
+              <input matInput id="panorama_ipv4_address" formControlName="panorama_ipv4_address">
+            </mat-form-field>
+          </div>
+
+          <div class="form-field">
+            <mat-form-field>
+              <mat-label>Panorama IPv6 Address</mat-label>
+              <!-- Input field for the IPv6 address, bound to the 'panorama_ipv6_address' form control -->
+              <input matInput id="panorama_ipv6_address" formControlName="panorama_ipv6_address">
+            </mat-form-field>
+          </div>
+
+          <!-- Validation for Panorama IP addresses -->
+          @if (updateInventoryForm.get('panorama_managed')?.value) {
+          <div class="form-field">
+            @if (updateInventoryForm.hasError('requirePanoramaIpAddress')) {
+            <mat-hint>
+              Please enter a valid IPv4 or IPv6 address for Panorama.
+            </mat-hint>
+            }
+            @if (updateInventoryForm.hasError('invalidPanoramaIpAddress')) {
+            <mat-error>
+              Please enter a valid IPv4 or IPv6 address for Panorama.
+            </mat-error>
+            }
+          </div>
+          }
+
           }
 
           <!-- Checkbox for indicating if the firewall is managed by Panorama -->
@@ -254,6 +287,7 @@
           Update
         </button>
       </div>
+
     </form>
   </main>
   <app-footer></app-footer>

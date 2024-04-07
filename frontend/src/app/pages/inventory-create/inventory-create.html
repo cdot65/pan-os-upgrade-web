@@ -21,6 +21,15 @@
             </mat-form-field>
           </div>
 
+          <!-- Form field for entering the serial number -->
+          <div class="form-field">
+            <mat-form-field>
+              <mat-label>Serial Number</mat-label>
+              <!-- Input field for serial, bound to the 'serial' form control -->
+              <input matInput id="serial" formControlName="serial">
+            </mat-form-field>
+          </div>
+
           <!-- Form field for entering additional notes -->
           <div class="form-field">
             <mat-form-field>
@@ -71,6 +80,30 @@
           </div>
         </div>
 
+        <!-- Software Information -->
+        <div>
+          <!-- Heading for the software information section -->
+          <h3>Software Information</h3>
+
+          <!-- Form field for entering the PAN-OS version -->
+          <div class="form-field">
+            <mat-form-field>
+              <mat-label>PAN-OS Version</mat-label>
+              <!-- Input field for the PAN-OS version, bound to the 'sw_version' form control -->
+              <input matInput id="sw_version" formControlName="sw_version">
+            </mat-form-field>
+          </div>
+
+          <!-- Form field for entering the content version -->
+          <div class="form-field">
+            <mat-form-field>
+              <mat-label>Content Version</mat-label>
+              <!-- Input field for the hostname, bound to the 'app_version' form control -->
+              <input matInput id="app_version" formControlName="app_version">
+            </mat-form-field>
+          </div>
+        </div>
+
         <div>
           <!-- Heading for the network information section -->
           <h3>Network Information</h3>
@@ -80,8 +113,8 @@
             <mat-form-field>
               <mat-label>IPv4 Address</mat-label>
               <!-- Input field for the IPv4 address, bound to the 'ipv4_address' form control -->
-              <!-- The 'required' attribute ensures that the field is mandatory -->
-              <input matInput id="ipv4_address" formControlName="ipv4_address" required>
+              <!-- The IPv4 address field is optional -->
+              <input matInput id="ipv4_address" formControlName="ipv4_address">
             </mat-form-field>
           </div>
 
@@ -94,6 +127,21 @@
               <input matInput id="ipv6_address" formControlName="ipv6_address">
             </mat-form-field>
           </div>
+
+          <!-- Validation to require either IPv4 or IPv6 address -->
+          <div class="form-field">
+            @if (createInventoryForm.hasError('requireIpAddress')) {
+            <mat-hint>
+              Please enter either an IPv4 address or an IPv6 address.
+            </mat-hint>
+            }
+            @if (createInventoryForm.hasError('invalidIpAddress')) {
+            <mat-error>
+              Please enter a valid IPv4 or IPv6 address.
+            </mat-error>
+            }
+          </div>
+
         </div>
 
         <div>
@@ -146,6 +194,15 @@
             </mat-form-field>
           </div>
 
+          <!-- Form field for entering the device group, displayed only if the firewall is managed by Panorama -->
+          <div class="form-field">
+            <mat-form-field>
+              <mat-label>Device Group</mat-label>
+              <!-- Input field for the device group, bound to the 'device_group' form control -->
+              <input matInput id="device_group" formControlName="device_group">
+            </mat-form-field>
+          </div>
+
           <div class="form-field">
             <mat-form-field>
               <mat-label>Panorama IPv4 Address</mat-label>
@@ -162,14 +219,22 @@
             </mat-form-field>
           </div>
 
-          <!-- Form field for entering the device group, displayed only if the firewall is managed by Panorama -->
+          <!-- Validation for Panorama IP addresses -->
+          @if (createInventoryForm.get('panorama_managed')?.value) {
           <div class="form-field">
-            <mat-form-field>
-              <mat-label>Device Group</mat-label>
-              <!-- Input field for the device group, bound to the 'device_group' form control -->
-              <input matInput id="device_group" formControlName="device_group">
-            </mat-form-field>
+            @if (createInventoryForm.hasError('requirePanoramaIpAddress')) {
+            <mat-hint>
+              Please enter a valid IPv4 or IPv6 address for Panorama.
+            </mat-hint>
+            }
+            @if (createInventoryForm.hasError('invalidPanoramaIpAddress')) {
+            <mat-error>
+              Please enter a valid IPv4 or IPv6 address for Panorama.
+            </mat-error>
+            }
           </div>
+          }
+
           }
           <!-- Checkbox for indicating if the firewall is managed by Panorama -->
           <div class="form-field">

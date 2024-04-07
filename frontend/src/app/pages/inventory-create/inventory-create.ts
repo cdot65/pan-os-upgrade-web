@@ -1,13 +1,16 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // src/app/pages/inventory-create/inventory-create.ts
 
-import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
 import {
+    AbstractControl,
     FormBuilder,
     FormGroup,
     ReactiveFormsModule,
+    ValidationErrors,
+    ValidatorFn,
     Validators,
 } from "@angular/forms";
+import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
 
 import { CommonModule } from "@angular/common";
 import { ComponentPageTitle } from "../page-title/page-title";
@@ -57,7 +60,8 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
         public _componentPageTitle: ComponentPageTitle,
     ) {
         this.createInventoryForm = this.formBuilder.group({
-            author: localStorage.getItem("author"),
+            app_version: [""],
+            // author: localStorage.getItem("author"),
             device_group: [""],
             device_type: ["Firewall", Validators.required],
             ha: [false],
@@ -65,20 +69,56 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
             ha_peer: [""],
             ha_status: [""],
             hostname: ["", Validators.required],
-            ipv4_address: ["", Validators.required],
-            ipv6_address: [""],
+            ipv4_address: [
+                "",
+                [
+                    Validators.pattern(
+                        // eslint-disable-next-line max-len
+                        /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
+                    ),
+                ],
+            ],
+            ipv6_address: [
+                "",
+                [
+                    Validators.pattern(
+                        // eslint-disable-next-line max-len
+                        /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/,
+                    ),
+                ],
+            ],
             notes: [""],
             panorama_appliance: [""],
-            panorama_ipv4_address: [""],
-            panorama_ipv6_address: [""],
+            panorama_ipv4_address: [
+                "",
+                [
+                    Validators.pattern(
+                        // eslint-disable-next-line max-len
+                        /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
+                    ),
+                ],
+            ],
+            panorama_ipv6_address: [
+                "",
+                [
+                    Validators.pattern(
+                        // eslint-disable-next-line max-len
+                        /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/,
+                    ),
+                ],
+            ],
             panorama_managed: [false],
             platform_name: ["", Validators.required],
+            serial: [""],
+            sw_version: [""],
         });
     }
 
     createDevice(): void {
         if (this.createInventoryForm && this.createInventoryForm.valid) {
+            const author = localStorage.getItem("author");
             const formValue = this.createInventoryForm.value;
+            formValue.author = author;
             if (formValue.device_type === "Panorama") {
                 delete formValue.device_group;
                 delete formValue.panorama_appliance;
@@ -155,7 +195,7 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory Create";
         this.getFirewallPlatforms();
-
+        this.createInventoryForm.setValidators(this.requireIpAddress());
         this.createInventoryForm
             .get("device_type")
             ?.valueChanges.pipe(takeUntil(this.destroy$))
@@ -172,6 +212,49 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
     onCancel(): void {
         this.createInventoryForm.reset();
         this.router.navigate(["/inventory"]);
+    }
+
+    requireIpAddress(): ValidatorFn {
+        return (control: AbstractControl): ValidationErrors | null => {
+            const ipv4Control = control.get("ipv4_address");
+            const ipv6Control = control.get("ipv6_address");
+            const panoramaManagedControl = control.get("panorama_managed");
+            const panoramaIpv4Control = control.get("panorama_ipv4_address");
+            const panoramaIpv6Control = control.get("panorama_ipv6_address");
+
+            if (
+                (ipv4Control && ipv4Control.value && ipv4Control.invalid) ||
+                (ipv6Control && ipv6Control.value && ipv6Control.invalid)
+            ) {
+                return { invalidIpAddress: true };
+            }
+
+            if (!ipv4Control?.value && !ipv6Control?.value) {
+                return { requireIpAddress: true };
+            }
+
+            if (panoramaManagedControl?.value) {
+                if (
+                    (panoramaIpv4Control &&
+                        panoramaIpv4Control.value &&
+                        panoramaIpv4Control.invalid) ||
+                    (panoramaIpv6Control &&
+                        panoramaIpv6Control.value &&
+                        panoramaIpv6Control.invalid)
+                ) {
+                    return { invalidPanoramaIpAddress: true };
+                }
+
+                if (
+                    !panoramaIpv4Control?.value &&
+                    !panoramaIpv6Control?.value
+                ) {
+                    return { requirePanoramaIpAddress: true };
+                }
+            }
+
+            return null;
+        };
     }
 
     updateFormValidation(device_type: string): void {
