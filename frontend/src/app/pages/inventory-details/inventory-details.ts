@@ -2,7 +2,7 @@
 // src/app/pages/inventory-details/inventory-details.ts
 
 import { ActivatedRoute, Router } from "@angular/router";
-import { Component, HostBinding, OnInit } from "@angular/core";
+import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
 import {
     FormBuilder,
     FormGroup,
@@ -26,7 +26,10 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { MatSelectModule } from "@angular/material/select";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { ProfileDialogComponent } from "../profile-select-dialog/profile-select-dialog.component";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
 @Component({
     selector: "app-inventory-details",
@@ -53,7 +56,7 @@ import { ProfileDialogComponent } from "../profile-select-dialog/profile-select-
 /**
  * Represents the component for displaying and managing inventory details.
  */
-export class InventoryDetailsComponent implements OnInit {
+export class InventoryDetailsComponent implements OnDestroy, OnInit {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
     inventoryItem: Device | undefined;
@@ -65,6 +68,7 @@ export class InventoryDetailsComponent implements OnInit {
     refreshJobCompleted: boolean = false;
     jobId: string | null = null;
     private retryCount = 0;
+    private destroy$ = new Subject<void>();
 
     constructor(
         private formBuilder: FormBuilder,
@@ -72,6 +76,7 @@ export class InventoryDetailsComponent implements OnInit {
         private inventoryService: InventoryService,
         private route: ActivatedRoute,
         private router: Router,
+        private snackBar: MatSnackBar,
         public _componentPageTitle: ComponentPageTitle,
     ) {
         // Update the form group
@@ -108,7 +113,8 @@ export class InventoryDetailsComponent implements OnInit {
 
         this.updateInventoryForm
             .get("device_type")
-            ?.valueChanges.subscribe((device_type) => {
+            ?.valueChanges.pipe(takeUntil(this.destroy$))
+            .subscribe((device_type) => {
                 if (device_type === "Firewall") {
                     this.getFirewallPlatforms();
                     this.updateInventoryForm
@@ -144,32 +150,57 @@ export class InventoryDetailsComponent implements OnInit {
             });
     }
 
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
     /**
      * Fetches the firewall platforms from the inventory service.
      */
     getFirewallPlatforms(): void {
-        this.inventoryService.getFirewallPlatforms().subscribe(
-            (platforms: DeviceType[]) => {
-                this.firewallPlatforms = platforms;
-            },
-            (error: any) => {
-                console.error("Error fetching firewall platforms:", error);
-            },
-        );
+        this.inventoryService
+            .getFirewallPlatforms()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (platforms: DeviceType[]) => {
+                    this.firewallPlatforms = platforms;
+                },
+                (error: any) => {
+                    console.error("Error fetching firewall platforms:", error);
+                    this.snackBar.open(
+                        "Failed to fetch firewall platforms. Please try again.",
+                        "Close",
+                        {
+                            duration: 3000,
+                        },
+                    );
+                },
+            );
     }
 
     /**
      * Fetches the Panorama platforms from the inventory service.
      */
     getPanoramaPlatforms(): void {
-        this.inventoryService.getPanoramaPlatforms().subscribe(
-            (platforms: DeviceType[]) => {
-                this.panoramaPlatforms = platforms;
-            },
-            (error: any) => {
-                console.error("Error fetching panorama platforms:", error);
-            },
-        );
+        this.inventoryService
+            .getPanoramaPlatforms()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (platforms: DeviceType[]) => {
+                    this.panoramaPlatforms = platforms;
+                },
+                (error: any) => {
+                    console.error("Error fetching panorama platforms:", error);
+                    this.snackBar.open(
+                        "Failed to fetch panorama platforms. Please try again.",
+                        "Close",
+                        {
+                            duration: 3000,
+                        },
+                    );
+                },
+            );
     }
 
     /**
@@ -178,15 +209,25 @@ export class InventoryDetailsComponent implements OnInit {
      * @param itemId - The ID of the inventory item to retrieve.
      */
     getDevice(itemId: string): void {
-        this.inventoryService.getDevice(itemId).subscribe(
-            (item: Device) => {
-                this.inventoryItem = item;
-                this.updateInventoryForm.patchValue(item);
-            },
-            (error: any) => {
-                console.error("Error fetching inventory item:", error);
-            },
-        );
+        this.inventoryService
+            .getDevice(itemId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (item: Device) => {
+                    this.inventoryItem = item;
+                    this.updateInventoryForm.patchValue(item);
+                },
+                (error: any) => {
+                    console.error("Error fetching inventory item:", error);
+                    this.snackBar.open(
+                        "Failed to fetch inventory item. Please try again.",
+                        "Close",
+                        {
+                            duration: 3000,
+                        },
+                    );
+                },
+            );
     }
 
     /**
@@ -207,12 +248,20 @@ export class InventoryDetailsComponent implements OnInit {
             }
             this.inventoryService
                 .updateDevice(updatedItem, this.inventoryItem.uuid)
+                .pipe(takeUntil(this.destroy$))
                 .subscribe(
                     () => {
                         this.router.navigate(["/inventory"]);
                     },
                     (error) => {
                         console.error("Error updating inventory item:", error);
+                        this.snackBar.open(
+                            "Failed to update inventory item. Please try again.",
+                            "Close",
+                            {
+                                duration: 3000,
+                            },
+                        );
                     },
                 );
         }
@@ -232,65 +281,88 @@ export class InventoryDetailsComponent implements OnInit {
             data: { message: "Select a profile to refresh device details" },
         });
 
-        dialogRef.afterClosed().subscribe((selectedProfileUuid) => {
-            if (selectedProfileUuid && this.inventoryItem) {
-                const author = localStorage.getItem("author");
-                const refreshForm = {
-                    author: author ? parseInt(author, 10) : 0,
-                    device: this.inventoryItem.uuid,
-                    profile: selectedProfileUuid,
-                };
-                this.showRefreshProgress = true;
-                this.showRefreshError = false; // Reset the error state
+        dialogRef
+            .afterClosed()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((selectedProfileUuid) => {
+                if (selectedProfileUuid && this.inventoryItem) {
+                    const author = localStorage.getItem("author");
+                    const refreshForm = {
+                        author: author ? parseInt(author, 10) : 0,
+                        device: this.inventoryItem.uuid,
+                        profile: selectedProfileUuid,
+                    };
+                    this.showRefreshProgress = true;
+                    this.showRefreshError = false; // Reset the error state
 
-                // Insert a one second delay to allow the API to initialize the job
-                setTimeout(() => {
-                    this.inventoryService.refreshDevice(refreshForm).subscribe(
-                        (jobId) => {
-                            this.jobId = jobId;
-                            this.checkJobStatus();
-                        },
-                        (error) => {
-                            console.error(
-                                "Error refreshing device details:",
-                                error,
+                    // Insert a delay to allow the API to initialize the job
+                    setTimeout(() => {
+                        this.inventoryService
+                            .refreshDevice(refreshForm)
+                            .pipe(takeUntil(this.destroy$))
+                            .subscribe(
+                                (jobId) => {
+                                    this.jobId = jobId;
+                                    this.checkJobStatus();
+                                },
+                                (error) => {
+                                    console.error(
+                                        "Error refreshing device details:",
+                                        error,
+                                    );
+                                    this.showRefreshProgress = false;
+                                    this.showRefreshError = true;
+                                    this.snackBar.open(
+                                        "Failed to refresh device details. Please try again.",
+                                        "Close",
+                                        {
+                                            duration: 3000,
+                                        },
+                                    );
+                                },
                             );
-                            this.showRefreshProgress = false;
-                            this.showRefreshError = true;
-                        },
-                    );
-                }, 2000);
-            }
-        });
+                    }, 2000);
+                }
+            });
     }
 
     checkJobStatus(): void {
         if (this.jobId) {
-            this.inventoryService.getJobStatus(this.jobId).subscribe(
-                (response) => {
-                    if (response.status === "completed") {
-                        this.showRefreshProgress = false;
-                        this.getDevice(this.inventoryItem!.uuid);
-                        this.retryCount = 0; // Reset the retry count on success
-                    } else {
-                        setTimeout(() => this.checkJobStatus(), 2000);
-                    }
-                },
-                (error) => {
-                    console.error("Error checking job status:", error);
-                    if (error.status === 400 && this.retryCount < 3) {
-                        this.retryCount++;
-                        console.log(
-                            `Retrying job status check (attempt ${this.retryCount})`,
-                        );
-                        setTimeout(() => this.checkJobStatus(), 2000);
-                    } else {
-                        this.showRefreshProgress = false;
-                        this.showRefreshError = true;
-                        this.retryCount = 0; // Reset the retry count on failure
-                    }
-                },
-            );
+            this.inventoryService
+                .getJobStatus(this.jobId)
+                .pipe(takeUntil(this.destroy$))
+                .subscribe(
+                    (response) => {
+                        if (response.status === "completed") {
+                            this.showRefreshProgress = false;
+                            this.getDevice(this.inventoryItem!.uuid);
+                            this.retryCount = 0; // Reset the retry count on success
+                        } else {
+                            setTimeout(() => this.checkJobStatus(), 2000);
+                        }
+                    },
+                    (error) => {
+                        console.error("Error checking job status:", error);
+                        if (error.status === 400 && this.retryCount < 3) {
+                            this.retryCount++;
+                            console.log(
+                                `Retrying job status check (attempt ${this.retryCount})`,
+                            );
+                            setTimeout(() => this.checkJobStatus(), 2000);
+                        } else {
+                            this.showRefreshProgress = false;
+                            this.showRefreshError = true;
+                            this.retryCount = 0;
+                            this.snackBar.open(
+                                "Failed to check job status. Please try again.",
+                                "Close",
+                                {
+                                    duration: 3000,
+                                },
+                            );
+                        }
+                    },
+                );
         }
     }
 }
