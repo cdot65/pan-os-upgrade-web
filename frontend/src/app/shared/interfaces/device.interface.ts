@@ -16,6 +16,8 @@ export interface Device {
     ipv6_address: string | null;
     notes: string;
     panorama_appliance: string | null;
+    panorama_ipv4_address: string | null;
+    panorama_ipv6_address: string | null;
     panorama_managed: boolean;
     platform_name: string;
     serial_number: string;

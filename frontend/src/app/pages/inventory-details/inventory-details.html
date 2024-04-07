@@ -59,6 +59,7 @@
           </div>
         </div>
 
+        <!-- Platform Information -->
         <div>
           <!-- Heading for the platform information section -->
           <h3>Platform Information</h3>
@@ -99,6 +100,31 @@
           </div>
         </div>
 
+        <!-- Software Information -->
+        <div>
+          <!-- Heading for the software information section -->
+          <h3>Software Information</h3>
+
+          <!-- Form field for entering the PAN-OS version -->
+          <div class="form-field">
+            <mat-form-field>
+              <mat-label>PAN-OS Version</mat-label>
+              <!-- Input field for the PAN-OS version, bound to the 'sw_version' form control -->
+              <input matInput id="sw_version" formControlName="sw_version">
+            </mat-form-field>
+          </div>
+
+          <!-- Form field for entering the content version -->
+          <div class="form-field">
+            <mat-form-field>
+              <mat-label>Content Version</mat-label>
+              <!-- Input field for the hostname, bound to the 'app_version' form control -->
+              <input matInput id="app_version" formControlName="app_version">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Network Information -->
         <div>
           <!-- Heading for the network information section -->
           <h3>Network Information</h3>
@@ -124,6 +150,7 @@
           </div>
         </div>
 
+        <!-- HA -->
         <div>
           <!-- Heading for the high availability section -->
           <h3>High Availability</h3>
@@ -174,6 +201,28 @@
               <input matInput id="panorama_appliance" formControlName="panorama_appliance">
             </mat-form-field>
           </div>
+
+          <!-- Form field for entering the IPv4 Address, displayed only if the firewall is managed by Panorama and IPv4 address is defined -->
+          @if (updateInventoryForm.get('panorama_ipv4_address')?.value) {
+          <div class="form-field">
+            <mat-form-field>
+              <mat-label>Panorama IPv4 Address</mat-label>
+              <!-- Input field for the IPv4 address, bound to the 'panorama_ipv4_address' form control -->
+              <input matInput id="panorama_ipv4_address" formControlName="panorama_ipv4_address">
+            </mat-form-field>
+          </div>
+          }
+
+          <!-- Form field for entering the IPv6 Address, displayed only if the firewall is managed by Panorama and IPv6 address is defined -->
+          @if (updateInventoryForm.get('panorama_ipv6_address')?.value) {
+          <div class="form-field">
+            <mat-form-field>
+              <mat-label>Panorama IPv6 Address</mat-label>
+              <!-- Input field for the IPv6 address, bound to the 'panorama_ipv6_address' form control -->
+              <input matInput id="panorama_ipv6_address" formControlName="panorama_ipv6_address">
+            </mat-form-field>
+          </div>
+          }
 
           <!-- Form field for entering the device group, displayed only if the firewall is managed by Panorama -->
           <div class="form-field">

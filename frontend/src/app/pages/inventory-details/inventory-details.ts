@@ -82,6 +82,7 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
         // Update the form group
         this.updateInventoryForm = this.formBuilder.group({
             // author: localStorage.getItem("author"),
+            app_version: [""],
             device_group: [""],
             device_type: [""],
             ha: [false],
@@ -93,8 +94,11 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
             ipv6_address: [""],
             notes: [""],
             panorama_appliance: [""],
+            panorama_ipv4_address: [""],
+            panorama_ipv6_address: [""],
             panorama_managed: [false],
             platform_name: ["", Validators.required],
+            sw_version: [""],
         });
     }
 
