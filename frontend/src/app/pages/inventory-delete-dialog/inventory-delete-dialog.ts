@@ -1,4 +1,4 @@
-// src/app/pages/confirmation-dialog/delete-dialog.ts
+// src/app/pages/inventory-delete-dialog/inventory-delete-dialog.ts
 
 import { Component, Inject } from "@angular/core";
 import {
@@ -10,14 +10,14 @@ import { MatButtonModule } from "@angular/material/button";
 
 @Component({
     selector: "app-delete-dialog",
-    templateUrl: "./delete-dialog.html",
-    styleUrls: ["./delete-dialog.scss"],
+    templateUrl: "./inventory-delete-dialog.html",
+    styleUrls: ["./inventory-delete-dialog.scss"],
     standalone: true,
     imports: [MatButtonModule, MatDialogModule],
 })
-export class DeleteDialogComponent {
+export class InventoryDeleteDialogComponent {
     constructor(
-        public dialogRef: MatDialogRef<DeleteDialogComponent>,
+        public dialogRef: MatDialogRef<InventoryDeleteDialogComponent>,
         @Inject(MAT_DIALOG_DATA)
         public data: { title: string; message: string },
     ) {}
