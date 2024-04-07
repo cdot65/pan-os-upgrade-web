@@ -126,14 +126,6 @@ export class ProfileDetailsComponent implements OnInit {
         });
     }
 
-    ngOnInit(): void {
-        this._componentPageTitle.title = "Profile Details";
-        const uuid = this.route.snapshot.paramMap.get("uuid");
-        if (uuid) {
-            this.getProfile(uuid);
-        }
-    }
-
     getProfile(uuid: string): void {
         this.profileService.getProfile(uuid).subscribe(
             (profile: Profile) => {
@@ -144,6 +136,14 @@ export class ProfileDetailsComponent implements OnInit {
                 console.error("Error fetching profile:", error);
             },
         );
+    }
+
+    ngOnInit(): void {
+        this._componentPageTitle.title = "Profile Details";
+        const uuid = this.route.snapshot.paramMap.get("uuid");
+        if (uuid) {
+            this.getProfile(uuid);
+        }
     }
 
     onCancel(): void {

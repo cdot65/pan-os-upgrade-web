@@ -13,9 +13,9 @@ import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 import { Subject, forkJoin } from "rxjs";
 
 import { ComponentPageTitle } from "../page-title/page-title";
-import { DeleteDialogComponent } from "../confirmation-dialog/delete-dialog";
 import { Device } from "../../shared/interfaces/device.interface";
 import { Footer } from "src/app/shared/footer/footer";
+import { InventoryDeleteDialogComponent } from "../inventory-delete-dialog/inventory-delete-dialog";
 import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
@@ -155,7 +155,7 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
     }
 
     onDeleteClick(item: Device): void {
-        const dialogRef = this.dialog.open(DeleteDialogComponent, {
+        const dialogRef = this.dialog.open(InventoryDeleteDialogComponent, {
             width: "300px",
             data: {
                 title: "Confirm Delete",
@@ -192,7 +192,7 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
 
     onDeleteSelectedClick() {
         const selectedItems = this.selection.selected;
-        const dialogRef = this.dialog.open(DeleteDialogComponent, {
+        const dialogRef = this.dialog.open(InventoryDeleteDialogComponent, {
             width: "300px",
             data: {
                 title: "Confirm Delete",

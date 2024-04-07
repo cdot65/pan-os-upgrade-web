@@ -108,10 +108,6 @@ export class ProfileCreateComponent implements OnInit {
         });
     }
 
-    ngOnInit(): void {
-        this._componentPageTitle.title = "Create Settings Profile";
-    }
-
     createProfile(): void {
         if (this.createProfileForm && this.createProfileForm.valid) {
             const formValue = this.createProfileForm.value;
@@ -124,6 +120,10 @@ export class ProfileCreateComponent implements OnInit {
                 },
             );
         }
+    }
+
+    ngOnInit(): void {
+        this._componentPageTitle.title = "Create Settings Profile";
     }
 
     onCancel(): void {

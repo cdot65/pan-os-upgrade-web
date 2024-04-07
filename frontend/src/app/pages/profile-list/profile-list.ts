@@ -11,14 +11,13 @@ import { MatSort, MatSortModule, Sort } from "@angular/material/sort";
 import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 
 import { ComponentPageTitle } from "../page-title/page-title";
-import { DeleteDialogComponent } from "../confirmation-dialog/delete-dialog";
 import { Footer } from "src/app/shared/footer/footer";
+import { InventoryDeleteDialogComponent } from "../inventory-delete-dialog/inventory-delete-dialog";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
-import { NgFor } from "@angular/common";
 import { Profile } from "../../shared/interfaces/profile.interface";
 import { ProfilePageHeader } from "../profile-page-header/profile-page-header";
 import { ProfileService } from "../../shared/services/profile.service";
@@ -32,19 +31,15 @@ import { forkJoin } from "rxjs";
     styleUrls: ["./profile-list.scss"],
     standalone: true,
     imports: [
-        NgFor,
-        ProfilePageHeader,
+        Footer,
         MatCheckboxModule,
         MatTableModule,
         MatSortModule,
         MatIconModule,
         MatButtonModule,
-        Footer,
+        ProfilePageHeader,
     ],
 })
-/**
- * Component for displaying the inventory list.
- */
 export class ProfileListComponent implements OnInit, AfterViewInit {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
@@ -65,21 +60,19 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
         private dialog: MatDialog,
     ) {}
 
-    ngOnInit(): void {
-        this._componentPageTitle.title = "Settings Profile List";
-        this.getProfiles();
-    }
-
-    ngAfterViewInit() {
-        this.dataSource.sort = this.sort;
-    }
-
     announceSortChange(sortState: Sort) {
         if (sortState.direction) {
             this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
         } else {
             this._liveAnnouncer.announce("Sorting cleared");
         }
+    }
+
+    checkboxLabel(row?: Profile): string {
+        if (!row) {
+            return `${this.isAllSelected() ? "select" : "deselect"} all`;
+        }
+        return `${this.selection.isSelected(row) ? "deselect" : "select"} row ${row.name}`;
     }
 
     getProfiles(): void {
@@ -97,14 +90,12 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
         );
     }
 
-    /** Whether the number of selected elements matches the total number of rows. */
     isAllSelected() {
         const numSelected = this.selection.selected.length;
         const numRows = this.dataSource.data.length;
         return numSelected === numRows;
     }
 
-    /** Selects all rows if they are not all selected; otherwise clear selection. */
     masterToggle() {
         if (this.isAllSelected()) {
             this.selection.clear();
@@ -113,20 +104,21 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
         }
     }
 
-    /** The label for the checkbox on the passed row */
-    checkboxLabel(row?: Profile): string {
-        if (!row) {
-            return `${this.isAllSelected() ? "select" : "deselect"} all`;
-        }
-        return `${this.selection.isSelected(row) ? "deselect" : "select"} row ${row.name}`;
-    }
-
     navigateToCreateSecurityProfile(): void {
         this.router.navigate(["/profiles/create"]);
     }
 
+    ngAfterViewInit() {
+        this.dataSource.sort = this.sort;
+    }
+
+    ngOnInit(): void {
+        this._componentPageTitle.title = "Settings Profile List";
+        this.getProfiles();
+    }
+
     onDeleteClick(profile: Profile): void {
-        const dialogRef = this.dialog.open(DeleteDialogComponent, {
+        const dialogRef = this.dialog.open(InventoryDeleteDialogComponent, {
             width: "300px",
             data: {
                 title: "Confirm Delete",
@@ -148,13 +140,9 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
         });
     }
 
-    onEditClick(item: Profile): void {
-        this.router.navigate(["/profiles", item.uuid]);
-    }
-
     onDeleteSelectedClick() {
         const selectedItems = this.selection.selected;
-        const dialogRef = this.dialog.open(DeleteDialogComponent, {
+        const dialogRef = this.dialog.open(InventoryDeleteDialogComponent, {
             width: "300px",
             data: {
                 title: "Confirm Delete",
@@ -179,5 +167,9 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
                 );
             }
         });
+    }
+
+    onEditClick(item: Profile): void {
+        this.router.navigate(["/profiles", item.uuid]);
     }
 }
