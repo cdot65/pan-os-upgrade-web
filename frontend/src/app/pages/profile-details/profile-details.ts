@@ -2,7 +2,7 @@
 // src/app/pages/profile-details/profile-details.ts
 
 import { ActivatedRoute, Router } from "@angular/router";
-import { Component, HostBinding, OnInit } from "@angular/core";
+import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
 import {
     FormBuilder,
     FormGroup,
@@ -23,9 +23,12 @@ import { MatOptionModule } from "@angular/material/core";
 import { MatRadioModule } from "@angular/material/radio";
 import { MatSelectModule } from "@angular/material/select";
 import { MatSliderModule } from "@angular/material/slider";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { Profile } from "../../shared/interfaces/profile.interface";
 import { ProfilePageHeader } from "../profile-page-header/profile-page-header";
 import { ProfileService } from "../../shared/services/profile.service";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
 @Component({
     selector: "app-profile-details",
@@ -53,18 +56,20 @@ import { ProfileService } from "../../shared/services/profile.service";
 /**
  * Represents the component for displaying and managing an upgrade profile details.
  */
-export class ProfileDetailsComponent implements OnInit {
+export class ProfileDetailsComponent implements OnInit, OnDestroy {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
     profile: Profile | undefined;
     updateProfileForm: FormGroup;
+    private destroy$ = new Subject<void>();
 
     constructor(
+        private formBuilder: FormBuilder,
+        private profileService: ProfileService,
         private route: ActivatedRoute,
         private router: Router,
-        private formBuilder: FormBuilder,
+        private snackBar: MatSnackBar,
         public _componentPageTitle: ComponentPageTitle,
-        private profileService: ProfileService,
     ) {
         this.updateProfileForm = this.formBuilder.group({
             description: [""],
@@ -127,15 +132,30 @@ export class ProfileDetailsComponent implements OnInit {
     }
 
     getProfile(uuid: string): void {
-        this.profileService.getProfile(uuid).subscribe(
-            (profile: Profile) => {
-                this.profile = profile;
-                this.updateProfileForm.patchValue(profile);
-            },
-            (error: any) => {
-                console.error("Error fetching profile:", error);
-            },
-        );
+        this.profileService
+            .getProfile(uuid)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (profile: Profile) => {
+                    this.profile = profile;
+                    this.updateProfileForm.patchValue(profile);
+                },
+                (error: any) => {
+                    console.error("Error fetching profile:", error);
+                    this.snackBar.open(
+                        "Failed to fetch profile. Please try again.",
+                        "Close",
+                        {
+                            duration: 3000,
+                        },
+                    );
+                },
+            );
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     ngOnInit(): void {
@@ -159,12 +179,20 @@ export class ProfileDetailsComponent implements OnInit {
             };
             this.profileService
                 .updateProfile(updatedProfile, this.profile.uuid)
+                .pipe(takeUntil(this.destroy$))
                 .subscribe(
                     () => {
                         this.router.navigate(["/profiles"]);
                     },
                     (error) => {
                         console.error("Error updating profile:", error);
+                        this.snackBar.open(
+                            "Failed to update profile. Please try again.",
+                            "Close",
+                            {
+                                duration: 3000,
+                            },
+                        );
                     },
                 );
         }

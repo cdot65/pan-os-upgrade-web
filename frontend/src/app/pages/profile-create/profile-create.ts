@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // src/app/pages/profile-create/profile-create.ts
 
-import { Component, HostBinding, OnInit } from "@angular/core";
+import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
 import {
     FormBuilder,
     FormGroup,
@@ -17,9 +17,12 @@ import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { ProfilePageHeader } from "../profile-page-header/profile-page-header";
 import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
 @Component({
     selector: "app-profile-create",
@@ -38,14 +41,16 @@ import { Router } from "@angular/router";
         Footer,
     ],
 })
-export class ProfileCreateComponent implements OnInit {
+export class ProfileCreateComponent implements OnInit, OnDestroy {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     createProfileForm: FormGroup;
+    private destroy$ = new Subject<void>();
 
     constructor(
         private formBuilder: FormBuilder,
         private profileService: ProfileService,
         private router: Router,
+        private snackBar: MatSnackBar,
         public _componentPageTitle: ComponentPageTitle,
     ) {
         this.createProfileForm = this.formBuilder.group({
@@ -111,15 +116,30 @@ export class ProfileCreateComponent implements OnInit {
     createProfile(): void {
         if (this.createProfileForm && this.createProfileForm.valid) {
             const formValue = this.createProfileForm.value;
-            this.profileService.createProfile(formValue).subscribe(
-                () => {
-                    this.router.navigate(["/profiles"]);
-                },
-                (error) => {
-                    console.error("Error creating profile:", error);
-                },
-            );
+            this.profileService
+                .createProfile(formValue)
+                .pipe(takeUntil(this.destroy$))
+                .subscribe(
+                    () => {
+                        this.router.navigate(["/profiles"]);
+                    },
+                    (error) => {
+                        console.error("Error creating profile:", error);
+                        this.snackBar.open(
+                            "Failed to create profile. Please try again.",
+                            "Close",
+                            {
+                                duration: 3000,
+                            },
+                        );
+                    },
+                );
         }
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     ngOnInit(): void {

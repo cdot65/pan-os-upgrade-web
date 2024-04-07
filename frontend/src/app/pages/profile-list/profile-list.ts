@@ -4,11 +4,13 @@ import {
     AfterViewInit,
     Component,
     HostBinding,
+    OnDestroy,
     OnInit,
     ViewChild,
 } from "@angular/core";
 import { MatSort, MatSortModule, Sort } from "@angular/material/sort";
 import { MatTableDataSource, MatTableModule } from "@angular/material/table";
+import { Subject, forkJoin } from "rxjs";
 
 import { ComponentPageTitle } from "../page-title/page-title";
 import { Footer } from "src/app/shared/footer/footer";
@@ -18,12 +20,13 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { Profile } from "../../shared/interfaces/profile.interface";
 import { ProfilePageHeader } from "../profile-page-header/profile-page-header";
 import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
 import { SelectionModel } from "@angular/cdk/collections";
-import { forkJoin } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
 @Component({
     selector: "app-profile-list",
@@ -40,7 +43,7 @@ import { forkJoin } from "rxjs";
         ProfilePageHeader,
     ],
 })
-export class ProfileListComponent implements OnInit, AfterViewInit {
+export class ProfileListComponent implements OnInit, AfterViewInit, OnDestroy {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
     profiles: Profile[] = [];
@@ -49,15 +52,17 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
         [],
     );
     selection = new SelectionModel<Profile>(true, []);
+    private destroy$ = new Subject<void>();
 
     @ViewChild(MatSort) sort: MatSort = new MatSort();
 
     constructor(
+        private dialog: MatDialog,
         private profileService: ProfileService,
         private router: Router,
+        private snackBar: MatSnackBar,
         private _liveAnnouncer: LiveAnnouncer,
         public _componentPageTitle: ComponentPageTitle,
-        private dialog: MatDialog,
     ) {}
 
     announceSortChange(sortState: Sort) {
@@ -76,18 +81,28 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
     }
 
     getProfiles(): void {
-        this.profileService.getProfiles().subscribe(
-            (items) => {
-                this.profiles = items;
-                this.profiles.sort((a, b) => a.name.localeCompare(b.name));
+        this.profileService
+            .getProfiles()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (items) => {
+                    this.profiles = items;
+                    this.profiles.sort((a, b) => a.name.localeCompare(b.name));
 
-                this.dataSource = new MatTableDataSource(this.profiles);
-                this.dataSource.sort = this.sort;
-            },
-            (error) => {
-                console.error("Error fetching settings profiles:", error);
-            },
-        );
+                    this.dataSource = new MatTableDataSource(this.profiles);
+                    this.dataSource.sort = this.sort;
+                },
+                (error) => {
+                    console.error("Error fetching settings profiles:", error);
+                    this.snackBar.open(
+                        "Failed to fetch settings profiles. Please try again.",
+                        "Close",
+                        {
+                            duration: 3000,
+                        },
+                    );
+                },
+            );
     }
 
     isAllSelected() {
@@ -112,6 +127,11 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
         this.dataSource.sort = this.sort;
     }
 
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
     ngOnInit(): void {
         this._componentPageTitle.title = "Settings Profile List";
         this.getProfiles();
@@ -126,18 +146,31 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
             },
         });
 
-        dialogRef.afterClosed().subscribe((result: boolean) => {
-            if (result) {
-                this.profileService.deleteProfile(profile.uuid).subscribe(
-                    () => {
-                        this.getProfiles();
-                    },
-                    (error) => {
-                        console.error("Error deleting inventory item:", error);
-                    },
-                );
-            }
-        });
+        dialogRef
+            .afterClosed()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((result: boolean) => {
+                if (result) {
+                    this.profileService
+                        .deleteProfile(profile.uuid)
+                        .pipe(takeUntil(this.destroy$))
+                        .subscribe(
+                            () => {
+                                this.getProfiles();
+                            },
+                            (error) => {
+                                console.error("Error deleting profile:", error);
+                                this.snackBar.open(
+                                    "Failed to delete profile. Please try again.",
+                                    "Close",
+                                    {
+                                        duration: 3000,
+                                    },
+                                );
+                            },
+                        );
+                }
+            });
     }
 
     onDeleteSelectedClick() {
@@ -151,22 +184,37 @@ export class ProfileListComponent implements OnInit, AfterViewInit {
             },
         });
 
-        dialogRef.afterClosed().subscribe((result: boolean) => {
-            if (result) {
-                const deleteRequests = selectedItems.map((item) =>
-                    this.profileService.deleteProfile(item.uuid),
-                );
-                forkJoin(deleteRequests).subscribe(
-                    () => {
-                        this.selection.clear();
-                        this.getProfiles();
-                    },
-                    (error) => {
-                        console.error("Error deleting inventory items:", error);
-                    },
-                );
-            }
-        });
+        dialogRef
+            .afterClosed()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((result: boolean) => {
+                if (result) {
+                    const deleteRequests = selectedItems.map((item) =>
+                        this.profileService.deleteProfile(item.uuid),
+                    );
+                    forkJoin(deleteRequests)
+                        .pipe(takeUntil(this.destroy$))
+                        .subscribe(
+                            () => {
+                                this.selection.clear();
+                                this.getProfiles();
+                            },
+                            (error) => {
+                                console.error(
+                                    "Error deleting profiles:",
+                                    error,
+                                );
+                                this.snackBar.open(
+                                    "Failed to delete selected profiles. Please try again.",
+                                    "Close",
+                                    {
+                                        duration: 3000,
+                                    },
+                                );
+                            },
+                        );
+                }
+            });
     }
 
     onEditClick(item: Profile): void {
