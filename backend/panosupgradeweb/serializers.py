@@ -111,6 +111,8 @@ class DeviceSerializer(serializers.ModelSerializer):
             "ipv6_address",
             "notes",
             "panorama_appliance",
+            "panorama_ipv4_address",
+            "panorama_ipv6_address",
             "panorama_managed",
             "platform_name",
             "serial",

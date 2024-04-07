@@ -69,6 +69,8 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
             ipv6_address: [""],
             notes: [""],
             panorama_appliance: [""],
+            panorama_ipv4_address: [""],
+            panorama_ipv6_address: [""],
             panorama_managed: [false],
             platform_name: ["", Validators.required],
         });
