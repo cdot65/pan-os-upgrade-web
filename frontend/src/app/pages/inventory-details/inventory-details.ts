@@ -38,8 +38,8 @@ import { takeUntil } from "rxjs/operators";
     standalone: true,
     imports: [
         CommonModule,
-        InventoryPageHeader,
         Footer,
+        InventoryPageHeader,
         MatButtonModule,
         MatCardModule,
         MatCheckboxModule,
@@ -59,20 +59,20 @@ import { takeUntil } from "rxjs/operators";
 export class InventoryDetailsComponent implements OnDestroy, OnInit {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
-    inventoryItem: Device | undefined;
-    updateInventoryForm: FormGroup;
     firewallPlatforms: DeviceType[] = [];
-    panoramaPlatforms: DeviceType[] = [];
-    showRefreshProgress: boolean = false;
-    showRefreshError: boolean = false;
-    refreshJobCompleted: boolean = false;
+    inventoryItem: Device | undefined;
     jobId: string | null = null;
-    private retryCount = 0;
+    panoramaPlatforms: DeviceType[] = [];
+    refreshJobCompleted: boolean = false;
+    showRefreshError: boolean = false;
+    showRefreshProgress: boolean = false;
+    updateInventoryForm: FormGroup;
     private destroy$ = new Subject<void>();
+    private retryCount = 0;
 
     constructor(
-        private formBuilder: FormBuilder,
         private dialog: MatDialog,
+        private formBuilder: FormBuilder,
         private inventoryService: InventoryService,
         private route: ActivatedRoute,
         private router: Router,
@@ -98,12 +98,115 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
         });
     }
 
-    /**
-     * Initializes the component.
-     * Sets the page title to "Inventory Details".
-     * Retrieves the inventory item based on the provided ID.
-     * Subscribe to changes of inventory type form control and fetches the corresponding platforms.
-     */
+    getDevice(itemId: string): void {
+        this.inventoryService
+            .getDevice(itemId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (item: Device) => {
+                    this.inventoryItem = item;
+                    this.updateInventoryForm.patchValue(item);
+                },
+                (error: any) => {
+                    console.error("Error fetching inventory item:", error);
+                    this.snackBar.open(
+                        "Failed to fetch inventory item. Please try again.",
+                        "Close",
+                        {
+                            duration: 3000,
+                        },
+                    );
+                },
+            );
+    }
+
+    getFirewallPlatforms(): void {
+        this.inventoryService
+            .getFirewallPlatforms()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (platforms: DeviceType[]) => {
+                    this.firewallPlatforms = platforms;
+                },
+                (error: any) => {
+                    console.error("Error fetching firewall platforms:", error);
+                    this.snackBar.open(
+                        "Failed to fetch firewall platforms. Please try again.",
+                        "Close",
+                        {
+                            duration: 3000,
+                        },
+                    );
+                },
+            );
+    }
+
+    getJobStatus(): void {
+        if (this.jobId) {
+            this.inventoryService
+                .getJobStatus(this.jobId)
+                .pipe(takeUntil(this.destroy$))
+                .subscribe(
+                    (response) => {
+                        if (response.status === "completed") {
+                            this.showRefreshProgress = false;
+                            this.getDevice(this.inventoryItem!.uuid);
+                            this.retryCount = 0; // Reset the retry count on success
+                        } else {
+                            setTimeout(() => this.getJobStatus(), 2000);
+                        }
+                    },
+                    (error) => {
+                        console.error("Error checking job status:", error);
+                        if (error.status === 400 && this.retryCount < 3) {
+                            this.retryCount++;
+                            console.log(
+                                `Retrying job status check (attempt ${this.retryCount})`,
+                            );
+                            setTimeout(() => this.getJobStatus(), 2000);
+                        } else {
+                            this.showRefreshProgress = false;
+                            this.showRefreshError = true;
+                            this.retryCount = 0;
+                            this.snackBar.open(
+                                "Failed to check job status. Please try again.",
+                                "Close",
+                                {
+                                    duration: 3000,
+                                },
+                            );
+                        }
+                    },
+                );
+        }
+    }
+
+    getPanoramaPlatforms(): void {
+        this.inventoryService
+            .getPanoramaPlatforms()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (platforms: DeviceType[]) => {
+                    this.panoramaPlatforms = platforms;
+                },
+                (error: any) => {
+                    console.error("Error fetching panorama platforms:", error);
+                    this.snackBar.open(
+                        "Failed to fetch panorama platforms. Please try again.",
+                        "Close",
+                        {
+                            duration: 3000,
+                        },
+                    );
+                },
+            );
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory Details";
         const itemId = this.route.snapshot.paramMap.get("id");
@@ -150,126 +253,6 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
             });
     }
 
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
-    }
-
-    /**
-     * Fetches the firewall platforms from the inventory service.
-     */
-    getFirewallPlatforms(): void {
-        this.inventoryService
-            .getFirewallPlatforms()
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(
-                (platforms: DeviceType[]) => {
-                    this.firewallPlatforms = platforms;
-                },
-                (error: any) => {
-                    console.error("Error fetching firewall platforms:", error);
-                    this.snackBar.open(
-                        "Failed to fetch firewall platforms. Please try again.",
-                        "Close",
-                        {
-                            duration: 3000,
-                        },
-                    );
-                },
-            );
-    }
-
-    /**
-     * Fetches the Panorama platforms from the inventory service.
-     */
-    getPanoramaPlatforms(): void {
-        this.inventoryService
-            .getPanoramaPlatforms()
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(
-                (platforms: DeviceType[]) => {
-                    this.panoramaPlatforms = platforms;
-                },
-                (error: any) => {
-                    console.error("Error fetching panorama platforms:", error);
-                    this.snackBar.open(
-                        "Failed to fetch panorama platforms. Please try again.",
-                        "Close",
-                        {
-                            duration: 3000,
-                        },
-                    );
-                },
-            );
-    }
-
-    /**
-     * Retrieves an inventory item by its ID.
-     *
-     * @param itemId - The ID of the inventory item to retrieve.
-     */
-    getDevice(itemId: string): void {
-        this.inventoryService
-            .getDevice(itemId)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(
-                (item: Device) => {
-                    this.inventoryItem = item;
-                    this.updateInventoryForm.patchValue(item);
-                },
-                (error: any) => {
-                    console.error("Error fetching inventory item:", error);
-                    this.snackBar.open(
-                        "Failed to fetch inventory item. Please try again.",
-                        "Close",
-                        {
-                            duration: 3000,
-                        },
-                    );
-                },
-            );
-    }
-
-    /**
-     * Updates the inventory item with the values from the inventory form.
-     * Navigates to the inventory page after successful update.
-     * Logs an error if the update fails.
-     */
-    updateDevice(): void {
-        if (this.inventoryItem && this.updateInventoryForm.valid) {
-            const updatedItem = {
-                ...this.inventoryItem,
-                ...this.updateInventoryForm.value,
-            };
-            if (updatedItem.device_type === "Panorama") {
-                delete updatedItem.device_group;
-                delete updatedItem.panorama_appliance;
-                delete updatedItem.panoramaManaged;
-            }
-            this.inventoryService
-                .updateDevice(updatedItem, this.inventoryItem.uuid)
-                .pipe(takeUntil(this.destroy$))
-                .subscribe(
-                    () => {
-                        this.router.navigate(["/inventory"]);
-                    },
-                    (error) => {
-                        console.error("Error updating inventory item:", error);
-                        this.snackBar.open(
-                            "Failed to update inventory item. Please try again.",
-                            "Close",
-                            {
-                                duration: 3000,
-                            },
-                        );
-                    },
-                );
-        }
-    }
-
-    /**
-     * Resets the updateInventoryForm and navigates to the inventory page.
-     */
     onCancel(): void {
         this.updateInventoryForm.reset();
         this.router.navigate(["/inventory"]);
@@ -303,7 +286,7 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
                             .subscribe(
                                 (jobId) => {
                                     this.jobId = jobId;
-                                    this.checkJobStatus();
+                                    this.getJobStatus();
                                 },
                                 (error) => {
                                     console.error(
@@ -326,41 +309,33 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
             });
     }
 
-    checkJobStatus(): void {
-        if (this.jobId) {
+    updateDevice(): void {
+        if (this.inventoryItem && this.updateInventoryForm.valid) {
+            const updatedItem = {
+                ...this.inventoryItem,
+                ...this.updateInventoryForm.value,
+            };
+            if (updatedItem.device_type === "Panorama") {
+                delete updatedItem.device_group;
+                delete updatedItem.panorama_appliance;
+                delete updatedItem.panoramaManaged;
+            }
             this.inventoryService
-                .getJobStatus(this.jobId)
+                .updateDevice(updatedItem, this.inventoryItem.uuid)
                 .pipe(takeUntil(this.destroy$))
                 .subscribe(
-                    (response) => {
-                        if (response.status === "completed") {
-                            this.showRefreshProgress = false;
-                            this.getDevice(this.inventoryItem!.uuid);
-                            this.retryCount = 0; // Reset the retry count on success
-                        } else {
-                            setTimeout(() => this.checkJobStatus(), 2000);
-                        }
+                    () => {
+                        this.router.navigate(["/inventory"]);
                     },
                     (error) => {
-                        console.error("Error checking job status:", error);
-                        if (error.status === 400 && this.retryCount < 3) {
-                            this.retryCount++;
-                            console.log(
-                                `Retrying job status check (attempt ${this.retryCount})`,
-                            );
-                            setTimeout(() => this.checkJobStatus(), 2000);
-                        } else {
-                            this.showRefreshProgress = false;
-                            this.showRefreshError = true;
-                            this.retryCount = 0;
-                            this.snackBar.open(
-                                "Failed to check job status. Please try again.",
-                                "Close",
-                                {
-                                    duration: 3000,
-                                },
-                            );
-                        }
+                        console.error("Error updating inventory item:", error);
+                        this.snackBar.open(
+                            "Failed to update inventory item. Please try again.",
+                            "Close",
+                            {
+                                duration: 3000,
+                            },
+                        );
                     },
                 );
         }
