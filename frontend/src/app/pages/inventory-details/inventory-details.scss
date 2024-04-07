@@ -10,6 +10,10 @@
   width: 97%;
   padding: 25px;
 
+  form {
+    padding: 20px;
+  }
+
   .table-header {
     display: flex;
     justify-content: space-between;
@@ -24,6 +28,11 @@
       mat-icon {
         margin-right: 5px;
       }
+    }
+
+    .refresh-header {
+      display: flex;
+      align-items: center;
     }
   }
 
@@ -49,10 +58,6 @@
     font-size: 20px;
     text-align: center;
     color: red;
-  }
-
-  form {
-    padding: 20px;
   }
 
   .inventory-details-grid {

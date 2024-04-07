@@ -50,20 +50,14 @@
         <td mat-cell *matCellDef="let item">{{item.hostname}}</td>
       </ng-container>
 
-      <!-- IPv4 Address Column -->
-      <ng-container matColumnDef="ipv4_address">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by IPv4 address">
-          IPv4 Address
+      <!-- IPv4/IPv6 Address Column -->
+      <ng-container matColumnDef="management_ip">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by management IP">
+          Management IP
         </th>
-        <td mat-cell *matCellDef="let item">{{item.ipv4_address}}</td>
-      </ng-container>
-
-      <!-- IPv6 Address Column -->
-      <ng-container matColumnDef="ipv6_address">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by IPv6 address">
-          IPv6 Address
-        </th>
-        <td mat-cell *matCellDef="let item">{{item.ipv6_address}}</td>
+        <td mat-cell *matCellDef="let item">
+          {{item.ipv4_address ? item.ipv4_address : item.ipv6_address}}
+        </td>
       </ng-container>
 
       <!-- Platform Column -->

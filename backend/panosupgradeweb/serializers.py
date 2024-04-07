@@ -54,7 +54,9 @@ class DeviceSerializer(serializers.ModelSerializer):
         allow_null=True,
     )
     ipv4_address = serializers.IPAddressField(
-        required=True,
+        allow_blank=True,
+        required=False,
+        allow_null=True,
     )
     ipv6_address = serializers.IPAddressField(
         allow_blank=True,
