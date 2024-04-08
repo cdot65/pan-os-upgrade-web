@@ -1,0 +1,14 @@
+{
+  "language_overrides": {
+    "Python": {
+      "format_on_save": {
+        "external": {
+          "command": "black",
+          "arguments": [
+            "-"
+          ]
+        }
+      }
+    }
+  }
+}
