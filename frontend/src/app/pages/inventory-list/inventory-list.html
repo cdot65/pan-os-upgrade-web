@@ -1,178 +1,124 @@
 <!-- src/app/pages/inventory-list/inventory-list.html -->
 <div class="inventory-list-container">
-    <app-inventory-page-header></app-inventory-page-header>
-    <main
-        focusOnNavigation
-        aria-label="Inventory list"
-        id="inventory-list"
-        class="inventory-list"
-    >
-        <div class="table-header">
-            <h2>Devices</h2>
+  <app-inventory-page-header></app-inventory-page-header>
+  <main focusOnNavigation aria-label="Inventory list" id="inventory-list" class="inventory-list">
+    <div class="table-header">
+      <h2>Devices</h2>
 
-            <div class="button-container">
-                <button
-                    mat-raised-button
-                    color="accent"
-                    (click)="navigateToSyncInventory()"
-                    aria-label="Sync Devices from Panorama"
-                >
-                    <mat-icon>sync</mat-icon>
-                    Sync Devices from Panorama
-                </button>
-                <button
-                    mat-raised-button
-                    color="primary"
-                    (click)="navigateToCreateInventory()"
-                    aria-label="Add a new device"
-                >
-                    <mat-icon>add</mat-icon>
-                    Add a new device
-                </button>
-                <button
-                    mat-raised-button
-                    color="warn"
-                    (click)="onDeleteSelectedClick()"
-                    [disabled]="selection.selected.length === 0"
-                >
-                    <mat-icon>delete</mat-icon>
-                    Delete Selected
-                </button>
-            </div>
+      <div class="button-row">
+        <div class="button-container">
+          <button mat-raised-button color="accent" (click)="navigateToSyncInventory()"
+            aria-label="Import Devices from Panorama">
+            <mat-icon>import_export</mat-icon>
+            Import
+          </button>
+          <button mat-raised-button color="primary" (click)="navigateToCreateInventory()" aria-label="Add a new device">
+            <mat-icon>add</mat-icon>
+            Add
+          </button>
+          <button mat-raised-button color="warn" (click)="onExportClick()" aria-label="Export selected devices">
+            <mat-icon>cloud_download</mat-icon>
+            Export
+          </button>
         </div>
 
-        <table
-            mat-table
-            [dataSource]="dataSource"
-            matSort
-            (matSortChange)="announceSortChange($event)"
-            class="mat-elevation-z2"
-        >
-            <!-- Checkbox Column -->
-            <ng-container matColumnDef="select">
-                <th mat-header-cell *matHeaderCellDef>
-                    <mat-checkbox
-                        (change)="$event ? masterToggle() : null"
-                        [checked]="selection.hasValue() && isAllSelected()"
-                        [indeterminate]="selection.hasValue() && !isAllSelected()"
-                        [aria-label]="checkboxLabel()"
-                    >
-                    </mat-checkbox>
-                </th>
-                <td mat-cell *matCellDef="let row">
-                    <mat-checkbox
-                        (click)="$event.stopPropagation()"
-                        (change)="$event ? selection.toggle(row) : null"
-                        [checked]="selection.isSelected(row)"
-                        [aria-label]="checkboxLabel(row)"
-                    >
-                    </mat-checkbox>
-                </td>
-            </ng-container>
+        @if (selection.selected.length > 0) {
+        <div class="selected-actions">
+          <button mat-raised-button color="primary" (click)="onEditSelectedClick()">
+            <mat-icon>edit</mat-icon>
+            Edit Selected
+          </button>
+          <button mat-raised-button color="warn" (click)="onDeleteSelectedClick()">
+            <mat-icon>delete</mat-icon>
+            Delete Selected
+          </button>
+        </div>
+        }
+      </div>
+    </div>
 
-            <!-- Hostname Column -->
-            <ng-container matColumnDef="hostname">
-                <th
-                    mat-header-cell
-                    *matHeaderCellDef
-                    mat-sort-header
-                    sortActionDescription="Sort by hostname"
-                >
-                    Hostname
-                </th>
-                <td mat-cell *matCellDef="let item">{{item.hostname}}</td>
-            </ng-container>
+    <table mat-table [dataSource]="dataSource" matSort (matSortChange)="announceSortChange($event)"
+      class="mat-elevation-z2">
+      <!-- Checkbox Column -->
+      <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-checkbox (change)="$event ? masterToggle() : null" [checked]="selection.hasValue() && isAllSelected()"
+            [indeterminate]="selection.hasValue() && !isAllSelected()" [aria-label]="checkboxLabel()">
+          </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let row">
+          <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+            [checked]="selection.isSelected(row)" [aria-label]="checkboxLabel(row)">
+          </mat-checkbox>
+        </td>
+      </ng-container>
 
-            <!-- IPv4/IPv6 Address Column -->
-            <ng-container matColumnDef="management_ip">
-                <th
-                    mat-header-cell
-                    *matHeaderCellDef
-                    mat-sort-header
-                    sortActionDescription="Sort by management IP"
-                >
-                    Management IP
-                </th>
-                <td mat-cell *matCellDef="let item">
-                    {{item.ipv4_address ? item.ipv4_address :
+      <!-- Hostname Column -->
+      <ng-container matColumnDef="hostname">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by hostname">
+          Hostname
+        </th>
+        <td mat-cell *matCellDef="let item">{{item.hostname}}</td>
+      </ng-container>
+
+      <!-- IPv4/IPv6 Address Column -->
+      <ng-container matColumnDef="management_ip">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by management IP">
+          Management IP
+        </th>
+        <td mat-cell *matCellDef="let item">
+          {{item.ipv4_address ? item.ipv4_address :
                     item.ipv6_address}}
-                </td>
-            </ng-container>
+        </td>
+      </ng-container>
 
-            <!-- Platform Column -->
-            <ng-container matColumnDef="platform_name">
-                <th
-                    mat-header-cell
-                    *matHeaderCellDef
-                    mat-sort-header
-                    sortActionDescription="Sort by platform"
-                >
-                    Platform
-                </th>
-                <td mat-cell *matCellDef="let item">{{item.platform_name}}</td>
-            </ng-container>
+      <!-- Platform Column -->
+      <ng-container matColumnDef="platform_name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by platform">
+          Platform
+        </th>
+        <td mat-cell *matCellDef="let item">{{item.platform_name}}</td>
+      </ng-container>
 
-            <!-- Inventory Type Column -->
-            <ng-container matColumnDef="device_type">
-                <th
-                    mat-header-cell
-                    *matHeaderCellDef
-                    mat-sort-header
-                    sortActionDescription="Sort by inventory type"
-                >
-                    Inventory Type
-                </th>
-                <td mat-cell *matCellDef="let item">{{item.device_type}}</td>
-            </ng-container>
+      <!-- Inventory Type Column -->
+      <ng-container matColumnDef="device_type">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by inventory type">
+          Inventory Type
+        </th>
+        <td mat-cell *matCellDef="let item">{{item.device_type}}</td>
+      </ng-container>
 
-            <!-- Notes Column -->
-            <ng-container matColumnDef="notes">
-                <th
-                    mat-header-cell
-                    *matHeaderCellDef
-                    mat-sort-header
-                    sortActionDescription="Sort by notes"
-                >
-                    Notes
-                </th>
-                <td mat-cell *matCellDef="let item">{{item.notes}}</td>
-            </ng-container>
+      <!-- Notes Column -->
+      <ng-container matColumnDef="notes">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by notes">
+          Notes
+        </th>
+        <td mat-cell *matCellDef="let item">{{item.notes}}</td>
+      </ng-container>
 
-            <!-- Edit Column -->
-            <ng-container matColumnDef="edit">
-                <th mat-header-cell *matHeaderCellDef>Edit</th>
-                <td mat-cell *matCellDef="let item">
-                    <button
-                        mat-icon-button
-                        (click)="onEditClick(item)"
-                        class="edit-button"
-                    >
-                        <mat-icon>edit</mat-icon>
-                    </button>
-                </td>
-            </ng-container>
+      <!-- Edit Column -->
+      <ng-container matColumnDef="edit">
+        <th mat-header-cell *matHeaderCellDef>Edit</th>
+        <td mat-cell *matCellDef="let item">
+          <button mat-icon-button (click)="onEditClick(item)" class="edit-button">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </td>
+      </ng-container>
 
-            <!-- Delete Column -->
-            <ng-container matColumnDef="delete">
-                <th mat-header-cell *matHeaderCellDef>Delete</th>
-                <td mat-cell *matCellDef="let item">
-                    <button
-                        mat-icon-button
-                        (click)="onDeleteClick(item)"
-                        class="delete-button"
-                    >
-                        <mat-icon>delete</mat-icon>
-                    </button>
-                </td>
-            </ng-container>
+      <!-- Delete Column -->
+      <ng-container matColumnDef="delete">
+        <th mat-header-cell *matHeaderCellDef>Delete</th>
+        <td mat-cell *matCellDef="let item">
+          <button mat-icon-button (click)="onDeleteClick(item)" class="delete-button">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr
-                mat-row
-                *matRowDef="let row; columns: displayedColumns;"
-                (click)="selection.toggle(row)"
-            ></tr>
-        </table>
-    </main>
-    <app-footer></app-footer>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selection.toggle(row)"></tr>
+    </table>
+  </main>
+  <app-footer></app-footer>
 </div>
