@@ -8,7 +8,6 @@ import xml.etree.ElementTree as ET
 from panos.firewall import Firewall
 from panos.panorama import Panorama
 
-# trunk-ignore(pyright/reportMissingImports)
 from panosupgradeweb.models import Device, DeviceType, Profile
 
 
