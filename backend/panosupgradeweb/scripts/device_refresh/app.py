@@ -2,10 +2,13 @@
 
 import json
 import logging
+import sys
 import xml.etree.ElementTree as ET
 
 from panos.firewall import Firewall
 from panos.panorama import Panorama
+
+# trunk-ignore(pyright/reportMissingImports)
 from panosupgradeweb.models import Device, DeviceType, Profile
 
 
@@ -163,16 +166,54 @@ def run_device_refresh(
         # Parse the HA state information and store it in the device_data dictionary
         if platform.device_type == "Firewall" and ha_info[0] != "disabled":
             device_data["ha"] = True
-            ha_details = flatten_xml_to_dict(element=ha_info[1])
-            device_data["ha_mode"] = ha_details.get("result", {}).get("group", {}).get("local-info", {}).get("mode")
-            device_data["ha_status"] = ha_details.get("result", {}).get("group", {}).get("local-info", {}).get("state")
-            device_data["ha_peer"] = ha_details.get("result", {}).get("group", {}).get("peer-info", {}).get("mgmt-ip", "").split("/")[0]
+
+            if isinstance(ha_info[1], ET.Element):
+                ha_details = flatten_xml_to_dict(element=ha_info[1])
+            else:
+                logging.debug("ha_info[1] is not an ET.Element")
+                sys.exit(1)
+
+            # Handle the error case here
+            device_data["ha_mode"] = (
+                ha_details.get("result", {})
+                .get("group", {})
+                .get("local-info", {})
+                .get("mode")
+            )
+            device_data["ha_status"] = (
+                ha_details.get("result", {})
+                .get("group", {})
+                .get("local-info", {})
+                .get("state")
+            )
+            device_data["ha_peer"] = (
+                ha_details.get("result", {})
+                .get("group", {})
+                .get("peer-info", {})
+                .get("mgmt-ip", "")
+                .split("/")[0]
+            )
         elif platform.device_type == "Panorama" and ha_info[0] != "disabled":
             device_data["ha"] = True
-            ha_details = flatten_xml_to_dict(element=ha_info[1])
-            device_data["ha_mode"] = ha_details.get("result", {}).get("local-info", {}).get("mode")
-            device_data["ha_status"] = ha_details.get("result", {}).get("local-info", {}).get("state")
-            device_data["ha_peer"] = ha_details.get("result", {}).get("peer-info", {}).get("mgmt-ip", "").split("/")[0]
+
+            if isinstance(ha_info[1], ET.Element):
+                ha_details = flatten_xml_to_dict(element=ha_info[1])
+            else:
+                logging.debug("ha_info[1] is not an ET.Element")
+                sys.exit(1)
+
+            device_data["ha_mode"] = (
+                ha_details.get("result", {}).get("local-info", {}).get("mode")
+            )
+            device_data["ha_status"] = (
+                ha_details.get("result", {}).get("local-info", {}).get("state")
+            )
+            device_data["ha_peer"] = (
+                ha_details.get("result", {})
+                .get("peer-info", {})
+                .get("mgmt-ip", "")
+                .split("/")[0]
+            )
         else:
             device_data["ha"] = False
             device_data["ha_mode"] = None
