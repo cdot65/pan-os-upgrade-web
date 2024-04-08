@@ -9,6 +9,7 @@ import {
     OnInit,
     ViewChild,
 } from "@angular/core";
+import { MatDialog, MatDialogModule } from "@angular/material/dialog";
 import { MatSort, MatSortModule, Sort } from "@angular/material/sort";
 import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 import { Subject, forkJoin } from "rxjs";
@@ -22,9 +23,10 @@ import { InventoryService } from "../../shared/services/inventory.service";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
-import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
+import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { ProfileDialogComponent } from "../profile-select-dialog/profile-select-dialog.component";
 import { Router } from "@angular/router";
 import { SelectionModel } from "@angular/cdk/collections";
 import { takeUntil } from "rxjs/operators";
@@ -42,6 +44,8 @@ import { takeUntil } from "rxjs/operators";
         MatSortModule,
         MatIconModule,
         MatButtonModule,
+        MatDialogModule,
+        MatProgressBarModule,
     ],
 })
 /**
@@ -62,6 +66,12 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
     ];
     selection = new SelectionModel<Device>(true, []);
     dataSource: MatTableDataSource<Device> = new MatTableDataSource<Device>([]);
+    showRefreshProgress: boolean = false;
+    showRefreshError: boolean = false;
+    jobId: string | null = null;
+    refreshJobsCompleted: number = 0;
+    totalRefreshJobs: number = 0;
+    private retryCount = 0;
     private destroy$ = new Subject<void>();
 
     @ViewChild(MatSort) sort: MatSort = new MatSort();
@@ -114,6 +124,49 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
                             duration: 3000,
                         },
                     );
+                },
+            );
+    }
+
+    getJobStatus(jobId: string): void {
+        this.inventoryService
+            .getJobStatus(jobId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (response) => {
+                    if (response.status === "completed") {
+                        this.refreshJobsCompleted++;
+                        if (
+                            this.refreshJobsCompleted === this.totalRefreshJobs
+                        ) {
+                            this.showRefreshProgress = false;
+                            this.getDevices();
+                            this.retryCount = 0;
+                        }
+                    } else {
+                        setTimeout(() => this.getJobStatus(jobId), 2000);
+                    }
+                },
+                (error) => {
+                    console.error("Error checking job status:", error);
+                    if (error.status === 400 && this.retryCount < 3) {
+                        this.retryCount++;
+                        console.log(
+                            `Retrying job status check (attempt ${this.retryCount})`,
+                        );
+                        setTimeout(() => this.getJobStatus(jobId), 2000);
+                    } else {
+                        this.showRefreshProgress = false;
+                        this.showRefreshError = true;
+                        this.retryCount = 0;
+                        this.snackBar.open(
+                            "Failed to check job status. Please try again.",
+                            "Close",
+                            {
+                                duration: 3000,
+                            },
+                        );
+                    }
                 },
             );
     }
@@ -234,6 +287,63 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
 
     onEditClick(item: Device): void {
         this.router.navigate(["/inventory", item.uuid]);
+    }
+
+    onRefreshSelectedClick() {
+        const selectedItems = this.selection.selected;
+        const dialogRef = this.dialog.open(ProfileDialogComponent, {
+            width: "400px",
+            data: { message: "Select a profile to refresh device details" },
+        });
+
+        dialogRef
+            .afterClosed()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((selectedProfileUuid) => {
+                if (selectedProfileUuid && selectedItems.length > 0) {
+                    const author = localStorage.getItem("author");
+                    const refreshRequests = selectedItems.map((item) => {
+                        const refreshForm = {
+                            author: author ? parseInt(author, 10) : 0,
+                            device: item.uuid,
+                            profile: selectedProfileUuid,
+                        };
+                        return this.inventoryService.refreshDevice(refreshForm);
+                    });
+
+                    this.showRefreshProgress = true;
+                    this.showRefreshError = false;
+                    this.refreshJobsCompleted = 0;
+                    this.totalRefreshJobs = selectedItems.length;
+
+                    forkJoin(refreshRequests)
+                        .pipe(takeUntil(this.destroy$))
+                        .subscribe(
+                            (jobIds) => {
+                                jobIds.forEach((jobId) => {
+                                    if (jobId) {
+                                        this.getJobStatus(jobId);
+                                    }
+                                });
+                            },
+                            (error) => {
+                                console.error(
+                                    "Error refreshing device details:",
+                                    error,
+                                );
+                                this.showRefreshProgress = false;
+                                this.showRefreshError = true;
+                                this.snackBar.open(
+                                    "Failed to refresh device details. Please try again.",
+                                    "Close",
+                                    {
+                                        duration: 3000,
+                                    },
+                                );
+                            },
+                        );
+                }
+            });
     }
 
     toggleAllRows() {

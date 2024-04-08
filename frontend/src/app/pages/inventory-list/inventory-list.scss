@@ -17,6 +17,11 @@
       margin: 0;
     }
 
+    .refresh-header {
+      display: flex;
+      align-items: center;
+    }
+
     .button-row {
       display: flex;
       justify-content: space-between;
@@ -41,6 +46,30 @@
         }
       }
     }
+  }
+
+  .refresh-progress {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+
+  }
+
+  .refresh-header {
+    outline: none;
+    // padding: 24px 8px;
+    font-size: 20px;
+    text-align: center;
+    color: accent;
+  }
+
+  .refresh-error {
+    outline: none;
+    // padding: 24px 8px;
+    font-size: 20px;
+    text-align: center;
+    color: red;
   }
 
   .mat-table {

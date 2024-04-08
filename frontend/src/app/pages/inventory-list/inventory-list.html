@@ -20,6 +20,10 @@
 
         @if (selection.selected.length > 0) {
         <div class="selected-actions">
+          <button mat-raised-button color="accent" (click)="onRefreshSelectedClick()">
+            <mat-icon>refresh</mat-icon>
+            Refresh Selected
+          </button>
           <button mat-raised-button color="warn" (click)="onDeleteSelectedClick()">
             <mat-icon>delete</mat-icon>
             Delete Selected
@@ -27,6 +31,22 @@
         </div>
         }
       </div>
+
+      <!-- Display the progress bar when a user has requested a refresh -->
+      @if (showRefreshProgress) {
+      <div class="refresh-progress">
+        <mat-progress-bar mode="determinate" [value]="(refreshJobsCompleted / totalRefreshJobs) * 100">
+        </mat-progress-bar>
+        <p>Refreshing {{ refreshJobsCompleted }} of {{ totalRefreshJobs }} devices</p>
+      </div>
+      }
+
+      <!-- Display the error message if there is a problem with the job -->
+      @if (showRefreshError) {
+      <div class="refresh-error">
+        <p>There was a problem with the refresh job. Please try again.</p>
+      </div>
+      }
     </div>
 
     <table mat-table [dataSource]="dataSource" matSort (matSortChange)="announceSortChange($event)"
