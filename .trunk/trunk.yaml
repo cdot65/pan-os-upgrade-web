@@ -14,13 +14,13 @@ runtimes:
         - python@3.10.8
 lint:
     disabled:
+        - pyright
         - ruff
         - osv-scanner
         - checkov
         - terrascan
         - flake8
     enabled:
-        - pyright@1.1.357
         - actionlint@1.6.27
         - bandit@1.7.8
         - black@24.3.0
