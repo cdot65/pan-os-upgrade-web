@@ -8,26 +8,18 @@
       <div class="button-row">
         <div class="button-container">
           <button mat-raised-button color="accent" (click)="navigateToSyncInventory()"
-            aria-label="Import Devices from Panorama">
-            <mat-icon>import_export</mat-icon>
-            Import
+            aria-label="Sync Devices from Panorama">
+            <mat-icon>sync</mat-icon>
+            Sync from Panorama
           </button>
           <button mat-raised-button color="primary" (click)="navigateToCreateInventory()" aria-label="Add a new device">
             <mat-icon>add</mat-icon>
-            Add
-          </button>
-          <button mat-raised-button color="warn" (click)="onExportClick()" aria-label="Export selected devices">
-            <mat-icon>cloud_download</mat-icon>
-            Export
+            Add new Device
           </button>
         </div>
 
         @if (selection.selected.length > 0) {
         <div class="selected-actions">
-          <button mat-raised-button color="primary" (click)="onEditSelectedClick()">
-            <mat-icon>edit</mat-icon>
-            Edit Selected
-          </button>
           <button mat-raised-button color="warn" (click)="onDeleteSelectedClick()">
             <mat-icon>delete</mat-icon>
             Delete Selected
