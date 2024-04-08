@@ -92,6 +92,18 @@ export const PANOSUPGRADE_ROUTES: Routes = [
         canActivate: [authGuard],
     },
     {
+        path: "upgrade",
+        loadComponent: () =>
+            import("./pages/upgrade-list").then((m) => m.UpgradeListComponent),
+        canActivate: [authGuard],
+    },
+    {
+        path: "upgrade/:uuid",
+        loadComponent: () =>
+            import("./pages/upgrade-list").then((m) => m.UpgradeListComponent),
+        canActivate: [authGuard],
+    },
+    {
         path: "404",
         loadComponent: () =>
             import("./pages/not-found").then((m) => m.NotFound),

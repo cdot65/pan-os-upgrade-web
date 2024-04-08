@@ -1,0 +1,29 @@
+// src/app/pages/upgrade-list/upgrade-list.component.scss
+
+.upgrade-list-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .upgrade-list {
+    flex: 1;
+    overflow: auto;
+    padding: 16px;
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+
+      .button-container {
+        display: flex;
+        gap: 8px;
+      }
+    }
+
+    table {
+      width: 100%;
+    }
+  }
+}
