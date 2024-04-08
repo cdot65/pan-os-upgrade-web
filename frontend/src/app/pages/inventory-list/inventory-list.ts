@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // src/app/pages/inventory-list/inventory-list.ts
 
 import {
@@ -233,16 +234,6 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
 
     onEditClick(item: Device): void {
         this.router.navigate(["/inventory", item.uuid]);
-    }
-
-    onEditSelectedClick() {
-        // Implement the logic to edit selected devices
-        console.log("Edit selected devices:", this.selection.selected);
-    }
-
-    onExportClick() {
-        // Implement the logic to export devices
-        console.log("Export devices");
     }
 
     toggleAllRows() {
