@@ -3,51 +3,47 @@
 <div class="upgrade-list-container">
   <app-upgrade-page-header></app-upgrade-page-header>
   <main focusOnNavigation aria-label="Upgrade list" id="upgrade-list" class="upgrade-list">
+
     <div class="table-header">
       <h2>Devices</h2>
+
+      <!-- Buttons -->
       <div class="button-container">
         <mat-form-field>
           <mat-label>Select a Profile</mat-label>
           <mat-select [(value)]="selectedProfile" (selectionChange)="onProfileSelect($event.value)">
-            <mat-option *ngFor="let profile of profiles" [value]="profile">
+            @for (profile of profiles; track profile) {
+            <mat-option [value]="profile">
               {{ profile.name }}
             </mat-option>
+            }
           </mat-select>
         </mat-form-field>
-        <button mat-raised-button color="primary" (click)="onUpgradeClick()">
-          <mat-icon>upgrade</mat-icon>
-          Upgrade Selected Device
-        </button>
       </div>
     </div>
 
-    <table mat-table [dataSource]="devices" class="mat-elevation-z2">
-      <!-- Checkbox Column -->
-      <ng-container matColumnDef="select">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let row">
+    <mat-accordion>
+      @for (row of devices; track row) {
+      <mat-expansion-panel [expanded]="expandedRow === row" (opened)="expandedRow = row" (closed)="expandedRow = null">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ row.hostname }}</mat-panel-title>
+          <mat-panel-description>
+            Software Version: {{ row.sw_version }} | Content Version: {{ row.app_version }}
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <div class="panel-content">
           <mat-checkbox (click)="$event.stopPropagation()" (change)="onDeviceSelect(row)"
             [checked]="selectedDevice === row">
           </mat-checkbox>
-        </td>
-      </ng-container>
-
-      <!-- Hostname Column -->
-      <ng-container matColumnDef="hostname">
-        <th mat-header-cell *matHeaderCellDef>Hostname</th>
-        <td mat-cell *matCellDef="let device">{{ device.hostname }}</td>
-      </ng-container>
-
-      <!-- Software Version Column -->
-      <ng-container matColumnDef="sw_version">
-        <th mat-header-cell *matHeaderCellDef>Software Version</th>
-        <td mat-cell *matCellDef="let device">{{ device.sw_version }}</td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="['select', 'hostname', 'sw_version']"></tr>
-      <tr mat-row *matRowDef="let row; columns: ['select', 'hostname', 'sw_version']" (click)="onDeviceSelect(row)">
-      </tr>
-    </table>
+          <p>Device Group: {{ row.device_group ? row.device_group : 'n/a' }}</p>
+          <button mat-raised-button color="primary" (click)="onUpgradeClick(row)" [disabled]="!selectedProfile">
+            <mat-icon>upgrade</mat-icon>
+            Upgrade Device
+          </button>
+        </div>
+      </mat-expansion-panel>
+      }
+    </mat-accordion>
   </main>
   <app-footer></app-footer>
 </div>

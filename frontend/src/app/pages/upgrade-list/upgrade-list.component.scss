@@ -22,8 +22,14 @@
       }
     }
 
-    table {
-      width: 100%;
+    .mat-expansion-panel {
+      margin-bottom: 8px;
+    }
+
+    .panel-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
   }
 }

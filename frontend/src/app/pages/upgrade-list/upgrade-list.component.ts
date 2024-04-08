@@ -1,6 +1,13 @@
 // src/app/pages/upgrade-list/upgrade-list.component.ts
 
 import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
+import {
+    animate,
+    state,
+    style,
+    transition,
+    trigger,
+} from "@angular/animations";
 
 import { ComponentPageTitle } from "../page-title/page-title";
 import { Device } from "../../shared/interfaces/device.interface";
@@ -9,6 +16,7 @@ import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatDialog } from "@angular/material/dialog";
+import { MatExpansionModule } from "@angular/material/expansion";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatSelectModule } from "@angular/material/select";
@@ -32,11 +40,22 @@ import { takeUntil } from "rxjs/operators";
         Footer,
         UpgradePageHeader,
         MatCheckboxModule,
+        MatExpansionModule,
         MatFormFieldModule,
         MatTableModule,
         MatIconModule,
         MatButtonModule,
         MatSelectModule,
+    ],
+    animations: [
+        trigger("detailExpand", [
+            state("collapsed", style({ height: "0px", minHeight: "0" })),
+            state("expanded", style({ height: "*" })),
+            transition(
+                "expanded <=> collapsed",
+                animate("225ms cubic-bezier(0.4, 0.0, 0.2, 1)"),
+            ),
+        ]),
     ],
 })
 export class UpgradeListComponent implements OnInit, OnDestroy {
@@ -45,6 +64,16 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
     profiles: Profile[] = [];
     selectedDevice: Device | null = null;
     selectedProfile: Profile | null = null;
+    displayedColumns: string[] = [
+        "select",
+        "hostname",
+        "sw_version",
+        "app_version",
+        "device_group",
+        "expand",
+    ];
+    expandedRow: Device | null = null;
+    expandedDevice: Device | null = null;
     private destroy$ = new Subject<void>();
 
     constructor(
@@ -112,6 +141,14 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
             );
     }
 
+    onDeviceCollapse(): void {
+        this.expandedDevice = null;
+    }
+
+    onDeviceExpand(device: Device): void {
+        this.expandedDevice = device;
+    }
+
     onDeviceSelect(device: Device): void {
         this.selectedDevice = device;
     }
@@ -120,14 +157,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         this.selectedProfile = profile;
     }
 
-    onUpgradeClick(): void {
-        if (!this.selectedDevice) {
-            this.snackBar.open("Please select a device to upgrade.", "Close", {
-                duration: 3000,
-            });
-            return;
-        }
-
+    onUpgradeClick(device: Device): void {
         if (!this.selectedProfile) {
             this.snackBar.open("Please select a profile.", "Close", {
                 duration: 3000,
@@ -137,7 +167,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
 
         const upgradeForm: UpgradeForm = {
             author: 1, // Replace with the actual author ID
-            device: this.selectedDevice.uuid,
+            device: device.uuid,
             profile: this.selectedProfile.uuid,
         };
 
@@ -177,4 +207,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
                 },
             );
     }
+
+    isExpansionDetailRow = (index: number, row: Device) =>
+        row === this.expandedRow;
 }
