@@ -246,8 +246,11 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
     }
 
     isSyncFromPanoramaButtonActive(): boolean {
-        return this.selection.selected.some(
-            (device) => device.device_type === "Panorama",
+        return (
+            this.selection.selected.length > 0 &&
+            this.selection.selected.every(
+                (device) => device.device_type === "Panorama",
+            )
         );
     }
 
