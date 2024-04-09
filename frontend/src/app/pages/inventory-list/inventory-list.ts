@@ -183,6 +183,28 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
             );
     }
 
+    getPanoramaDevices(): void {
+        this.inventoryService.getPanoramaDevices().subscribe(
+            (devices) => {
+                this.panoramaDevices = devices;
+            },
+            (error) => {
+                console.error("Error fetching Panorama devices:", error);
+            },
+        );
+    }
+
+    getProfiles(): void {
+        this.profileService.getProfiles().subscribe(
+            (profiles) => {
+                this.profiles = profiles;
+            },
+            (error) => {
+                console.error("Error fetching profiles:", error);
+            },
+        );
+    }
+
     getSyncJobStatus(jobId: string): void {
         this.inventoryService
             .getJobStatus(jobId)
@@ -215,28 +237,6 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
                     }
                 },
             );
-    }
-
-    getPanoramaDevices(): void {
-        this.inventoryService.getPanoramaDevices().subscribe(
-            (devices) => {
-                this.panoramaDevices = devices;
-            },
-            (error) => {
-                console.error("Error fetching Panorama devices:", error);
-            },
-        );
-    }
-
-    getProfiles(): void {
-        this.profileService.getProfiles().subscribe(
-            (profiles) => {
-                this.profiles = profiles;
-            },
-            (error) => {
-                console.error("Error fetching profiles:", error);
-            },
-        );
     }
 
     isAllSelected() {
