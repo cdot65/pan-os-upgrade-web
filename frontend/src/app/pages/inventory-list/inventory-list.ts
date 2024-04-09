@@ -283,46 +283,10 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         this.getProfiles();
     }
 
-    onDeleteClick(item: Device): void {
-        const dialogRef = this.dialog.open(InventoryDeleteDialogComponent, {
-            width: "300px",
-            data: {
-                title: "Confirm Delete",
-                message: "Are you sure you want to delete this inventory item?",
-            },
-        });
-
-        dialogRef
-            .afterClosed()
-            .pipe(takeUntil(this.destroy$))
-            .subscribe((result: boolean) => {
-                if (result) {
-                    this.inventoryService.deleteDevice(item.uuid).subscribe(
-                        () => {
-                            this.getDevices(); // Refresh the inventory list after deletion
-                        },
-                        (error) => {
-                            console.error(
-                                "Error deleting inventory item:",
-                                error,
-                            );
-                            this.snackBar.open(
-                                "Failed to delete inventory item. Please try again.",
-                                "Close",
-                                {
-                                    duration: 3000,
-                                },
-                            );
-                        },
-                    );
-                }
-            });
-    }
-
     onDeleteSelectedClick() {
         const selectedItems = this.selection.selected;
         const dialogRef = this.dialog.open(InventoryDeleteDialogComponent, {
-            width: "300px",
+            width: "480px",
             data: {
                 title: "Confirm Delete",
                 // eslint-disable-next-line max-len
@@ -432,7 +396,7 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         }
 
         const dialogRef = this.dialog.open(ProfileDialogComponent, {
-            width: "480px",
+            width: "520px",
             data: {
                 message: "Select a profile to sync inventory from Panorama",
             },
