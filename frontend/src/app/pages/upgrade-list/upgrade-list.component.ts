@@ -77,29 +77,8 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         });
     }
 
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
-    }
-
-    ngOnInit(): void {
-        this._componentPageTitle.title = "Upgrade List";
-        this.getDevices();
-        this.getProfiles();
-    }
-
     getDevice(deviceId: string): Device | undefined {
         return this.devices.find((d) => d.uuid === deviceId);
-    }
-
-    getDeviceHostname(deviceId: string): string {
-        const device = this.devices.find((d) => d.uuid === deviceId);
-        return device ? device.hostname : "";
-    }
-
-    getDeviceSwVersion(deviceId: string): string {
-        const device = this.devices.find((d) => d.uuid === deviceId);
-        return device ? device.sw_version : "";
     }
 
     getDeviceHaMode(deviceId: string): string | null {
@@ -141,9 +120,14 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         return device ? device.ha_status : null;
     }
 
-    getProfileName(profileId: string): string {
-        const profile = this.profiles.find((p) => p.uuid === profileId);
-        return profile ? profile.name : "";
+    getDeviceHostname(deviceId: string): string {
+        const device = this.devices.find((d) => d.uuid === deviceId);
+        return device ? device.hostname : "";
+    }
+
+    getDeviceSwVersion(deviceId: string): string {
+        const device = this.devices.find((d) => d.uuid === deviceId);
+        return device ? device.sw_version : "";
     }
 
     getDevices(): void {
@@ -167,6 +151,11 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
                     );
                 },
             );
+    }
+
+    getProfileName(profileId: string): string {
+        const profile = this.profiles.find((p) => p.uuid === profileId);
+        return profile ? profile.name : "";
     }
 
     getProfiles(): void {
@@ -193,6 +182,17 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
     isDeviceHaEnabled(deviceId: string): boolean {
         const device = this.devices.find((d) => d.uuid === deviceId);
         return device ? device.ha : false;
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    ngOnInit(): void {
+        this._componentPageTitle.title = "Upgrade List";
+        this.getDevices();
+        this.getProfiles();
     }
 
     onUpgradeClick(): void {
