@@ -61,10 +61,13 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
     displayedColumns: string[] = [
         "select",
         "hostname",
-        "notes",
+        // "notes",
         "management_ip",
         "device_type",
-        "platform_name",
+        "device_group",
+        "ha",
+        "sw_version",
+        "app_version",
         "details",
     ];
     dataSource: MatTableDataSource<Device> = new MatTableDataSource<Device>([]);
