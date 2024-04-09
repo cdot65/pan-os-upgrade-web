@@ -20,13 +20,16 @@ import { Footer } from "src/app/shared/footer/footer";
 import { InventoryDeleteDialogComponent } from "../inventory-delete-dialog/inventory-delete-dialog";
 import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
 import { InventoryService } from "../../shared/services/inventory.service";
+import { InventorySyncForm } from "../../shared/interfaces/inventory-sync-form.interface";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatIconModule } from "@angular/material/icon";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { Profile } from "../../shared/interfaces/profile.interface";
 import { ProfileDialogComponent } from "../profile-select-dialog/profile-select-dialog.component";
+import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
 import { SelectionModel } from "@angular/cdk/collections";
 import { takeUntil } from "rxjs/operators";
@@ -64,13 +67,21 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         "platform_name",
         "edit",
     ];
-    selection = new SelectionModel<Device>(true, []);
     dataSource: MatTableDataSource<Device> = new MatTableDataSource<Device>([]);
-    showRefreshProgress: boolean = false;
-    showRefreshError: boolean = false;
     jobId: string | null = null;
+    panoramaDevices: Device[] = [];
+    profiles: Profile[] = [];
     refreshJobsCompleted: number = 0;
+    selection = new SelectionModel<Device>(true, []);
+    showRefreshError: boolean = false;
+    showRefreshProgress: boolean = false;
+    showSyncError: boolean = false;
+    showSyncProgress: boolean = false;
+    syncJobId: string | null = null;
+    syncJobsCompleted: number = 0;
     totalRefreshJobs: number = 0;
+    totalSyncJobs: number = 0;
+    private syncRetryCount = 0;
     private retryCount = 0;
     private destroy$ = new Subject<void>();
 
@@ -79,6 +90,7 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
     constructor(
         private dialog: MatDialog,
         private inventoryService: InventoryService,
+        private profileService: ProfileService,
         private router: Router,
         private snackBar: MatSnackBar,
         private _liveAnnouncer: LiveAnnouncer,
@@ -171,10 +183,72 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
             );
     }
 
+    getSyncJobStatus(jobId: string): void {
+        this.inventoryService
+            .getJobStatus(jobId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (response) => {
+                    if (response.status === "completed") {
+                        this.syncJobsCompleted++;
+                        if (this.syncJobsCompleted === this.totalSyncJobs) {
+                            this.showSyncProgress = false;
+                            this.getDevices();
+                            this.syncRetryCount = 0;
+                        }
+                    } else {
+                        setTimeout(() => this.getSyncJobStatus(jobId), 2500);
+                    }
+                },
+                (error) => {
+                    console.error("Error checking sync job status:", error);
+                    if (error.status === 400 && this.syncRetryCount < 3) {
+                        this.syncRetryCount++;
+                        console.log(
+                            `Retrying sync job status check (attempt ${this.syncRetryCount})`,
+                        );
+                        setTimeout(() => this.getSyncJobStatus(jobId), 2500);
+                    } else {
+                        this.showSyncProgress = false;
+                        this.showSyncError = true;
+                        this.syncRetryCount = 0;
+                    }
+                },
+            );
+    }
+
+    getPanoramaDevices(): void {
+        this.inventoryService.getPanoramaDevices().subscribe(
+            (devices) => {
+                this.panoramaDevices = devices;
+            },
+            (error) => {
+                console.error("Error fetching Panorama devices:", error);
+            },
+        );
+    }
+
+    getProfiles(): void {
+        this.profileService.getProfiles().subscribe(
+            (profiles) => {
+                this.profiles = profiles;
+            },
+            (error) => {
+                console.error("Error fetching profiles:", error);
+            },
+        );
+    }
+
     isAllSelected() {
         const numSelected = this.selection.selected.length;
         const numRows = this.dataSource.data.length;
         return numSelected === numRows;
+    }
+
+    isSyncFromPanoramaButtonActive(): boolean {
+        return this.selection.selected.some(
+            (device) => device.device_type === "Panorama",
+        );
     }
 
     masterToggle() {
@@ -205,6 +279,8 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory List";
         this.getDevices();
+        this.getPanoramaDevices();
+        this.getProfiles();
     }
 
     onDeleteClick(item: Device): void {
@@ -340,6 +416,69 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
                                         duration: 3000,
                                     },
                                 );
+                            },
+                        );
+                }
+            });
+    }
+
+    onSyncFromPanoramaClick(): void {
+        const selectedPanoramaDevices = this.selection.selected.filter(
+            (device) => device.device_type === "Panorama",
+        );
+
+        if (selectedPanoramaDevices.length === 0) {
+            return;
+        }
+
+        const dialogRef = this.dialog.open(ProfileDialogComponent, {
+            width: "400px",
+            data: {
+                message: "Select a profile to sync inventory from Panorama",
+            },
+        });
+
+        dialogRef
+            .afterClosed()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((selectedProfileUuid) => {
+                if (selectedProfileUuid) {
+                    const author = localStorage.getItem("author");
+                    const syncRequests = selectedPanoramaDevices.map(
+                        (device) => {
+                            const syncForm: InventorySyncForm = {
+                                author: author ? parseInt(author, 10) : 0,
+                                panorama_device: device.uuid,
+                                profile: selectedProfileUuid,
+                            };
+                            return this.inventoryService.syncInventory(
+                                syncForm,
+                            );
+                        },
+                    );
+
+                    this.showSyncProgress = true;
+                    this.showSyncError = false;
+                    this.syncJobsCompleted = 0;
+                    this.totalSyncJobs = selectedPanoramaDevices.length;
+
+                    forkJoin(syncRequests)
+                        .pipe(takeUntil(this.destroy$))
+                        .subscribe(
+                            (jobIds) => {
+                                jobIds.forEach((jobId) => {
+                                    if (jobId) {
+                                        this.getSyncJobStatus(jobId);
+                                    }
+                                });
+                            },
+                            (error) => {
+                                console.error(
+                                    "Error syncing inventory:",
+                                    error,
+                                );
+                                this.showSyncProgress = false;
+                                this.showSyncError = true;
                             },
                         );
                 }
