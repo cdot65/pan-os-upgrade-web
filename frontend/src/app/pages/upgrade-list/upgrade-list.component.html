@@ -4,7 +4,7 @@
     <mat-stepper orientation="vertical" #stepper [formGroup]="upgradeForm">
       <mat-step [stepControl]="upgradeForm.get('devices')!" errorMessage="Device selection is required.">
         <ng-template matStepLabel>Select Devices</ng-template>
-        <mat-form-field>
+        <mat-form-field class="dropdown">
           <mat-label>Devices</mat-label>
           <mat-select formControlName="devices" multiple>
             @for (device of devices; track device) {
@@ -20,7 +20,7 @@
       </mat-step>
       <mat-step [stepControl]="upgradeForm.get('profile')!" errorMessage="Profile selection is required.">
         <ng-template matStepLabel>Select a Profile</ng-template>
-        <mat-form-field>
+        <mat-form-field class="dropdown">
           <mat-label>Profile</mat-label>
           <mat-select formControlName="profile">
             @for (profile of profiles; track profile) {
@@ -37,7 +37,7 @@
       </mat-step>
       <mat-step>
         <ng-template matStepLabel>Select Target Version</ng-template>
-        <mat-form-field>
+        <mat-form-field class="dropdown">
           <mat-label>Target Version</mat-label>
           <input matInput formControlName="targetVersion">
         </mat-form-field>
@@ -48,31 +48,48 @@
       </mat-step>
       <mat-step>
         <ng-template matStepLabel>Review and Confirm</ng-template>
-        <table>
-          <tr>
-            <th>Selected Devices</th>
-            <td>
-              <ul>
-                @for (deviceId of upgradeForm.get('devices')?.value; track deviceId) {
-                <li>{{ getDeviceHostname(deviceId) }}</li>
+        <div class="selected-devices">
+          @for (deviceId of upgradeForm.get('devices')?.value; track deviceId) {
+          <mat-card class="device-card">
+            <mat-card-header>
+              <mat-card-title>{{ getDeviceHostname(deviceId) }}</mat-card-title>
+              <mat-card-subtitle>Current Version: {{ getDeviceSwVersion(deviceId) }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <table>
+                <tr>
+                  <th>HA</th>
+                  <td>{{ isDeviceHaEnabled(deviceId) ? 'Enabled' : 'Disabled' }}</td>
+                </tr>
+                @if (isDeviceHaEnabled(deviceId)) {
+                <tr>
+                  <th>HA Mode</th>
+                  <td>{{ getDeviceHaMode(deviceId) }}</td>
+                </tr>
+                <tr>
+                  <th>HA Peer</th>
+                  <td>{{ getDeviceHaPeer(deviceId) }}</td>
+                </tr>
+                <tr>
+                  <th>HA Status</th>
+                  <td>{{ getDeviceHaStatus(deviceId) }}</td>
+                </tr>
                 }
-              </ul>
-            </td>
-          </tr>
-          <tr>
-            <th>Selected Profile</th>
-            <td>{{ getProfileName(upgradeForm.get('profile')?.value) }}</td>
-          </tr>
-          <tr>
-            <th>Target Version</th>
-            <td>{{ upgradeForm.get('targetVersion')?.value }}</td>
-          </tr>
-        </table>
+              </table>
+            </mat-card-content>
+          </mat-card>
+          }
+        </div>
+        <div class="confirmation-details">
+          <p><strong>Selected Profile:</strong> {{ getProfileName(upgradeForm.get('profile')?.value) }}</p>
+          <p><strong>Target Version:</strong> {{ upgradeForm.get('targetVersion')?.value }}</p>
+        </div>
         <div>
           <button mat-button matStepperPrevious>Back</button>
           <button mat-raised-button color="primary" (click)="onUpgradeClick()">Upgrade</button>
         </div>
       </mat-step>
+
     </mat-stepper>
   </main>
   <app-footer></app-footer>
