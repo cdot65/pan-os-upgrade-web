@@ -5,7 +5,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 
 @Component({
-    selector: "profile-page-header",
+    selector: "app-profile-page-header",
     templateUrl: "./profile-page-header.html",
     styleUrls: ["./profile-page-header.scss"],
     standalone: true,

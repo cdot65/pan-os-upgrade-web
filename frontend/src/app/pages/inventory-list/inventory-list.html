@@ -1,5 +1,6 @@
 <!-- src/app/pages/inventory-list/inventory-list.html -->
 <div class="inventory-list-container">
+
   <app-inventory-page-header></app-inventory-page-header>
   <main focusOnNavigation aria-label="Inventory list" id="inventory-list" class="inventory-list">
     <div class="table-header">
@@ -11,11 +12,13 @@
             <mat-icon>add</mat-icon>
             Add new Device
           </button>
+
           <button mat-raised-button color="accent" (click)="onSyncFromPanoramaClick()"
             aria-label="Sync Devices from Panorama" [disabled]="!isSyncFromPanoramaButtonActive()">
             <mat-icon>sync</mat-icon>
             Sync from Panorama
           </button>
+
         </div>
 
         @if (selection.selected.length > 0) {
@@ -67,6 +70,7 @@
 
     <table mat-table [dataSource]="dataSource" matSort (matSortChange)="announceSortChange($event)"
       class="mat-elevation-z2">
+
       <!-- Checkbox Column -->
       <ng-container matColumnDef="select">
         <th mat-header-cell *matHeaderCellDef>
