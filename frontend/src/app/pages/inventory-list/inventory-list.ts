@@ -368,7 +368,7 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
     onRefreshSelectedClick() {
         const selectedItems = this.selection.selected;
         const dialogRef = this.dialog.open(ProfileDialogComponent, {
-            width: "400px",
+            width: "480px",
             data: { message: "Select a profile to refresh device details" },
         });
 
@@ -432,7 +432,7 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         }
 
         const dialogRef = this.dialog.open(ProfileDialogComponent, {
-            width: "400px",
+            width: "480px",
             data: {
                 message: "Select a profile to sync inventory from Panorama",
             },
