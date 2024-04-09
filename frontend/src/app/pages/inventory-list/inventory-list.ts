@@ -65,7 +65,7 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         "management_ip",
         "device_type",
         "platform_name",
-        "edit",
+        "details",
     ];
     dataSource: MatTableDataSource<Device> = new MatTableDataSource<Device>([]);
     jobId: string | null = null;
