@@ -1,49 +1,79 @@
-<!-- src/app/pages/upgrade-list/upgrade-list.component.html -->
-
 <div class="upgrade-list-container">
   <app-upgrade-page-header></app-upgrade-page-header>
   <main focusOnNavigation aria-label="Upgrade list" id="upgrade-list" class="upgrade-list">
-
-    <div class="table-header">
-      <h2>Devices</h2>
-
-      <!-- Buttons -->
-      <div class="button-container">
+    <mat-stepper orientation="vertical" #stepper [formGroup]="upgradeForm">
+      <mat-step [stepControl]="upgradeForm.get('devices')!" errorMessage="Device selection is required.">
+        <ng-template matStepLabel>Select Devices</ng-template>
         <mat-form-field>
-          <mat-label>Select a Profile</mat-label>
-          <mat-select [(value)]="selectedProfile" (selectionChange)="onProfileSelect($event.value)">
+          <mat-label>Devices</mat-label>
+          <mat-select formControlName="devices" multiple>
+            @for (device of devices; track device) {
+            <mat-option [value]="device.uuid">
+              {{ device.hostname }}
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <div>
+          <button mat-button matStepperNext>Next</button>
+        </div>
+      </mat-step>
+      <mat-step [stepControl]="upgradeForm.get('profile')!" errorMessage="Profile selection is required.">
+        <ng-template matStepLabel>Select a Profile</ng-template>
+        <mat-form-field>
+          <mat-label>Profile</mat-label>
+          <mat-select formControlName="profile">
             @for (profile of profiles; track profile) {
-            <mat-option [value]="profile">
+            <mat-option [value]="profile.uuid">
               {{ profile.name }}
             </mat-option>
             }
           </mat-select>
         </mat-form-field>
-      </div>
-    </div>
-
-    <mat-accordion>
-      @for (row of devices; track row) {
-      <mat-expansion-panel [expanded]="expandedRow === row" (opened)="expandedRow = row" (closed)="expandedRow = null">
-        <mat-expansion-panel-header>
-          <mat-panel-title>{{ row.hostname }}</mat-panel-title>
-          <mat-panel-description>
-            Software Version: {{ row.sw_version }} | Content Version: {{ row.app_version }}
-          </mat-panel-description>
-        </mat-expansion-panel-header>
-        <div class="panel-content">
-          <mat-checkbox (click)="$event.stopPropagation()" (change)="onDeviceSelect(row)"
-            [checked]="selectedDevice === row">
-          </mat-checkbox>
-          <p>Device Group: {{ row.device_group ? row.device_group : 'n/a' }}</p>
-          <button mat-raised-button color="primary" (click)="onUpgradeClick(row)" [disabled]="!selectedProfile">
-            <mat-icon>upgrade</mat-icon>
-            Upgrade Device
-          </button>
+        <div>
+          <button mat-button matStepperPrevious>Back</button>
+          <button mat-button matStepperNext>Next</button>
         </div>
-      </mat-expansion-panel>
-      }
-    </mat-accordion>
+      </mat-step>
+      <mat-step>
+        <ng-template matStepLabel>Select Target Version</ng-template>
+        <mat-form-field>
+          <mat-label>Target Version</mat-label>
+          <input matInput formControlName="targetVersion">
+        </mat-form-field>
+        <div>
+          <button mat-button matStepperPrevious>Back</button>
+          <button mat-button matStepperNext>Next</button>
+        </div>
+      </mat-step>
+      <mat-step>
+        <ng-template matStepLabel>Review and Confirm</ng-template>
+        <table>
+          <tr>
+            <th>Selected Devices</th>
+            <td>
+              <ul>
+                @for (deviceId of upgradeForm.get('devices')?.value; track deviceId) {
+                <li>{{ getDeviceHostname(deviceId) }}</li>
+                }
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <th>Selected Profile</th>
+            <td>{{ getProfileName(upgradeForm.get('profile')?.value) }}</td>
+          </tr>
+          <tr>
+            <th>Target Version</th>
+            <td>{{ upgradeForm.get('targetVersion')?.value }}</td>
+          </tr>
+        </table>
+        <div>
+          <button mat-button matStepperPrevious>Back</button>
+          <button mat-raised-button color="primary" (click)="onUpgradeClick()">Upgrade</button>
+        </div>
+      </mat-step>
+    </mat-stepper>
   </main>
   <app-footer></app-footer>
 </div>
