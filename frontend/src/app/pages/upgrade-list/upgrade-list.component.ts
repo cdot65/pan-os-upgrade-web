@@ -77,15 +77,15 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         });
     }
 
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
     ngOnInit(): void {
         this._componentPageTitle.title = "Upgrade List";
         this.getDevices();
         this.getProfiles();
-    }
-
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
     }
 
     getDevice(deviceId: string): Device | undefined {
