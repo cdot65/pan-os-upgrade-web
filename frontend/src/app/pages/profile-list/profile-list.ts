@@ -47,7 +47,7 @@ export class ProfileListComponent implements OnInit, AfterViewInit, OnDestroy {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
     profiles: Profile[] = [];
-    displayedColumns: string[] = ["select", "name", "description", "edit"];
+    displayedColumns: string[] = ["select", "name", "description", "details"];
     dataSource: MatTableDataSource<Profile> = new MatTableDataSource<Profile>(
         [],
     );
@@ -133,7 +133,7 @@ export class ProfileListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this._componentPageTitle.title = "Settings Profile List";
+        this._componentPageTitle.title = "Profile List";
         this.getProfiles();
     }
 
