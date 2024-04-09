@@ -2,8 +2,7 @@
 
 export interface UpgradeForm {
     author: number;
-    device: string;
+    devices: string[];
     profile: string;
     targetVersion?: string;
-    scheduledAt?: Date;
 }

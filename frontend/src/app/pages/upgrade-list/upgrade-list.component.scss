@@ -1,5 +1,3 @@
-// src/app/pages/upgrade-list/upgrade-list.component.scss
-
 .upgrade-list-container {
   display: flex;
   flex-direction: column;
@@ -9,27 +7,14 @@
     flex: 1;
     overflow: auto;
     padding: 16px;
+  }
 
-    .table-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
+  .mat-form-field {
+    width: 100%;
+    margin-top: 16px;
+  }
 
-      .button-container {
-        display: flex;
-        gap: 8px;
-      }
-    }
-
-    .mat-expansion-panel {
-      margin-bottom: 8px;
-    }
-
-    .panel-content {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
+  button {
+    margin-top: 16px;
   }
 }
