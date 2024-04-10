@@ -1,28 +1,31 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-// frontend/src/app/shared/interfaces/inventory-item.interface.ts
-
+// frontend/src/app/shared/interfaces/device.interface.ts
 export interface Device {
-    // author: number;
-    app_version: string;
+    app_version: string | null;
     created_at: string;
     device_group: string | null;
     device_type: string;
-    ha: boolean;
-    ha_mode: string | null;
-    ha_peer: string | null;
-    ha_status: string | null;
+    ha_deployment: HaDeployment | null;
     hostname: string;
-    ipv4_address: string;
+    ipv4_address: string | null;
     ipv6_address: string | null;
-    notes: string;
+    local_ha_state: string | null;
+    notes: string | null;
     panorama_appliance: string | null;
     panorama_ipv4_address: string | null;
     panorama_ipv6_address: string | null;
-    panorama_managed: boolean;
+    panorama_managed: boolean | null;
     platform_name: string;
-    serial_number: string;
-    sw_version: string;
-    threat_version: string;
-    uptime: string;
+    serial: string | null;
+    sw_version: string | null;
+    threat_version: string | null;
+    uptime: string | null;
     uuid: string;
+}
+
+export interface HaDeployment {
+    peer_device: string;
+    peer_ip: string | null;
+    peer_hostname: string | null;
+    peer_state: string | null;
 }

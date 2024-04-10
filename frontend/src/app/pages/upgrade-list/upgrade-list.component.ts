@@ -14,6 +14,7 @@ import { Footer } from "src/app/shared/footer/footer";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
+import { MatDividerModule } from "@angular/material/divider";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
@@ -37,6 +38,7 @@ import { takeUntil } from "rxjs/operators";
     imports: [
         Footer,
         UpgradePageHeader,
+        MatDividerModule,
         MatStepperModule,
         MatFormFieldModule,
         MatSelectModule,
@@ -81,43 +83,34 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         return this.devices.find((d) => d.uuid === deviceId);
     }
 
-    getDeviceHaMode(deviceId: string): string | null {
-        const device = this.devices.find((d) => d.uuid === deviceId);
-        return device ? device.ha_mode : null;
-    }
-
-    getDeviceHaPeer(deviceId: string): string | null {
-        const device = this.devices.find((d) => d.uuid === deviceId);
-        return device ? device.ha_peer : null;
-    }
-
     getDeviceHaProperties(deviceId: string): {
         ha: boolean;
-        ha_mode: string | null;
-        ha_peer: string | null;
-        ha_status: string | null;
+        local_ha_state: string | null;
+        peer_device: string | null;
+        peer_ip: string | null;
+        peer_hostname: string | null;
+        peer_state: string | null;
     } {
         const device = this.devices.find((d) => d.uuid === deviceId);
-        if (device) {
+        if (device && device.ha_deployment) {
             return {
-                ha: device.ha,
-                ha_mode: device.ha_mode,
-                ha_peer: device.ha_peer,
-                ha_status: device.ha_status,
+                ha: true,
+                local_ha_state: device.local_ha_state || null,
+                peer_device: device.ha_deployment.peer_device || null,
+                peer_ip: device.ha_deployment.peer_ip || null,
+                peer_hostname: device.ha_deployment.peer_hostname || null,
+                peer_state: device.ha_deployment.peer_state || null,
             };
         } else {
             return {
                 ha: false,
-                ha_mode: null,
-                ha_peer: null,
-                ha_status: null,
+                local_ha_state: "n/a",
+                peer_device: "n/a",
+                peer_ip: "n/a",
+                peer_hostname: "n/a",
+                peer_state: "n/a",
             };
         }
-    }
-
-    getDeviceHaStatus(deviceId: string): string | null {
-        const device = this.devices.find((d) => d.uuid === deviceId);
-        return device ? device.ha_status : null;
     }
 
     getDeviceHostname(deviceId: string): string {
@@ -125,9 +118,9 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         return device ? device.hostname : "";
     }
 
-    getDeviceSwVersion(deviceId: string): string {
+    getDeviceSwVersion(deviceId: string): string | null {
         const device = this.devices.find((d) => d.uuid === deviceId);
-        return device ? device.sw_version : "";
+        return device ? device.sw_version : null;
     }
 
     getDevices(): void {
@@ -181,7 +174,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
 
     isDeviceHaEnabled(deviceId: string): boolean {
         const device = this.devices.find((d) => d.uuid === deviceId);
-        return device ? device.ha : false;
+        return !!device?.ha_deployment?.peer_device;
     }
 
     ngOnDestroy(): void {

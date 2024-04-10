@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from panos.firewall import Firewall
 from panos.panorama import Panorama
 
-from panosupgradeweb.models import Device, DeviceType, Profile
+from panosupgradeweb.models import Device, DeviceType, Profile, HaDeployment
 
 
 def find_devicegroup_by_serial(data, serial):
@@ -172,52 +172,45 @@ def run_device_refresh(
                 logging.debug("ha_info[1] is not an ET.Element")
                 sys.exit(1)
 
-            # Handle the error case here
-            device_data["ha_mode"] = (
-                ha_details.get("result", {})
-                .get("group", {})
-                .get("local-info", {})
-                .get("mode")
-            )
-            device_data["ha_status"] = (
+            device1_state = (
                 ha_details.get("result", {})
                 .get("group", {})
                 .get("local-info", {})
                 .get("state")
             )
-            device_data["ha_peer"] = (
+            device2_ip = (
                 ha_details.get("result", {})
                 .get("group", {})
                 .get("peer-info", {})
                 .get("mgmt-ip", "")
                 .split("/")[0]
             )
-        elif platform.device_type == "Panorama" and ha_info[0] != "disabled":
-            device_data["ha"] = True
 
-            if isinstance(ha_info[1], ET.Element):
-                ha_details = flatten_xml_to_dict(element=ha_info[1])
+            logging.debug(f"Device 1 state: {device1_state}")
+            logging.debug(f"Device 2 IP: {device2_ip}")
+
+            try:
+                device2 = Device.objects.get(ipv4_address=device2_ip)
+            except Device.DoesNotExist:
+                logging.warning(
+                    f"Device with IP {device2_ip} not found. Skipping HA deployment."
+                )
+                device2 = None
+
+            if device2:
+                device2_state = "passive" if device1_state == "active" else "active"
+                ha_deployment, _ = HaDeployment.objects.update_or_create(
+                    device1=device,
+                    device2=device2,
+                    defaults={
+                        "device1_state": device1_state,
+                        "device2_state": device2_state,
+                    },
+                )
             else:
-                logging.debug("ha_info[1] is not an ET.Element")
-                sys.exit(1)
-
-            device_data["ha_mode"] = (
-                ha_details.get("result", {}).get("local-info", {}).get("mode")
-            )
-            device_data["ha_status"] = (
-                ha_details.get("result", {}).get("local-info", {}).get("state")
-            )
-            device_data["ha_peer"] = (
-                ha_details.get("result", {})
-                .get("peer-info", {})
-                .get("mgmt-ip", "")
-                .split("/")[0]
-            )
+                device_data["ha"] = False
         else:
             device_data["ha"] = False
-            device_data["ha_mode"] = None
-            device_data["ha_status"] = None
-            device_data["ha_peer"] = None
 
         # Store additional device information in the device_data dictionary
         device_data["panorama_managed"] = device.panorama_managed
@@ -226,16 +219,12 @@ def run_device_refresh(
         )
 
         # Create or update the Device object using the device_data dictionary
-        inventory_item, created = Device.objects.update_or_create(
+        device, created = Device.objects.update_or_create(
             hostname=device_data["hostname"],
             defaults={
                 "app_version": device_data["app_version"],
                 "author_id": author_id,
                 "device_group": device_data.get("device_group"),
-                "ha": device_data["ha"],
-                "ha_mode": device_data["ha_mode"],
-                "ha_peer": device_data["ha_peer"],
-                "ha_status": device_data["ha_status"],
                 "ipv4_address": device_data["ipv4_address"],
                 "ipv6_address": device_data["ipv6_address"],
                 "panorama_managed": device_data["panorama_managed"],

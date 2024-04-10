@@ -143,6 +143,10 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
             );
     }
 
+    // getHaMode(device: Device): string | null {
+    //     return device.ha_deployment ? device.ha_deployment.ha_mode : null;
+    // }
+
     getJobStatus(jobId: string): void {
         this.inventoryService
             .getJobStatus(jobId)
@@ -247,6 +251,10 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         const numRows = this.dataSource.data.length;
         return numSelected === numRows;
     }
+
+    // isDeviceInHaDeployment(device: Device): boolean {
+    //     return device.ha_deployment !== null;
+    // }
 
     isSyncFromPanoramaButtonActive(): boolean {
         return (

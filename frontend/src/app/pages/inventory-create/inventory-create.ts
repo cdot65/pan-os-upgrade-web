@@ -14,6 +14,7 @@ import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
 
 import { CommonModule } from "@angular/common";
 import { ComponentPageTitle } from "../page-title/page-title";
+import { Device } from "../../shared/interfaces/device.interface";
 import { DeviceType } from "../../shared/interfaces/device-type.interface";
 import { Footer } from "src/app/shared/footer/footer";
 import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
@@ -48,6 +49,13 @@ import { takeUntil } from "rxjs/operators";
 export class InventoryCreateComponent implements OnDestroy, OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     createInventoryForm: FormGroup;
+    devices: Device[] = [];
+    haStates: string[] = [
+        "active",
+        "passive",
+        "active-primary",
+        "active-secondary",
+    ];
     firewallPlatforms: DeviceType[] = [];
     panoramaPlatforms: DeviceType[] = [];
     private destroy$ = new Subject<void>();
@@ -64,10 +72,13 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
             // author: localStorage.getItem("author"),
             device_group: [""],
             device_type: ["Firewall", Validators.required],
-            ha: [false],
-            ha_mode: [""],
-            ha_peer: [""],
-            ha_status: [""],
+            ha_enabled: [false],
+            ha_deployment: this.formBuilder.group({
+                device1: [""],
+                device2: [""],
+                device1_state: [""],
+                device2_state: [""],
+            }),
             hostname: ["", Validators.required],
             ipv4_address: [
                 "",
@@ -119,11 +130,17 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
             const author = localStorage.getItem("author");
             const formValue = this.createInventoryForm.value;
             formValue.author = author;
+
             if (formValue.device_type === "Panorama") {
                 delete formValue.device_group;
                 delete formValue.panorama_appliance;
                 delete formValue.panorama_managed;
             }
+
+            if (!formValue.ha_enabled) {
+                delete formValue.ha_deployment;
+            }
+
             this.inventoryService
                 .createDevice(formValue)
                 .pipe(takeUntil(this.destroy$))
@@ -143,6 +160,20 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
                     },
                 );
         }
+    }
+
+    getDevices(): void {
+        this.inventoryService
+            .getDevices()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (devices) => {
+                    this.devices = devices;
+                },
+                (error) => {
+                    console.error("Error fetching devices:", error);
+                },
+            );
     }
 
     getFirewallPlatforms(): void {
@@ -194,6 +225,7 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
 
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory Create";
+        this.getDevices();
         this.getFirewallPlatforms();
         this.createInventoryForm.setValidators(this.requireIpAddress());
         this.createInventoryForm

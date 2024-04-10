@@ -1,5 +1,4 @@
 # backend/panosupgradeweb/serializers.py
-
 from rest_framework import serializers
 from dj_rest_auth.serializers import TokenSerializer
 from django.contrib.auth import get_user_model
@@ -7,6 +6,7 @@ from django.conf import settings
 from .models import (
     Device,
     DeviceType,
+    HaDeployment,
     Job,
     Profile,
 )
@@ -23,6 +23,17 @@ class CustomTokenSerializer(TokenSerializer):
         fields = TokenSerializer.Meta.fields + ("author",)
 
 
+class HaDeploymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HaDeployment
+        fields = (
+            "peer_device",
+            "peer_ip",
+            "peer_hostname",
+            "peer_state",
+        )
+
+
 class DeviceSerializer(serializers.ModelSerializer):
     app_version = serializers.CharField(
         allow_blank=True,
@@ -37,21 +48,6 @@ class DeviceSerializer(serializers.ModelSerializer):
     device_type = serializers.CharField(
         source="platform.device_type",
         read_only=True,
-    )
-    ha_mode = serializers.CharField(
-        allow_blank=True,
-        required=False,
-        allow_null=True,
-    )
-    ha_peer = serializers.CharField(
-        allow_blank=True,
-        required=False,
-        allow_null=True,
-    )
-    ha_status = serializers.CharField(
-        allow_blank=True,
-        required=False,
-        allow_null=True,
     )
     ipv4_address = serializers.IPAddressField(
         allow_blank=True,
@@ -76,6 +72,7 @@ class DeviceSerializer(serializers.ModelSerializer):
         source="platform.name",
         read_only=True,
     )
+    ha_deployment = serializers.SerializerMethodField()
     serial = serializers.CharField(
         allow_blank=True,
         required=False,
@@ -104,13 +101,11 @@ class DeviceSerializer(serializers.ModelSerializer):
             "created_at",
             "device_group",
             "device_type",
-            "ha",
-            "ha_mode",
-            "ha_peer",
-            "ha_status",
+            "ha_deployment",
             "hostname",
             "ipv4_address",
             "ipv6_address",
+            "local_ha_state",
             "notes",
             "panorama_appliance",
             "panorama_ipv4_address",
@@ -133,6 +128,13 @@ class DeviceSerializer(serializers.ModelSerializer):
             except DeviceType.DoesNotExist:
                 raise serializers.ValidationError("Invalid platform")
         return super().create(validated_data)
+
+    def get_ha_deployment(self, obj):
+        try:
+            ha_deployment = obj.ha_deployment
+            return HaDeploymentSerializer(ha_deployment).data
+        except HaDeployment.DoesNotExist:
+            return None
 
     def update(self, instance, validated_data):
         platform_name = self.initial_data.get("platform_name")
