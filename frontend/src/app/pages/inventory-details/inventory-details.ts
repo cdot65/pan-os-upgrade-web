@@ -62,7 +62,14 @@ import { takeUntil } from "rxjs/operators";
 export class InventoryDetailsComponent implements OnDestroy, OnInit {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
+    devices: Device[] = [];
     firewallPlatforms: DeviceType[] = [];
+    haStates: string[] = [
+        "active",
+        "passive",
+        "active-primary",
+        "active-secondary",
+    ];
     inventoryItem: Device | undefined;
     jobId: string | null = null;
     panoramaPlatforms: DeviceType[] = [];
@@ -82,16 +89,16 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
         private snackBar: MatSnackBar,
         public _componentPageTitle: ComponentPageTitle,
     ) {
-        // Update the form group
         this.updateInventoryForm = this.formBuilder.group({
-            // author: localStorage.getItem("author"),
             app_version: [""],
             device_group: [""],
             device_type: [""],
-            ha: [false],
-            ha_mode: [""],
-            ha_peer: [""],
-            ha_status: [""],
+            ha_deployment: this.formBuilder.group({
+                device1: [""],
+                device2: [""],
+                device1_state: [""],
+                device2_state: [""],
+            }),
             hostname: ["", Validators.required],
             ipv4_address: [
                 "",
@@ -156,6 +163,20 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
                             duration: 3000,
                         },
                     );
+                },
+            );
+    }
+
+    getDevices(): void {
+        this.inventoryService
+            .getDevices()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (devices) => {
+                    this.devices = devices;
+                },
+                (error) => {
+                    console.error("Error fetching devices:", error);
                 },
             );
     }
@@ -249,6 +270,7 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
 
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory Details";
+        this.getDevices();
         const itemId = this.route.snapshot.paramMap.get("id");
         if (itemId) {
             this.getDevice(itemId);

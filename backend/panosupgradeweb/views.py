@@ -94,6 +94,10 @@ class InventoryViewSet(viewsets.ModelViewSet):
                     serializer.validated_data["platform"] = platform
                 serializer.save(author=request.user)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except DeviceType.DoesNotExist:
+                return Response(
+                    {"error": "Invalid platform"}, status=status.HTTP_400_BAD_REQUEST
+                )
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         else:

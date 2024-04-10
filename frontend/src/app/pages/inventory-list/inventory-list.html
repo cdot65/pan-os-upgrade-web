@@ -99,8 +99,7 @@
           Management IP
         </th>
         <td mat-cell *matCellDef="let item">
-          {{item.ipv4_address ? item.ipv4_address :
-                    item.ipv6_address}}
+          {{item.ipv4_address ? item.ipv4_address : item.ipv6_address}}
         </td>
       </ng-container>
 
@@ -112,24 +111,13 @@
         <td mat-cell *matCellDef="let item">{{item.device_group ? item.device_group : 'n/a'}}</td>
       </ng-container>
 
-      <!-- Platform Column -->
-      <!-- <ng-container matColumnDef="platform_name">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by platform">
-          Platform
-        </th>
-        <td mat-cell *matCellDef="let item">{{item.platform_name}}</td>
-      </ng-container> -->
-
-      <!-- HA Enabled Column -->
       <ng-container matColumnDef="ha">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by HA enabled">
-          HA
-        </th>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by HA status">HA Status</th>
         <td mat-cell *matCellDef="let item">
-          @if (item.ha) {
-          <mat-icon>check</mat-icon>
+          @if (item.ha_deployment?.device1 && item.ha_deployment?.device2) {
+          <mat-icon>link</mat-icon>
           } @else {
-          <mat-icon>clear</mat-icon>
+          <mat-icon>link_off</mat-icon>
           }
         </td>
       </ng-container>

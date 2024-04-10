@@ -1,0 +1,10 @@
+[{
+  "fields": {
+    "device_a": "example.fw1.com",
+    "device_b": "example.fw2.com",
+    "ha_mode": "active-passive",
+    "device_a_state": "active",
+    "device_b_state": "passive"
+  },
+  "model": "panosupgradeweb.hadeployment"
+}]

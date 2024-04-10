@@ -12,6 +12,22 @@
       display: flex;
       flex-wrap: wrap;
       gap: 16px;
+
+      .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: left;
+        padding-top: 10px;
+
+        .th {
+          margin: 0;
+        }
+
+        .clear-all {
+          color: var(--color-primary);
+          cursor: pointer;
+        }
+      }
     }
 
     .device-card {

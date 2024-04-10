@@ -48,48 +48,33 @@
       </mat-step>
       <mat-step>
         <ng-template matStepLabel>Review and Confirm</ng-template>
+        <div class="confirmation-details">
+          <p><strong>Selected Profile:</strong> {{ getProfileName(upgradeForm.get('profile')?.value) }}</p>
+          <p><strong>Target Version:</strong> {{ upgradeForm.get('targetVersion')?.value }}</p>
+        </div>
         <div class="selected-devices">
           @for (deviceId of upgradeForm.get('devices')?.value; track deviceId) {
           <mat-card class="device-card">
-            <mat-card-header>
+            <mat-card-header class="table-header">
               <mat-card-title>{{ getDeviceHostname(deviceId) }}</mat-card-title>
               <mat-card-subtitle>Current Version: {{ getDeviceSwVersion(deviceId) }}</mat-card-subtitle>
             </mat-card-header>
             <mat-card-content>
-              <table>
-                <tr>
-                  <th>HA</th>
-                  <td>{{ isDeviceHaEnabled(deviceId) ? 'Enabled' : 'Disabled' }}</td>
-                </tr>
-                @if (isDeviceHaEnabled(deviceId)) {
-                <tr>
-                  <th>HA Mode</th>
-                  <td>{{ getDeviceHaMode(deviceId) }}</td>
-                </tr>
-                <tr>
-                  <th>HA Peer</th>
-                  <td>{{ getDeviceHaPeer(deviceId) }}</td>
-                </tr>
-                <tr>
-                  <th>HA Status</th>
-                  <td>{{ getDeviceHaStatus(deviceId) }}</td>
-                </tr>
-                }
-              </table>
+              <mat-divider></mat-divider>
+              <h4>High Availability</h4>
+              <ul>
+                <li>State: {{getDeviceHaProperties(deviceId).local_ha_state }}</li>
+                <li>Peer: {{ getDeviceHaProperties(deviceId).peer_hostname }}</li>
+              </ul>
             </mat-card-content>
           </mat-card>
           }
-        </div>
-        <div class="confirmation-details">
-          <p><strong>Selected Profile:</strong> {{ getProfileName(upgradeForm.get('profile')?.value) }}</p>
-          <p><strong>Target Version:</strong> {{ upgradeForm.get('targetVersion')?.value }}</p>
         </div>
         <div>
           <button mat-button matStepperPrevious>Back</button>
           <button mat-raised-button color="primary" (click)="onUpgradeClick()">Upgrade</button>
         </div>
       </mat-step>
-
     </mat-stepper>
   </main>
   <app-footer></app-footer>
