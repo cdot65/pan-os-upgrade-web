@@ -179,11 +179,15 @@
 
         <!-- HA Section -->
         <div>
+          <!-- Heading for the high availability section -->
           <h3>High Availability</h3>
-          <div formGroupName="ha_deployment">
+
+          <!-- Conditional form field for specifying the HA deployment -->
+          @if (updateInventoryForm.get('ha_enabled')?.value) {
+          <div class="form-field" formGroupName="ha_deployment">
             <mat-form-field>
-              <mat-label>Device 1</mat-label>
-              <mat-select formControlName="device1">
+              <mat-label>Peer Device</mat-label>
+              <mat-select formControlName="peer_device">
                 <mat-option *ngFor="let device of devices" [value]="device.uuid">
                   {{device.hostname}}
                 </mat-option>
@@ -191,27 +195,18 @@
             </mat-form-field>
 
             <mat-form-field>
-              <mat-label>Device 1 State</mat-label>
-              <mat-select formControlName="device1_state">
-                <mat-option value="active">Active</mat-option>
-                <mat-option value="passive">Passive</mat-option>
-                <mat-option value="active-primary">Active-Primary</mat-option>
-                <mat-option value="active-secondary">Active-Secondary</mat-option>
-              </mat-select>
+              <mat-label>Peer IP</mat-label>
+              <input matInput formControlName="peer_ip">
             </mat-form-field>
 
             <mat-form-field>
-              <mat-label>Device 2</mat-label>
-              <mat-select formControlName="device2">
-                <mat-option *ngFor="let device of devices" [value]="device.uuid">
-                  {{device.hostname}}
-                </mat-option>
-              </mat-select>
+              <mat-label>Peer Hostname</mat-label>
+              <input matInput formControlName="peer_hostname">
             </mat-form-field>
 
             <mat-form-field>
-              <mat-label>Device 2 State</mat-label>
-              <mat-select formControlName="device2_state">
+              <mat-label>Peer State</mat-label>
+              <mat-select formControlName="peer_state">
                 <mat-option value="active">Active</mat-option>
                 <mat-option value="passive">Passive</mat-option>
                 <mat-option value="active-primary">Active-Primary</mat-option>
@@ -219,6 +214,13 @@
               </mat-select>
             </mat-form-field>
           </div>
+          }
+          <!-- Form field for enabling/disabling high availability -->
+          <div class="form-field">
+            <!-- Checkbox for toggling high availability, bound to the 'ha_enabled' form control -->
+            <mat-checkbox formControlName="ha_enabled">HA Enabled</mat-checkbox>
+          </div>
+
         </div>
 
 
