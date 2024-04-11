@@ -93,11 +93,12 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
             app_version: [""],
             device_group: [""],
             device_type: [""],
+            ha_enabled: [false],
             ha_deployment: this.formBuilder.group({
-                device1: [""],
-                device2: [""],
-                device1_state: [""],
-                device2_state: [""],
+                peer_device: [""],
+                peer_ip: [""],
+                peer_hostname: [""],
+                peer_state: [""],
             }),
             hostname: ["", Validators.required],
             ipv4_address: [
@@ -118,6 +119,7 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
                     ),
                 ],
             ],
+            local_ha_state: [""],
             notes: [""],
             panorama_appliance: [""],
             panorama_ipv4_address: [
@@ -425,6 +427,9 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
                 delete updatedItem.device_group;
                 delete updatedItem.panorama_appliance;
                 delete updatedItem.panoramaManaged;
+            }
+            if (!updatedItem.ha_enabled) {
+                delete updatedItem.ha_deployment;
             }
             this.inventoryService
                 .updateDevice(updatedItem, this.inventoryItem.uuid)
