@@ -49,6 +49,9 @@ class DeviceSerializer(serializers.ModelSerializer):
         source="platform.device_type",
         read_only=True,
     )
+    ha_deployment = HaDeploymentSerializer(
+        read_only=True,
+    )
     ipv4_address = serializers.IPAddressField(
         allow_blank=True,
         required=False,
@@ -72,7 +75,6 @@ class DeviceSerializer(serializers.ModelSerializer):
         source="platform.name",
         read_only=True,
     )
-    ha_deployment = serializers.SerializerMethodField()
     serial = serializers.CharField(
         allow_blank=True,
         required=False,
