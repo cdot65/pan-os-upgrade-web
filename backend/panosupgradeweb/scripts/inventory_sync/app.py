@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 
 from panos.firewall import Firewall
 from panos.panorama import Panorama
-from panosupgradeweb.models import Device, DeviceType, Profile, HaDeployment
+from panosupgradeweb.models import Device, DeviceType, HaDeployment, Profile
 
 
 def find_devicegroup_by_serial(data, serial):
@@ -112,9 +112,9 @@ def run_inventory_sync(
         result_dict = flatten_xml_to_dict(element=connected_devices)
 
         # Convert the result dictionary to JSON
-        json_output = json.dumps(result_dict, indent=2)
+        json_output = json.dumps(result_dict)
 
-        # Create or update Device objects based on the retrieved devices
+        # Step 1: Create or update Device objects based on the retrieved devices
         for device in result_dict["result"]["devices"]["entry"]:
             platform_name = device["model"]
 
@@ -128,15 +128,23 @@ def run_inventory_sync(
                 )
                 continue
 
-            # build connection to firewall device through Panorama object
+            # Build connection to firewall device through Panorama object
             firewall = Firewall(serial=device["serial"])
             pan.add(firewall)
 
             # Retrieve the system information from the firewall device
             info = firewall.show_system_info()
 
+            # Retrieve the HA state information from the firewall device
+            ha_info = firewall.show_highavailability_state()
+
+            local_ha_state = None
+            if ha_info[0] != "disabled":
+                ha_details = flatten_xml_to_dict(element=ha_info[1])
+                local_ha_state = ha_details["result"]["group"]["local-info"]["state"]
+
             # Create or update the Device object
-            primary_device, _ = Device.objects.update_or_create(
+            Device.objects.update_or_create(
                 hostname=info["system"]["hostname"],
                 defaults={
                     "app_version": info["system"]["app-version"],
@@ -154,6 +162,7 @@ def run_inventory_sync(
                         if info["system"]["ipv6-address"] != "unknown"
                         else None
                     ),
+                    "local_ha_state": local_ha_state,
                     "notes": None,
                     "platform": platform,
                     "panorama_appliance": panorama_hostname,
@@ -167,41 +176,39 @@ def run_inventory_sync(
                 },
             )
 
+        # Step 2: Iterate over the devices and build the HA relationships
+        for device in result_dict["result"]["devices"]["entry"]:
+            # Build connection to firewall device through Panorama object
+            firewall = Firewall(serial=device["serial"])
+            pan.add(firewall)
+
             # Retrieve the HA state information from the firewall device
             ha_info = firewall.show_highavailability_state()
 
-            ha_deployment = None
             if ha_info[0] != "disabled":
                 ha_details = flatten_xml_to_dict(element=ha_info[1])
-                primary_state = ha_details["result"]["group"]["local-info"]["state"]
-                secondary_device_ip = ha_details["result"]["group"]["peer-info"][
-                    "mgmt-ip"
-                ].split("/")[0]
+                peer_ip = ha_details["result"]["group"]["peer-info"]["mgmt-ip"].split(
+                    "/"
+                )[0]
 
                 try:
-                    secondary_device = Device.objects.get(
-                        ipv4_address=secondary_device_ip
+                    primary_device = Device.objects.get(serial=device["serial"])
+                    peer_device = Device.objects.get(ipv4_address=peer_ip)
+                    peer_state = ha_details["result"]["group"]["peer-info"]["state"]
+
+                    HaDeployment.objects.update_or_create(
+                        device=primary_device,
+                        defaults={
+                            "peer_device": peer_device,
+                            "peer_ip": peer_ip,
+                            "peer_hostname": peer_device.hostname,
+                            "peer_state": peer_state,
+                        },
                     )
                 except Device.DoesNotExist:
                     logging.warning(
-                        f"Secondary device with IP {secondary_device_ip} not found. Skipping HA deployment."
+                        f"Peer device with IP {peer_ip} not found. Skipping HA deployment."
                     )
-                    secondary_device = None
-
-                if secondary_device:
-                    ha_deployment, _ = HaDeployment.objects.update_or_create(
-                        device1=primary_device,
-                        device2=secondary_device,
-                        defaults={
-                            "device1_state": primary_state,
-                            "device2_state": (
-                                "passive" if primary_state == "active" else "active"
-                            ),
-                        },
-                    )
-
-            if ha_deployment:
-                ha_deployment.save()
 
         return json_output
 
