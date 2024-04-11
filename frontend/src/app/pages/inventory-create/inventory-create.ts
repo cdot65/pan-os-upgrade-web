@@ -74,10 +74,10 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
             device_type: ["Firewall", Validators.required],
             ha_enabled: [false],
             ha_deployment: this.formBuilder.group({
-                device1: [""],
-                device2: [""],
-                device1_state: [""],
-                device2_state: [""],
+                peer_device: [""],
+                peer_ip: [""],
+                peer_hostname: [""],
+                peer_state: [""],
             }),
             hostname: ["", Validators.required],
             ipv4_address: [
