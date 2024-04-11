@@ -2,7 +2,6 @@
 
 import json
 import logging
-import sys
 import xml.etree.ElementTree as ET
 
 from panos.firewall import Firewall
@@ -78,7 +77,7 @@ def run_device_refresh(
     profile_uuid,
     author_id,
 ):
-    logging.debug(f"Running inventory sync for Panorama device: {device_uuid}")
+    logging.debug(f"Running device refresh for device: {device_uuid}")
     logging.debug(f"Using profile: {profile_uuid}")
     logging.debug(f"Author ID: {author_id}")
 
@@ -88,7 +87,7 @@ def run_device_refresh(
     # Retrieve the PAN device, device type, and profile objects from the database
     device = Device.objects.get(uuid=device_uuid)
     profile = Profile.objects.get(uuid=profile_uuid)
-    platform = DeviceType.objects.get(name=device.platform)
+    platform = device.platform
 
     # Build the PAN device object
     try:
@@ -164,21 +163,16 @@ def run_device_refresh(
 
         # Parse the HA state information and store it in the device_data dictionary
         if platform.device_type == "Firewall" and ha_info[0] != "disabled":
-            device_data["ha"] = True
-
-            if isinstance(ha_info[1], ET.Element):
-                ha_details = flatten_xml_to_dict(element=ha_info[1])
-            else:
-                logging.debug("ha_info[1] is not an ET.Element")
-                sys.exit(1)
-
-            device1_state = (
+            ha_details = flatten_xml_to_dict(element=ha_info[1])
+            local_ha_state = (
                 ha_details.get("result", {})
                 .get("group", {})
                 .get("local-info", {})
                 .get("state")
             )
-            device2_ip = (
+            device_data["local_ha_state"] = local_ha_state
+
+            peer_ip = (
                 ha_details.get("result", {})
                 .get("group", {})
                 .get("peer-info", {})
@@ -186,31 +180,31 @@ def run_device_refresh(
                 .split("/")[0]
             )
 
-            logging.debug(f"Device 1 state: {device1_state}")
-            logging.debug(f"Device 2 IP: {device2_ip}")
-
             try:
-                device2 = Device.objects.get(ipv4_address=device2_ip)
-            except Device.DoesNotExist:
-                logging.warning(
-                    f"Device with IP {device2_ip} not found. Skipping HA deployment."
+                peer_device = Device.objects.get(ipv4_address=peer_ip)
+                peer_hostname = peer_device.hostname
+                peer_state = (
+                    ha_details.get("result", {})
+                    .get("group", {})
+                    .get("peer-info", {})
+                    .get("state")
                 )
-                device2 = None
 
-            if device2:
-                device2_state = "passive" if device1_state == "active" else "active"
-                ha_deployment, _ = HaDeployment.objects.update_or_create(
-                    device1=device,
-                    device2=device2,
+                HaDeployment.objects.update_or_create(
+                    device=device,
                     defaults={
-                        "device1_state": device1_state,
-                        "device2_state": device2_state,
+                        "peer_device": peer_device,
+                        "peer_ip": peer_ip,
+                        "peer_hostname": peer_hostname,
+                        "peer_state": peer_state,
                     },
                 )
-            else:
-                device_data["ha"] = False
+            except Device.DoesNotExist:
+                logging.warning(
+                    f"Peer device with IP {peer_ip} not found. Skipping HA deployment."
+                )
         else:
-            device_data["ha"] = False
+            device_data["local_ha_state"] = None
 
         # Store additional device information in the device_data dictionary
         device_data["panorama_managed"] = device.panorama_managed
@@ -218,30 +212,25 @@ def run_device_refresh(
             device.panorama_appliance if device.panorama_managed else None
         )
 
-        # Create or update the Device object using the device_data dictionary
-        device, created = Device.objects.update_or_create(
-            hostname=device_data["hostname"],
-            defaults={
-                "app_version": device_data["app_version"],
-                "author_id": author_id,
-                "device_group": device_data.get("device_group"),
-                "ipv4_address": device_data["ipv4_address"],
-                "ipv6_address": device_data["ipv6_address"],
-                "panorama_managed": device_data["panorama_managed"],
-                "panorama_appliance": device_data["panorama_appliance"],
-                "serial": device_data["serial"],
-                "sw_version": device_data["sw_version"],
-                "threat_version": device_data["threat_version"],
-                "uptime": device_data["uptime"],
-            },
+        # Update the Device object using the device_data dictionary
+        Device.objects.filter(uuid=device_uuid).update(
+            app_version=device_data["app_version"],
+            author_id=author_id,
+            device_group=device_data.get("device_group"),
+            ipv4_address=device_data["ipv4_address"],
+            ipv6_address=device_data["ipv6_address"],
+            local_ha_state=device_data["local_ha_state"],
+            panorama_managed=device_data["panorama_managed"],
+            panorama_appliance=device_data["panorama_appliance"],
+            serial=device_data["serial"],
+            sw_version=device_data["sw_version"],
+            threat_version=device_data["threat_version"],
+            uptime=device_data["uptime"],
         )
-
-        # Add the created flag to the device_data dictionary
-        device_data["created"] = created
 
         # Serialize the device_data dictionary to JSON
         return json.dumps(device_data, indent=2)
 
     except Exception as e:
-        logging.error(f"Error during inventory sync: {str(e)}")
+        logging.error(f"Error during device refresh: {str(e)}")
         raise e
