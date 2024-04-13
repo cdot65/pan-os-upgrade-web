@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 from panos.firewall import Firewall
 from panos.panorama import Panorama
 
-from panosupgradeweb.models import Device, DeviceType, Profile, HaDeployment
+from panosupgradeweb.models import Device, DeviceType, Profile
 
 
 def find_devicegroup_by_serial(data, serial):
@@ -164,13 +164,13 @@ def run_device_refresh(
         # Parse the HA state information and store it in the device_data dictionary
         if platform.device_type == "Firewall" and ha_info[0] != "disabled":
             ha_details = flatten_xml_to_dict(element=ha_info[1])
-            local_ha_state = (
+            local_state = (
                 ha_details.get("result", {})
                 .get("group", {})
                 .get("local-info", {})
                 .get("state")
             )
-            device_data["local_ha_state"] = local_ha_state
+            device_data["ha_enabled"] = True
 
             peer_ip = (
                 ha_details.get("result", {})
@@ -182,7 +182,7 @@ def run_device_refresh(
 
             try:
                 peer_device = Device.objects.get(ipv4_address=peer_ip)
-                peer_hostname = peer_device.hostname
+                peer_device_uuid = str(peer_device.uuid)
                 peer_state = (
                     ha_details.get("result", {})
                     .get("group", {})
@@ -190,21 +190,16 @@ def run_device_refresh(
                     .get("state")
                 )
 
-                HaDeployment.objects.update_or_create(
-                    device=device,
-                    defaults={
-                        "peer_device": peer_device,
-                        "peer_ip": peer_ip,
-                        "peer_hostname": peer_hostname,
-                        "peer_state": peer_state,
-                    },
-                )
+                device_data["peer_device_id"] = peer_device_uuid
+                device_data["peer_ip"] = peer_ip
+                device_data["peer_state"] = peer_state
+                device_data["local_state"] = local_state
             except Device.DoesNotExist:
                 logging.warning(
                     f"Peer device with IP {peer_ip} not found. Skipping HA deployment."
                 )
         else:
-            device_data["local_ha_state"] = None
+            device_data["ha_enabled"] = False
 
         # Store additional device information in the device_data dictionary
         device_data["panorama_managed"] = device.panorama_managed
@@ -217,11 +212,15 @@ def run_device_refresh(
             app_version=device_data["app_version"],
             author_id=author_id,
             device_group=device_data.get("device_group"),
+            ha_enabled=device_data["ha_enabled"],
             ipv4_address=device_data["ipv4_address"],
             ipv6_address=device_data["ipv6_address"],
-            local_ha_state=device_data["local_ha_state"],
+            local_state=device_data.get("local_state"),
             panorama_managed=device_data["panorama_managed"],
             panorama_appliance=device_data["panorama_appliance"],
+            peer_device_id=device_data.get("peer_device_id"),
+            peer_ip=device_data.get("peer_ip"),
+            peer_state=device_data.get("peer_state"),
             serial=device_data["serial"],
             sw_version=device_data["sw_version"],
             threat_version=device_data["threat_version"],
@@ -229,7 +228,7 @@ def run_device_refresh(
         )
 
         # Serialize the device_data dictionary to JSON
-        return json.dumps(device_data, indent=2)
+        return json.dumps(device_data)
 
     except Exception as e:
         logging.error(f"Error during device refresh: {str(e)}")

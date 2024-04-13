@@ -3,9 +3,9 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 from .views import (
-    InventoryExistsView,
+    DeviceExistsView,
     DeviceTypeViewSet,
-    InventoryViewSet,
+    DeviceViewSet,
     JobViewSet,
     ProfileViewSet,
     UserViewSet,
@@ -15,7 +15,7 @@ from .views import (
 router = SimpleRouter()
 router.register(
     "inventory",
-    InventoryViewSet,
+    DeviceViewSet,
     basename="inventory",
 )
 
@@ -45,17 +45,17 @@ urlpatterns = [
     ),
     path(
         "inventory/refresh/",
-        InventoryViewSet.as_view({"post": "refresh_device"}),
+        DeviceViewSet.as_view({"post": "refresh_device"}),
         name="inventory-refresh",
     ),
     path(
         "inventory/job-status/",
-        InventoryViewSet.as_view({"get": "get_job_status"}),
+        DeviceViewSet.as_view({"get": "get_job_status"}),
         name="job-status",
     ),
     path(
         "inventory/sync/",
-        InventoryViewSet.as_view({"post": "sync_inventory"}),
+        DeviceViewSet.as_view({"post": "sync_inventory"}),
         name="inventory-sync",
     ),
     path(
@@ -82,7 +82,7 @@ urlpatterns = [
     ),
     path(
         "inventory/exists",
-        InventoryExistsView.as_view(),
+        DeviceExistsView.as_view(),
         name="inventory_exists",
     ),
 ]

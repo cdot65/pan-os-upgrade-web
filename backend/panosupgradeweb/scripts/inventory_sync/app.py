@@ -1,12 +1,30 @@
 # backend/panosupgradeweb/scripts/inventory_sync/app.py
-
+import os
+import sys
+import argparse
 import json
 import logging
 import xml.etree.ElementTree as ET
 
+import django
+
+# Add the Django project's root directory to the Python path
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+)
+
+# Set the DJANGO_SETTINGS_MODULE environment variable
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_project.settings")
+
+# Initialize the Django application
+django.setup()
+
+# Now you can import your Django models
+from panosupgradeweb.models import Device, DeviceType, Profile
+
 from panos.firewall import Firewall
 from panos.panorama import Panorama
-from panosupgradeweb.models import Device, DeviceType, HaDeployment, Profile
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def find_devicegroup_by_serial(data, serial):
@@ -121,10 +139,10 @@ def run_inventory_sync(
             # Retrieve the DeviceType object based on the platform_name
             try:
                 platform = DeviceType.objects.get(name=platform_name)
-            except DeviceType.DoesNotExist:
+            except ObjectDoesNotExist:
                 # Handle the case when the platform doesn't exist
                 logging.warning(
-                    f"Platform '{platform_name}' not found. Skipping device: {device.hostname}"
+                    f"Platform '{platform_name}' not found. Skipping device: {device['@name']}"
                 )
                 continue
 
@@ -138,10 +156,28 @@ def run_inventory_sync(
             # Retrieve the HA state information from the firewall device
             ha_info = firewall.show_highavailability_state()
 
-            local_ha_state = None
-            if ha_info[0] != "disabled":
+            ha_enabled = ha_info[0] != "disabled"
+
+            peer_device_uuid = None
+            peer_ip = None
+            peer_state = None
+            local_state = None
+
+            if ha_enabled:
                 ha_details = flatten_xml_to_dict(element=ha_info[1])
-                local_ha_state = ha_details["result"]["group"]["local-info"]["state"]
+                peer_ip = ha_details["result"]["group"]["peer-info"]["mgmt-ip"].split(
+                    "/"
+                )[0]
+                local_state = ha_details["result"]["group"]["local-info"]["state"]
+
+                try:
+                    peer_device = Device.objects.get(ipv4_address=peer_ip)
+                    peer_device_uuid = str(peer_device.uuid)
+                    peer_state = ha_details["result"]["group"]["peer-info"]["state"]
+                except ObjectDoesNotExist:
+                    logging.warning(
+                        f"Peer device with IP {peer_ip} not found. Skipping HA deployment."
+                    )
 
             # Create or update the Device object
             Device.objects.update_or_create(
@@ -152,6 +188,7 @@ def run_inventory_sync(
                     "device_group": find_devicegroup_by_serial(
                         device_group_mappings, device["serial"]
                     ),
+                    "ha_enabled": ha_enabled,
                     "ipv4_address": (
                         info["system"]["ip-address"]
                         if info["system"]["ip-address"] != "unknown"
@@ -162,13 +199,16 @@ def run_inventory_sync(
                         if info["system"]["ipv6-address"] != "unknown"
                         else None
                     ),
-                    "local_ha_state": local_ha_state,
+                    "local_state": local_state,
                     "notes": None,
                     "platform": platform,
                     "panorama_appliance": panorama_hostname,
                     "panorama_managed": True,
                     "panorama_ipv4_address": panorama_device.ipv4_address,
                     "panorama_ipv6_address": panorama_device.ipv6_address,
+                    "peer_device_id": peer_device_uuid,
+                    "peer_ip": peer_ip,
+                    "peer_state": peer_state,
                     "serial": info["system"]["serial"],
                     "sw_version": info["system"]["sw-version"],
                     "threat_version": info["system"]["threat-version"],
@@ -176,42 +216,23 @@ def run_inventory_sync(
                 },
             )
 
-        # Step 2: Iterate over the devices and build the HA relationships
-        for device in result_dict["result"]["devices"]["entry"]:
-            # Build connection to firewall device through Panorama object
-            firewall = Firewall(serial=device["serial"])
-            pan.add(firewall)
-
-            # Retrieve the HA state information from the firewall device
-            ha_info = firewall.show_highavailability_state()
-
-            if ha_info[0] != "disabled":
-                ha_details = flatten_xml_to_dict(element=ha_info[1])
-                peer_ip = ha_details["result"]["group"]["peer-info"]["mgmt-ip"].split(
-                    "/"
-                )[0]
-
-                try:
-                    primary_device = Device.objects.get(serial=device["serial"])
-                    peer_device = Device.objects.get(ipv4_address=peer_ip)
-                    peer_state = ha_details["result"]["group"]["peer-info"]["state"]
-
-                    HaDeployment.objects.update_or_create(
-                        device=primary_device,
-                        defaults={
-                            "peer_device": peer_device,
-                            "peer_ip": peer_ip,
-                            "peer_hostname": peer_device.hostname,
-                            "peer_state": peer_state,
-                        },
-                    )
-                except Device.DoesNotExist:
-                    logging.warning(
-                        f"Peer device with IP {peer_ip} not found. Skipping HA deployment."
-                    )
-
         return json_output
 
     except Exception as e:
         logging.error(f"Error during inventory sync: {str(e)}")
         raise e
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run inventory sync script")
+    parser.add_argument("panorama_device_uuid", type=str, help="Panorama device UUID")
+    parser.add_argument("profile_uuid", type=str, help="Profile UUID")
+    parser.add_argument("author_id", type=int, help="Author ID")
+
+    args = parser.parse_args()
+
+    panorama_device_uuid = args.panorama_device_uuid
+    profile_uuid = args.profile_uuid
+    author_id = args.author_id
+
+    run_inventory_sync(panorama_device_uuid, profile_uuid, author_id)

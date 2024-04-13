@@ -94,12 +94,6 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
             device_group: [""],
             device_type: [""],
             ha_enabled: [false],
-            ha_deployment: this.formBuilder.group({
-                peer_device: [""],
-                peer_ip: [""],
-                peer_hostname: [""],
-                peer_state: [""],
-            }),
             hostname: ["", Validators.required],
             ipv4_address: [
                 "",
@@ -119,7 +113,7 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
                     ),
                 ],
             ],
-            local_ha_state: [""],
+            local_state: [""],
             notes: [""],
             panorama_appliance: [""],
             panorama_ipv4_address: [
@@ -141,6 +135,9 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
                 ],
             ],
             panorama_managed: [false],
+            peer_device: [""],
+            peer_ip: [""],
+            peer_state: [""],
             platform_name: ["", Validators.required],
             serial: [""],
             sw_version: [""],
@@ -294,6 +291,9 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
                     this.updateInventoryForm
                         .get("panorama_managed")
                         ?.setValidators([]);
+                    this.updateInventoryForm
+                        .get("panorama_managed")
+                        ?.setValidators([]);
                 } else if (device_type === "Panorama") {
                     this.getPanoramaPlatforms();
                     this.updateInventoryForm
@@ -423,14 +423,13 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
                 ...this.inventoryItem,
                 ...this.updateInventoryForm.value,
             };
+
             if (updatedItem.device_type === "Panorama") {
                 delete updatedItem.device_group;
                 delete updatedItem.panorama_appliance;
                 delete updatedItem.panoramaManaged;
             }
-            if (!updatedItem.ha_enabled) {
-                delete updatedItem.ha_deployment;
-            }
+
             this.inventoryService
                 .updateDevice(updatedItem, this.inventoryItem.uuid)
                 .pipe(takeUntil(this.destroy$))

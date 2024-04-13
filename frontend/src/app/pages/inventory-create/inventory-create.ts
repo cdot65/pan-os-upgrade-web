@@ -69,16 +69,9 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
     ) {
         this.createInventoryForm = this.formBuilder.group({
             app_version: [""],
-            // author: localStorage.getItem("author"),
             device_group: [""],
             device_type: ["Firewall", Validators.required],
             ha_enabled: [false],
-            ha_deployment: this.formBuilder.group({
-                peer_device: [""],
-                peer_ip: [""],
-                peer_hostname: [""],
-                peer_state: [""],
-            }),
             hostname: ["", Validators.required],
             ipv4_address: [
                 "",
@@ -98,6 +91,7 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
                     ),
                 ],
             ],
+            local_state: [""],
             notes: [""],
             panorama_appliance: [""],
             panorama_ipv4_address: [
@@ -119,6 +113,9 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
                 ],
             ],
             panorama_managed: [false],
+            peer_device: [""],
+            peer_ip: [""],
+            peer_state: [""],
             platform_name: ["", Validators.required],
             serial: [""],
             sw_version: [""],
@@ -135,10 +132,6 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
                 delete formValue.device_group;
                 delete formValue.panorama_appliance;
                 delete formValue.panorama_managed;
-            }
-
-            if (!formValue.ha_enabled) {
-                delete formValue.ha_deployment;
             }
 
             this.inventoryService

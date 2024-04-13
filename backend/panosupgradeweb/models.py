@@ -44,6 +44,10 @@ class Device(models.Model):
         null=True,
         verbose_name="Device Group",
     )
+    ha_enabled = models.BooleanField(
+        null=True,
+        verbose_name="HA Enabled",
+    )
     hostname = models.CharField(
         max_length=100,
         unique=True,
@@ -61,7 +65,7 @@ class Device(models.Model):
         null=True,
         verbose_name="IPv6 Address",
     )
-    local_ha_state = models.CharField(
+    local_state = models.CharField(
         max_length=20,
         choices=(
             ("active", "Active"),
@@ -99,6 +103,32 @@ class Device(models.Model):
         blank=True,
         null=True,
         verbose_name="Panorama IPv6 Address",
+    )
+    peer_device = models.ForeignKey(
+        "self",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="+",
+        verbose_name="Peer Device",
+    )
+    peer_ip = models.GenericIPAddressField(
+        protocol="IPv4",
+        blank=True,
+        null=True,
+        verbose_name="Peer IP Address",
+    )
+    peer_state = models.CharField(
+        max_length=20,
+        choices=(
+            ("active", "Active"),
+            ("passive", "Passive"),
+            ("active-primary", "Active-Primary"),
+            ("active-secondary", "Active-Secondary"),
+        ),
+        blank=True,
+        null=True,
+        verbose_name="Peer HA State",
     )
     platform = models.ForeignKey(
         DeviceType,
@@ -143,56 +173,8 @@ class Device(models.Model):
         verbose_name="UUID",
     )
 
-    def get_ha_deployment(self):
-        try:
-            return HaDeployment.objects.get(device=self)
-        except HaDeployment.DoesNotExist:
-            return None
-
     def __str__(self) -> str:
         return str(self.hostname)
-
-
-class HaDeployment(models.Model):
-    device = models.OneToOneField(
-        Device,
-        on_delete=models.CASCADE,
-        related_name="ha_deployment",
-        verbose_name="Device",
-    )
-    peer_device = models.ForeignKey(
-        Device,
-        on_delete=models.CASCADE,
-        related_name="+",
-        verbose_name="Peer Device",
-    )
-    peer_ip = models.GenericIPAddressField(
-        protocol="IPv4",
-        blank=True,
-        null=True,
-        verbose_name="Peer IP Address",
-    )
-    peer_hostname = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        verbose_name="Peer Hostname",
-    )
-    peer_state = models.CharField(
-        max_length=20,
-        choices=(
-            ("active", "Active"),
-            ("passive", "Passive"),
-            ("active-primary", "Active-Primary"),
-            ("active-secondary", "Active-Secondary"),
-        ),
-        blank=True,
-        null=True,
-        verbose_name="Peer HA State",
-    )
-
-    def __str__(self) -> str:
-        return f"{self.device.hostname} - {self.peer_hostname}"
 
 
 class Job(models.Model):

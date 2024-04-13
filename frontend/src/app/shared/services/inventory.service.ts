@@ -135,7 +135,7 @@ export class InventoryService {
             })
             .pipe(
                 catchError((error) => {
-                    console.error("Error creating device ");
+                    console.error("Error creating device:", error);
                     throw error;
                 }),
             );
