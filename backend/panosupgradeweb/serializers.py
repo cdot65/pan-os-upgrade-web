@@ -56,10 +56,11 @@ class DeviceSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
-    peer_device_id = serializers.UUIDField(
-        source="peer_device.uuid",
-        read_only=True,
+    peer_device_id = serializers.PrimaryKeyRelatedField(
+        queryset=Device.objects.all(),
+        source="peer_device",
         required=False,
+        allow_null=True,
     )
     peer_ip = serializers.CharField(
         allow_blank=True,
@@ -144,13 +145,9 @@ class DeviceSerializer(serializers.ModelSerializer):
             except DeviceType.DoesNotExist:
                 raise serializers.ValidationError("Invalid platform")
 
-        peer_device_uuid = validated_data.pop("peer_device_id", None)
-        if peer_device_uuid:
-            try:
-                peer_device = Device.objects.get(uuid=peer_device_uuid)
-                instance.peer_device = peer_device
-            except Device.DoesNotExist:
-                raise serializers.ValidationError("Invalid peer device UUID")
+        peer_device = validated_data.pop("peer_device", None)
+        if peer_device:
+            instance.peer_device = peer_device
 
         instance.peer_ip = validated_data.get("peer_ip", instance.peer_ip)
         instance.peer_state = validated_data.get("peer_state", instance.peer_state)
