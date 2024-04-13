@@ -93,6 +93,18 @@ class DeviceViewSet(viewsets.ModelViewSet):
                     platform = DeviceType.objects.get(name=platform_name)
                     serializer.validated_data["platform"] = platform
                 serializer.save(author=request.user)
+
+                peer_device_uuid = request.data.get("peer_device_id")
+                if peer_device_uuid:
+                    try:
+                        peer_device = Device.objects.get(uuid=peer_device_uuid)
+                        serializer.validated_data["peer_device"] = peer_device
+                    except Device.DoesNotExist:
+                        return Response(
+                            {"error": "Invalid peer device UUID"},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             except DeviceType.DoesNotExist:
                 return Response(
