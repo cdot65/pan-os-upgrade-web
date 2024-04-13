@@ -6,9 +6,9 @@ import { Observable, of, throwError } from "rxjs";
 import { catchError, map, tap } from "rxjs/operators";
 
 import { Device } from "../interfaces/device.interface";
+import { DeviceSyncForm } from "../interfaces/device-sync-form.interface";
 import { DeviceType } from "../interfaces/device-type.interface";
 import { Injectable } from "@angular/core";
-import { InventorySyncForm } from "../interfaces/inventory-sync-form.interface";
 import { environment } from "../../../environments/environment.prod";
 
 @Injectable({
@@ -225,7 +225,7 @@ export class InventoryService {
             );
     }
 
-    syncInventory(syncForm: InventorySyncForm): Observable<string | null> {
+    syncInventory(syncForm: DeviceSyncForm): Observable<string | null> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",

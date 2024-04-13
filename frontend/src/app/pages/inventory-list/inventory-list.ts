@@ -16,11 +16,11 @@ import { Subject, forkJoin } from "rxjs";
 
 import { ComponentPageTitle } from "../page-title/page-title";
 import { Device } from "../../shared/interfaces/device.interface";
+import { DeviceSyncForm } from "../../shared/interfaces/device-sync-form.interface";
 import { Footer } from "src/app/shared/footer/footer";
 import { InventoryDeleteDialogComponent } from "../inventory-delete-dialog/inventory-delete-dialog";
 import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
 import { InventoryService } from "../../shared/services/inventory.service";
-import { InventorySyncForm } from "../../shared/interfaces/inventory-sync-form.interface";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
@@ -416,7 +416,7 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
                     const author = localStorage.getItem("author");
                     const syncRequests = selectedPanoramaDevices.map(
                         (device) => {
-                            const syncForm: InventorySyncForm = {
+                            const syncForm: DeviceSyncForm = {
                                 author: author ? parseInt(author, 10) : 0,
                                 panorama_device: device.uuid,
                                 profile: selectedProfileUuid,
