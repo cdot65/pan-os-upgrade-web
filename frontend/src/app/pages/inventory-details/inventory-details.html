@@ -197,7 +197,7 @@
 
             <mat-form-field>
               <mat-label>Peer Device</mat-label>
-              <mat-select formControlName="peer_device">
+              <mat-select formControlName="peer_device_id">
                 @for (device of devices; track device) {
                 <mat-option [value]="device.uuid">
                   {{device.hostname}}
