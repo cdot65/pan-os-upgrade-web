@@ -82,10 +82,12 @@ class Device(models.Model):
         null=True,
         verbose_name="Notes",
     )
-    panorama_appliance = models.CharField(
-        max_length=100,
+    panorama_appliance = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
+        related_name="+",
         verbose_name="Panorama Appliance",
     )
     panorama_managed = models.BooleanField(
