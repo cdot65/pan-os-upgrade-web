@@ -85,7 +85,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
 
     getDeviceHaProperties(deviceId: string): {
         ha_enabled: boolean;
-        peer_device: string | null;
+        local_state: string | null;
         peer_ip: string | null;
         peer_state: string | null;
     } {
@@ -93,14 +93,14 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         if (device && device.ha_enabled) {
             return {
                 ha_enabled: true,
-                peer_device: device.peer_device_id || null,
+                local_state: device.local_state || null,
                 peer_ip: device.peer_ip || null,
                 peer_state: device.peer_state || null,
             };
         } else {
             return {
                 ha_enabled: false,
-                peer_device: "n/a",
+                local_state: "n/a",
                 peer_ip: "n/a",
                 peer_state: "n/a",
             };
