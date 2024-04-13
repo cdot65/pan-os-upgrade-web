@@ -56,6 +56,10 @@ class DeviceSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+    peer_device_id = serializers.UUIDField(
+        source="peer_device.uuid",
+        read_only=True,
+    )
     platform_name = serializers.CharField(
         source="platform.name",
         read_only=True,
@@ -105,6 +109,7 @@ class DeviceSerializer(serializers.ModelSerializer):
             "uptime",
             "uuid",
             "peer_device",
+            "peer_device_id",
             "peer_ip",
             "peer_state",
             "local_state",
