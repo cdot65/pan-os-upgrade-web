@@ -207,6 +207,10 @@ def run_device_refresh(
             device.panorama_appliance if device.panorama_managed else None
         )
 
+        panorama_appliance_uuid = None
+        if device.panorama_appliance:
+            panorama_appliance_uuid = str(device.panorama_appliance.uuid)
+
         # Update the Device object using the device_data dictionary
         Device.objects.filter(uuid=device_uuid).update(
             app_version=device_data["app_version"],
@@ -218,6 +222,7 @@ def run_device_refresh(
             local_state=device_data.get("local_state"),
             panorama_managed=device_data["panorama_managed"],
             panorama_appliance=device_data["panorama_appliance"],
+            panorama_appliance_id=panorama_appliance_uuid,
             peer_device_id=device_data.get("peer_device_id"),
             peer_ip=device_data.get("peer_ip"),
             peer_state=device_data.get("peer_state"),

@@ -52,6 +52,12 @@ class DeviceSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+    panorama_appliance_id = serializers.PrimaryKeyRelatedField(
+        queryset=Device.objects.all(),
+        source="panorama_appliance",
+        required=False,
+        allow_null=True,
+    )
     panorama_managed = serializers.BooleanField(
         required=False,
         allow_null=True,
@@ -106,6 +112,7 @@ class DeviceSerializer(serializers.ModelSerializer):
             "local_state",
             "notes",
             "panorama_appliance",
+            "panorama_appliance_id",
             "panorama_ipv4_address",
             "panorama_ipv6_address",
             "panorama_managed",
@@ -131,12 +138,23 @@ class DeviceSerializer(serializers.ModelSerializer):
             except DeviceType.DoesNotExist:
                 raise serializers.ValidationError("Invalid platform")
 
+        panorama_appliance_id = validated_data.pop("panorama_appliance", None)
+
+        # If the device is managed by Panorama, assign the Panorama appliance using the UUID
+        if panorama_appliance_id:
+            try:
+                panorama_appliance = Device.objects.get(uuid=panorama_appliance_id)
+                validated_data["panorama_appliance"] = panorama_appliance
+            except Device.DoesNotExist:
+                raise serializers.ValidationError("Invalid Panorama appliance UUID")
+
         # Create the device instance
         device = super().create(validated_data)
 
         return device
 
     def update(self, instance, validated_data):
+        # Handle the platform assignment
         platform_name = self.initial_data.get("platform_name")
         if platform_name:
             try:
@@ -145,6 +163,17 @@ class DeviceSerializer(serializers.ModelSerializer):
             except DeviceType.DoesNotExist:
                 raise serializers.ValidationError("Invalid platform")
 
+        # Handle the Panorama appliance assignment
+        panorama_appliance_id = validated_data.pop("panorama_appliance", None)
+        if panorama_appliance_id:
+            try:
+                panorama_appliance = Device.objects.get(uuid=panorama_appliance_id)
+                instance.panorama_appliance = panorama_appliance
+            except Device.DoesNotExist:
+                raise serializers.ValidationError("Invalid Panorama appliance UUID")
+            instance.panorama_appliance = panorama_appliance_id
+
+        # Handle the peer device assignment
         peer_device = validated_data.pop("peer_device", None)
         if peer_device:
             instance.peer_device = peer_device

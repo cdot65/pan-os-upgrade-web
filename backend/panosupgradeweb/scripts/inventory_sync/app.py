@@ -185,6 +185,16 @@ def run_inventory_sync(
                         f"Peer device with IP {peer_ip} not found. Skipping HA deployment."
                     )
 
+            panorama_appliance_uuid = None
+            if panorama_hostname:
+                try:
+                    panorama_appliance = Device.objects.get(hostname=panorama_hostname)
+                    panorama_appliance_uuid = str(panorama_appliance.uuid)
+                except ObjectDoesNotExist:
+                    logging.warning(
+                        f"Panorama appliance '{panorama_hostname}' not found. Skipping assignment."
+                    )
+
             # Create or update the Device object
             Device.objects.update_or_create(
                 hostname=info["system"]["hostname"],
@@ -208,7 +218,7 @@ def run_inventory_sync(
                     "local_state": local_state,
                     "notes": None,
                     "platform": platform,
-                    "panorama_appliance": panorama_hostname,
+                    "panorama_appliance_id": panorama_appliance_uuid,
                     "panorama_managed": True,
                     "panorama_ipv4_address": panorama_device.ipv4_address,
                     "panorama_ipv6_address": panorama_device.ipv6_address,
