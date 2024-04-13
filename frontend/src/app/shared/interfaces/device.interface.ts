@@ -15,7 +15,6 @@ export interface Device {
     panorama_ipv4_address: string | null;
     panorama_ipv6_address: string | null;
     panorama_managed: boolean | null;
-    peer_device: string | null;
     peer_device_id: string | null;
     peer_ip: string | null;
     peer_state: string | null;

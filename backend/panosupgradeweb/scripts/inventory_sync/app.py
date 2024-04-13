@@ -132,6 +132,9 @@ def run_inventory_sync(
         # Convert the result dictionary to JSON
         json_output = json.dumps(result_dict)
 
+        # Create a list of peer firewalls missing their HA partner
+        missing_peer_devices = []
+
         # Step 1: Create or update Device objects based on the retrieved devices
         for device in result_dict["result"]["devices"]["entry"]:
             platform_name = device["model"]
@@ -175,6 +178,9 @@ def run_inventory_sync(
                     peer_device_uuid = str(peer_device.uuid)
                     peer_state = ha_details["result"]["group"]["peer-info"]["state"]
                 except ObjectDoesNotExist:
+                    # When the peer device doesn't yet exist we will revisit after creation.
+                    missing_peer_devices.append(firewall)
+
                     logging.warning(
                         f"Peer device with IP {peer_ip} not found. Skipping HA deployment."
                     )
@@ -216,6 +222,27 @@ def run_inventory_sync(
                 },
             )
 
+        # Step 2: Revisit the missing peer devices and update the peer_device_id
+        for firewall in missing_peer_devices:
+            ha_info = firewall.show_highavailability_state()
+            ha_details = flatten_xml_to_dict(element=ha_info[1])
+            peer_ip = ha_details["result"]["group"]["peer-info"]["mgmt-ip"].split("/")[
+                0
+            ]
+
+            try:
+                peer_device = Device.objects.get(ipv4_address=peer_ip)
+                peer_device_uuid = str(peer_device.uuid)
+                peer_state = ha_details["result"]["group"]["peer-info"]["state"]
+            except ObjectDoesNotExist:
+                logging.error(
+                    f"Peer device with IP {peer_ip} still not found. Skipping HA deployment."
+                )
+                continue
+
+            Device.objects.filter(serial=firewall.serial).update(
+                peer_device_id=peer_device_uuid, peer_ip=peer_ip, peer_state=peer_state
+            )
         return json_output
 
     except Exception as e:
