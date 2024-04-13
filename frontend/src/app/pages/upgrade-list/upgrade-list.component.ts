@@ -93,7 +93,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         if (device && device.ha_enabled) {
             return {
                 ha_enabled: true,
-                peer_device: device.peer_device || null,
+                peer_device: device.peer_device_id || null,
                 peer_ip: device.peer_ip || null,
                 peer_state: device.peer_state || null,
             };
@@ -168,7 +168,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
 
     isDeviceHaEnabled(deviceId: string): boolean {
         const device = this.devices.find((d) => d.uuid === deviceId);
-        return !!device?.peer_device;
+        return !!device?.peer_device_id;
     }
 
     ngOnDestroy(): void {

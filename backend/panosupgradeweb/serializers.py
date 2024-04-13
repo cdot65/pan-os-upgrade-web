@@ -59,6 +59,12 @@ class DeviceSerializer(serializers.ModelSerializer):
     peer_device_id = serializers.UUIDField(
         source="peer_device.uuid",
         read_only=True,
+        required=False,
+    )
+    peer_ip = serializers.CharField(
+        allow_blank=True,
+        required=False,
+        allow_null=True,
     )
     platform_name = serializers.CharField(
         source="platform.name",
@@ -84,7 +90,6 @@ class DeviceSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
-    peer_device = serializers.UUIDField(required=False)
 
     class Meta:
         model = Device
@@ -97,22 +102,21 @@ class DeviceSerializer(serializers.ModelSerializer):
             "hostname",
             "ipv4_address",
             "ipv6_address",
+            "local_state",
             "notes",
             "panorama_appliance",
             "panorama_ipv4_address",
             "panorama_ipv6_address",
             "panorama_managed",
+            "peer_device_id",
+            "peer_ip",
+            "peer_state",
             "platform_name",
             "serial",
             "sw_version",
             "threat_version",
             "uptime",
             "uuid",
-            "peer_device",
-            "peer_device_id",
-            "peer_ip",
-            "peer_state",
-            "local_state",
         )
 
     def create(self, validated_data):
@@ -140,7 +144,7 @@ class DeviceSerializer(serializers.ModelSerializer):
             except DeviceType.DoesNotExist:
                 raise serializers.ValidationError("Invalid platform")
 
-        peer_device_uuid = validated_data.pop("peer_device", None)
+        peer_device_uuid = validated_data.pop("peer_device_id", None)
         if peer_device_uuid:
             try:
                 peer_device = Device.objects.get(uuid=peer_device_uuid)
