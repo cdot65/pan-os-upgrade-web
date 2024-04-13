@@ -47,11 +47,6 @@ class DeviceSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
-    panorama_appliance = serializers.CharField(
-        allow_blank=True,
-        required=False,
-        allow_null=True,
-    )
     panorama_appliance_id = serializers.PrimaryKeyRelatedField(
         queryset=Device.objects.all(),
         source="panorama_appliance",
@@ -111,10 +106,7 @@ class DeviceSerializer(serializers.ModelSerializer):
             "ipv6_address",
             "local_state",
             "notes",
-            "panorama_appliance",
             "panorama_appliance_id",
-            "panorama_ipv4_address",
-            "panorama_ipv6_address",
             "panorama_managed",
             "peer_device_id",
             "peer_ip",
@@ -138,7 +130,7 @@ class DeviceSerializer(serializers.ModelSerializer):
             except DeviceType.DoesNotExist:
                 raise serializers.ValidationError("Invalid platform")
 
-        panorama_appliance_id = validated_data.pop("panorama_appliance", None)
+        panorama_appliance_id = validated_data.pop("panorama_appliance_id", None)
 
         # If the device is managed by Panorama, assign the Panorama appliance using the UUID
         if panorama_appliance_id:
@@ -164,7 +156,7 @@ class DeviceSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Invalid platform")
 
         # Handle the Panorama appliance assignment
-        panorama_appliance_id = validated_data.pop("panorama_appliance", None)
+        panorama_appliance_id = validated_data.pop("panorama_appliance_id", None)
         if panorama_appliance_id:
             try:
                 panorama_appliance = Device.objects.get(uuid=panorama_appliance_id)

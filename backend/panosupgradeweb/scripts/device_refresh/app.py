@@ -1,13 +1,30 @@
-# backend/panosupgradeweb/scripts/device_refresh/app.py
-
+# backend/panosupgradeweb/scripts/inventory_sync/app.py
+import os
+import sys
+import argparse
 import json
 import logging
 import xml.etree.ElementTree as ET
 
+import django
+
 from panos.firewall import Firewall
 from panos.panorama import Panorama
 
-from panosupgradeweb.models import Device, DeviceType, Profile
+# Add the Django project's root directory to the Python path
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+)
+
+# Set the DJANGO_SETTINGS_MODULE environment variable
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_project.settings")
+
+# Initialize the Django application
+django.setup()
+
+# import our Django models
+from panosupgradeweb.models import Device, DeviceType, Profile  # noqa: E402
+from django.core.exceptions import ObjectDoesNotExist  # noqa: E402
 
 
 def find_devicegroup_by_serial(data, serial):
@@ -204,12 +221,8 @@ def run_device_refresh(
         # Store additional device information in the device_data dictionary
         device_data["panorama_managed"] = device.panorama_managed
         device_data["panorama_appliance"] = (
-            device.panorama_appliance if device.panorama_managed else None
+            str(device.panorama_appliance.uuid) if device.panorama_managed else None
         )
-
-        panorama_appliance_uuid = None
-        if device.panorama_appliance:
-            panorama_appliance_uuid = str(device.panorama_appliance.uuid)
 
         # Update the Device object using the device_data dictionary
         Device.objects.filter(uuid=device_uuid).update(
@@ -221,8 +234,7 @@ def run_device_refresh(
             ipv6_address=device_data["ipv6_address"],
             local_state=device_data.get("local_state"),
             panorama_managed=device_data["panorama_managed"],
-            panorama_appliance=device_data["panorama_appliance"],
-            panorama_appliance_id=panorama_appliance_uuid,
+            panorama_appliance_id=device_data.get("panorama_appliance"),
             peer_device_id=device_data.get("peer_device_id"),
             peer_ip=device_data.get("peer_ip"),
             peer_state=device_data.get("peer_state"),
@@ -238,3 +250,38 @@ def run_device_refresh(
     except Exception as e:
         logging.error(f"Error during device refresh: {str(e)}")
         raise e
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Run device refresh script for Palo Alto Networks devices"
+    )
+    parser.add_argument(
+        "-d",
+        "--device-uuid",
+        type=str,
+        required=True,
+        help="UUID of the device to refresh from",
+    )
+    parser.add_argument(
+        "-p",
+        "--profile-uuid",
+        type=str,
+        required=True,
+        help="UUID of the profile to use for authentication",
+    )
+    parser.add_argument(
+        "-a",
+        "--author-id",
+        type=int,
+        required=True,
+        help="ID of the author performing the device refresh",
+    )
+
+    args = parser.parse_args()
+
+    device_uuid = args.device_uuid
+    profile_uuid = args.profile_uuid
+    author_id = args.author_id
+
+    run_device_refresh(device_uuid, profile_uuid, author_id)

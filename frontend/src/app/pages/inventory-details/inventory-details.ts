@@ -73,6 +73,7 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
     inventoryItem: Device | undefined;
     jobId: string | null = null;
     panoramaPlatforms: DeviceType[] = [];
+    panoramas: Device[] = [];
     refreshJobCompleted: boolean = false;
     showRefreshError: boolean = false;
     showRefreshProgress: boolean = false;
@@ -115,25 +116,7 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
             ],
             local_state: [""],
             notes: [""],
-            panorama_appliance: [""],
-            panorama_ipv4_address: [
-                "",
-                [
-                    Validators.pattern(
-                        // eslint-disable-next-line max-len
-                        /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
-                    ),
-                ],
-            ],
-            panorama_ipv6_address: [
-                "",
-                [
-                    Validators.pattern(
-                        // eslint-disable-next-line max-len
-                        /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/,
-                    ),
-                ],
-            ],
+            panorama_appliance_id: [""],
             panorama_managed: [false],
             peer_device_id: [""],
             peer_ip: [""],
@@ -173,6 +156,22 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
             .subscribe(
                 (devices) => {
                     this.devices = devices;
+                },
+                (error) => {
+                    console.error("Error fetching devices:", error);
+                },
+            );
+    }
+
+    getPanoramaAppliances(): void {
+        this.inventoryService
+            .getDevices()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (panoramas) => {
+                    this.panoramas = panoramas.filter(
+                        (panorama) => panorama.device_type === "Panorama",
+                    );
                 },
                 (error) => {
                     console.error("Error fetching devices:", error);
@@ -270,6 +269,7 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory Details";
         this.getDevices();
+        this.getPanoramaAppliances();
         const itemId = this.route.snapshot.paramMap.get("id");
         if (itemId) {
             this.getDevice(itemId);
@@ -286,7 +286,7 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
                         .get("device_group")
                         ?.setValidators([]);
                     this.updateInventoryForm
-                        .get("panorama_appliance")
+                        .get("panorama_appliance_id")
                         ?.setValidators([]);
                     this.updateInventoryForm
                         .get("panorama_managed")
@@ -300,7 +300,7 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
                         .get("device_group")
                         ?.clearValidators();
                     this.updateInventoryForm
-                        .get("panorama_appliance")
+                        .get("panorama_appliance_id")
                         ?.clearValidators();
                     this.updateInventoryForm
                         .get("panorama_managed")
@@ -310,7 +310,7 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
                     .get("device_group")
                     ?.updateValueAndValidity();
                 this.updateInventoryForm
-                    .get("panorama_appliance")
+                    .get("panorama_appliance_id")
                     ?.updateValueAndValidity();
                 this.updateInventoryForm
                     .get("panorama_managed")
@@ -378,9 +378,6 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
         return (control: AbstractControl): ValidationErrors | null => {
             const ipv4Control = control.get("ipv4_address");
             const ipv6Control = control.get("ipv6_address");
-            const panoramaManagedControl = control.get("panorama_managed");
-            const panoramaIpv4Control = control.get("panorama_ipv4_address");
-            const panoramaIpv6Control = control.get("panorama_ipv6_address");
 
             if (
                 (ipv4Control && ipv4Control.value && ipv4Control.invalid) ||
@@ -391,26 +388,6 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
 
             if (!ipv4Control?.value && !ipv6Control?.value) {
                 return { requireIpAddress: true };
-            }
-
-            if (panoramaManagedControl?.value) {
-                if (
-                    (panoramaIpv4Control &&
-                        panoramaIpv4Control.value &&
-                        panoramaIpv4Control.invalid) ||
-                    (panoramaIpv6Control &&
-                        panoramaIpv6Control.value &&
-                        panoramaIpv6Control.invalid)
-                ) {
-                    return { invalidPanoramaIpAddress: true };
-                }
-
-                if (
-                    !panoramaIpv4Control?.value &&
-                    !panoramaIpv6Control?.value
-                ) {
-                    return { requirePanoramaIpAddress: true };
-                }
             }
 
             return null;
@@ -426,7 +403,7 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
 
             if (updatedItem.device_type === "Panorama") {
                 delete updatedItem.device_group;
-                delete updatedItem.panorama_appliance;
+                delete updatedItem.panorama_appliance_id;
                 delete updatedItem.panoramaManaged;
             }
 

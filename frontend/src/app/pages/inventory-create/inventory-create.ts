@@ -93,7 +93,7 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
             ],
             local_state: [""],
             notes: [""],
-            panorama_appliance: [""],
+            panorama_appliance_id: [""],
             panorama_ipv4_address: [
                 "",
                 [
@@ -130,7 +130,7 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
 
             if (formValue.device_type === "Panorama") {
                 delete formValue.device_group;
-                delete formValue.panorama_appliance;
+                delete formValue.panorama_appliance_id;
                 delete formValue.panorama_managed;
             }
 
@@ -285,8 +285,9 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
     updateFormValidation(device_type: string): void {
         const device_groupControl =
             this.createInventoryForm.get("device_group");
-        const panorama_applianceControl =
-            this.createInventoryForm.get("panorama_appliance");
+        const panorama_applianceControl = this.createInventoryForm.get(
+            "panorama_appliance_id",
+        );
         const panorama_managedControl =
             this.createInventoryForm.get("panorama_managed");
 
