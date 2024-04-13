@@ -135,7 +135,7 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
                 ],
             ],
             panorama_managed: [false],
-            peer_device: [""],
+            peer_device_id: [""],
             peer_ip: [""],
             peer_state: [""],
             platform_name: ["", Validators.required],
