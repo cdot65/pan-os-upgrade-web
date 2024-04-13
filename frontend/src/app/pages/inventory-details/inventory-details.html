@@ -244,8 +244,13 @@
           <div class="form-field">
             <mat-form-field>
               <mat-label>Panorama Appliance</mat-label>
-              <!-- Input field for the Panorama appliance, bound to the 'panorama_appliance' form control -->
-              <input matInput id="panorama_appliance" formControlName="panorama_appliance" />
+              <mat-select formControlName="panorama_appliance_id">
+                @for (device of panoramas; track device) {
+                <mat-option [value]="device.uuid">
+                  {{device.hostname}}
+                </mat-option>
+                }
+              </mat-select>
             </mat-form-field>
           </div>
 
@@ -257,43 +262,7 @@
               <input matInput id="device_group" formControlName="device_group" />
             </mat-form-field>
           </div>
-
-          <div class="form-field">
-            <mat-form-field>
-              <mat-label>Panorama IPv4 Address</mat-label>
-              <!-- Input field for the IPv4 address, bound to the 'panorama_ipv4_address' form control -->
-              <input matInput id="panorama_ipv4_address" formControlName="panorama_ipv4_address" />
-            </mat-form-field>
-          </div>
-
-          <div class="form-field">
-            <mat-form-field>
-              <mat-label>Panorama IPv6 Address</mat-label>
-              <!-- Input field for the IPv6 address, bound to the 'panorama_ipv6_address' form control -->
-              <input matInput id="panorama_ipv6_address" formControlName="panorama_ipv6_address" />
-            </mat-form-field>
-          </div>
-
-          <!-- Validation for Panorama IP addresses -->
-          @if (updateInventoryForm.get('panorama_managed')?.value) {
-          <div class="form-field">
-            @if
-            (updateInventoryForm.hasError('requirePanoramaIpAddress'))
-            {
-            <mat-hint>
-              Please enter a valid IPv4 or IPv6 address for
-              Panorama.
-            </mat-hint>
-            } @if
-            (updateInventoryForm.hasError('invalidPanoramaIpAddress'))
-            {
-            <mat-error>
-              Please enter a valid IPv4 or IPv6 address for
-              Panorama.
-            </mat-error>
-            }
-          </div>
-          } }
+          }
 
           <!-- Checkbox for indicating if the firewall is managed by Panorama -->
           <div class="form-field">

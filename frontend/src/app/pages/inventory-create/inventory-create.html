@@ -208,8 +208,13 @@
           <div class="form-field">
             <mat-form-field>
               <mat-label>Panorama Appliance</mat-label>
-              <!-- Input field for the Panorama appliance, bound to the 'panorama_appliance' form control -->
-              <input matInput id="panorama_appliance" formControlName="panorama_appliance" />
+              <mat-select formControlName="panorama_appliance_id">
+                @for (device of devices; track device) {
+                <mat-option [value]="device.uuid">
+                  {{device.hostname}}
+                </mat-option>
+                }
+              </mat-select>
             </mat-form-field>
           </div>
 
