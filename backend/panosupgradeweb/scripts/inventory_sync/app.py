@@ -8,6 +8,9 @@ import xml.etree.ElementTree as ET
 
 import django
 
+from panos.firewall import Firewall
+from panos.panorama import Panorama
+
 # Add the Django project's root directory to the Python path
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
@@ -19,12 +22,9 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_project.settings")
 # Initialize the Django application
 django.setup()
 
-# Now you can import your Django models
-from panosupgradeweb.models import Device, DeviceType, Profile
-
-from panos.firewall import Firewall
-from panos.panorama import Panorama
-from django.core.exceptions import ObjectDoesNotExist
+# import our Django models
+from panosupgradeweb.models import Device, DeviceType, Profile  # noqa: E402
+from django.core.exceptions import ObjectDoesNotExist  # noqa: E402
 
 
 def find_devicegroup_by_serial(data, serial):
@@ -251,10 +251,30 @@ def run_inventory_sync(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run inventory sync script")
-    parser.add_argument("panorama_device_uuid", type=str, help="Panorama device UUID")
-    parser.add_argument("profile_uuid", type=str, help="Profile UUID")
-    parser.add_argument("author_id", type=int, help="Author ID")
+    parser = argparse.ArgumentParser(
+        description="Run inventory sync script for Palo Alto Networks devices"
+    )
+    parser.add_argument(
+        "-p",
+        "--panorama-device-uuid",
+        type=str,
+        required=True,
+        help="UUID of the Panorama device to sync inventory from",
+    )
+    parser.add_argument(
+        "-r",
+        "--profile-uuid",
+        type=str,
+        required=True,
+        help="UUID of the profile to use for authentication",
+    )
+    parser.add_argument(
+        "-a",
+        "--author-id",
+        type=int,
+        required=True,
+        help="ID of the author performing the inventory sync",
+    )
 
     args = parser.parse_args()
 
