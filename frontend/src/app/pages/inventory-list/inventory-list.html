@@ -112,12 +112,12 @@
       </ng-container>
 
       <ng-container matColumnDef="ha">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by HA status">HA Status</th>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by HA enabled">HA Enabled</th>
         <td mat-cell *matCellDef="let item">
-          @if (item.ha_deployment?.device1 && item.ha_deployment?.device2) {
-          <mat-icon>link</mat-icon>
+          @if (item.ha_enabled) {
+          <mat-icon>done</mat-icon>
           } @else {
-          <mat-icon>link_off</mat-icon>
+          <mat-icon>close</mat-icon>
           }
         </td>
       </ng-container>

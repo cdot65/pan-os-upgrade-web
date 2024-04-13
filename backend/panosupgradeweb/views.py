@@ -38,7 +38,7 @@ from .tasks import (
 )
 
 
-class InventoryExistsView(APIView):
+class DeviceExistsView(APIView):
     """
     A view that returns the existence of an inventory item by name as a boolean.
     """
@@ -70,7 +70,7 @@ class InventoryExistsView(APIView):
             )
 
 
-class InventoryViewSet(viewsets.ModelViewSet):
+class DeviceViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnly,)
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer

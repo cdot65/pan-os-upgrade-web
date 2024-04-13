@@ -184,24 +184,31 @@
 
           <!-- Conditional form field for specifying the HA deployment -->
           @if (updateInventoryForm.get('ha_enabled')?.value) {
-          <div class="form-field" formGroupName="ha_deployment">
+          <div class="form-field">
+            <mat-form-field>
+              <mat-label>Local HA State</mat-label>
+              <mat-select formControlName="local_state">
+                <mat-option value="active">Active</mat-option>
+                <mat-option value="passive">Passive</mat-option>
+                <mat-option value="active-primary">Active-Primary</mat-option>
+                <mat-option value="active-secondary">Active-Secondary</mat-option>
+              </mat-select>
+            </mat-form-field>
+
             <mat-form-field>
               <mat-label>Peer Device</mat-label>
               <mat-select formControlName="peer_device">
-                <mat-option *ngFor="let device of devices" [value]="device.uuid">
+                @for (device of devices; track device) {
+                <mat-option [value]="device.uuid">
                   {{device.hostname}}
                 </mat-option>
+                }
               </mat-select>
             </mat-form-field>
 
             <mat-form-field>
               <mat-label>Peer IP</mat-label>
               <input matInput formControlName="peer_ip">
-            </mat-form-field>
-
-            <mat-form-field>
-              <mat-label>Peer Hostname</mat-label>
-              <input matInput formControlName="peer_hostname">
             </mat-form-field>
 
             <mat-form-field>
@@ -215,6 +222,7 @@
             </mat-form-field>
           </div>
           }
+
           <!-- Form field for enabling/disabling high availability -->
           <div class="form-field">
             <!-- Checkbox for toggling high availability, bound to the 'ha_enabled' form control -->

@@ -84,30 +84,24 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
     }
 
     getDeviceHaProperties(deviceId: string): {
-        ha: boolean;
-        local_ha_state: string | null;
+        ha_enabled: boolean;
         peer_device: string | null;
         peer_ip: string | null;
-        peer_hostname: string | null;
         peer_state: string | null;
     } {
         const device = this.devices.find((d) => d.uuid === deviceId);
-        if (device && device.ha_deployment) {
+        if (device && device.ha_enabled) {
             return {
-                ha: true,
-                local_ha_state: device.local_ha_state || null,
-                peer_device: device.ha_deployment.peer_device || null,
-                peer_ip: device.ha_deployment.peer_ip || null,
-                peer_hostname: device.ha_deployment.peer_hostname || null,
-                peer_state: device.ha_deployment.peer_state || null,
+                ha_enabled: true,
+                peer_device: device.peer_device || null,
+                peer_ip: device.peer_ip || null,
+                peer_state: device.peer_state || null,
             };
         } else {
             return {
-                ha: false,
-                local_ha_state: "n/a",
+                ha_enabled: false,
                 peer_device: "n/a",
                 peer_ip: "n/a",
-                peer_hostname: "n/a",
                 peer_state: "n/a",
             };
         }
@@ -174,7 +168,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
 
     isDeviceHaEnabled(deviceId: string): boolean {
         const device = this.devices.find((d) => d.uuid === deviceId);
-        return !!device?.ha_deployment?.peer_device;
+        return !!device?.peer_device;
     }
 
     ngOnDestroy(): void {

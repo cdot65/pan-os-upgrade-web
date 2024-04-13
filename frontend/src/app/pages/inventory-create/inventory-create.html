@@ -149,13 +149,15 @@
 
           <!-- Conditional form field for specifying the HA deployment -->
           @if (createInventoryForm.get('ha_enabled')?.value === true) {
-          <div class="form-field" formGroupName="ha_deployment">
+          <div class="form-field">
             <mat-form-field>
               <mat-label>Peer Device</mat-label>
               <mat-select formControlName="peer_device">
-                <mat-option *ngFor="let device of devices" [value]="device.uuid">
+                @for (device of devices; track device) {
+                <mat-option [value]="device.uuid">
                   {{device.hostname}}
                 </mat-option>
+                }
               </mat-select>
             </mat-form-field>
 
@@ -165,13 +167,18 @@
             </mat-form-field>
 
             <mat-form-field>
-              <mat-label>Peer Hostname</mat-label>
-              <input matInput formControlName="peer_hostname">
+              <mat-label>Peer State</mat-label>
+              <mat-select formControlName="peer_state">
+                <mat-option value="active">Active</mat-option>
+                <mat-option value="passive">Passive</mat-option>
+                <mat-option value="active-primary">Active-Primary</mat-option>
+                <mat-option value="active-secondary">Active-Secondary</mat-option>
+              </mat-select>
             </mat-form-field>
 
             <mat-form-field>
-              <mat-label>Peer State</mat-label>
-              <mat-select formControlName="peer_state">
+              <mat-label>Local State</mat-label>
+              <mat-select formControlName="local_state">
                 <mat-option value="active">Active</mat-option>
                 <mat-option value="passive">Passive</mat-option>
                 <mat-option value="active-primary">Active-Primary</mat-option>

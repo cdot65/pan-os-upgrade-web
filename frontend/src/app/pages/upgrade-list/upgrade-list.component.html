@@ -63,8 +63,7 @@
               <mat-divider></mat-divider>
               <h4>High Availability</h4>
               <ul>
-                <li>State: {{getDeviceHaProperties(deviceId).local_ha_state }}</li>
-                <li>Peer: {{ getDeviceHaProperties(deviceId).peer_hostname }}</li>
+                <li>State: {{getDeviceHaProperties(deviceId).ha_enabled }}</li>
               </ul>
             </mat-card-content>
           </mat-card>

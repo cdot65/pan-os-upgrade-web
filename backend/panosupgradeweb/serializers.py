@@ -6,7 +6,6 @@ from django.conf import settings
 from .models import (
     Device,
     DeviceType,
-    HaDeployment,
     Job,
     Profile,
 )
@@ -23,17 +22,6 @@ class CustomTokenSerializer(TokenSerializer):
         fields = TokenSerializer.Meta.fields + ("author",)
 
 
-class HaDeploymentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = HaDeployment
-        fields = (
-            "peer_device",
-            "peer_ip",
-            "peer_hostname",
-            "peer_state",
-        )
-
-
 class DeviceSerializer(serializers.ModelSerializer):
     app_version = serializers.CharField(
         allow_blank=True,
@@ -47,9 +35,6 @@ class DeviceSerializer(serializers.ModelSerializer):
     )
     device_type = serializers.CharField(
         source="platform.device_type",
-        read_only=True,
-    )
-    ha_deployment = HaDeploymentSerializer(
         read_only=True,
     )
     ipv4_address = serializers.IPAddressField(
@@ -95,6 +80,7 @@ class DeviceSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+    peer_device = serializers.UUIDField(required=False)
 
     class Meta:
         model = Device
@@ -103,11 +89,10 @@ class DeviceSerializer(serializers.ModelSerializer):
             "created_at",
             "device_group",
             "device_type",
-            "ha_deployment",
+            "ha_enabled",
             "hostname",
             "ipv4_address",
             "ipv6_address",
-            "local_ha_state",
             "notes",
             "panorama_appliance",
             "panorama_ipv4_address",
@@ -119,24 +104,27 @@ class DeviceSerializer(serializers.ModelSerializer):
             "threat_version",
             "uptime",
             "uuid",
+            "peer_device",
+            "peer_ip",
+            "peer_state",
+            "local_state",
         )
 
     def create(self, validated_data):
         platform_name = self.initial_data.get("platform_name")
+
+        # Handle the platform assignment
         if platform_name:
             try:
                 platform = DeviceType.objects.get(name=platform_name)
                 validated_data["platform"] = platform
             except DeviceType.DoesNotExist:
                 raise serializers.ValidationError("Invalid platform")
-        return super().create(validated_data)
 
-    def get_ha_deployment(self, obj):
-        try:
-            ha_deployment = obj.ha_deployment
-            return HaDeploymentSerializer(ha_deployment).data
-        except HaDeployment.DoesNotExist:
-            return None
+        # Create the device instance
+        device = super().create(validated_data)
+
+        return device
 
     def update(self, instance, validated_data):
         platform_name = self.initial_data.get("platform_name")
@@ -146,6 +134,19 @@ class DeviceSerializer(serializers.ModelSerializer):
                 instance.platform = platform
             except DeviceType.DoesNotExist:
                 raise serializers.ValidationError("Invalid platform")
+
+        peer_device_uuid = validated_data.pop("peer_device", None)
+        if peer_device_uuid:
+            try:
+                peer_device = Device.objects.get(uuid=peer_device_uuid)
+                instance.peer_device = peer_device
+            except Device.DoesNotExist:
+                raise serializers.ValidationError("Invalid peer device UUID")
+
+        instance.peer_ip = validated_data.get("peer_ip", instance.peer_ip)
+        instance.peer_state = validated_data.get("peer_state", instance.peer_state)
+        instance.local_state = validated_data.get("local_state", instance.local_state)
+
         return super().update(instance, validated_data)
 
 
