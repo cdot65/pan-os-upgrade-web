@@ -14,6 +14,7 @@ from panosupgradeweb.models import Job
 from panosupgradeweb.scripts import (
     run_inventory_sync,
     run_device_refresh,
+    run_panos_upgrade,
 )
 
 # ----------------------------------------------------------------------------
@@ -69,7 +70,7 @@ def execute_inventory_sync(
 # Device Refresh Task
 # ----------------------------------------------------------------------------
 @shared_task(bind=True)
-def refresh_device_task(
+def execute_refresh_device_task(
     self,
     device_uuid,
     profile_uuid,
@@ -92,6 +93,45 @@ def refresh_device_task(
             device_uuid,
             profile_uuid,
             author_id,
+        )
+        job.json_data = json_output
+    except Exception as e:
+        job.json_data = f"Job ID: {job.pk}\nError: {e}"
+        logging.error(f"Exception Type: {type(e).__name__}")
+        logging.error(f"Traceback: {traceback.format_exc()}")
+
+    job.save()
+
+
+# ----------------------------------------------------------------------------
+# Device Upgrade Task
+# ----------------------------------------------------------------------------
+@shared_task(bind=True)
+def execute_upgrade_device_task(
+    self,
+    device_uuid,
+    author_id,
+    profile_uuid,
+    target_version,
+):
+    logging.debug(f"Device upgrade task started for device: {device_uuid}")
+    author = User.objects.get(id=author_id)
+    logging.debug(f"Author: {author}")
+
+    job = Job.objects.create(
+        job_type="device_upgrade",
+        json_data=None,
+        author=author,
+        task_id=self.request.id,
+    )
+    logging.debug(f"Job ID: {job.pk}")
+
+    try:
+        json_output = run_panos_upgrade(
+            device_uuid,
+            author_id,
+            profile_uuid,
+            target_version,
         )
         job.json_data = json_output
     except Exception as e:

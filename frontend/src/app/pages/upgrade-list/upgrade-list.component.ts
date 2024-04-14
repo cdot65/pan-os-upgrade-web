@@ -15,8 +15,10 @@ import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
 import { MatDividerModule } from "@angular/material/divider";
+import { MatExpansionModule } from "@angular/material/expansion";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
+import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { MatSelectModule } from "@angular/material/select";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatStepperModule } from "@angular/material/stepper";
@@ -27,6 +29,7 @@ import { STEPPER_GLOBAL_OPTIONS } from "@angular/cdk/stepper";
 import { Subject } from "rxjs";
 import { UpgradeForm } from "../../shared/interfaces/upgrade-form.interface";
 import { UpgradePageHeader } from "../upgrade-page-header/upgrade-page-header";
+import { UpgradeResponse } from "../../shared/interfaces/upgrade-response.interface";
 import { UpgradeService } from "../../shared/services/upgrade.service";
 import { takeUntil } from "rxjs/operators";
 
@@ -47,6 +50,8 @@ import { takeUntil } from "rxjs/operators";
         ReactiveFormsModule,
         MatInputModule,
         MatCardModule,
+        MatExpansionModule,
+        MatProgressBarModule,
     ],
     providers: [
         {
@@ -60,6 +65,8 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
     devices: Device[] = [];
     profiles: Profile[] = [];
     upgradeForm: FormGroup;
+    jobIds: string[] = [];
+    step = 0;
     private destroy$ = new Subject<void>();
 
     constructor(
@@ -195,17 +202,16 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
                 .upgradeDevice(upgradeFormData)
                 .pipe(takeUntil(this.destroy$))
                 .subscribe(
-                    (jobId) => {
-                        if (jobId) {
+                    (response: UpgradeResponse | null) => {
+                        if (response && response.job_ids) {
+                            this.jobIds = response.job_ids;
                             this.snackBar.open(
-                                "Upgrade initiated successfully. Job ID: " +
-                                    jobId,
+                                "Upgrade initiated successfully.",
                                 "Close",
                                 {
                                     duration: 3000,
                                 },
                             );
-                            this.router.navigate(["/upgrade-status", jobId]);
                         } else {
                             this.snackBar.open(
                                 "Failed to initiate the upgrade. Please try again.",
@@ -227,6 +233,26 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
                         );
                     },
                 );
+
+            this.stepNext();
         }
+    }
+
+    resetForm() {
+        this.step = 0;
+        this.upgradeForm.reset();
+        this.jobIds = [];
+    }
+
+    stepSet(index: number) {
+        this.step = index;
+    }
+
+    stepNext() {
+        this.step++;
+    }
+
+    stepPrev() {
+        this.step--;
     }
 }

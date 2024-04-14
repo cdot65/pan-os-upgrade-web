@@ -27,6 +27,7 @@ from .serializers import (
     DeviceSerializer,
     DeviceRefreshSerializer,
     DeviceTypeSerializer,
+    DeviceUpgradeSerializer,
     InventorySyncSerializer,
     JobSerializer,
     ProfileSerializer,
@@ -34,7 +35,8 @@ from .serializers import (
 )
 from .tasks import (
     execute_inventory_sync,
-    refresh_device_task,
+    execute_refresh_device_task,
+    execute_upgrade_device_task,
 )
 
 
@@ -149,7 +151,7 @@ class DeviceViewSet(viewsets.ModelViewSet):
                 print(f"Profile: {profile.name}")
 
                 # Trigger the Celery task for device refresh and get the task ID
-                task = refresh_device_task.delay(
+                task = execute_refresh_device_task.delay(
                     device_uuid,
                     profile_uuid,
                     author_id,
@@ -210,6 +212,53 @@ class DeviceViewSet(viewsets.ModelViewSet):
             except Profile.DoesNotExist:
                 return Response(
                     {"error": "Invalid profile"}, status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # Add a new action in the DeviceViewSet
+    @action(detail=False, methods=["post"], url_path="upgrade")
+    def upgrade_devices(self, request):
+        serializer = DeviceUpgradeSerializer(data=request.data)
+        if serializer.is_valid():
+            devices = serializer.validated_data["devices"]
+            profile_uuid = serializer.validated_data["profile"]
+            author_id = serializer.validated_data["author"]
+            target_version = serializer.validated_data["targetVersion"]
+
+            try:
+                profile = Profile.objects.get(uuid=profile_uuid)
+
+                job_ids = []
+                for device_uuid in devices:
+                    try:
+                        device = Device.objects.get(uuid=device_uuid)
+                        print(f"Upgrading device {device.hostname}...")
+                        print(f"Profile: {profile.name}")
+
+                        # Trigger the Celery task for device upgrade and get the task ID
+                        task = execute_upgrade_device_task.delay(
+                            str(device_uuid),
+                            author_id,
+                            str(profile_uuid),
+                            target_version,
+                        )
+                        job_ids.append(task.id)
+                    except Device.DoesNotExist:
+                        print(f"Invalid device UUID: {device_uuid}")
+
+                return Response(
+                    {"job_ids": job_ids},
+                    status=status.HTTP_200_OK,
+                )
+
+            except Profile.DoesNotExist:
+                return Response(
+                    {"error": "Invalid profile."}, status=status.HTTP_400_BAD_REQUEST
                 )
             except Exception as e:
                 return Response(
