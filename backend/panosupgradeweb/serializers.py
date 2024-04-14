@@ -193,6 +193,13 @@ class DeviceTypeSerializer(serializers.ModelSerializer):
         )
 
 
+class DeviceUpgradeSerializer(serializers.Serializer):
+    author = serializers.IntegerField(required=True)
+    devices = serializers.ListField(child=serializers.UUIDField(), required=True)
+    profile = serializers.UUIDField(required=True)
+    targetVersion = serializers.CharField(required=True)
+
+
 class InventorySyncSerializer(serializers.Serializer):
     author = serializers.IntegerField(required=True)
     panorama_device = serializers.UUIDField(required=True)

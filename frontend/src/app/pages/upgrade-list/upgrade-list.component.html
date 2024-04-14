@@ -1,9 +1,15 @@
+<!-- upgrade-list.component.html -->
 <div class="upgrade-list-container">
   <app-upgrade-page-header></app-upgrade-page-header>
   <main focusOnNavigation aria-label="Upgrade list" id="upgrade-list" class="upgrade-list">
-    <mat-stepper orientation="vertical" #stepper [formGroup]="upgradeForm">
-      <mat-step [stepControl]="upgradeForm.get('devices')!" errorMessage="Device selection is required.">
-        <ng-template matStepLabel>Select Devices</ng-template>
+    <mat-accordion class="example-headers-align" [formGroup]="upgradeForm">
+
+      <!-- Step 1: Select Devices -->
+      <mat-expansion-panel [expanded]="step === 0" (opened)="stepSet(0)" hideToggle>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Select Devices</mat-panel-title>
+          <mat-panel-description>Choose the devices to upgrade</mat-panel-description>
+        </mat-expansion-panel-header>
         <mat-form-field class="dropdown">
           <mat-label>Devices</mat-label>
           <mat-select formControlName="devices" multiple>
@@ -14,12 +20,17 @@
             }
           </mat-select>
         </mat-form-field>
-        <div>
-          <button mat-button matStepperNext>Next</button>
-        </div>
-      </mat-step>
-      <mat-step [stepControl]="upgradeForm.get('profile')!" errorMessage="Profile selection is required.">
-        <ng-template matStepLabel>Select a Profile</ng-template>
+        <mat-action-row>
+          <button mat-raised-button color="primary" (click)="stepNext()">Next</button>
+        </mat-action-row>
+      </mat-expansion-panel>
+
+      <!-- Step 2: Select Profile -->
+      <mat-expansion-panel [expanded]="step === 1" (opened)="stepSet(1)" hideToggle>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Select a Profile</mat-panel-title>
+          <mat-panel-description>Choose the upgrade profile</mat-panel-description>
+        </mat-expansion-panel-header>
         <mat-form-field class="dropdown">
           <mat-label>Profile</mat-label>
           <mat-select formControlName="profile">
@@ -30,24 +41,34 @@
             }
           </mat-select>
         </mat-form-field>
-        <div>
-          <button mat-button matStepperPrevious>Back</button>
-          <button mat-button matStepperNext>Next</button>
-        </div>
-      </mat-step>
-      <mat-step>
-        <ng-template matStepLabel>Select Target Version</ng-template>
+        <mat-action-row>
+          <button mat-raised-button color="warn" (click)="stepPrev()">Back</button>
+          <button mat-raised-button color="primary" (click)="stepNext()">Next</button>
+        </mat-action-row>
+      </mat-expansion-panel>
+
+      <!-- Step 3: Select Target Version -->
+      <mat-expansion-panel [expanded]="step === 2" (opened)="stepSet(2)" hideToggle>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Select Target Version</mat-panel-title>
+          <mat-panel-description>Enter the target PAN-OS version</mat-panel-description>
+        </mat-expansion-panel-header>
         <mat-form-field class="dropdown">
           <mat-label>Target Version</mat-label>
           <input matInput formControlName="targetVersion">
         </mat-form-field>
-        <div>
-          <button mat-button matStepperPrevious>Back</button>
-          <button mat-button matStepperNext>Next</button>
-        </div>
-      </mat-step>
-      <mat-step>
-        <ng-template matStepLabel>Review and Confirm</ng-template>
+        <mat-action-row>
+          <button mat-raised-button color="warn" (click)="stepPrev()">Back</button>
+          <button mat-raised-button color="primary" (click)="stepNext()">Next</button>
+        </mat-action-row>
+      </mat-expansion-panel>
+
+      <!-- Step 4: Review and Confirm -->
+      <mat-expansion-panel [expanded]="step === 3" (opened)="stepSet(3)" hideToggle>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Review and Confirm</mat-panel-title>
+          <mat-panel-description>Confirm the upgrade details</mat-panel-description>
+        </mat-expansion-panel-header>
         <div class="confirmation-details">
           <p><strong>Upgrade Profile:</strong> {{ getProfileName(upgradeForm.get('profile')?.value) }}</p>
           <p><strong>Target Version:</strong> {{ upgradeForm.get('targetVersion')?.value }}</p>
@@ -72,12 +93,37 @@
           </mat-card>
           }
         </div>
-        <div>
-          <button mat-button matStepperPrevious>Back</button>
+        <mat-action-row>
+          <button mat-raised-button color="warn" (click)="stepPrev()">Back</button>
           <button mat-raised-button color="primary" (click)="onUpgradeClick()">Upgrade</button>
-        </div>
-      </mat-step>
-    </mat-stepper>
+        </mat-action-row>
+      </mat-expansion-panel>
+
+      <!-- Step 5: Upgrade Progress -->
+      <mat-expansion-panel [expanded]="step === 4" (opened)="stepSet(4)" hideToggle>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Upgrade Progress</mat-panel-title>
+          <mat-panel-description>Track the upgrade progress</mat-panel-description>
+        </mat-expansion-panel-header>
+        <mat-accordion>
+          @for (jobId of jobIds; track jobId) {
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                Job ID: {{ jobId }}
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <mat-progress-bar mode="determinate"></mat-progress-bar>
+          </mat-expansion-panel>
+          }
+        </mat-accordion>
+        <mat-action-row>
+          <button mat-raised-button color="primary" (click)="resetForm()">New Upgrade</button>
+        </mat-action-row>
+      </mat-expansion-panel>
+
+    </mat-accordion>
   </main>
+
   <app-footer></app-footer>
 </div>

@@ -59,6 +59,11 @@ urlpatterns = [
         name="inventory-sync",
     ),
     path(
+        "inventory/upgrade/",
+        DeviceViewSet.as_view({"post": "upgrade_devices"}),
+        name="inventory-upgrade",
+    ),
+    path(
         "inventory/platforms/<int:pk>/",
         DeviceTypeViewSet.as_view({"get": "retrieve"}),
         name="inventory-platforms-detail",
