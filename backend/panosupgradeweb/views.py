@@ -309,6 +309,43 @@ class JobViewSet(viewsets.ModelViewSet):
         return JsonResponse(response_data, status=200)
 
 
+class JobLogViewSet(viewsets.ViewSet):
+    def list(self, request, job_id):
+        job = get_object_or_404(Job, task_id=job_id)
+        upgrade_logs = job.upgrade_logs.all()
+        snapshot_logs = job.snapshot_logs.all()
+        readiness_check_logs = job.readiness_check_logs.all()
+
+        data = {
+            "upgrade_logs": [
+                {
+                    "timestamp": log.timestamp,
+                    "level": log.level,
+                    "message": log.message,
+                }
+                for log in upgrade_logs
+            ],
+            "snapshot_logs": [
+                {
+                    "timestamp": log.timestamp,
+                    "snapshot_type": log.snapshot_type,
+                    "snapshot_data": log.snapshot_data,
+                }
+                for log in snapshot_logs
+            ],
+            "readiness_check_logs": [
+                {
+                    "timestamp": log.timestamp,
+                    "check_name": log.check_name,
+                    "check_result": log.check_result,
+                    "check_details": log.check_details,
+                }
+                for log in readiness_check_logs
+            ],
+        }
+        return Response(data)
+
+
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
