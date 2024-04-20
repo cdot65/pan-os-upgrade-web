@@ -128,10 +128,12 @@ def execute_upgrade_device_task(
 
     try:
         json_output = run_panos_upgrade(
-            device_uuid,
-            author_id,
-            profile_uuid,
-            target_version,
+            author_id=author_id,
+            device_uuid=device_uuid,
+            dry_run=True,
+            job_id=job.task_id,
+            profile_uuid=profile_uuid,
+            target_version=target_version,
         )
         job.json_data = json_output
     except Exception as e:
