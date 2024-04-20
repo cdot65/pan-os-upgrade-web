@@ -1358,8 +1358,8 @@ if __name__ == "__main__":
     dry_run = args.dry_run
 
     run_panos_upgrade(
-        author_id,
-        device_uuid,
+        author_id=author_id,
+        device_uuid=device_uuid,
         dry_run=dry_run,
         profile_uuid=profile_uuid,
         target_version=target_version,
