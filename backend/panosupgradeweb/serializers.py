@@ -208,6 +208,9 @@ class InventorySyncSerializer(serializers.Serializer):
 
 class JobSerializer(serializers.ModelSerializer):
     task_id = serializers.CharField(read_only=True)
+    upgrade_logs = serializers.SerializerMethodField()
+    snapshot_logs = serializers.SerializerMethodField()
+    readiness_check_logs = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
@@ -218,7 +221,44 @@ class JobSerializer(serializers.ModelSerializer):
             "updated_at",
             "job_type",
             "json_data",
+            "upgrade_logs",
+            "snapshot_logs",
+            "readiness_check_logs",
         )
+
+    def get_upgrade_logs(self, obj):
+        upgrade_logs = obj.upgrade_logs.all()
+        return [
+            {
+                "timestamp": log.timestamp,
+                "level": log.level,
+                "message": log.message,
+            }
+            for log in upgrade_logs
+        ]
+
+    def get_snapshot_logs(self, obj):
+        snapshot_logs = obj.snapshot_logs.all()
+        return [
+            {
+                "timestamp": log.timestamp,
+                "snapshot_type": log.snapshot_type,
+                "snapshot_data": log.snapshot_data,
+            }
+            for log in snapshot_logs
+        ]
+
+    def get_readiness_check_logs(self, obj):
+        readiness_check_logs = obj.readiness_check_logs.all()
+        return [
+            {
+                "timestamp": log.timestamp,
+                "check_name": log.check_name,
+                "check_result": log.check_result,
+                "check_details": log.check_details,
+            }
+            for log in readiness_check_logs
+        ]
 
 
 class UserSerializer(serializers.ModelSerializer):
