@@ -8,8 +8,10 @@ import sys
 import time
 
 from typing import Dict, List, Optional, Tuple, Union
+import uuid
 
 import django
+from django.contrib.auth import get_user_model
 
 # Palo Alto Networks SDK imports
 from panos.base import PanDevice
@@ -28,6 +30,7 @@ from panos_upgrade_assurance.firewall_proxy import FirewallProxy
 
 # project imports
 from pan_os_upgrade.components.utilities import flatten_xml_to_dict, get_emoji
+from pan_os_upgrade.components.assurance import AssuranceOptions
 
 # Add the Django project's root directory to the Python path
 sys.path.append(
@@ -440,11 +443,11 @@ def perform_snapshot(device: Dict) -> any:
     while attempt < max_snapshot_tries and snapshot is None:
         try:
             # Log snapshot attempt
-            log_snapshot(
-                device["job_id"],
-                "snapshot_attempt",
-                {"attempt": attempt + 1, "max_attempts": max_snapshot_tries},
-            )
+            # log_snapshot(
+            #     device["job_id"],
+            #     "snapshot_attempt",
+            #     {"attempt": attempt + 1, "max_attempts": max_snapshot_tries},
+            # )
 
             # Take snapshots
             snapshot = run_assurance(
@@ -543,37 +546,47 @@ def run_assurance(
 
     #         return None
 
-    # elif operation_type == "state_snapshot":
-    #     # validate each type of action
-    #     for action in actions:
-    #         if action not in AssuranceOptions.STATE_SNAPSHOTS.keys():
-    #             logging.error(
-    #                 f"{get_emoji(action='error')} {hostname}: Invalid action for state snapshot: {action}"
-    #             )
-    #             return
+    if operation_type == "state_snapshot":
+        actions = {
+            "arp_table": device["profile"].arp_table_snapshot,
+            "content_version": device["profile"].content_version_snapshot,
+            "ip_sec_tunnels": device["profile"].ip_sec_tunnels_snapshot,
+            "license": device["profile"].license_snapshot,
+            "nics": device["profile"].nics_snapshot,
+            "routes": device["profile"].routes_snapshot,
+            "session_stats": device["profile"].session_stats_snapshot,
+        }
 
-    #     # take snapshots
-    #     try:
-    #         logging.debug(
-    #             f"{get_emoji(action='start')} {hostname}: Performing snapshots."
-    #         )
-    #         results = checks_firewall.run_snapshots(snapshots_config=actions)
-    #         logging.debug(
-    #             f"{get_emoji(action='report')} {hostname}: Snapshot results {results}"
-    #         )
+        # validate each type of action
+        for action in actions.keys():
+            if action not in AssuranceOptions.STATE_SNAPSHOTS.keys():
+                logging.error(
+                    f"{get_emoji(action='error')} {device['db_device'].hostname}: Invalid action for state snapshot: {action}"
+                )
+                return
 
-    #         if results:
-    #             # Pass the results to the SnapshotReport model
-    #             return SnapshotReport(hostname=hostname, **results)
-    #         else:
-    #             return None
+        # take snapshots
+        try:
+            logging.debug(
+                f"{get_emoji(action='start')} {device['db_device'].hostname}: Performing snapshots."
+            )
+            results = checks_firewall.run_snapshots(snapshots_config=actions)
+            logging.debug(
+                f"{get_emoji(action='report')} {device['db_device'].hostname}: Snapshot results {results}"
+            )
 
-    #     except Exception as e:
-    #         logging.error(
-    #             f"{get_emoji(action='error')} {hostname}: Error running snapshots: %s",
-    #             e,
-    #         )
-    #         return
+            # if results:
+            #     # Pass the results to the SnapshotReport model
+            #     return SnapshotReport(hostname=device["db_device"].hostname, **results)
+            # else:
+            #     return None
+
+        except Exception as e:
+            logging.error(
+                f"{get_emoji(action='error')} {device['db_device'].hostname}: Error running snapshots: %s",
+                e,
+            )
+            return
 
     # elif operation_type == "report":
     #     for action in actions:
@@ -587,11 +600,11 @@ def run_assurance(
     #         )
     #         # result = getattr(Report(firewall), action)(**config)
 
-    # else:
-    #     logging.error(
-    #         f"{get_emoji(action='error')} {hostname}: Invalid operation type: {operation_type}"
-    #     )
-    #     return
+    else:
+        logging.error(
+            f"{get_emoji(action='error')} {device['db_device'].hostname}: Invalid operation type: {operation_type}"
+        )
+        return
 
     return results
 
@@ -950,6 +963,7 @@ def upgrade_firewall(
         "INFO",
         f"{get_emoji(action='start')} {device['db_device'].hostname}: Performing test to see if {target_version} is already downloaded.",
     )
+
     image_downloaded = software_download(
         device=device,
         target_version=target_version,
@@ -985,10 +999,7 @@ def upgrade_firewall(
     # ]
 
     # Perform the pre-upgrade snapshot
-    pre_snapshot = perform_snapshot(
-        device=device,
-        file_path=f'assurance/snapshots/{device["db_device"].hostname}/pre/{time.strftime("%Y-%m-%d_%H-%M-%S")}.json',
-    )
+    pre_snapshot = perform_snapshot(device=device)
 
     log_upgrade(
         device["job_id"],
@@ -1239,7 +1250,7 @@ def run_panos_upgrade(
                 log_upgrade(
                     device["job_id"],
                     "INFO",
-                    f"{get_emoji(action='info')} {upgrade_devices[0]['db_device'].hostname}: HA peer firewall added to the upgrade list.",
+                    f"{get_emoji(action='report')} {upgrade_devices[0]['db_device'].hostname}: HA peer firewall added to the upgrade list.",
                 )
 
         # Iterate over the list of passive and active-secondary devices to upgrade
@@ -1286,7 +1297,7 @@ def run_panos_upgrade(
         json_output = json.dumps(
             {
                 "exec": "upgrade workflow executed",
-                "device": f"{device.hostname}",
+                "device": f"{each['db_device'].hostname}",
             }
         )
         return json_output
@@ -1357,10 +1368,20 @@ if __name__ == "__main__":
     target_version = args.target_version
     dry_run = args.dry_run
 
+    # Create a new Job entry
+    author = get_user_model().objects.get(id=author_id)
+    job = Job.objects.create(
+        job_type="device_upgrade",
+        json_data=None,
+        author=author,
+        task_id=str(uuid.uuid4()),
+    )
+
     run_panos_upgrade(
         author_id=author_id,
         device_uuid=device_uuid,
         dry_run=dry_run,
+        job_id=str(job.task_id),
         profile_uuid=profile_uuid,
         target_version=target_version,
     )
