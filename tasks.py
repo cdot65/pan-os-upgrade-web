@@ -56,3 +56,17 @@ def publish(context):
     context.run(
         f"{backend} && {frontend} && {worker}",
     )
+
+
+@task()
+def rebuild(context):
+    """Rebuild our Docker images."""
+    remove_migrations = "rm backend/panosupgradeweb/migrations/*.py"
+    stop_containers = "docker-compose stop"
+    remove_containers = "docker-compose rm -f"
+    remove_volumes = "docker volume rm pan-os-upgrade-web_elasticsearch_data && docker volume rm pan-os-upgrade-web_postgres_data"
+    build_containers = "docker-compose build"
+    start_containers = "docker-compose up -d"
+    context.run(
+        f"{remove_migrations} && {stop_containers} && {remove_containers} && {remove_volumes} && {build_containers} && {start_containers}",
+    )
