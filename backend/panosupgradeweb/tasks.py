@@ -55,7 +55,12 @@ def execute_inventory_sync(
     logging.debug(f"Job ID: {job.pk}")
 
     try:
-        json_output = run_inventory_sync(panorama_device_uuid, profile_uuid, author_id)
+        json_output = run_inventory_sync(
+            author_id=author_id,
+            job_id=job.task_id,
+            panorama_device_uuid=panorama_device_uuid,
+            profile_uuid=profile_uuid,
+        )
         job.json_data = json_output
     except Exception as e:
         job.json_data = f"Job ID: {job.pk}\nError: {e}"
