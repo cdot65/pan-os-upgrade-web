@@ -95,9 +95,10 @@ def execute_refresh_device_task(
 
     try:
         json_output = run_device_refresh(
-            device_uuid,
-            profile_uuid,
-            author_id,
+            author_id=author_id,
+            device_uuid=device_uuid,
+            job_id=job.task_id,
+            profile_uuid=profile_uuid,
         )
         job.json_data = json_output
     except Exception as e:
