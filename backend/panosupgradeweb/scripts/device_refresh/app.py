@@ -7,6 +7,7 @@ import logging
 import xml.etree.ElementTree as ET
 
 import django
+from logstash_async.handler import AsynchronousLogstashHandler
 
 from panos.firewall import Firewall
 from panos.panorama import Panorama
@@ -25,6 +26,40 @@ django.setup()
 # import our Django models
 from panosupgradeweb.models import Device, DeviceType, Profile  # noqa: E402
 from django.core.exceptions import ObjectDoesNotExist  # noqa: E402
+
+
+# Create a logger instance
+logger = logging.getLogger("pan-os-device-refresh")
+logger.setLevel(logging.DEBUG)
+
+# Create a Logstash handler
+logstash_handler = AsynchronousLogstashHandler(
+    # Use the Logstash service name from the Docker Compose file
+    host="logstash",
+    # The port Logstash is listening on
+    port=5000,
+    # Disable the local queue database
+    database_path=None,
+)
+
+# Add the Logstash handler to the logger
+logger.addHandler(logstash_handler)
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+logger.addHandler(console_handler)
+
+
+def log_device_refresh(
+    job_id: str,
+    level: str,
+    message: str,
+):
+    extra = {
+        "job_id": job_id,
+        "job_type": "device_refresh",
+    }
+    logger.log(getattr(logging, level), message, extra=extra)
 
 
 def find_devicegroup_by_serial(data, serial):
@@ -90,13 +125,26 @@ def get_device_group_mapping(panorama: Panorama):
 
 
 def run_device_refresh(
-    device_uuid,
-    profile_uuid,
-    author_id,
+    author_id: int,
+    device_uuid: str,
+    job_id: str,
+    profile_uuid: str,
 ):
-    logging.debug(f"Running device refresh for device: {device_uuid}")
-    logging.debug(f"Using profile: {profile_uuid}")
-    logging.debug(f"Author ID: {author_id}")
+    log_device_refresh(
+        job_id=job_id,
+        level="DEBUG",
+        message=f"Running device refresh for device: {device_uuid}",
+    )
+    log_device_refresh(
+        job_id=job_id,
+        level="DEBUG",
+        message=f"Using profile: {profile_uuid}",
+    )
+    log_device_refresh(
+        job_id=job_id,
+        level="DEBUG",
+        message=f"Author ID: {author_id}",
+    )
 
     # Initialize an empty dictionary to store the device data
     device_data = {}
@@ -116,6 +164,11 @@ def run_device_refresh(
                 profile.pan_username,
                 profile.pan_password,
             )
+            log_device_refresh(
+                job_id=job_id,
+                level="INFO",
+                message=f"Connected to firewall device {device.ipv4_address}",
+            )
 
         elif platform.device_type == "Firewall" and device.panorama_managed:
             pan_device = Firewall(
@@ -134,6 +187,11 @@ def run_device_refresh(
                 device_group_mappings,
                 device.serial,
             )
+            log_device_refresh(
+                job_id=job_id,
+                level="INFO",
+                message=f"Connected to firewall through Panorama device {device.panorama_ipv4_address}",
+            )
 
         else:
             # Connect to the Panorama device using the retrieved credentials
@@ -142,15 +200,34 @@ def run_device_refresh(
                 profile.pan_username,
                 profile.pan_password,
             )
+            log_device_refresh(
+                job_id=job_id,
+                level="INFO",
+                message=f"Connected to Panorama device {device.ipv4_address}",
+            )
 
     except Exception as e:
-        logging.error(f"Error while building the PAN object: {str(e)}")
+        log_device_refresh(
+            job_id=job_id,
+            level="ERROR",
+            message=f"Error while connecting to the PAN device: {str(e)}",
+        )
         raise e
 
     # Connect to the PAN device and retrieve the system information
     try:
         # Retrieve the system information from the firewall device
         system_info = pan_device.show_system_info()
+        log_device_refresh(
+            job_id=job_id,
+            level="INFO",
+            message=f"Retrieved system information from device {device.ipv4_address}",
+        )
+        log_device_refresh(
+            job_id=job_id,
+            level="DEBUG",
+            message=f"System Info: {system_info}",
+        )
 
         # Store the relevant system information in the device_data dictionary
         device_data["hostname"] = system_info["system"]["hostname"]
@@ -212,8 +289,10 @@ def run_device_refresh(
                 device_data["peer_state"] = peer_state
                 device_data["local_state"] = local_state
             except Device.DoesNotExist:
-                logging.warning(
-                    f"Peer device with IP {peer_ip} not found. Skipping HA deployment."
+                log_device_refresh(
+                    job_id=job_id,
+                    level="WARNING",
+                    message=f"Peer device with IP {peer_ip} not found. Skipping HA deployment.",
                 )
         else:
             device_data["ha_enabled"] = False
@@ -222,6 +301,11 @@ def run_device_refresh(
         device_data["panorama_managed"] = device.panorama_managed
         device_data["panorama_appliance"] = (
             str(device.panorama_appliance.uuid) if device.panorama_managed else None
+        )
+        log_device_refresh(
+            job_id=job_id,
+            level="DEBUG",
+            message=f"Device Data: {device_data}",
         )
 
         # Update the Device object using the device_data dictionary
@@ -243,12 +327,21 @@ def run_device_refresh(
             threat_version=device_data["threat_version"],
             uptime=device_data["uptime"],
         )
+        log_device_refresh(
+            job_id=job_id,
+            level="INFO",
+            message=f"Device {device_data['hostname']} updated successfully",
+        )
 
         # Serialize the device_data dictionary to JSON
         return json.dumps(device_data)
 
     except Exception as e:
-        logging.error(f"Error during device refresh: {str(e)}")
+        log_device_refresh(
+            job_id=job_id,
+            level="ERROR",
+            message=f"Error while retrieving system information: {str(e)}",
+        )
         raise e
 
 
@@ -284,4 +377,9 @@ if __name__ == "__main__":
     profile_uuid = args.profile_uuid
     author_id = args.author_id
 
-    run_device_refresh(device_uuid, profile_uuid, author_id)
+    run_device_refresh(
+        author_id=author_id,
+        device_uuid=device_uuid,
+        job_id="CLI",
+        profile_uuid=profile_uuid,
+    )
