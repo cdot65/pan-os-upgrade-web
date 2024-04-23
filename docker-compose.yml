@@ -14,8 +14,6 @@ services:
             - logstash
         env_file:
             - ./backend/.env
-        networks:
-            - app
 
     frontend:
         build:
@@ -25,8 +23,6 @@ services:
             - "8080:80"
         depends_on:
             - backend
-        networks:
-            - app
 
     db:
         image: postgres:14
@@ -38,15 +34,11 @@ services:
             - ./backend/.env
         ports:
             - "5432:5432"
-        networks:
-            - app
 
     redis:
         image: redis:7.0.5-alpine
         expose:
             - 6379
-        networks:
-            - app
 
     worker:
         build:
@@ -62,8 +54,6 @@ services:
             - redis
         env_file:
             - ./backend/.env
-        networks:
-            - app
 
     elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
@@ -73,8 +63,7 @@ services:
             - "9200:9200"
         volumes:
             - elasticsearch_data:/usr/share/elasticsearch/data
-        networks:
-            - app
+            - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
 
     logstash:
         image: docker.elastic.co/logstash/logstash:7.17.0
@@ -83,8 +72,6 @@ services:
             - ./logstash/pipeline:/usr/share/logstash/pipeline
         depends_on:
             - elasticsearch
-        networks:
-            - app
 
 networks:
     app:
