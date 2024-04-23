@@ -41,9 +41,10 @@
     </div>
     <div>
       <h3>Elasticsearch Logs</h3>
-      <div *ngIf="logs.length === 0">No logs found.</div>
-      <div *ngIf="logs.length > 0">
-        <mat-card *ngFor="let log of logs" class="log-entry">
+      @if (logs.length > 0) {
+      <div>
+        @for (log of logs; track log) {
+        <mat-card class="log-entry">
           <mat-card-header>
             <mat-card-title>{{ log._source.message }}</mat-card-title>
             <mat-card-subtitle>{{ log._source['@timestamp'] | date:'medium' }}</mat-card-subtitle>
@@ -53,7 +54,11 @@
             <div>Log Level: {{ log._source.log_level }}</div>
           </mat-card-content>
         </mat-card>
+        }
       </div>
+      } @else if (logs.length === 0) {
+      <div>No logs found.</div>
+      }
     </div>
   </main>
   <app-footer></app-footer>
