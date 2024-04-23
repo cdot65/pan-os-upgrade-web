@@ -83,3 +83,25 @@
     }
   }
 }
+
+.log-entry {
+  margin-bottom: 16px;
+
+  .mat-card-header {
+    background-color: #f5f5f5;
+    padding: 8px 16px;
+  }
+
+  .mat-card-title {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .mat-card-subtitle {
+    color: #666;
+  }
+
+  .mat-card-content {
+    padding: 16px;
+  }
+}
