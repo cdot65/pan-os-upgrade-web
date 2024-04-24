@@ -12,6 +12,8 @@ import { JobService } from "../../shared/services/job.service";
 import { MatCardModule } from "@angular/material/card";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatSelectModule } from "@angular/material/select";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { NgxJsonViewerModule } from "ngx-json-viewer";
 import { Subject } from "rxjs";
@@ -29,15 +31,21 @@ import { takeUntil } from "rxjs/operators";
         MatCardModule,
         MatFormFieldModule,
         MatInputModule,
+        MatProgressSpinnerModule,
+        MatSelectModule,
         NgxJsonViewerModule,
     ],
 })
 export class JobDetailsComponent implements OnDestroy, OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
+    inactivityTimer$ = new Subject<void>();
     jobItem: Job | undefined;
     jobId: string | null = null;
     logs: any[] = [];
     parsedJsonData: any;
+    pollingEnabled = true;
+    pollingIntervalOptions = [0, 1000, 3000, 5000, 10000, 30000];
+    selectedPollingInterval = 3000; // Default polling interval
     private destroy$ = new Subject<void>();
 
     constructor(
@@ -48,6 +56,27 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
         public _componentPageTitle: ComponentPageTitle,
     ) {}
 
+    fetchLogsOnce(jobId: string) {
+        this.elasticsearchService
+            .getLogsByJobIdOnce(jobId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (result) => {
+                    this.logs = result.hits.hits;
+                },
+                (error) => {
+                    console.error("Error fetching logs:", error);
+                    this.snackBar.open(
+                        "Failed to fetch logs. Please try again.",
+                        "Close",
+                        {
+                            duration: 3000,
+                        },
+                    );
+                },
+            );
+    }
+
     getJob(itemId: string): void {
         this.jobService
             .getJob(itemId)
@@ -56,7 +85,7 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
                 (item: Job) => {
                     this.jobItem = item;
                     this.parsedJsonData = JSON.parse(item.json_data);
-                    this.searchLogsByJobId(item.task_id);
+                    this.subscribeToLogs(item.task_id); // Call subscribeToLogs() instead
                 },
                 (error: any) => {
                     console.error("Error fetching job item:", error);
@@ -71,24 +100,6 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
             );
     }
 
-    async searchLogsByJobId(jobId: string) {
-        try {
-            const result = await this.elasticsearchService
-                .getLogsByJobId(jobId)
-                .toPromise();
-            this.logs = result.hits.hits;
-        } catch (error) {
-            console.error("Error searching logs by job ID:", error);
-            this.snackBar.open(
-                "Failed to fetch logs. Please try again.",
-                "Close",
-                {
-                    duration: 3000,
-                },
-            );
-        }
-    }
-
     ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
@@ -99,6 +110,42 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
         const itemId = this.route.snapshot.paramMap.get("id");
         if (itemId) {
             this.getJob(itemId);
+            this.fetchLogsOnce(itemId);
+            this.subscribeToLogs(itemId);
+        }
+    }
+
+    subscribeToLogs(jobId: string) {
+        if (this.selectedPollingInterval === 0) {
+            this.pollingEnabled = false;
+            return;
+        }
+
+        this.pollingEnabled = true;
+        this.elasticsearchService
+            .getLogsByJobId(jobId, this.selectedPollingInterval)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (result) => {
+                    this.logs = result.hits.hits;
+                },
+                (error) => {
+                    console.error("Error searching logs by job ID:", error);
+                    this.snackBar.open(
+                        "Failed to fetch logs. Please try again.",
+                        "Close",
+                        {
+                            duration: 3000,
+                        },
+                    );
+                },
+            );
+    }
+
+    onPollingIntervalChange() {
+        const itemId = this.route.snapshot.paramMap.get("id");
+        if (itemId) {
+            this.subscribeToLogs(itemId);
         }
     }
 }

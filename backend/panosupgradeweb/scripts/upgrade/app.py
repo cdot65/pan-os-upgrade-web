@@ -1,4 +1,5 @@
 # backend/panosupgradeweb/scripts/panos_upgrade/app.py
+
 import argparse
 import json
 import logging
@@ -54,8 +55,9 @@ from panosupgradeweb.models import (  # noqa: E402
     UpgradeLog,
 )
 
+
 # Create a logger instance
-logger = logging.getLogger("pan-os-inventory")
+logger = logging.getLogger("pan-os-upgrade-upgrade")
 logger.setLevel(logging.DEBUG)
 
 # Create a Logstash handler
@@ -70,10 +72,6 @@ logstash_handler = AsynchronousLogstashHandler(
 
 # Add the Logstash handler to the logger
 logger.addHandler(logstash_handler)
-
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
-logger.addHandler(console_handler)
 
 
 def check_ha_compatibility(
@@ -205,7 +203,7 @@ def get_ha_status(device: Dict) -> Tuple[str, Optional[dict]]:
         log_upgrade(
             job_id=device["job_id"],
             level="DEBUG",
-            message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Target device deployment details: {ha_details}",
+            message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Target device deployment details collected.",
         )
         return deployment_type[0], ha_details
     else:

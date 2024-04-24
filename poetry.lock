@@ -1919,6 +1919,16 @@ files = [
 ]
 
 [[package]]
+name = "python-logstash"
+version = "0.4.8"
+description = "Python logging handler for Logstash."
+optional = false
+python-versions = "*"
+files = [
+    {file = "python-logstash-0.4.8.tar.gz", hash = "sha256:d04e1ce11ecc107e4a4f3b807fc57d96811e964a554081b3bbb44732f74ef5f9"},
+]
+
+[[package]]
 name = "python-logstash-async"
 version = "3.0.0"
 description = "Asynchronous Python logging handler for Logstash."
@@ -2460,4 +2470,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "982d2c958f07c9d6552abc269d7eb1d262f9b5ebcd727d9f885b9c0cc5c03059"
+content-hash = "f06e452804a36e70c9307d28ceab20481edceafd7a094d6d51bbe4cb7152e2df"
