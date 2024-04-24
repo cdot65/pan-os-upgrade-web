@@ -39,6 +39,7 @@ invoke = "^2.1.2"
 dynaconf = "^3.2.0"
 defusedxml = "^0.7.1"
 python-logstash-async = "^3.0.0"
+python-logstash = "^0.4.8"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"

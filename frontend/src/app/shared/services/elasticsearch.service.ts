@@ -2,9 +2,10 @@
 // frontend/src/app/shared/services/elasticsearch.service.ts
 
 import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { Observable, interval } from "rxjs";
 
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { switchMap } from "rxjs/operators";
 
 @Injectable({
     providedIn: "root",
@@ -38,7 +39,35 @@ export class ElasticsearchService {
         return this.http.post(url, body, { headers });
     }
 
-    getLogsByJobId(jobId: string): Observable<any> {
+    getLogsByJobId(jobId: string, pollingInterval: number): Observable<any> {
+        const url = `${this.apiUrl}/python-logs-upgrade-*/_search`;
+        const headers = new HttpHeaders().set(
+            "Content-Type",
+            "application/json",
+        );
+        const body = {
+            from: 0,
+            size: 100,
+            query: {
+                match: {
+                    "extra.job_id": jobId,
+                },
+            },
+            sort: [
+                {
+                    "@timestamp": {
+                        order: "asc",
+                    },
+                },
+            ],
+        };
+
+        return interval(pollingInterval).pipe(
+            switchMap(() => this.http.post(url, body, { headers })),
+        );
+    }
+
+    getLogsByJobIdOnce(jobId: string): Observable<any> {
         const url = `${this.apiUrl}/python-logs-upgrade-*/_search`;
         const headers = new HttpHeaders().set(
             "Content-Type",

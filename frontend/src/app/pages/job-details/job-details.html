@@ -41,6 +41,19 @@
     </div>
     <div>
       <h3>Elasticsearch Logs</h3>
+      <mat-form-field>
+        <mat-label>Polling Interval</mat-label>
+        <mat-select [(value)]="selectedPollingInterval" (selectionChange)="onPollingIntervalChange()">
+          <mat-option *ngFor="let option of pollingIntervalOptions" [value]="option">
+            {{ option === 0 ? 'Disabled' : option / 1000 + ' seconds' }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      @if (!pollingEnabled) {
+      <div>Polling is disabled.</div>
+      }
+
       @if (logs.length > 0) {
       <div>
         @for (log of logs; track log) {
@@ -58,6 +71,7 @@
       </div>
       } @else if (logs.length === 0) {
       <div>No logs found.</div>
+      <mat-spinner></mat-spinner>
       }
     </div>
   </main>
