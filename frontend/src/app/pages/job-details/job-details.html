@@ -54,7 +54,13 @@
                         </div>
 
                         @if (!pollingEnabled) {
-                        <div class="polling-info">Polling is disabled.</div>
+                        <div class="polling-info">
+                            Live job polling disabled.
+                        </div>
+                        } @else {
+                        <div class="polling-warning">
+                            Live job polling enabled.
+                        </div>
                         } @if (logs.length > 0) {
                         <div>
                             @for (log of logs; track log) {
