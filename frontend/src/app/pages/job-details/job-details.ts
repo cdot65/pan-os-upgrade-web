@@ -48,7 +48,7 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
     parsedJsonData: any;
     pollingEnabled = true;
     pollingIntervalOptions = [0, 1000, 3000, 5000, 10000, 30000];
-    selectedPollingInterval = 3000; // Default polling interval
+    selectedPollingInterval = 0; // Default polling interval
     private destroy$ = new Subject<void>();
 
     constructor(
