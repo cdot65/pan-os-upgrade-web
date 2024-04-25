@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
+import { Subject, Subscription } from "rxjs";
 
 import { ActivatedRoute } from "@angular/router";
 import { CommonModule } from "@angular/common";
@@ -16,7 +17,6 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatSelectModule } from "@angular/material/select";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { NgxJsonViewerModule } from "ngx-json-viewer";
-import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 
 @Component({
@@ -42,6 +42,7 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
     jobItem: Job | undefined;
     jobId: string | null = null;
     logs: any[] = [];
+    logSubscription: Subscription | undefined;
     parsedJsonData: any;
     pollingEnabled = true;
     pollingIntervalOptions = [0, 1000, 3000, 5000, 10000, 30000];
@@ -103,8 +104,10 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
     ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
+        if (this.logSubscription) {
+            this.logSubscription.unsubscribe();
+        }
     }
-
     ngOnInit(): void {
         this._componentPageTitle.title = "Job Details";
         const itemId = this.route.snapshot.paramMap.get("id");
@@ -118,11 +121,18 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
     subscribeToLogs(jobId: string) {
         if (this.selectedPollingInterval === 0) {
             this.pollingEnabled = false;
+            if (this.logSubscription) {
+                this.logSubscription.unsubscribe();
+            }
             return;
         }
 
         this.pollingEnabled = true;
-        this.elasticsearchService
+        if (this.logSubscription) {
+            this.logSubscription.unsubscribe();
+        }
+
+        this.logSubscription = this.elasticsearchService
             .getLogsByJobId(jobId, this.selectedPollingInterval)
             .pipe(takeUntil(this.destroy$))
             .subscribe(
@@ -141,11 +151,17 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
                 },
             );
     }
-
     onPollingIntervalChange() {
         const itemId = this.route.snapshot.paramMap.get("id");
         if (itemId) {
-            this.subscribeToLogs(itemId);
+            if (this.selectedPollingInterval === 0) {
+                this.pollingEnabled = false;
+                if (this.logSubscription) {
+                    this.logSubscription.unsubscribe();
+                }
+            } else {
+                this.subscribeToLogs(itemId);
+            }
         }
     }
 }
