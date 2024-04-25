@@ -14,7 +14,6 @@ import { MatCardModule } from "@angular/material/card";
 import { MatDividerModule } from "@angular/material/divider";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
-import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatSelectModule } from "@angular/material/select";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { NgxJsonViewerModule } from "ngx-json-viewer";
@@ -33,7 +32,6 @@ import { takeUntil } from "rxjs/operators";
         MatDividerModule,
         MatFormFieldModule,
         MatInputModule,
-        MatProgressSpinnerModule,
         MatSelectModule,
         NgxJsonViewerModule,
     ],
