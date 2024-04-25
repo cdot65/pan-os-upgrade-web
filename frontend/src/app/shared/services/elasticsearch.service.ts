@@ -15,8 +15,8 @@ export class ElasticsearchService {
 
     constructor(private http: HttpClient) {}
 
-    getAllLogs(): Observable<any> {
-        const url = `${this.apiUrl}/python-logs-upgrade-*/_search`;
+    getLogsAll(path: string): Observable<any> {
+        const url = `${this.apiUrl}/python-logs-${path}-*/_search`;
         const headers = new HttpHeaders().set(
             "Content-Type",
             "application/json",
@@ -39,8 +39,12 @@ export class ElasticsearchService {
         return this.http.post(url, body, { headers });
     }
 
-    getLogsByJobId(jobId: string, pollingInterval: number): Observable<any> {
-        const url = `${this.apiUrl}/python-logs-upgrade-*/_search`;
+    getLogsById(
+        jobId: string,
+        path: string,
+        pollingInterval: number,
+    ): Observable<any> {
+        const url = `${this.apiUrl}/python-logs-${path}-*/_search`;
         const headers = new HttpHeaders().set(
             "Content-Type",
             "application/json",
@@ -67,8 +71,8 @@ export class ElasticsearchService {
         );
     }
 
-    getLogsByJobIdOnce(jobId: string): Observable<any> {
-        const url = `${this.apiUrl}/python-logs-upgrade-*/_search`;
+    getLogsByIdOnce(jobId: string, path: string): Observable<any> {
+        const url = `${this.apiUrl}/python-logs-${path}-*/_search`;
         const headers = new HttpHeaders().set(
             "Content-Type",
             "application/json",
