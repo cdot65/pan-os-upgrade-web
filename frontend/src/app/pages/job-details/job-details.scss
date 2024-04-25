@@ -30,15 +30,14 @@
 }
 
 .live-logs {
-  // width: 97%;
-  // padding: 25px;
-
-  // form {
-  //   padding: 20px;
-  // }
-
   .polling-info {
     color: #666;
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+
+  .polling-warning {
+    color: #f00;
     margin-bottom: 16px;
     font-style: italic;
   }
@@ -69,7 +68,5 @@
     .mat-card-content {
       padding: 16px;
     }
-
   }
-
 }
