@@ -1,79 +1,88 @@
 <!-- src/app/pages/job-details/job-details.html -->
 <div class="job-details-container">
-  <app-job-page-header></app-job-page-header>
-  <main focusOnNavigation aria-label="Job details" id="job-details" class="job-details">
-    <div class="mat-elevation-z2">
-      <div class="table-header">
-        <h2>Job Details</h2>
-      </div>
+    <app-job-page-header></app-job-page-header>
+    <main
+        focusOnNavigation
+        aria-label="Job details"
+        id="job-details"
+        class="job-details"
+    >
+        <div class="mat-elevation-z2">
+            <mat-card class="job-details-card">
+                <mat-card-header>
+                    <mat-card-title>Job Details</mat-card-title>
+                    <mat-card-subtitle
+                        >{{ jobItem?.task_id }}</mat-card-subtitle
+                    >
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="job-details-info">
+                        <p><b>Job Type</b>: {{ jobItem?.job_type }}</p>
+                        <p>
+                            <b>Created at</b>: {{ jobItem?.created_at |
+                            date:'medium' }}
+                        </p>
+                        <p>
+                            <b>Status</b>:
+                            <ngx-json-viewer
+                                [json]="parsedJsonData"
+                            ></ngx-json-viewer>
+                        </p>
+                    </div>
 
-      <div class="job-details-grid">
-        <div>
-          <h3>Job Information</h3>
-          <div class="form-field">
-            <mat-form-field>
-              <mat-label>Task ID</mat-label>
-              <input matInput [value]="jobItem?.task_id" readonly />
-            </mat-form-field>
-          </div>
-          <div class="form-field">
-            <mat-form-field>
-              <mat-label>Job Type</mat-label>
-              <input matInput [value]="jobItem?.job_type" readonly />
-            </mat-form-field>
-          </div>
-          <div class="form-field">
-            <mat-form-field>
-              <mat-label>Created At</mat-label>
-              <input matInput [value]="jobItem?.created_at | date:'medium'" readonly />
-            </mat-form-field>
-          </div>
+                    <mat-divider></mat-divider>
+
+                    <div class="live-logs">
+                        <h3>Live Logs</h3>
+
+                        <div class="polling-interval-dropdown">
+                            <mat-form-field>
+                                <mat-label>Polling Interval</mat-label>
+                                <mat-select
+                                    [(value)]="selectedPollingInterval"
+                                    (selectionChange)="onPollingIntervalChange()"
+                                >
+                                    <mat-option
+                                        *ngFor="let option of pollingIntervalOptions"
+                                        [value]="option"
+                                    >
+                                        {{ option === 0 ? 'Disabled' : option /
+                                        1000 + ' seconds' }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        @if (!pollingEnabled) {
+                        <div class="polling-info">Polling is disabled.</div>
+                        } @if (logs.length > 0) {
+                        <div>
+                            @for (log of logs; track log) {
+                            <mat-card class="log-entry">
+                                <mat-card-header class="mat-card-header">
+                                    <mat-card-title class="mat-card-title"
+                                        >{{ log._source.message
+                                        }}</mat-card-title
+                                    >
+                                    <mat-card-subtitle
+                                        >Timestamp: {{ log._source['@timestamp']
+                                        | date:'medium' }}
+                                    </mat-card-subtitle>
+                                    <mat-card-subtitle
+                                        >Log Level: {{ log._source.log_level }}
+                                    </mat-card-subtitle>
+                                </mat-card-header>
+                            </mat-card>
+                            }
+                        </div>
+                        } @else if (logs.length === 0) {
+                        <div>No logs found.</div>
+                        <mat-spinner></mat-spinner>
+                        }
+                    </div>
+                </mat-card-content>
+            </mat-card>
         </div>
-
-        <div>
-          <h3>Job Data</h3>
-          <div class="form-field">
-            <ngx-json-viewer [json]="parsedJsonData"></ngx-json-viewer>
-          </div>
-        </div>
-
-      </div>
-    </div>
-    <div>
-      <h3>Elasticsearch Logs</h3>
-      <mat-form-field>
-        <mat-label>Polling Interval</mat-label>
-        <mat-select [(value)]="selectedPollingInterval" (selectionChange)="onPollingIntervalChange()">
-          <mat-option *ngFor="let option of pollingIntervalOptions" [value]="option">
-            {{ option === 0 ? 'Disabled' : option / 1000 + ' seconds' }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      @if (!pollingEnabled) {
-      <div>Polling is disabled.</div>
-      }
-
-      @if (logs.length > 0) {
-      <div>
-        @for (log of logs; track log) {
-        <mat-card class="log-entry">
-          <mat-card-header>
-            <mat-card-title>{{ log._source.message }}</mat-card-title>
-            <mat-card-subtitle>Timestamp:
-              {{ log._source['@timestamp'] | date:'medium' }}
-            </mat-card-subtitle>
-            <mat-card-subtitle>Log Level: {{ log._source.log_level }}
-            </mat-card-subtitle>
-          </mat-card-header>
-        </mat-card>
-        }
-      </div>
-      } @else if (logs.length === 0) {
-      <div>No logs found.</div>
-      <mat-spinner></mat-spinner>
-      }
-    </div>
-  </main>
-  <app-footer></app-footer>
+    </main>
+    <app-footer></app-footer>
 </div>
