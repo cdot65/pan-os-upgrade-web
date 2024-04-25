@@ -11,6 +11,7 @@ import { Job } from "../../shared/interfaces/job.interface";
 import { JobPageHeader } from "../job-page-header/job-page-header";
 import { JobService } from "../../shared/services/job.service";
 import { MatCardModule } from "@angular/material/card";
+import { MatDividerModule } from "@angular/material/divider";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
@@ -29,6 +30,7 @@ import { takeUntil } from "rxjs/operators";
         Footer,
         JobPageHeader,
         MatCardModule,
+        MatDividerModule,
         MatFormFieldModule,
         MatInputModule,
         MatProgressSpinnerModule,
