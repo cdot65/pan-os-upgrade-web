@@ -1,0 +1,9 @@
+graph TB
+    GH1[Start] --> GH2[Log start of getting deployment information]
+    GH2 --> GH3[Get deployment type using show_highavailability_state]
+    GH3 --> GH4[Log target device deployment type]
+    GH4 --> GH5{HA details available?}
+    GH5 -->|Yes| GH6[Flatten XML to dictionary]
+    GH6 --> GH7[Log target device deployment details collected]
+    GH5 -->|No| GH8[Return deployment type and None]
+    GH7 --> GH9[Return deployment type and HA details]

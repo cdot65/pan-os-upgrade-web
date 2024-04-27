@@ -1,0 +1,15 @@
+graph TB
+    SD1[Start] --> SD2{Is target version already downloaded?}
+    SD2 -->|Yes| SD3[Log success and return True]
+    SD2 -->|No| SD4{Is target version not downloaded or in downloading state?}
+    SD4 -->|Yes| SD5[Log version not found and start download]
+    SD4 -->|No| SD6[Log error and exit]
+    SD5 --> SD7[Initiate download]
+    SD7 --> SD8{Download successful?}
+    SD8 -->|Yes| SD9[Log success and return True]
+    SD8 -->|No| SD10{Download in progress?}
+    SD10 -->|Yes| SD11[Log download progress]
+    SD10 -->|No| SD12[Log download failure and return False]
+    SD11 --> SD13{Download complete?}
+    SD13 -->|Yes| SD9
+    SD13 -->|No| SD11

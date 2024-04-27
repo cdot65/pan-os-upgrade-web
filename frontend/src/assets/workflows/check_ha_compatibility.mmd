@@ -1,0 +1,8 @@
+graph TB
+    CH1[Start] --> CH2{Major upgrade more than one release apart?}
+    CH2 -->|Yes| CH3[Log warning and return False]
+    CH2 -->|No| CH4{Within same major version and minor upgrade more than one release apart?}
+    CH4 -->|Yes| CH5[Log warning and return False]
+    CH4 -->|No| CH6{Spans exactly one major version and increases minor version?}
+    CH6 -->|Yes| CH7[Log warning and return False]
+    CH6 -->|No| CH8[Log compatibility check success and return True]

@@ -1,0 +1,20 @@
+graph TB
+    PV1[Start] --> PV2[Remove .xfr suffix from version string]
+    PV2 --> PV3[Split version string into parts]
+    PV3 --> PV4{Number of parts valid?}
+    PV4 -->|No| PV5[Raise ValueError]
+    PV4 -->|Yes| PV6{Third part contains invalid characters?}
+    PV6 -->|Yes| PV5[Raise ValueError]
+    PV6 -->|No| PV7[Extract major and minor parts]
+    PV7 --> PV8{Length of parts is 3?}
+    PV8 -->|No| PV9[Set maintenance and hotfix to 0]
+    PV8 -->|Yes| PV10[Extract maintenance part]
+    PV10 --> PV11{Maintenance part contains -h, -c, or -b?}
+    PV11 -->|Yes| PV12[Split maintenance part into maintenance and hotfix]
+    PV11 -->|No| PV13[Set hotfix to 0]
+    PV12 --> PV14{Maintenance and hotfix are digits?}
+    PV13 --> PV14{Maintenance and hotfix are digits?}
+    PV14 -->|No| PV5[Raise ValueError]
+    PV14 -->|Yes| PV15[Convert maintenance and hotfix to integers]
+    PV9 --> PV16[Return major, minor, maintenance, hotfix]
+    PV15 --> PV16[Return major, minor, maintenance, hotfix]

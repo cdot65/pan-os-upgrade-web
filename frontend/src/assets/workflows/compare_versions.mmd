@@ -1,0 +1,8 @@
+graph TB
+    CV1[Start] --> CV2[Parse version1]
+    CV1 --> CV3[Parse version2]
+    CV2 --> CV4{Compare parsed versions}
+    CV3 --> CV4
+    CV4 -->|version1 < version2| CV5[Return older]
+    CV4 -->|version1 > version2| CV6[Return newer]
+    CV4 -->|version1 == version2| CV7[Return equal]

@@ -1,0 +1,11 @@
+graph TB
+    PS1[Start] --> PS2[Log start of snapshot]
+    PS2 --> PS3{Attempt < Max Attempts and Snapshot is None?}
+    PS3 -->|Yes| PS4[Try to take snapshot using run_assurance]
+    PS4 --> PS5{Snapshot Successful?}
+    PS5 -->|Yes| PS6[Log success and return snapshot]
+    PS5 -->|No| PS7[Log error and wait for retry interval]
+    PS7 --> PS3
+    PS3 -->|No| PS8{Snapshot is None?}
+    PS8 -->|Yes| PS9[Log failure after max attempts]
+    PS8 -->|No| PS10[End]

@@ -1,0 +1,25 @@
+graph TB
+    SUC1[Start] --> SUC2[Parse target version]
+    SUC2 --> SUC3[Check if target version is older than current version]
+    SUC3 --> SUC4[Verify compatibility with current version and HA setup]
+    SUC4 --> SUC5{Compatible?}
+    SUC5 -->|No| SUC6[Return False]
+    SUC5 -->|Yes| SUC7[Retrieve available software versions]
+    SUC7 --> SUC8{Target version available?}
+    SUC8 -->|No| SUC9[Return False]
+    SUC8 -->|Yes| SUC10{Base image downloaded?}
+    SUC10 -->|Yes| SUC11[Return True]
+    SUC10 -->|No| SUC12[Attempt base image download]
+    SUC12 --> SUC13{Download successful?}
+    SUC13 -->|Yes| SUC14[Wait for image to load]
+    SUC14 --> SUC15[Re-check available versions]
+    SUC15 --> SUC16{Target version available?}
+    SUC16 -->|Yes| SUC17[Return True]
+    SUC16 -->|No| SUC18{Retry count exceeded?}
+    SUC18 -->|No| SUC19[Retry download]
+    SUC19 --> SUC12
+    SUC18 -->|Yes| SUC20[Return False]
+    SUC13 -->|No| SUC21{Retry count exceeded?}
+    SUC21 -->|No| SUC22[Wait and retry download]
+    SUC22 --> SUC12
+    SUC21 -->|Yes| SUC23[Return False]
