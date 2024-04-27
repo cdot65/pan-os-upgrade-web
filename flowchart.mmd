@@ -1,0 +1,22 @@
+flowchart TD
+    A[Start] --> B{Parse command line arguments}
+    B --> C{Create a new Job entry}
+    C --> D[Run PAN-OS upgrade]
+    D --> E{Check if firewall is ready for upgrade}
+    E -- Yes --> F{Retrieve Device and Profile objects from database}
+    F --> G{Create device dictionary object}
+    G --> H{Add device to upgrade_devices list}
+    H --> I{Check if device is in HA pair}
+    I -- Yes --> J{Create Firewall object for peer device}
+    J --> K{Add peer device to upgrade_devices list}
+    I -- No --> L{Iterate over upgrade_devices list}
+    K --> L
+    L --> M{Check device local state}
+    M -- passive or active-secondary --> N[Upgrade firewall]
+    M -- active or active-primary --> O[Upgrade firewall]
+    N --> P{Handle exceptions}
+    O --> P
+    P --> Q{Return JSON output}
+    E -- No --> R{Log error and exit}
+    Q --> S[End]
+    R --> S
