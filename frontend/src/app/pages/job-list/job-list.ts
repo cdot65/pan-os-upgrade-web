@@ -95,7 +95,7 @@ export class JobListComponent implements OnInit, AfterViewInit, OnDestroy {
                 (items) => {
                     this.jobItems = items;
                     this.jobItems.sort((a, b) =>
-                        a.job_type.localeCompare(b.job_type),
+                        b.created_at.localeCompare(a.created_at),
                     );
                     this.dataSource = new MatTableDataSource(this.jobItems);
                     this.dataSource.sort = this.sort;
