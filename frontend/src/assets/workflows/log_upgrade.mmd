@@ -1,0 +1,5 @@
+graph TB
+    LU1[Start] --> LU2[Create extra dictionary with job details]
+    LU2 --> LU3[Get the corresponding logging level using getattr]
+    LU3 --> LU4[Log the message with the specified level and extra details]
+    LU4 --> LU5[End]

@@ -1,0 +1,11 @@
+graph TB
+    DU1[Start] --> DU2{Is target_maintenance an integer?}
+    DU2 -->|Yes| DU3[Set target_version with integer maintenance]
+    DU2 -->|No| DU4[Parse target_version from string]
+    DU3 --> DU5[Log current and target versions]
+    DU4 --> DU5
+    DU5 --> DU6{Is current_version_parsed less than target_version?}
+    DU6 -->|Yes| DU7[Log upgrade required message]
+    DU6 -->|No| DU8[Log no upgrade required or downgrade attempt detected]
+    DU8 --> DU9[Log halting upgrade message]
+    DU9 --> DU10[Exit the script]

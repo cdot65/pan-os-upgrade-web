@@ -1,0 +1,7 @@
+graph TB
+    SHA1[Start] --> SHA2[Send API request to suspend active device]
+    SHA2 --> SHA3{Parse XML response}
+    SHA3 -->|Success| SHA4[Log success message and return True]
+    SHA3 -->|Failure| SHA5[Log failure message and return False]
+    SHA2 --> SHA6[Catch exception]
+    SHA6 --> SHA7[Log error message and return False]

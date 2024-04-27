@@ -1,0 +1,19 @@
+graph TB
+    UF1[Start] --> UF2{Check if upgrade is available}
+    UF2 -->|No| UF3[Log error and exit]
+    UF2 -->|Yes| UF4{Is firewall part of HA pair?}
+    UF4 -->|Yes| UF5{Determine active/passive role}
+    UF5 -->|Not ready| UF6[Switch control to peer firewall]
+    UF5 -->|Ready| UF7[Proceed with upgrade]
+    UF4 -->|No| UF7[Proceed with upgrade]
+    UF7 --> UF8{Is target version already downloaded?}
+    UF8 -->|Yes| UF9[Log success]
+    UF8 -->|No| UF10[Download target version]
+    UF10 -->|Success| UF9[Log success]
+    UF10 -->|Failure| UF11[Log error and exit]
+    UF9 --> UF12[Perform pre-upgrade snapshot]
+    UF12 --> UF13[Perform upgrade]
+    UF13 -->|Success| UF14[Perform post-upgrade tasks]
+    UF13 -->|Failure| UF15[Log error]
+    UF14 --> UF16[End]
+    UF15 --> UF16[End]

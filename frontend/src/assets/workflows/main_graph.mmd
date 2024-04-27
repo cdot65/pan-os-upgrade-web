@@ -1,0 +1,25 @@
+graph TD
+    A[Start] --> B[Import necessary modules and set up Django environment]
+    B --> C[Define global variables and configure logging]
+    C --> D[Define helper functions]
+    D --> E[Define main upgrade functions]
+    E --> F[Define entry point for the PAN-OS upgrade script]
+    F --> G[Parse command-line arguments]
+    G --> H[Configure logging level]
+    H --> I[Create a new Job entry]
+    I --> J[Call run_panos_upgrade function]
+    J --> K{Device panorama managed?}
+    K -->|Yes| L[Create Firewall object with serial and Panorama]
+    K -->|No| M[Create Firewall object with IP address]
+    L --> N[Create device dictionary object]
+    M --> N
+    N --> O[Add device to upgrade_devices list]
+    O --> P{Device in HA pair?}
+    P -->|Yes| Q[Create Firewall object for HA peer]
+    P -->|No| R[Iterate over passive and active-secondary devices]
+    Q --> R
+    R --> S[Upgrade passive and active-secondary firewalls]
+    S --> T[Iterate over active and active-primary devices]
+    T --> U[Upgrade active and active-primary firewalls]
+    U --> V[Return JSON output]
+    V --> W[End]

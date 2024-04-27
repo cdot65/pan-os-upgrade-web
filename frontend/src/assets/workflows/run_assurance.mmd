@@ -1,0 +1,11 @@
+graph TB
+    RA1[Start] --> RA2{operation_type?}
+    RA2 -->|state_snapshot| RA3[Set up FirewallProxy and CheckFirewall]
+    RA3 --> RA4[Validate snapshot actions]
+    RA4 --> RA5{Actions valid?}
+    RA5 -->|No| RA6[Log error and return]
+    RA5 -->|Yes| RA7[Take snapshots]
+    RA7 --> RA8{Snapshots successful?}
+    RA8 -->|No| RA9[Log error and return]
+    RA8 -->|Yes| RA10[Log snapshot results and return results]
+    RA2 -->|Other| RA11[Log error and return]

@@ -1,0 +1,13 @@
+graph TB
+    HF1[Start] --> HF2{Is target device part of HA?}
+    HF2 -->|No| HF3[Proceed with upgrade]
+    HF2 -->|Yes| HF4[Get HA details]
+    HF4 --> HF5{Are devices synchronized?}
+    HF5 -->|No| HF6[Wait and recheck]
+    HF5 -->|Yes| HF7{Compare software versions}
+    HF7 -->|Equal| HF8{Check local HA state}
+    HF8 -->|Active/Active-Primary| HF9[Defer upgrade]
+    HF8 -->|Passive/Active-Secondary| HF10[Suspend HA state and proceed]
+    HF8 -->|Initial| HF11[Proceed with upgrade]
+    HF7 -->|Older| HF12[Suspend HA state of active and proceed]
+    HF7 -->|Newer| HF13[Suspend HA state of passive and proceed]

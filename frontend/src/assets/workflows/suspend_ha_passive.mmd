@@ -1,0 +1,8 @@
+graph TB
+    SHP1[Start] --> SHP2[Log start of HA state suspension]
+    SHP2 --> SHP3[Send request to suspend HA state]
+    SHP3 --> SHP4{Suspension successful?}
+    SHP4 -->|Yes| SHP5[Log success and return True]
+    SHP4 -->|No| SHP6[Log failure and return False]
+    SHP3 --> SHP7[Catch exception]
+    SHP7 --> SHP8[Log error and return False]
