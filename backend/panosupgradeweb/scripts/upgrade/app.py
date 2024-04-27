@@ -75,6 +75,7 @@ logger.addHandler(logstash_handler)
 
 
 # Create JOB_ID global variable
+global JOB_ID
 JOB_ID = ""
 
 
@@ -1075,6 +1076,7 @@ def run_panos_upgrade(
     profile_uuid: str,
     target_version: str,
 ):
+    global JOB_ID
     JOB_ID = job_id
 
     # Check to see if the firewall is ready for an upgrade
