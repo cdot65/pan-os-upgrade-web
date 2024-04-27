@@ -86,6 +86,37 @@ def check_ha_compatibility(
     target_major: int,
     target_minor: int,
 ) -> bool:
+    """
+    Check the compatibility of upgrading a firewall in an HA pair to a target version.
+
+    This function compares the current version and target version of a firewall in an HA pair
+    to determine if the upgrade is compatible. It checks for the following scenarios:
+    - If the major upgrade is more than one release apart
+    - If the upgrade is within the same major version but the minor upgrade is more than one release apart
+    - If the upgrade spans exactly one major version but also increases the minor version
+
+    Args:
+        device (Dict): A dictionary containing information about the firewall device.
+        current_major (int): The current major version of the firewall.
+        current_minor (int): The current minor version of the firewall.
+        target_major (int): The target major version for the upgrade.
+        target_minor (int): The target minor version for the upgrade.
+
+    Returns:
+        bool: True if the upgrade is compatible, False otherwise.
+
+    Mermaid Workflow:
+        ```mermaid
+        graph TD
+            A[Start] --> B{Major upgrade more than one release apart?}
+            B -->|Yes| C[Log warning and return False]
+            B -->|No| D{Within same major version and minor upgrade more than one release apart?}
+            D -->|Yes| E[Log warning and return False]
+            D -->|No| F{Spans exactly one major version and increases minor version?}
+            F -->|Yes| G[Log warning and return False]
+            F -->|No| H[Log compatibility check success and return True]
+        ```
+    """
 
     # Check if the major upgrade is more than one release apart
     if target_major - current_major > 1:
@@ -123,10 +154,41 @@ def compare_versions(
     version1: str,
     version2: str,
 ) -> str:
+    """
+    Compare two version strings and determine their relative order.
 
+    This function takes two version strings as input and compares them to determine
+    which version is older, newer, or equal. It uses the `parse_version` function
+    to parse the version strings into comparable objects.
+
+    Args:
+        version1 (str): The first version string to compare.
+        version2 (str): The second version string to compare.
+
+    Returns:
+        str: The relative order of the versions:
+            - "older" if version1 is older than version2
+            - "newer" if version1 is newer than version2
+            - "equal" if version1 is equal to version2
+
+    Mermaid Workflow:
+        ```mermaid
+        graph TD
+            A[Start] --> B[Parse version1]
+            A --> C[Parse version2]
+            B --> D{Compare parsed versions}
+            C --> D
+            D -->|version1 < version2| E[Return "older"]
+            D -->|version1 > version2| F[Return "newer"]
+            D -->|version1 == version2| G[Return "equal"]
+        ```
+    """
+
+    # Parse the version strings into comparable objects
     parsed_version1 = parse_version(version=version1)
     parsed_version2 = parse_version(version=version2)
 
+    # Compare the parsed versions and return the relative order
     if parsed_version1 < parsed_version2:
         return "older"
     elif parsed_version1 > parsed_version2:
@@ -141,6 +203,39 @@ def determine_upgrade(
     target_major: int,
     target_minor: int,
 ) -> None:
+    """
+    Determine if a firewall requires an upgrade based on the current and target versions.
+
+    This function compares the current version of a firewall with the target version to determine
+    if an upgrade is necessary. It handles both integer and string maintenance versions and logs
+    the appropriate messages based on the upgrade requirement.
+
+    Args:
+        device (Dict): A dictionary containing information about the firewall device.
+        target_maintenance (Union[int, str]): The target maintenance version, which can be an integer or a string.
+        target_major (int): The target major version for the upgrade.
+        target_minor (int): The target minor version for the upgrade.
+
+    Returns:
+        None
+
+    Mermaid Workflow:
+        ```mermaid
+        graph TD
+            A[Start] --> B{Is target_maintenance an integer?}
+            B -->|Yes| C[Set target_version with integer maintenance]
+            B -->|No| D[Parse target_version from string]
+            C --> E[Log current and target versions]
+            D --> E
+            E --> F{Is current_version_parsed less than target_version?}
+            F -->|Yes| G[Log upgrade required message]
+            F -->|No| H[Log no upgrade required or downgrade attempt detected]
+            H --> I[Log halting upgrade message]
+            I --> J[Exit the script]
+        ```
+    """
+
+    # Parse the current version of the firewall
     current_version_parsed = parse_version(version=device["db_device"].sw_version)
 
     if isinstance(target_maintenance, int):
@@ -152,6 +247,7 @@ def determine_upgrade(
             version=f"{target_major}.{target_minor}.{target_maintenance}"
         )
 
+    # Log the current and target versions
     log_upgrade(
         level="INFO",
         message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Current version: {device['db_device'].sw_version}.",
@@ -162,15 +258,18 @@ def determine_upgrade(
     )
 
     if current_version_parsed < target_version:
+        # Log upgrade required message if the current version is less than the target version
         log_upgrade(
             level="INFO",
             message=f"{get_emoji(action='success')} {device['db_device'].hostname}: Upgrade required from {device['db_device'].sw_version} to {target_major}.{target_minor}.{target_maintenance}",
         )
     else:
+        # Log no upgrade required or downgrade attempt detected message
         log_upgrade(
             level="INFO",
             message=f"{get_emoji(action='skipped')} {device['db_device'].hostname}: No upgrade required or downgrade attempt detected.",
         )
+        # Log halting upgrade message and exit the script
         log_upgrade(
             level="INFO",
             message=f"{get_emoji(action='skipped')} {device['db_device'].hostname}: Halting upgrade.",
@@ -179,27 +278,65 @@ def determine_upgrade(
 
 
 def get_ha_status(device: Dict) -> Tuple[str, Optional[dict]]:
+    """
+    Retrieve the deployment information and HA status of a firewall device.
 
+    This function uses the `show_highavailability_state()` method to retrieve the deployment type
+    and HA details of the specified firewall device. It logs the progress and results of the operation
+    using the `log_upgrade()` function.
+
+    Args:
+        device (Dict): A dictionary containing information about the firewall device.
+            The dictionary should include the following keys:
+            - 'db_device': An object representing the device in the database, with a 'hostname' attribute.
+            - 'pan_device': An object representing the PAN device, with a 'serial' attribute.
+
+    Returns:
+        Tuple[str, Optional[dict]]: A tuple containing two elements:
+            - The deployment type of the firewall device as a string.
+            - A dictionary containing the HA details if available, or None if no HA details are found.
+
+    Mermaid Workflow:
+        ```mermaid
+        graph TD
+            A[Start] --> B[Log start of getting deployment information]
+            B --> C[Get deployment type using show_highavailability_state()]
+            C --> D[Log target device deployment type]
+            D --> E{HA details available?}
+            E -->|Yes| F[Flatten XML to dictionary]
+            F --> G[Log target device deployment details collected]
+            E -->|No| H[Return deployment type and None]
+            G --> I[Return deployment type and HA details]
+        ```
+    """
+
+    # Log the start of getting deployment information
     log_upgrade(
         level="DEBUG",
         message=f"{get_emoji(action='start')} {device['db_device'].hostname}: Getting {device['pan_device'].serial} deployment information.",
     )
+
+    # Get the deployment type using show_highavailability_state()
     deployment_type = device["pan_device"].show_highavailability_state()
 
+    # Log the target device deployment type
     log_upgrade(
         level="DEBUG",
         message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Target device deployment: {deployment_type[0]}",
     )
 
     if deployment_type[1]:
+        # Flatten the XML to a dictionary if HA details are available
         ha_details = flatten_xml_to_dict(element=deployment_type[1])
 
+        # Log that the target device deployment details have been collected
         log_upgrade(
             level="DEBUG",
             message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Target device deployment details collected.",
         )
         return deployment_type[0], ha_details
     else:
+        # Return the deployment type and None if no HA details are available
         return deployment_type[0], None
 
 
@@ -207,6 +344,39 @@ def handle_firewall_ha(
     device: Dict,
     dry_run: bool,
 ) -> Tuple[bool, Optional[Firewall]]:
+    """
+    Handle the upgrade process for a firewall device in an HA (High Availability) configuration.
+
+    This function checks the HA status of the target device and its peer, and determines the appropriate
+    actions to take based on their HA states and software versions. It may suspend the HA state of the
+    target device if necessary, and decides whether to proceed with the upgrade or defer it for later.
+
+    Args:
+        device (Dict): A dictionary containing information about the target firewall device.
+        dry_run (bool): A flag indicating whether to perform a dry run (simulation) or actual changes.
+
+    Returns:
+        Tuple[bool, Optional[Firewall]]: A tuple containing two values:
+            - bool: True if the upgrade process should proceed, False otherwise.
+            - Optional[Firewall]: The peer firewall device object if applicable, None otherwise.
+
+    Mermaid Workflow:
+        ```mermaid
+        graph TD
+            A[Start] --> B{Is target device part of HA?}
+            B -->|No| C[Proceed with upgrade]
+            B -->|Yes| D[Get HA details]
+            D --> E{Are devices synchronized?}
+            E -->|No| F[Wait and recheck]
+            E -->|Yes| G{Compare software versions}
+            G -->|Equal| H{Check local HA state}
+            H -->|Active/Active-Primary| I[Defer upgrade]
+            H -->|Passive/Active-Secondary| J[Suspend HA state and proceed]
+            H -->|Initial| K[Proceed with upgrade]
+            G -->|Older| L[Suspend HA state of active and proceed]
+            G -->|Newer| M[Suspend HA state of passive and proceed]
+        ```
+    """
 
     # If the target device is not part of an HA configuration, proceed with the upgrade
     if not device["db_device"].ha_enabled:
@@ -265,10 +435,10 @@ def handle_firewall_ha(
     # If the firewall and its peer devices are running the same version
     if version_comparison == "equal":
 
-        # if the current device is active or active-primary
+        # If the current device is active or active-primary
         if local_state == "active" or local_state == "active-primary":
 
-            # log message to console
+            # Log message to console
             log_upgrade(
                 level="INFO",
                 message=f"{get_emoji(action='search')} {device['db_device'].hostname}: Detected active target device in HA pair running the same version as its peer.",
@@ -277,10 +447,10 @@ def handle_firewall_ha(
             # Exit the upgrade process for the target device at this time, to be revisited later
             return False, None
 
-        # if the current device is passive or active-secondary
+        # If the current device is passive or active-secondary
         elif local_state == "passive" or local_state == "active-secondary":
 
-            # suspend HA state of the target device
+            # Suspend HA state of the target device
             if not dry_run:
                 log_upgrade(
                     level="INFO",
@@ -288,7 +458,7 @@ def handle_firewall_ha(
                 )
                 suspend_ha_passive(device=device)
 
-            # log message to console
+            # Log message to console
             else:
                 log_upgrade(
                     level="INFO",
@@ -345,15 +515,96 @@ def log_upgrade(
     level: str,
     message: str,
 ):
+    """
+    Log an upgrade message with the specified level and additional job details.
+
+    This function logs an upgrade message using the Python logging module. It includes
+    additional job details such as the job ID and job type in the log record.
+
+    Args:
+        level (str): The logging level for the message (e.g., "INFO", "WARNING", "ERROR").
+        message (str): The log message to be recorded.
+
+    Returns:
+        None
+
+    Mermaid Workflow:
+        ```mermaid
+        graph TD
+            A[Start] --> B[Create extra dictionary with job details]
+            B --> C[Get the corresponding logging level using getattr]
+            C --> D[Log the message with the specified level and extra details]
+            D --> E[End]
+        ```
+    """
+
+    # Create a dictionary with additional job details
     extra = {
         "job_id": JOB_ID,
         "job_type": "upgrade",
     }
+
+    # Log the message with the specified level and extra details
     logger.log(getattr(logging, level), message, extra=extra)
 
 
 def parse_version(version: str) -> Tuple[int, int, int, int]:
+    """
+    Parse a version string into its major, minor, maintenance, and hotfix components.
 
+    This function takes a version string in the format "major.minor[.maintenance[-h|-c|-b]hotfix][.xfr]"
+    and returns a tuple of four integers representing the major, minor, maintenance, and hotfix parts
+    of the version. It handles various version formats and validates the input to ensure it follows
+    the expected format.
+
+    Args:
+        version (str): The version string to parse.
+
+    Returns:
+        Tuple[int, int, int, int]: A tuple containing the major, minor, maintenance, and hotfix
+            parts of the version as integers.
+
+    Raises:
+        ValueError: If the version string is in an invalid format or contains invalid characters.
+
+    Examples:
+        >>> parse_version("10.1.2")
+        (10, 1, 2, 0)
+        >>> parse_version("10.1.2-h3")
+        (10, 1, 2, 3)
+        >>> parse_version("10.1.2-c4")
+        (10, 1, 2, 4)
+        >>> parse_version("10.1.2-b5")
+        (10, 1, 2, 5)
+        >>> parse_version("10.1.2.xfr")
+        (10, 1, 2, 0)
+        >>> parse_version("10.1")
+        (10, 1, 0, 0)
+
+    Mermaid Workflow:
+        ```mermaid
+        graph TD
+            A[Start] --> B[Remove .xfr suffix from version string]
+            B --> C[Split version string into parts]
+            C --> D{Number of parts valid?}
+            D -->|No| E[Raise ValueError]
+            D -->|Yes| F{Third part contains invalid characters?}
+            F -->|Yes| E[Raise ValueError]
+            F -->|No| G[Extract major and minor parts]
+            G --> H{Length of parts is 3?}
+            H -->|No| I[Set maintenance and hotfix to 0]
+            H -->|Yes| J[Extract maintenance part]
+            J --> K{Maintenance part contains -h, -c, or -b?}
+            K -->|Yes| L[Split maintenance part into maintenance and hotfix]
+            K -->|No| M[Set hotfix to 0]
+            L --> N{Maintenance and hotfix are digits?}
+            M --> N{Maintenance and hotfix are digits?}
+            N -->|No| E[Raise ValueError]
+            N -->|Yes| O[Convert maintenance and hotfix to integers]
+            I --> P[Return major, minor, maintenance, hotfix]
+            O --> P[Return major, minor, maintenance, hotfix]
+        ```
+    """
     # Remove .xfr suffix from the version string, keeping the hotfix part intact
     version = re.sub(r"\.xfr$", "", version)
 
@@ -398,6 +649,37 @@ def parse_version(version: str) -> Tuple[int, int, int, int]:
 
 
 def perform_snapshot(device: Dict) -> any:
+    """
+    Perform a snapshot of the network state information for a given device.
+
+    This function attempts to take a snapshot of the network state information for a device
+    using the run_assurance function. It retries the snapshot operation up to a specified
+    maximum number of attempts with a configurable retry interval. If the snapshot is
+    successfully created, it is logged and returned. If the snapshot fails after the maximum
+    number of attempts, an error is logged.
+
+    Args:
+        device (Dict): A dictionary containing information about the device, including the
+            device profile and database device object.
+
+    Returns:
+        any: The snapshot object if successfully created, or None if the snapshot failed.
+
+    Mermaid Workflow:
+        ```mermaid
+        graph TD
+            A[Start] --> B[Log start of snapshot]
+            B --> C{Attempt < Max Attempts and Snapshot is None?}
+            C -->|Yes| D[Try to take snapshot using run_assurance]
+            D --> E{Snapshot Successful?}
+            E -->|Yes| F[Log success and return snapshot]
+            E -->|No| G[Log error and wait for retry interval]
+            G --> C
+            C -->|No| H{Snapshot is None?}
+            H -->|Yes| I[Log failure after max attempts]
+            H -->|No| J[End]
+        ```
+    """
 
     max_snapshot_tries = device["profile"].max_snapshot_tries
     snapshot_retry_interval = device["profile"].snapshot_retry_interval
@@ -411,13 +693,6 @@ def perform_snapshot(device: Dict) -> any:
 
     while attempt < max_snapshot_tries and snapshot is None:
         try:
-            # Log snapshot attempt
-            # log_snapshot(
-            #     JOB_ID,
-            #     "snapshot_attempt",
-            #     {"attempt": attempt + 1, "max_attempts": max_snapshot_tries},
-            # )
-
             # Take snapshots
             snapshot = run_assurance(
                 device=device,
@@ -428,22 +703,6 @@ def perform_snapshot(device: Dict) -> any:
                 level="INFO",
                 message=snapshot,
             )
-
-            # if snapshot is not None and isinstance(snapshot, SnapshotReport):
-            #     logging.info(
-            #         f"{get_emoji(action='success')} {hostname}: Network snapshot created successfully on attempt {attempt + 1}."
-            #     )
-
-            #     # Save the snapshot to the specified file path as JSON
-            #     ensure_directory_exists(file_path=file_path)
-            #     with open(file_path, "w") as file:
-            #         file.write(snapshot.model_dump_json(indent=4))
-
-            #     logging.info(
-            #         f"{get_emoji(action='save')} {hostname}: Network state snapshot collected and saved to {file_path}"
-            #     )
-
-            #     return snapshot
 
         # Catch specific and general exceptions
         except (AttributeError, IOError, Exception) as error:
@@ -460,13 +719,49 @@ def perform_snapshot(device: Dict) -> any:
             message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Failed to create snapshot after {max_snapshot_tries} attempts.",
         )
 
+    return snapshot
+
 
 def run_assurance(
     device: Device,
     operation_type: str,
 ) -> any:
+    """
+    Run assurance checks or snapshots on a firewall device.
 
-    # setup Firewall client
+    This function sets up a FirewallProxy and CheckFirewall instance for the given device,
+    and performs assurance operations based on the specified operation_type.
+
+    Args:
+        device (Device): A dictionary containing information about the firewall device.
+        operation_type (str): The type of assurance operation to perform. Valid values are:
+            - "state_snapshot": Take snapshots of various firewall states.
+
+    Returns:
+        any: The results of the assurance operation, depending on the operation_type:
+            - "state_snapshot": Returns a dictionary containing the snapshot results.
+            - Other operation types: Returns None.
+
+    Raises:
+        None
+
+    Mermaid Workflow:
+        ```mermaid
+        graph TD
+            A[Start] --> B{operation_type?}
+            B -->|state_snapshot| C[Set up FirewallProxy and CheckFirewall]
+            C --> D[Validate snapshot actions]
+            D --> E{Actions valid?}
+            E -->|No| F[Log error and return]
+            E -->|Yes| G[Take snapshots]
+            G --> H{Snapshots successful?}
+            H -->|No| I[Log error and return]
+            H -->|Yes| J[Log snapshot results and return results]
+            B -->|Other| K[Log error and return]
+        ```
+    """
+
+    # Setup Firewall client
     proxy_firewall = FirewallProxy(device["pan_device"])
     checks_firewall = CheckFirewall(proxy_firewall)
     log_upgrade(
@@ -475,41 +770,6 @@ def run_assurance(
     )
 
     results = None
-
-    # if operation_type == "readiness_check":
-    #     for action in actions:
-    #         if action not in AssuranceOptions.READINESS_CHECKS.keys():
-    #             logging.error(
-    #                 f"{get_emoji(action='error')} {hostname}: Invalid action for readiness check: {action}"
-    #             )
-
-    #             sys.exit(1)
-
-    #     try:
-    #         logging.info(
-    #             f"{get_emoji(action='start')} {hostname}: Performing readiness checks to determine if firewall is ready for upgrade."
-    #         )
-    #         result = checks_firewall.run_readiness_checks(actions)
-
-    #         for (
-    #             test_name,
-    #             test_info,
-    #         ) in AssuranceOptions.READINESS_CHECKS.items():
-    #             check_readiness_and_log(
-    #                 hostname=hostname,
-    #                 result=result,
-    #                 test_info=test_info,
-    #                 test_name=test_name,
-    #             )
-
-    #         return ReadinessCheckReport(**result)
-
-    #     except Exception as e:
-    #         logging.error(
-    #             f"{get_emoji(action='error')} {hostname}: Error running readiness checks: {e}"
-    #         )
-
-    #         return None
 
     if operation_type == "state_snapshot":
         actions = {
@@ -522,7 +782,7 @@ def run_assurance(
             "session_stats": device["profile"].session_stats_snapshot,
         }
 
-        # validate each type of action
+        # Validate each type of action
         for action in actions.keys():
             if action not in AssuranceOptions.STATE_SNAPSHOTS.keys():
                 log_upgrade(
@@ -531,7 +791,7 @@ def run_assurance(
                 )
                 return
 
-        # take snapshots
+        # Take snapshots
         try:
             log_upgrade(
                 level="DEBUG",
@@ -543,30 +803,12 @@ def run_assurance(
                 message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Snapshot results {results}",
             )
 
-            # if results:
-            #     # Pass the results to the SnapshotReport model
-            #     return SnapshotReport(hostname=device["db_device"].hostname, **results)
-            # else:
-            #     return None
-
         except Exception as e:
             log_upgrade(
                 level="ERROR",
                 message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Error running snapshots: {e}",
             )
             return
-
-    # elif operation_type == "report":
-    #     for action in actions:
-    #         if action not in AssuranceOptions.REPORTS.keys():
-    #             logging.error(
-    #                 f"{get_emoji(action='error')} {hostname}: Invalid action for report: {action}"
-    #             )
-    #             return
-    #         logging.info(
-    #             f"{get_emoji(action='report')} {hostname}: Generating report: {action}"
-    #         )
-    #         # result = getattr(Report(firewall), action)(**config)
 
     else:
         log_upgrade(
@@ -582,7 +824,41 @@ def software_download(
     device: Dict,
     target_version: str,
 ) -> bool:
+    """
+    Download the target software version to the firewall device.
 
+    This function checks if the target software version is already downloaded on the firewall device.
+    If the version is not downloaded, it initiates the download process and monitors the download status.
+    It logs the progress and status of the download operation.
+
+    Args:
+        device (Dict): A dictionary containing information about the firewall device.
+        target_version (str): The target software version to be downloaded.
+
+    Returns:
+        bool: True if the download is successful, False otherwise.
+
+    Mermaid Workflow:
+        ```mermaid
+        graph TD
+            A[Start] --> B{Is target version already downloaded?}
+            B -->|Yes| C[Log success and return True]
+            B -->|No| D{Is target version not downloaded or in downloading state?}
+            D -->|Yes| E[Log version not found and start download]
+            D -->|No| F[Log error and exit]
+            E --> G[Initiate download]
+            G --> H{Download successful?}
+            H -->|Yes| I[Log success and return True]
+            H -->|No| J{Download in progress?}
+            J -->|Yes| K[Log download progress]
+            J -->|No| L[Log download failure and return False]
+            K --> M{Download complete?}
+            M -->|Yes| I
+            M -->|No| K
+        ```
+    """
+
+    # Check if the target version is already downloaded
     if device["pan_device"].software.versions[target_version]["downloaded"]:
         log_upgrade(
             level="INFO",
@@ -590,6 +866,7 @@ def software_download(
         )
         return True
 
+    # Check if the target version is not downloaded or in downloading state
     if (
         not device["pan_device"].software.versions[target_version]["downloaded"]
         or device["pan_device"].software.versions[target_version][  # noqa: W503
@@ -670,8 +947,56 @@ def software_update_check(
     device: Dict,
     target_version: str,
 ) -> bool:
+    """
+    Check if a software update to the target version is available and compatible.
 
-    # parse target_version
+    This function performs the following steps:
+    1. Parses the target version into major, minor, and maintenance components.
+    2. Checks if the target version is older than the current version.
+    3. Verifies the compatibility of the target version with the current version and HA setup.
+    4. Retrieves the list of available software versions from the device.
+    5. If the target version is available, attempts to download the base image.
+    6. If the base image is already downloaded or successfully downloaded, returns True.
+    7. If the target version is not available or the download fails after multiple attempts, returns False.
+
+    Args:
+        device (Dict): A dictionary containing information about the firewall device.
+        target_version (str): The target software version to check for availability and compatibility.
+
+    Returns:
+        bool: True if the target version is available and compatible, False otherwise.
+
+    Mermaid Workflow:
+        ```mermaid
+        graph TD
+            A[Start] --> B[Parse target version]
+            B --> C[Check if target version is older than current version]
+            C --> D[Verify compatibility with current version and HA setup]
+            D --> E{Compatible?}
+            E -->|No| F[Return False]
+            E -->|Yes| G[Retrieve available software versions]
+            G --> H{Target version available?}
+            H -->|No| I[Return False]
+            H -->|Yes| J{Base image downloaded?}
+            J -->|Yes| K[Return True]
+            J -->|No| L[Attempt base image download]
+            L --> M{Download successful?}
+            M -->|Yes| N[Wait for image to load]
+            N --> O[Re-check available versions]
+            O --> P{Target version available?}
+            P -->|Yes| Q[Return True]
+            P -->|No| R{Retry count exceeded?}
+            R -->|No| S[Retry download]
+            S --> L
+            R -->|Yes| T[Return False]
+            M -->|No| U{Retry count exceeded?}
+            U -->|No| V[Wait and retry download]
+            V --> L
+            U -->|Yes| W[Return False]
+        ```
+    """
+
+    # Parse target_version into major, minor, and maintenance components
     target_major, target_minor, target_maintenance = target_version.split(".")
 
     # Convert target_major and target_minor to integers
@@ -683,7 +1008,7 @@ def software_update_check(
         # Convert target_maintenance to integer
         target_maintenance = int(target_maintenance)
 
-    # check to see if the specified version is older than the current version
+    # Check if the specified version is older than the current version
     determine_upgrade(
         device=device,
         target_maintenance=target_maintenance,
@@ -704,7 +1029,7 @@ def software_update_check(
     ):
         return False
 
-    # retrieve available versions of PAN-OS
+    # Retrieve available versions of PAN-OS
     log_upgrade(
         level="INFO",
         message=f"{get_emoji(action='working')} {device['db_device'].hostname}: Refreshing list of available software versions",
@@ -787,15 +1112,47 @@ def software_update_check(
 
 
 def suspend_ha_active(device: Dict) -> bool:
+    """
+    Suspend the active device in a high-availability (HA) pair.
+
+    This function sends an API request to the active device in an HA pair to suspend its state.
+    It parses the XML response to determine if the suspension was successful.
+
+    Args:
+        device (Dict): A dictionary containing information about the firewall device.
+            The dictionary should include the following keys:
+            - "pan_device": A PanDevice object representing the firewall device.
+            - "db_device": An object representing the device in the database, with a "hostname" attribute.
+
+    Returns:
+        bool: True if the active device was successfully suspended, False otherwise.
+
+    Raises:
+        Exception: If an error occurs while suspending the active device.
+
+    Mermaid Workflow:
+        ```mermaid
+        graph TD
+            A[Start] --> B[Send API request to suspend active device]
+            B --> C{Parse XML response}
+            C -->|Success| D[Log success message and return True]
+            C -->|Failure| E[Log failure message and return False]
+            B --> F[Catch exception]
+            F --> G[Log error message and return False]
+        ```
+    """
 
     try:
+        # Send API request to suspend the active device
         suspension_response = device["pan_device"].op(
             "<request><high-availability><state><suspend/></state></high-availability></request>",
             cmd_xml=False,
         )
 
+        # Parse the XML response to extract the result message
         response_message = flatten_xml_to_dict(suspension_response)
 
+        # Check if the suspension was successful
         if response_message["result"] == "Successfully changed HA state to suspended":
             log_upgrade(
                 level="INFO",
@@ -817,33 +1174,69 @@ def suspend_ha_active(device: Dict) -> bool:
 
 
 def suspend_ha_passive(device: Dict) -> bool:
+    """
+    Suspend the HA state of the passive target device in an HA pair.
 
+    This function sends a request to suspend the HA state of the passive target device in an HA pair.
+    It logs the start and success/failure of the suspension process.
+
+    Args:
+        device (Dict): A dictionary containing information about the firewall device, including the 'db_device' and 'pan_device' keys.
+            - 'db_device' should contain the hostname of the device.
+            - 'pan_device' should be an instance of the PanDevice class representing the firewall device.
+
+    Returns:
+        bool: True if the HA state is successfully suspended, False otherwise.
+
+    Raises:
+        Exception: If an error occurs while suspending the HA state.
+
+    Mermaid Workflow:
+        ```mermaid
+        graph TD
+            A[Start] --> B[Log start of HA state suspension]
+            B --> C[Send request to suspend HA state]
+            C --> D{Suspension successful?}
+            D -->|Yes| E[Log success and return True]
+            D -->|No| F[Log failure and return False]
+            C --> G[Catch exception]
+            G --> H[Log error and return False]
+        ```
+    """
+
+    # Log the start of HA state suspension
     log_upgrade(
         level="INFO",
         message=f"{get_emoji(action='start')} {device['db_device'].hostname}: Suspending passive target device HA state.",
     )
 
     try:
+        # Send a request to suspend the HA state
         suspension_response = device["pan_device"].op(
             "<request><high-availability><state><suspend/></state></high-availability></request>",
             cmd_xml=False,
         )
 
+        # Parse the response message
         response_message = flatten_xml_to_dict(suspension_response)
 
+        # Check if the HA state suspension was successful
         if response_message["result"] == "Successfully changed HA state to suspended":
+            # Log the success of HA state suspension
             log_upgrade(
                 level="INFO",
                 message=f"{get_emoji(action='success')} {device['db_device'].hostname}: Passive target device HA state suspended.",
             )
             return True
         else:
+            # Log the failure of HA state suspension
             log_upgrade(
                 level="ERROR",
                 message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Failed to suspend passive target device HA state.",
             )
             return False
     except Exception as e:
+        # Log any errors that occur during HA state suspension
         log_upgrade(
             level="ERROR",
             message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Error suspending passive target device HA state: {e}",
@@ -856,6 +1249,44 @@ def upgrade_firewall(
     dry_run: bool,
     target_version: str,
 ) -> None:
+    """
+    Upgrade a firewall to a target PAN-OS version.
+
+    This function performs the necessary steps to upgrade a firewall to a target PAN-OS version.
+    It checks if the firewall is ready for an upgrade, handles HA scenarios, downloads the target
+    version, performs pre-upgrade snapshots, and initiates the upgrade process.
+
+    Args:
+        device (Dict): A dictionary containing information about the firewall device.
+        dry_run (bool): Indicates whether to perform a dry run (True) or actual upgrade (False).
+        target_version (str): The target PAN-OS version to upgrade to.
+
+    Returns:
+        None
+
+    Mermaid Workflow:
+        ```mermaid
+        graph TD
+            A[Start] --> B{Check if upgrade is available}
+            B -->|No| C[Log error and exit]
+            B -->|Yes| D{Is firewall part of HA pair?}
+            D -->|Yes| E{Determine active/passive role}
+            E -->|Not ready| F[Switch control to peer firewall]
+            E -->|Ready| G[Proceed with upgrade]
+            D -->|No| G[Proceed with upgrade]
+            G --> H{Is target version already downloaded?}
+            H -->|Yes| I[Log success]
+            H -->|No| J[Download target version]
+            J -->|Success| I[Log success]
+            J -->|Failure| K[Log error and exit]
+            I --> L[Perform pre-upgrade snapshot]
+            L --> M[Perform upgrade]
+            M -->|Success| N[Perform post-upgrade tasks]
+            M -->|Failure| O[Log error]
+            N --> P[End]
+            O --> P[End]
+        ```
+    """
 
     # Check to see if the firewall is ready for an upgrade
     log_upgrade(
@@ -868,7 +1299,7 @@ def upgrade_firewall(
         target_version=target_version,
     )
 
-    # gracefully exit if the firewall is not ready for an upgrade to target version
+    # Gracefully exit if the firewall is not ready for an upgrade to target version
     if not update_available:
         log_upgrade(
             level="ERROR",
@@ -883,7 +1314,7 @@ def upgrade_firewall(
             dry_run=dry_run,
         )
 
-        # gracefully exit the upgrade_firewall function if the firewall is not ready for an upgrade to target version
+        # Gracefully exit the upgrade_firewall function if the firewall is not ready for an upgrade to target version
         if not proceed_with_upgrade:
             if peer_firewall:
                 log_upgrade(
@@ -926,15 +1357,6 @@ def upgrade_firewall(
         )
         sys.exit(1)
 
-    # Begin snapshots of the network state
-
-    # Determine snapshot actions to perform based on Profile fields
-    # selected_actions = [
-    #     action
-    #     for action, attrs in AssuranceOptions.STATE_SNAPSHOTS.items()
-    #     if getattr(profile, action.lower() + "_snapshot", False)
-    # ]
-
     # Perform the pre-upgrade snapshot
     pre_snapshot = perform_snapshot(device=device)
 
@@ -942,6 +1364,14 @@ def upgrade_firewall(
         level="DEBUG",
         message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Pre-upgrade snapshot {pre_snapshot}",
     )
+
+    # TODO: Implement the remaining upgrade steps
+    # - Perform readiness checks
+    # - Perform HA sync check for HA firewalls
+    # - Back up configuration to local filesystem
+    # - Exit execution if dry_run is True
+    # - Perform the upgrade
+    # - Perform post-upgrade tasks (reboot, post-upgrade snapshot, generate diff report)
 
     # # Perform Readiness Checks
     # perform_readiness_checks(
@@ -1075,7 +1505,52 @@ def run_panos_upgrade(
     job_id: str,
     profile_uuid: str,
     target_version: str,
-):
+) -> str:
+    """
+    Runs the PAN-OS upgrade process for a specified device.
+
+    This function performs the PAN-OS upgrade workflow for a given device. It retrieves the device
+    and profile information from the database, creates Firewall objects for the device and its HA peer
+    (if applicable), and executes the upgrade process. The upgrade is performed in two rounds:
+    first targeting passive and active-secondary firewalls, and then targeting active and active-primary firewalls.
+
+    Args:
+        author_id (int): The ID of the author performing the upgrade.
+        device_uuid (str): The UUID of the device to upgrade.
+        dry_run (bool): Indicates whether to perform a dry run without making any changes.
+        job_id (str): The ID of the job associated with the upgrade.
+        profile_uuid (str): The UUID of the profile to use for authentication.
+        target_version (str): The target PAN-OS version for the upgrade.
+
+    Returns:
+        str: A JSON string indicating the execution status of the upgrade workflow.
+
+    Raises:
+        Exception: If an error occurs during the PAN-OS upgrade process.
+
+    Mermaid Workflow:
+        ```mermaid
+        graph TD
+            A[Start] --> B[Set global JOB_ID]
+            B --> C[Log upgrade details]
+            C --> D[Retrieve Device and Profile from database]
+            D --> E{Device panorama managed?}
+            E -->|Yes| F[Create Firewall object with serial and Panorama]
+            E -->|No| G[Create Firewall object with IP address]
+            F --> H[Create device dictionary object]
+            G --> H
+            H --> I[Add device to upgrade_devices list]
+            I --> J{Device in HA pair?}
+            J -->|Yes| K[Create Firewall object for HA peer]
+            J -->|No| L[Iterate over passive and active-secondary devices]
+            K --> L
+            L --> M[Upgrade passive and active-secondary firewalls]
+            M --> N[Iterate over active and active-primary devices]
+            N --> O[Upgrade active and active-primary firewalls]
+            O --> P[Return JSON output]
+            P --> Q[End]
+        ```
+    """
     global JOB_ID
     JOB_ID = job_id
 
@@ -1106,6 +1581,7 @@ def run_panos_upgrade(
 
         # Perform common setup tasks, return a connected device
         if device.panorama_managed:
+            # Create a Firewall object using the serial and Panorama if the device is Panorama-managed
             firewall = Firewall(
                 serial=device.serial,
                 api_username=profile.pan_username,
@@ -1122,6 +1598,7 @@ def run_panos_upgrade(
             )
             pan.add(firewall)
         else:
+            # Create a Firewall object using the IP address if the device is not Panorama-managed
             firewall = Firewall(
                 hostname=device.ipv4_address,
                 username=profile.pan_username,
@@ -1145,14 +1622,13 @@ def run_panos_upgrade(
 
         # If the device is in an HA pair, create a Firewall object for the peer device
         if upgrade_devices[0]["db_device"].ha_enabled:
-
             # Create a Firewall object based on HA peer information within device object.
             if upgrade_devices[0]["db_device"].peer_device is not None:
                 peer = Device.objects.get(
                     pk=upgrade_devices[0]["db_device"].peer_device.pk
                 )
 
-                # If the device is managed by Panorama, we should use the serial instead of the IP address
+                # If the device is managed by Panorama, use the serial instead of the IP address
                 if upgrade_devices[0]["db_device"].panorama_managed:
                     peer_firewall = Firewall(
                         serial=peer.serial,
@@ -1242,6 +1718,32 @@ def run_panos_upgrade(
 
 
 if __name__ == "__main__":
+    """
+    Main entry point for the PAN-OS upgrade script.
+
+    This script is used to run the PAN-OS upgrade process for Palo Alto Networks devices.
+    It parses command-line arguments, configures logging, creates a new job entry, and
+    initiates the upgrade process by calling the `run_panos_upgrade` function.
+
+    Command-line arguments:
+        -d, --device-uuid (str): UUID of the device to upgrade (required).
+        -a, --author-id (int): ID of the author performing the upgrade (required).
+        --dry-run: Perform a dry run without making any changes (optional).
+        -l, --log-level (str): Set the logging level (default: INFO) (optional).
+        -p, --profile-uuid (str): UUID of the profile to use for authentication (required).
+        -t, --target-version (str): Target PAN-OS version for the upgrade (required).
+
+    Mermaid Workflow:
+        ```mermaid
+        graph TD
+            A[Start] --> B[Parse command-line arguments]
+            B --> C[Configure logging level]
+            C --> D[Create a new Job entry]
+            D --> E[Call run_panos_upgrade function]
+            E --> F[End]
+        ```
+    """
+
     parser = argparse.ArgumentParser(
         description="Run PAN-OS upgrade script for Palo Alto Networks devices"
     )
@@ -1307,6 +1809,7 @@ if __name__ == "__main__":
         task_id=str(uuid.uuid4()),
     )
 
+    # Initiate the upgrade process
     run_panos_upgrade(
         author_id=author_id,
         device_uuid=device_uuid,
