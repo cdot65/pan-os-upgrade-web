@@ -30,7 +30,7 @@ from django.core.exceptions import ObjectDoesNotExist  # noqa: E402
 
 # Create a logger instance
 logger = logging.getLogger("pan-os-inventory")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 # Create a Logstash handler
 logstash_handler = AsynchronousLogstashHandler(
@@ -55,6 +55,8 @@ def log_inventory_sync(
     level: str,
     message: str,
 ):
+    emoji = get_emoji(action=level.lower())
+    message = f"{emoji} {message}"
     extra = {
         "job_id": job_id,
         "job_type": "inventory_sync",
@@ -124,6 +126,58 @@ def get_device_group_mapping(pan: Panorama):
     return device_group_mappings
 
 
+def get_emoji(action: str) -> str:
+    """
+    Maps specific action keywords to their corresponding emoji symbols for enhanced log and user interface messages.
+
+    This utility function is designed to add visual cues to log messages or user interface outputs by associating specific action keywords with relevant emoji symbols. It aims to improve the readability and user experience by providing a quick visual reference for the action's nature or outcome. The function supports a predefined set of keywords, each mapping to a unique emoji. If an unrecognized keyword is provided, the function returns an empty string to ensure seamless operation without interrupting the application flow.
+
+    Parameters
+    ----------
+    action : str
+        A keyword representing the action or status for which an emoji is required. Supported keywords include 'success', 'error', 'warning', 'working', 'report', 'search', 'save', 'stop', and 'start'.
+
+    Returns
+    -------
+    str
+        The emoji symbol associated with the specified action keyword. Returns an empty string if the keyword is not recognized, maintaining non-disruptive output.
+
+    Examples
+    --------
+    Adding visual cues to log messages:
+        >>> logging.info(f"{get_emoji(action='success')} Operation successful.")
+        >>> logging.error(f"{get_emoji(action='error')} An error occurred.")
+
+    Enhancing user prompts in a command-line application:
+        >>> print(f"{get_emoji(action='start')} Initiating the process.")
+        >>> print(f"{get_emoji(action='stop')} Process terminated.")
+
+    Notes
+    -----
+    - The function enhances the aesthetic and functional aspects of textual outputs, making them more engaging and easier to interpret at a glance.
+    - It is implemented with a fail-safe approach, where unsupported keywords result in an empty string, thus preserving the integrity and continuity of the output.
+    - Customization or extension of the supported action keywords and their corresponding emojis can be achieved by modifying the internal emoji_map dictionary.
+
+    This function is not expected to raise any exceptions, ensuring stable and predictable behavior across various usage contexts.
+    """
+
+    emoji_map = {
+        "debug": "🐛",
+        "error": "❌",
+        "info": "ℹ️",
+        "report": "📊",
+        "save": "💾",
+        "search": "🔍",
+        "skipped": "⏭️",
+        "start": "🚀",
+        "stop": "🛑",
+        "success": "✅",
+        "warning": "⚠️",
+        "working": "⏳",
+    }
+    return emoji_map.get(action, "")
+
+
 def run_inventory_sync(
     author_id: int,
     job_id: str,
@@ -156,14 +210,14 @@ def run_inventory_sync(
         panorama_device = Device.objects.get(uuid=panorama_device_uuid)
         log_inventory_sync(
             job_id=job_id,
-            level="DEBUG",
+            level="INFO",
             message=f"Retrieved Panorama device: {panorama_device.hostname}",
         )
 
         profile = Profile.objects.get(uuid=profile_uuid)
         log_inventory_sync(
             job_id=job_id,
-            level="DEBUG",
+            level="INFO",
             message=f"Retrieved profile: {profile.name}",
         )
 
@@ -183,7 +237,7 @@ def run_inventory_sync(
         )
         log_inventory_sync(
             job_id=job_id,
-            level="DEBUG",
+            level="INFO",
             message=f"Connected to Panorama device: {panorama_device.ipv4_address}",
         )
 
@@ -192,7 +246,7 @@ def run_inventory_sync(
         panorama_hostname = system_info["system"]["hostname"]
         log_inventory_sync(
             job_id=job_id,
-            level="DEBUG",
+            level="INFO",
             message=f"Connected to Panorama device: {panorama_hostname}",
         )
 
@@ -233,13 +287,15 @@ def run_inventory_sync(
                 platform = DeviceType.objects.get(name=platform_name)
             except ObjectDoesNotExist:
                 # Handle the case when the platform doesn't exist
-                logging.warning(
-                    f"Platform '{platform_name}' not found. Skipping device: {device['@name']}"
+                log_inventory_sync(
+                    job_id=job_id,
+                    level="WARNING",
+                    message=f"Platform '{platform_name}' not found. Skipping device: {device['@name']}",
                 )
                 continue
             log_inventory_sync(
                 job_id=job_id,
-                level="DEBUG",
+                level="INFO",
                 message=f"Retrieved platform: {platform.name}",
             )
 
@@ -295,8 +351,10 @@ def run_inventory_sync(
                     # When the peer device doesn't yet exist we will revisit after creation.
                     missing_peer_devices.append(firewall)
 
-                    logging.warning(
-                        f"Peer device with IP {peer_ip} not found. Skipping HA deployment."
+                    log_inventory_sync(
+                        job_id=job_id,
+                        level="WARNING",
+                        message=f"Peer device with IP {peer_ip} not found. Skipping HA deployment.",
                     )
 
             panorama_appliance_uuid = None
@@ -306,12 +364,14 @@ def run_inventory_sync(
                     panorama_appliance_uuid = str(panorama_appliance.uuid)
                     log_inventory_sync(
                         job_id=job_id,
-                        level="DEBUG",
+                        level="INFO",
                         message=f"Retrieved Panorama appliance: {panorama_appliance.hostname}",
                     )
                 except ObjectDoesNotExist:
-                    logging.warning(
-                        f"Panorama appliance '{panorama_hostname}' not found. Skipping assignment."
+                    log_inventory_sync(
+                        job_id=job_id,
+                        level="WARNING",
+                        message=f"Panorama appliance '{panorama_hostname}' not found. Skipping assignment.",
                     )
 
             # Create or update the Device object
@@ -375,12 +435,14 @@ def run_inventory_sync(
                 peer_state = ha_details["result"]["group"]["peer-info"]["state"]
                 log_inventory_sync(
                     job_id=job_id,
-                    level="DEBUG",
+                    level="INFO",
                     message=f"Retrieved peer device: {peer_device.hostname}",
                 )
             except ObjectDoesNotExist:
-                logging.error(
-                    f"Peer device with IP {peer_ip} still not found. Skipping HA deployment."
+                log_inventory_sync(
+                    job_id=job_id,
+                    level="ERROR",
+                    message=f"Peer device with IP {peer_ip} still not found. Skipping HA deployment.",
                 )
                 continue
 
@@ -395,7 +457,11 @@ def run_inventory_sync(
         return json_output
 
     except Exception as e:
-        logging.error(f"Error during inventory sync: {str(e)}")
+        log_inventory_sync(
+            job_id=job_id,
+            level="ERROR",
+            message=f"Error during inventory sync: {str(e)}",
+        )
         raise e
 
 

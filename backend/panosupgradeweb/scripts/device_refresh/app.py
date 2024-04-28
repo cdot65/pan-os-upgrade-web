@@ -50,13 +50,71 @@ console_handler.setLevel(logging.INFO)
 logger.addHandler(console_handler)
 
 
+# Create JOB_ID global variable
+global JOB_ID
+JOB_ID = ""
+
+
+def get_emoji(action: str) -> str:
+    """
+    Maps specific action keywords to their corresponding emoji symbols for enhanced log and user interface messages.
+
+    This utility function is designed to add visual cues to log messages or user interface outputs by associating specific action keywords with relevant emoji symbols. It aims to improve the readability and user experience by providing a quick visual reference for the action's nature or outcome. The function supports a predefined set of keywords, each mapping to a unique emoji. If an unrecognized keyword is provided, the function returns an empty string to ensure seamless operation without interrupting the application flow.
+
+    Parameters
+    ----------
+    action : str
+        A keyword representing the action or status for which an emoji is required. Supported keywords include 'success', 'error', 'warning', 'working', 'report', 'search', 'save', 'stop', and 'start'.
+
+    Returns
+    -------
+    str
+        The emoji symbol associated with the specified action keyword. Returns an empty string if the keyword is not recognized, maintaining non-disruptive output.
+
+    Examples
+    --------
+    Adding visual cues to log messages:
+        >>> logging.info(f"{get_emoji(action='success')} Operation successful.")
+        >>> logging.error(f"{get_emoji(action='error')} An error occurred.")
+
+    Enhancing user prompts in a command-line application:
+        >>> print(f"{get_emoji(action='start')} Initiating the process.")
+        >>> print(f"{get_emoji(action='stop')} Process terminated.")
+
+    Notes
+    -----
+    - The function enhances the aesthetic and functional aspects of textual outputs, making them more engaging and easier to interpret at a glance.
+    - It is implemented with a fail-safe approach, where unsupported keywords result in an empty string, thus preserving the integrity and continuity of the output.
+    - Customization or extension of the supported action keywords and their corresponding emojis can be achieved by modifying the internal emoji_map dictionary.
+
+    This function is not expected to raise any exceptions, ensuring stable and predictable behavior across various usage contexts.
+    """
+
+    emoji_map = {
+        "debug": "🐛",
+        "error": "❌",
+        "info": "ℹ️",
+        "report": "📊",
+        "save": "💾",
+        "search": "🔍",
+        "skipped": "⏭️",
+        "start": "🚀",
+        "stop": "🛑",
+        "success": "✅",
+        "warning": "⚠️",
+        "working": "⏳",
+    }
+    return emoji_map.get(action, "")
+
+
 def log_device_refresh(
-    job_id: str,
     level: str,
     message: str,
 ):
+    emoji = get_emoji(action=level.lower())
+    message = f"{emoji} {message}"
     extra = {
-        "job_id": job_id,
+        "job_id": JOB_ID,
         "job_type": "device_refresh",
     }
     logger.log(getattr(logging, level), message, extra=extra)
@@ -130,18 +188,20 @@ def run_device_refresh(
     job_id: str,
     profile_uuid: str,
 ):
+
+    # JOB_ID global variable
+    global JOB_ID
+    JOB_ID = job_id
+
     log_device_refresh(
-        job_id=job_id,
         level="DEBUG",
         message=f"Running device refresh for device: {device_uuid}",
     )
     log_device_refresh(
-        job_id=job_id,
         level="DEBUG",
         message=f"Using profile: {profile_uuid}",
     )
     log_device_refresh(
-        job_id=job_id,
         level="DEBUG",
         message=f"Author ID: {author_id}",
     )
@@ -165,7 +225,6 @@ def run_device_refresh(
                 profile.pan_password,
             )
             log_device_refresh(
-                job_id=job_id,
                 level="INFO",
                 message=f"Connected to firewall device {device.ipv4_address}",
             )
@@ -188,7 +247,6 @@ def run_device_refresh(
                 device.serial,
             )
             log_device_refresh(
-                job_id=job_id,
                 level="INFO",
                 message=f"Connected to firewall through Panorama device {device.panorama_ipv4_address}",
             )
@@ -201,14 +259,12 @@ def run_device_refresh(
                 profile.pan_password,
             )
             log_device_refresh(
-                job_id=job_id,
                 level="INFO",
                 message=f"Connected to Panorama device {device.ipv4_address}",
             )
 
     except Exception as e:
         log_device_refresh(
-            job_id=job_id,
             level="ERROR",
             message=f"Error while connecting to the PAN device: {str(e)}",
         )
@@ -219,12 +275,10 @@ def run_device_refresh(
         # Retrieve the system information from the firewall device
         system_info = pan_device.show_system_info()
         log_device_refresh(
-            job_id=job_id,
             level="INFO",
             message=f"Retrieved system information from device {device.ipv4_address}",
         )
         log_device_refresh(
-            job_id=job_id,
             level="DEBUG",
             message=f"System Info: {system_info}",
         )
@@ -290,7 +344,6 @@ def run_device_refresh(
                 device_data["local_state"] = local_state
             except Device.DoesNotExist:
                 log_device_refresh(
-                    job_id=job_id,
                     level="WARNING",
                     message=f"Peer device with IP {peer_ip} not found. Skipping HA deployment.",
                 )
@@ -303,7 +356,6 @@ def run_device_refresh(
             str(device.panorama_appliance.uuid) if device.panorama_managed else None
         )
         log_device_refresh(
-            job_id=job_id,
             level="DEBUG",
             message=f"Device Data: {device_data}",
         )
@@ -328,7 +380,6 @@ def run_device_refresh(
             uptime=device_data["uptime"],
         )
         log_device_refresh(
-            job_id=job_id,
             level="INFO",
             message=f"Device {device_data['hostname']} updated successfully",
         )
@@ -338,7 +389,6 @@ def run_device_refresh(
 
     except Exception as e:
         log_device_refresh(
-            job_id=job_id,
             level="ERROR",
             message=f"Error while retrieving system information: {str(e)}",
         )
