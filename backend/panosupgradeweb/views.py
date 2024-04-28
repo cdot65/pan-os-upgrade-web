@@ -226,9 +226,10 @@ class DeviceViewSet(viewsets.ModelViewSet):
         serializer = DeviceUpgradeSerializer(data=request.data)
         if serializer.is_valid():
             devices = serializer.validated_data["devices"]
+            dry_run = serializer.validated_data["dry_run"]
             profile_uuid = serializer.validated_data["profile"]
             author_id = serializer.validated_data["author"]
-            target_version = serializer.validated_data["targetVersion"]
+            target_version = serializer.validated_data["target_version"]
 
             try:
                 profile = Profile.objects.get(uuid=profile_uuid)
@@ -242,10 +243,11 @@ class DeviceViewSet(viewsets.ModelViewSet):
 
                         # Trigger the Celery task for device upgrade and get the task ID
                         task = execute_upgrade_device_task.delay(
-                            str(device_uuid),
-                            author_id,
-                            str(profile_uuid),
-                            target_version,
+                            author_id=author_id,
+                            dry_run=dry_run,
+                            device_uuid=str(device_uuid),
+                            profile_uuid=str(profile_uuid),
+                            target_version=target_version,
                         )
                         job_ids.append(task.id)
                     except Device.DoesNotExist:
