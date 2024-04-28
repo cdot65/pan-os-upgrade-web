@@ -143,54 +143,6 @@ def find_devicegroup_by_serial(
     return None
 
 
-def log_inventory_sync(
-    action: str,
-    message: str,
-):
-    """
-    Log an upgrade message with the appropriate emoji based on the action being performed.
-
-    This function logs an upgrade message using the Python logging module. It determines
-    the appropriate logging level based on the action and includes additional job details
-    such as the job ID and job type in the log record.
-
-    Args:
-        action (str): The action being performed (e.g., "start", "success", "error").
-        message (str): The log message to be recorded.
-
-    Returns:
-        None
-
-    Mermaid Workflow:
-        ```mermaid
-        graph TD
-            A[Start] --> B[Create extra dictionary with job details]
-            B --> C[Get the corresponding emoji based on the action]
-            C --> D[Prepend the emoji to the message]
-            D --> E[Determine the appropriate logging level based on the action]
-            E --> F[Log the message with the determined level and extra details]
-            F --> G[End]
-        ```
-    """
-    emoji = get_emoji(action=action)
-    message = f"{emoji} {message}"
-    extra = {
-        "job_id": JOB_ID,
-        "job_type": "inventory_sync",
-    }
-
-    level_mapping = {
-        "debug": logging.DEBUG,
-        "info": logging.INFO,
-        "warning": logging.WARNING,
-        "error": logging.ERROR,
-        "critical": logging.CRITICAL,
-    }
-    level = level_mapping.get(action, logging.INFO)
-
-    logger.log(level, message, extra=extra)
-
-
 def flatten_xml_to_dict(element: ET.Element) -> dict:
     """
     Flatten an XML element into a dictionary.
@@ -288,6 +240,54 @@ def flatten_xml_to_dict(element: ET.Element) -> dict:
         message="XML element flattened to dictionary successfully",
     )
     return result
+
+
+def log_inventory_sync(
+    action: str,
+    message: str,
+):
+    """
+    Log an upgrade message with the appropriate emoji based on the action being performed.
+
+    This function logs an upgrade message using the Python logging module. It determines
+    the appropriate logging level based on the action and includes additional job details
+    such as the job ID and job type in the log record.
+
+    Args:
+        action (str): The action being performed (e.g., "start", "success", "error").
+        message (str): The log message to be recorded.
+
+    Returns:
+        None
+
+    Mermaid Workflow:
+        ```mermaid
+        graph TD
+            A[Start] --> B[Create extra dictionary with job details]
+            B --> C[Get the corresponding emoji based on the action]
+            C --> D[Prepend the emoji to the message]
+            D --> E[Determine the appropriate logging level based on the action]
+            E --> F[Log the message with the determined level and extra details]
+            F --> G[End]
+        ```
+    """
+    emoji = get_emoji(action=action)
+    message = f"{emoji} {message}"
+    extra = {
+        "job_id": JOB_ID,
+        "job_type": "inventory_sync",
+    }
+
+    level_mapping = {
+        "debug": logging.DEBUG,
+        "info": logging.INFO,
+        "warning": logging.WARNING,
+        "error": logging.ERROR,
+        "critical": logging.CRITICAL,
+    }
+    level = level_mapping.get(action, logging.INFO)
+
+    logger.log(level, message, extra=extra)
 
 
 def get_device_group_mapping(pan: Panorama) -> List[Dict]:
