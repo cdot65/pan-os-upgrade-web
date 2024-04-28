@@ -14,6 +14,7 @@ import uuid
 import django
 from django.contrib.auth import get_user_model
 from logstash_async.handler import AsynchronousLogstashHandler
+from celery.exceptions import WorkerTerminate, WorkerLostError
 
 # Palo Alto Networks SDK imports
 from panos.base import PanDevice
@@ -73,6 +74,11 @@ logstash_handler = AsynchronousLogstashHandler(
 # Add the Logstash handler to the logger
 logger.addHandler(logstash_handler)
 
+# Debugging: Add a console handler to the logger
+# console_handler = logging.StreamHandler()
+# console_handler.setLevel(logging.INFO)
+# logger.addHandler(console_handler)
+
 
 # Create JOB_ID global variable
 global JOB_ID
@@ -121,36 +127,37 @@ def check_ha_compatibility(
     # Check if the major upgrade is more than one release apart
     if target_major - current_major > 1:
         log_upgrade(
-            level="WARNING",
-            message=f"{get_emoji(action='warning')} {device['db_device'].hostname}: Upgrading firewalls in an HA pair to a version that is more than one major release apart may cause compatibility issues.",
+            action="warning",
+            message=f"{device['db_device'].hostname}: Upgrading firewalls in an HA pair to a version that is more than one major release apart may cause compatibility issues.",
         )
         return False
 
     # Check if the upgrade is within the same major version but the minor upgrade is more than one release apart
     elif target_major == current_major and target_minor - current_minor > 1:
         log_upgrade(
-            level="WARNING",
-            message=f"{get_emoji(action='warning')} {device['db_device'].hostname}: Upgrading firewalls in an HA pair to a version that is more than one minor release apart may cause compatibility issues.",
+            action="warning",
+            message=f"{device['db_device'].hostname}: Upgrading firewalls in an HA pair to a version that is more than one minor release apart may cause compatibility issues.",
         )
         return False
 
     # Check if the upgrade spans exactly one major version but also increases the minor version
     elif target_major - current_major == 1 and target_minor > 0:
         log_upgrade(
-            level="WARNING",
-            message=f"{get_emoji(action='warning')} {device['db_device'].hostname}: Upgrading firewalls in an HA pair to a version that spans more than one major release or increases the minor version beyond the first in the next major release may cause compatibility issues.",
+            action="warning",
+            message=f"{device['db_device'].hostname}: Upgrading firewalls in an HA pair to a version that spans more than one major release or increases the minor version beyond the first in the next major release may cause compatibility issues.",
         )
         return False
 
     # Log compatibility check success
     log_upgrade(
-        level="INFO",
-        message=f"{get_emoji(action='success')} {device['db_device'].hostname}: The target version is compatible with the current version.",
+        action="success",
+        message=f"{device['db_device'].hostname}: The target version is compatible with the current version.",
     )
     return True
 
 
 def compare_versions(
+    device: Dict,
     version1: str,
     version2: str,
 ) -> str:
@@ -183,6 +190,10 @@ def compare_versions(
             D -->|version1 == version2| G[Return "equal"]
         ```
     """
+    log_upgrade(
+        action="search",
+        message=f"{device['db_device'].hostname}: Comparing version strings",
+    )
 
     # Parse the version strings into comparable objects
     parsed_version1 = parse_version(version=version1)
@@ -249,32 +260,32 @@ def determine_upgrade(
 
     # Log the current and target versions
     log_upgrade(
-        level="INFO",
-        message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Current version: {device['db_device'].sw_version}.",
+        action="report",
+        message=f"{device['db_device'].hostname}: Current version: {device['db_device'].sw_version}.",
     )
     log_upgrade(
-        level="INFO",
-        message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Target version: {target_major}.{target_minor}.{target_maintenance}.",
+        action="report",
+        message=f"{device['db_device'].hostname}: Target version: {target_major}.{target_minor}.{target_maintenance}.",
     )
 
     if current_version_parsed < target_version:
         # Log upgrade required message if the current version is less than the target version
         log_upgrade(
-            level="INFO",
-            message=f"{get_emoji(action='success')} {device['db_device'].hostname}: Upgrade required from {device['db_device'].sw_version} to {target_major}.{target_minor}.{target_maintenance}",
+            action="start",
+            message=f"{device['db_device'].hostname}: Upgrade required from {device['db_device'].sw_version} to {target_major}.{target_minor}.{target_maintenance}",
         )
     else:
         # Log no upgrade required or downgrade attempt detected message
         log_upgrade(
-            level="INFO",
-            message=f"{get_emoji(action='skipped')} {device['db_device'].hostname}: No upgrade required or downgrade attempt detected.",
+            action="skipped",
+            message=f"{device['db_device'].hostname}: No upgrade required or downgrade attempt detected.",
         )
         # Log halting upgrade message and exit the script
         log_upgrade(
-            level="INFO",
-            message=f"{get_emoji(action='skipped')} {device['db_device'].hostname}: Halting upgrade.",
+            action="stop",
+            message=f"{device['db_device'].hostname}: Halting upgrade.",
         )
-        sys.exit(0)
+        raise WorkerTerminate()
 
 
 def get_emoji(action: str) -> str:
@@ -364,8 +375,8 @@ def get_ha_status(device: Dict) -> Tuple[str, Optional[dict]]:
 
     # Log the start of getting deployment information
     log_upgrade(
-        level="DEBUG",
-        message=f"{get_emoji(action='start')} {device['db_device'].hostname}: Getting {device['pan_device'].serial} deployment information.",
+        action="start",
+        message=f"{device['db_device'].hostname}: Getting {device['pan_device'].serial} deployment information.",
     )
 
     # Get the deployment type using show_highavailability_state()
@@ -373,8 +384,8 @@ def get_ha_status(device: Dict) -> Tuple[str, Optional[dict]]:
 
     # Log the target device deployment type
     log_upgrade(
-        level="DEBUG",
-        message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Target device deployment: {deployment_type[0]}",
+        action="report",
+        message=f"{device['db_device'].hostname}: Target device deployment: {deployment_type[0]}",
     )
 
     if deployment_type[1]:
@@ -383,8 +394,8 @@ def get_ha_status(device: Dict) -> Tuple[str, Optional[dict]]:
 
         # Log that the target device deployment details have been collected
         log_upgrade(
-            level="DEBUG",
-            message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Target device deployment details collected.",
+            action="success",
+            message=f"{device['db_device'].hostname}: Target device deployment details collected.",
         )
         return deployment_type[0], ha_details
     else:
@@ -442,8 +453,8 @@ def handle_firewall_ha(
     peer_version = peer_device.sw_version
 
     log_upgrade(
-        level="INFO",
-        message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Local state: {local_state}, Local version: {local_version}, Peer Device: {peer_device.hostname}, Peer version: {peer_version}",
+        action="report",
+        message=f"{device['db_device'].hostname}: Local state: {local_state}, Local version: {local_version}, Peer Device: {peer_device.hostname}, Peer version: {peer_version}",
     )
 
     # Initialize with default values
@@ -452,8 +463,8 @@ def handle_firewall_ha(
 
     for attempt in range(max_retries):
         log_upgrade(
-            level="INFO",
-            message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Attempt {attempt + 1}/{max_retries} to get HA status.",
+            action="search",
+            message=f"{device['db_device'].hostname}: Attempt {attempt + 1}/{max_retries} to get HA status.",
         )
 
         # Re-fetch the HA status to get the latest state
@@ -463,25 +474,26 @@ def handle_firewall_ha(
 
         if ha_details["result"]["group"]["running-sync"] == "synchronized":
             log_upgrade(
-                level="INFO",
-                message=f"{get_emoji(action='success')} {device['db_device'].hostname}: HA synchronization complete.",
+                action="success",
+                message=f"{device['db_device'].hostname}: HA synchronization complete.",
             )
             break
         else:
             log_upgrade(
-                level="INFO",
-                message=f"{get_emoji(action='report')} {device['db_device'].hostname}: HA synchronization still in progress. Rechecking after wait period.",
+                action="working",
+                message=f"{device['db_device'].hostname}: HA synchronization still in progress.",
             )
             # Wait for HA synchronization
             time.sleep(retry_interval)
 
     version_comparison = compare_versions(
+        device=device,
         version1=local_version,
         version2=peer_version,
     )
     log_upgrade(
-        level="INFO",
-        message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Version comparison: {version_comparison}",
+        action="report",
+        message=f"{device['db_device'].hostname}: Version comparison: {version_comparison}",
     )
 
     # If the firewall and its peer devices are running the same version
@@ -492,8 +504,8 @@ def handle_firewall_ha(
 
             # Log message to console
             log_upgrade(
-                level="INFO",
-                message=f"{get_emoji(action='search')} {device['db_device'].hostname}: Detected active target device in HA pair running the same version as its peer.",
+                action="search",
+                message=f"{device['db_device'].hostname}: Detected active target device in HA pair running the same version as its peer.",
             )
 
             # Exit the upgrade process for the target device at this time, to be revisited later
@@ -505,16 +517,16 @@ def handle_firewall_ha(
             # Suspend HA state of the target device
             if not dry_run:
                 log_upgrade(
-                    level="INFO",
-                    message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Suspending HA state of passive or active-secondary",
+                    action="start",
+                    message=f"{device['db_device'].hostname}: Suspending HA state of passive or active-secondary",
                 )
                 suspend_ha_passive(device=device)
 
             # Log message to console
             else:
                 log_upgrade(
-                    level="INFO",
-                    message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Target device is passive, but we are in dry-run mode. Skipping HA state suspension.",
+                    action="skipped",
+                    message=f"{device['db_device'].hostname}: Target device is passive, but we are in dry-run mode. Skipping HA state suspension.",
                 )
 
             # Continue with upgrade process on the passive target device
@@ -523,29 +535,29 @@ def handle_firewall_ha(
         elif local_state == "initial":
             # Continue with upgrade process on the initial target device
             log_upgrade(
-                level="INFO",
-                message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Target device is in initial HA state",
+                action="report",
+                message=f"{device['db_device'].hostname}: Target device is in initial HA state",
             )
             return True, None
 
     elif version_comparison == "older":
         log_upgrade(
-            level="INFO",
-            message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Target device is on an older version",
+            action="report",
+            message=f"{device['db_device'].hostname}: Target device is on an older version",
         )
         # Suspend HA state of active if the passive is on a later release
         if local_state == "active" or local_state == "active-primary" and not dry_run:
             log_upgrade(
-                level="INFO",
-                message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Suspending HA state of active or active-primary",
+                action="start",
+                message=f"{device['db_device'].hostname}: Suspending HA state of active or active-primary",
             )
             suspend_ha_active(device=device)
         return True, None
 
     elif version_comparison == "newer":
         log_upgrade(
-            level="INFO",
-            message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Target device is on a newer version",
+            action="report",
+            message=f"{device['db_device'].hostname}: Target device is on a newer version",
         )
         # Suspend HA state of passive if the active is on a later release
         if (
@@ -554,8 +566,8 @@ def handle_firewall_ha(
             and not dry_run  # noqa: W503
         ):
             log_upgrade(
-                level="INFO",
-                message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Suspending HA state of passive or active-secondary",
+                action="start",
+                message=f"{device['db_device'].hostname}: Suspending HA state of passive or active-secondary",
             )
             suspend_ha_passive(device=device)
         return True, None
@@ -564,17 +576,18 @@ def handle_firewall_ha(
 
 
 def log_upgrade(
-    level: str,
+    action: str,
     message: str,
 ):
     """
-    Log an upgrade message with the specified level and additional job details.
+    Log an upgrade message with the appropriate level based on the action being performed.
 
-    This function logs an upgrade message using the Python logging module. It includes
-    additional job details such as the job ID and job type in the log record.
+    This function logs an upgrade message using the Python logging module. It determines
+    the appropriate logging level based on the action and includes additional job details
+    such as the job ID and job type in the log record.
 
     Args:
-        level (str): The logging level for the message (e.g., "INFO", "WARNING", "ERROR").
+        action (str): The action being performed (e.g., "start", "success", "error").
         message (str): The log message to be recorded.
 
     Returns:
@@ -584,20 +597,30 @@ def log_upgrade(
         ```mermaid
         graph TD
             A[Start] --> B[Create extra dictionary with job details]
-            B --> C[Get the corresponding logging level using getattr]
-            C --> D[Log the message with the specified level and extra details]
-            D --> E[End]
+            B --> C[Get the corresponding emoji based on the action]
+            C --> D[Prepend the emoji to the message]
+            D --> E[Determine the appropriate logging level based on the action]
+            E --> F[Log the message with the determined level and extra details]
+            F --> G[End]
         ```
     """
-
-    # Create a dictionary with additional job details
+    emoji = get_emoji(action=action)
+    message = f"{emoji} {message}"
     extra = {
         "job_id": JOB_ID,
         "job_type": "upgrade",
     }
 
-    # Log the message with the specified level and extra details
-    logger.log(getattr(logging, level), message, extra=extra)
+    level_mapping = {
+        "debug": logging.DEBUG,
+        "info": logging.INFO,
+        "warning": logging.WARNING,
+        "error": logging.ERROR,
+        "critical": logging.CRITICAL,
+    }
+    level = level_mapping.get(action, logging.INFO)
+
+    logger.log(level, message, extra=extra)
 
 
 def parse_version(version: str) -> Tuple[int, int, int, int]:
@@ -737,8 +760,8 @@ def perform_snapshot(device: Dict) -> any:
     snapshot_retry_interval = device["profile"].snapshot_retry_interval
 
     log_upgrade(
-        level="INFO",
-        message=f"{get_emoji(action='start')} {device['db_device'].hostname}: Performing snapshot of network state information.",
+        action="start",
+        message=f"{device['db_device'].hostname}: Performing snapshot of network state information.",
     )
     attempt = 0
     snapshot = None
@@ -752,23 +775,27 @@ def perform_snapshot(device: Dict) -> any:
             )
 
             log_upgrade(
-                level="INFO",
-                message=snapshot,
+                action="save",
+                message=f"{device['db_device'].hostname}: Snapshot successfully created.",
             )
 
         # Catch specific and general exceptions
         except (AttributeError, IOError, Exception) as error:
             log_upgrade(
-                level="ERROR",
-                message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Snapshot attempt failed with error: {error}. Retrying after {snapshot_retry_interval} seconds.",
+                action="error",
+                message=f"{device['db_device'].hostname}: Snapshot attempt failed with error: {error}. Retrying after {snapshot_retry_interval} seconds.",
+            )
+            log_upgrade(
+                action="working",
+                message=f"{device['db_device'].hostname}: Waiting for {snapshot_retry_interval} seconds before retrying snapshot.",
             )
             time.sleep(snapshot_retry_interval)
             attempt += 1
 
     if snapshot is None:
         log_upgrade(
-            level="ERROR",
-            message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Failed to create snapshot after {max_snapshot_tries} attempts.",
+            action="error",
+            message=f"{device['db_device'].hostname}: Failed to create snapshot after {max_snapshot_tries} attempts.",
         )
 
     return snapshot
@@ -817,8 +844,8 @@ def run_assurance(
     proxy_firewall = FirewallProxy(device["pan_device"])
     checks_firewall = CheckFirewall(proxy_firewall)
     log_upgrade(
-        level="DEBUG",
-        message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Running assurance on firewall {checks_firewall}",
+        action="report",
+        message=f"{device['db_device'].hostname}: Running assurance on firewall {checks_firewall}",
     )
 
     results = None
@@ -838,34 +865,34 @@ def run_assurance(
         for action in actions.keys():
             if action not in AssuranceOptions.STATE_SNAPSHOTS.keys():
                 log_upgrade(
-                    level="ERROR",
-                    message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Invalid action for state snapshot: {action}",
+                    action="error",
+                    message=f"{device['db_device'].hostname}: Invalid action for state snapshot: {action}",
                 )
                 return
 
         # Take snapshots
         try:
             log_upgrade(
-                level="DEBUG",
-                message=f"{get_emoji(action='start')} {device['db_device'].hostname}: Performing snapshots.",
+                action="start",
+                message=f"{device['db_device'].hostname}: Performing snapshots.",
             )
             results = checks_firewall.run_snapshots(snapshots_config=actions)
             log_upgrade(
-                level="DEBUG",
-                message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Snapshot results {results}",
+                action="report",
+                message=f"{device['db_device'].hostname}: Snapshot results {results}",
             )
 
         except Exception as e:
             log_upgrade(
-                level="ERROR",
-                message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Error running snapshots: {e}",
+                action="error",
+                message=f"{device['db_device'].hostname}: Error running snapshots: {e}",
             )
             return
 
     else:
         log_upgrade(
-            level="ERROR",
-            message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Invalid operation type: {operation_type}",
+            action="error",
+            message=f"{device['db_device'].hostname}: Invalid operation type: {operation_type}",
         )
         return
 
@@ -913,8 +940,8 @@ def software_download(
     # Check if the target version is already downloaded
     if device["pan_device"].software.versions[target_version]["downloaded"]:
         log_upgrade(
-            level="INFO",
-            message=f"{get_emoji(action='success')} {device['db_device'].hostname}: version {target_version} already on target device.",
+            action="success",
+            message=f"{device['db_device'].hostname}: version {target_version} already on target device.",
         )
         return True
 
@@ -927,25 +954,25 @@ def software_download(
         != "downloading"  # noqa: W503
     ):
         log_upgrade(
-            level="INFO",
-            message=f"{get_emoji(action='search')} {device['db_device'].hostname}: version {target_version} is not on the target device",
+            action="search",
+            message=f"{device['db_device'].hostname}: version {target_version} is not on the target device",
         )
 
         start_time = time.time()
 
         try:
             log_upgrade(
-                level="INFO",
-                message=f"{get_emoji(action='start')} {device['db_device'].hostname}: version {target_version} is beginning download",
+                action="start",
+                message=f"{device['db_device'].hostname}: version {target_version} is beginning download",
             )
             device["pan_device"].software.download(target_version)
         except PanDeviceXapiError as download_error:
             log_upgrade(
-                level="ERROR",
-                message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Download Error {download_error}",
+                action="error",
+                message=f"{device['db_device'].hostname}: Download Error {download_error}",
             )
 
-            sys.exit(1)
+            raise WorkerTerminate()
 
         while True:
             device["pan_device"].software.info()
@@ -956,8 +983,8 @@ def software_download(
 
             if dl_status is True:
                 log_upgrade(
-                    level="INFO",
-                    message=f"{get_emoji(action='success')} {device['db_device'].hostname}: {target_version} downloaded in {elapsed_time} seconds",
+                    action="success",
+                    message=f"{device['db_device'].hostname}: {target_version} downloaded in {elapsed_time} seconds",
                 )
                 return True
             elif dl_status in (False, "downloading"):
@@ -969,18 +996,18 @@ def software_download(
                 )
                 if device["db_device"].ha_enabled:
                     log_upgrade(
-                        level="INFO",
-                        message=f"{get_emoji(action='working')} {device['db_device'].hostname}: {status_msg} - Elapsed time: {elapsed_time} seconds",
+                        action="working",
+                        message=f"{device['db_device'].hostname}: {status_msg} - Elapsed time: {elapsed_time} seconds",
                     )
                 else:
                     log_upgrade(
-                        level="INFO",
-                        message=f"{get_emoji(action='working')} {device['db_device'].hostname}: {status_msg} - Elapsed time: {elapsed_time} seconds",
+                        action="working",
+                        message=f"{device['db_device'].hostname}: {status_msg} - Elapsed time: {elapsed_time} seconds",
                     )
             else:
                 log_upgrade(
-                    level="ERROR",
-                    message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Download failed after {elapsed_time} seconds",
+                    action="error",
+                    message=f"{device['db_device'].hostname}: Download failed after {elapsed_time} seconds",
                 )
                 return False
 
@@ -988,11 +1015,11 @@ def software_download(
 
     else:
         log_upgrade(
-            level="ERROR",
-            message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Error downloading {target_version}.",
+            action="error",
+            message=f"{device['db_device'].hostname}: Error downloading {target_version}.",
         )
 
-        sys.exit(1)
+        raise WorkerTerminate()
 
 
 def software_update_check(
@@ -1083,8 +1110,8 @@ def software_update_check(
 
     # Retrieve available versions of PAN-OS
     log_upgrade(
-        level="INFO",
-        message=f"{get_emoji(action='working')} {device['db_device'].hostname}: Refreshing list of available software versions",
+        action="working",
+        message=f"{device['db_device'].hostname}: Refreshing list of available software versions",
     )
     device["pan_device"].software.check()
     available_versions = device["pan_device"].software.versions
@@ -1094,22 +1121,22 @@ def software_update_check(
         wait_time = device["profile"].download_retry_interval
 
         log_upgrade(
-            level="INFO",
-            message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Version {target_version} is available for download",
+            action="report",
+            message=f"{device['db_device'].hostname}: Version {target_version} is available for download",
         )
 
         base_version_key = f"{target_major}.{target_minor}.0"
         if available_versions.get(base_version_key, {}).get("downloaded"):
             log_upgrade(
-                level="INFO",
-                message=f"{get_emoji(action='success')} {device['db_device'].hostname}: Base image for {target_version} is already downloaded",
+                action="success",
+                message=f"{device['db_device'].hostname}: Base image for {target_version} is already downloaded",
             )
             return True
         else:
             for attempt in range(retry_count):
                 log_upgrade(
-                    level="INFO",
-                    message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Base image for {target_version} is not downloaded. Attempting download.",
+                    action="report",
+                    message=f"{device['db_device'].hostname}: Base image for {target_version} is not downloaded. Attempting download.",
                 )
                 downloaded = software_download(
                     device=device,
@@ -1118,12 +1145,12 @@ def software_update_check(
 
                 if downloaded:
                     log_upgrade(
-                        level="INFO",
-                        message=f"{get_emoji(action='success')} {device['db_device'].hostname}: Base image {base_version_key} downloaded successfully",
+                        action="success",
+                        message=f"{device['db_device'].hostname}: Base image {base_version_key} downloaded successfully",
                     )
                     log_upgrade(
-                        level="INFO",
-                        message=f"{get_emoji(action='success')} {device['db_device'].hostname}: Pausing for {wait_time} seconds to let {base_version_key} image load into the software manager before downloading {target_version}",
+                        action="success",
+                        message=f"{device['db_device'].hostname}: Pausing for {wait_time} seconds to let {base_version_key} image load into the software manager before downloading {target_version}",
                     )
 
                     # Wait before retrying to ensure the device has processed the downloaded base image
@@ -1140,22 +1167,22 @@ def software_update_check(
 
                     else:
                         log_upgrade(
-                            level="INFO",
-                            message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Waiting for device to load the new base image into software manager",
+                            action="report",
+                            message=f"{device['db_device'].hostname}: Waiting for device to load the new base image into software manager",
                         )
                         # Retry if the version is still not recognized
                         continue
                 else:
                     if attempt < retry_count - 1:
                         log_upgrade(
-                            level="INFO",
-                            message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Failed to download base image for version {target_version}. Retrying in {wait_time} seconds.",
+                            action="report",
+                            message=f"{device['db_device'].hostname}: Failed to download base image for version {target_version}. Retrying in {wait_time} seconds.",
                         )
                         time.sleep(wait_time)
                     else:
                         log_upgrade(
-                            level="ERROR",
-                            message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Failed to download base image after {retry_count} attempts.",
+                            action="error",
+                            message=f"{device['db_device'].hostname}: Failed to download base image after {retry_count} attempts.",
                         )
                         return False
 
@@ -1207,20 +1234,20 @@ def suspend_ha_active(device: Dict) -> bool:
         # Check if the suspension was successful
         if response_message["result"] == "Successfully changed HA state to suspended":
             log_upgrade(
-                level="INFO",
-                message=f"{get_emoji(action='success')} {device['db_device'].hostname}: Active target device HA state suspended.",
+                action="success",
+                message=f"{device['db_device'].hostname}: Active target device HA state suspended.",
             )
             return True
         else:
             log_upgrade(
-                level="ERROR",
-                message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Failed to suspend active target device HA state.",
+                action="error",
+                message=f"{device['db_device'].hostname}: Failed to suspend active target device HA state.",
             )
             return False
     except Exception as e:
         log_upgrade(
-            level="ERROR",
-            message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Error suspending active target device HA state: {e}",
+            action="error",
+            message=f"{device['db_device'].hostname}: Error suspending active target device HA state: {e}",
         )
         return False
 
@@ -1258,8 +1285,8 @@ def suspend_ha_passive(device: Dict) -> bool:
 
     # Log the start of HA state suspension
     log_upgrade(
-        level="INFO",
-        message=f"{get_emoji(action='start')} {device['db_device'].hostname}: Suspending passive target device HA state.",
+        action="start",
+        message=f"{device['db_device'].hostname}: Suspending passive target device HA state.",
     )
 
     try:
@@ -1276,22 +1303,22 @@ def suspend_ha_passive(device: Dict) -> bool:
         if response_message["result"] == "Successfully changed HA state to suspended":
             # Log the success of HA state suspension
             log_upgrade(
-                level="INFO",
-                message=f"{get_emoji(action='success')} {device['db_device'].hostname}: Passive target device HA state suspended.",
+                action="success",
+                message=f"{device['db_device'].hostname}: Passive target device HA state suspended.",
             )
             return True
         else:
             # Log the failure of HA state suspension
             log_upgrade(
-                level="ERROR",
-                message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Failed to suspend passive target device HA state.",
+                action="error",
+                message=f"{device['db_device'].hostname}: Failed to suspend passive target device HA state.",
             )
             return False
     except Exception as e:
         # Log any errors that occur during HA state suspension
         log_upgrade(
-            level="ERROR",
-            message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Error suspending passive target device HA state: {e}",
+            action="error",
+            message=f"{device['db_device'].hostname}: Error suspending passive target device HA state: {e}",
         )
         return False
 
@@ -1342,8 +1369,8 @@ def upgrade_firewall(
 
     # Check to see if the firewall is ready for an upgrade
     log_upgrade(
-        level="DEBUG",
-        message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Checking to see if a PAN-OS upgrade is available.",
+        action="report",
+        message=f"{device['db_device'].hostname}: Checking to see if a PAN-OS upgrade is available.",
     )
 
     update_available = software_update_check(
@@ -1354,10 +1381,10 @@ def upgrade_firewall(
     # Gracefully exit if the firewall is not ready for an upgrade to target version
     if not update_available:
         log_upgrade(
-            level="ERROR",
-            message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Not ready for upgrade to {target_version}.",
+            action="error",
+            message=f"{device['db_device'].hostname}: Not ready for upgrade to {target_version}.",
         )
-        sys.exit(1)
+        raise WorkerTerminate()
 
     # If firewall is part of HA pair, determine if it's active or passive
     if device["db_device"].ha_enabled:
@@ -1370,8 +1397,8 @@ def upgrade_firewall(
         if not proceed_with_upgrade:
             if peer_firewall:
                 log_upgrade(
-                    level="INFO",
-                    message=f"{get_emoji(action='start')} {device['db_device'].hostname}: Switching control to the peer firewall for upgrade.",
+                    action="start",
+                    message=f"{device['db_device'].hostname}: Switching control to the peer firewall for upgrade.",
                 )
                 upgrade_firewall(
                     device=peer_firewall,
@@ -1383,8 +1410,8 @@ def upgrade_firewall(
 
     # Download the target version
     log_upgrade(
-        level="INFO",
-        message=f"{get_emoji(action='start')} {device['db_device'].hostname}: Performing test to see if {target_version} is already downloaded.",
+        action="start",
+        message=f"{device['db_device'].hostname}: Performing test to see if {target_version} is already downloaded.",
     )
 
     image_downloaded = software_download(
@@ -1394,27 +1421,27 @@ def upgrade_firewall(
 
     if device["db_device"].ha_enabled and image_downloaded:
         log_upgrade(
-            level="INFO",
-            message=f"{get_emoji(action='success')} {device['db_device'].hostname}: {target_version} has been downloaded and sync'd to HA peer.",
+            action="success",
+            message=f"{device['db_device'].hostname}: {target_version} has been downloaded and sync'd to HA peer.",
         )
     elif image_downloaded:
         log_upgrade(
-            level="INFO",
-            message=f"{get_emoji(action='success')} {device['db_device'].hostname}: version {target_version} has been downloaded.",
+            action="success",
+            message=f"{device['db_device'].hostname}: version {target_version} has been downloaded.",
         )
     else:
         log_upgrade(
-            level="ERROR",
-            message=f"{get_emoji(action='error')} {device['db_device'].hostname}: Image not downloaded, exiting.",
+            action="error",
+            message=f"{device['db_device'].hostname}: Image not downloaded, exiting.",
         )
-        sys.exit(1)
+        raise WorkerTerminate()
 
     # Perform the pre-upgrade snapshot
     pre_snapshot = perform_snapshot(device=device)
 
     log_upgrade(
-        level="DEBUG",
-        message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Pre-upgrade snapshot {pre_snapshot}",
+        action="report",
+        message=f"{device['db_device'].hostname}: Pre-upgrade snapshot {pre_snapshot}",
     )
 
     # TODO: Implement the remaining upgrade steps
@@ -1608,20 +1635,20 @@ def run_panos_upgrade(
 
     # Check to see if the firewall is ready for an upgrade
     log_upgrade(
-        level="DEBUG",
-        message=f"{get_emoji(action='report')} Running PAN-OS upgrade for device: {device_uuid}",
+        action="report",
+        message=f"Running PAN-OS upgrade for device: {device_uuid}",
     )
     log_upgrade(
-        level="DEBUG",
-        message=f"{get_emoji(action='report')} Author ID: {author_id}",
+        action="report",
+        message=f"Author ID: {author_id}",
     )
     log_upgrade(
-        level="DEBUG",
-        message=f"{get_emoji(action='report')} Using profile: {profile_uuid}",
+        action="report",
+        message=f"Using profile: {profile_uuid}",
     )
     log_upgrade(
-        level="DEBUG",
-        message=f"{get_emoji(action='report')} Target PAN-OS version: {target_version}",
+        action="report",
+        message=f"Target PAN-OS version: {target_version}",
     )
 
     upgrade_devices = []
@@ -1665,8 +1692,8 @@ def run_panos_upgrade(
             "profile": profile,
         }
         log_upgrade(
-            level="DEBUG",
-            message=f"{get_emoji(action='report')} {device['db_device'].hostname}: Device and firewall objects created.",
+            action="report",
+            message=f"{device['db_device'].hostname}: Device and firewall objects created.",
         )
 
         # Add the device object to the upgrade_devices list
@@ -1710,8 +1737,8 @@ def run_panos_upgrade(
                 )
 
                 log_upgrade(
-                    level="INFO",
-                    message=f"{get_emoji(action='report')} {upgrade_devices[0]['db_device'].hostname}: HA peer firewall added to the upgrade list.",
+                    action="report",
+                    message=f"{upgrade_devices[0]['db_device'].hostname}: HA peer firewall added to the upgrade list.",
                 )
 
         # Iterate over the list of passive and active-secondary devices to upgrade
@@ -1727,10 +1754,16 @@ def run_panos_upgrade(
                         dry_run=dry_run,
                         target_version=target_version,
                     )
+                except WorkerLostError as exc:
+                    log_upgrade(
+                        action="error",
+                        message=f"{each['db_device'].hostname}: Worker lost: {exc}",
+                    )
+                    raise WorkerTerminate()
                 except Exception as exc:
                     log_upgrade(
-                        level="ERROR",
-                        message=f"{get_emoji(action='error')} {each['db_device'].hostname}: Generated an exception: {exc}",
+                        action="error",
+                        message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
                     )
 
         # Iterate over the list of devices to upgrade
@@ -1746,10 +1779,16 @@ def run_panos_upgrade(
                         dry_run=dry_run,
                         target_version=target_version,
                     )
+                except WorkerLostError as exc:
+                    log_upgrade(
+                        action="error",
+                        message=f"{each['db_device'].hostname}: Worker lost: {exc}",
+                    )
+                    raise WorkerTerminate()
                 except Exception as exc:
                     log_upgrade(
-                        level="ERROR",
-                        message=f"{get_emoji(action='error')} {each['db_device'].hostname}: Generated an exception: {exc}",
+                        action="error",
+                        message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
                     )
 
         # Return the JSON output indicating the execution status
@@ -1761,10 +1800,16 @@ def run_panos_upgrade(
         )
         return json_output
 
+    except WorkerLostError as e:
+        log_upgrade(
+            action="error",
+            message=f"Worker lost during PAN-OS upgrade: {str(e)}",
+        )
+        raise WorkerTerminate()
     except Exception as e:
         log_upgrade(
-            level="ERROR",
-            message=f"{get_emoji(action='error')} Error during PAN-OS upgrade: {str(e)}",
+            action="error",
+            message=f"Error during PAN-OS upgrade: {str(e)}",
         )
         raise e
 
