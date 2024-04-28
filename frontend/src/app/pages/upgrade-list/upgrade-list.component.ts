@@ -15,17 +15,15 @@ import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
 import { MatDividerModule } from "@angular/material/divider";
-import { MatExpansionModule } from "@angular/material/expansion";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
+import { MatRadioModule } from "@angular/material/radio";
 import { MatSelectModule } from "@angular/material/select";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { MatStepperModule } from "@angular/material/stepper";
 import { Profile } from "../../shared/interfaces/profile.interface";
 import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
-import { STEPPER_GLOBAL_OPTIONS } from "@angular/cdk/stepper";
 import { Subject } from "rxjs";
 import { UpgradeForm } from "../../shared/interfaces/upgrade-form.interface";
 import { UpgradePageHeader } from "../upgrade-page-header/upgrade-page-header";
@@ -42,7 +40,6 @@ import { takeUntil } from "rxjs/operators";
         Footer,
         UpgradePageHeader,
         MatDividerModule,
-        MatStepperModule,
         MatFormFieldModule,
         MatSelectModule,
         MatButtonModule,
@@ -50,14 +47,8 @@ import { takeUntil } from "rxjs/operators";
         ReactiveFormsModule,
         MatInputModule,
         MatCardModule,
-        MatExpansionModule,
         MatProgressBarModule,
-    ],
-    providers: [
-        {
-            provide: STEPPER_GLOBAL_OPTIONS,
-            useValue: { showError: true },
-        },
+        MatRadioModule,
     ],
 })
 export class UpgradeListComponent implements OnInit, OnDestroy {
@@ -67,6 +58,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
     upgradeForm: FormGroup;
     jobIds: string[] = [];
     step = 0;
+    target_versions: string[] = ["10.1.3", "10.2.9-h1", "11.1.1-h1"];
     private destroy$ = new Subject<void>();
 
     constructor(
@@ -80,8 +72,9 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
     ) {
         this.upgradeForm = this.formBuilder.group({
             devices: [[], Validators.required],
+            dry_run: [true],
             profile: ["", Validators.required],
-            targetVersion: [""],
+            target_version: ["", Validators.required],
             scheduledAt: [""],
         });
     }
@@ -194,8 +187,9 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
             const upgradeFormData: UpgradeForm = {
                 author: 1, // Replace with the actual author ID
                 devices: this.upgradeForm.get("devices")?.value,
+                dry_run: this.upgradeForm.get("dry_run")?.value,
                 profile: this.upgradeForm.get("profile")?.value,
-                targetVersion: this.upgradeForm.get("targetVersion")?.value,
+                target_version: this.upgradeForm.get("target_version")?.value,
             };
 
             this.upgradeService
@@ -234,7 +228,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
                     },
                 );
 
-            this.stepNext();
+            this.step = 4;
         }
     }
 
@@ -242,17 +236,5 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         this.step = 0;
         this.upgradeForm.reset();
         this.jobIds = [];
-    }
-
-    stepSet(index: number) {
-        this.step = index;
-    }
-
-    stepNext() {
-        this.step++;
-    }
-
-    stepPrev() {
-        this.step--;
     }
 }

@@ -44,6 +44,18 @@
     }
   }
 
+  .upgrade-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+
+    .form-field {
+      mat-form-field {
+        width: 100%;
+      }
+    }
+  }
+
 
   button {
     margin-top: 16px;
