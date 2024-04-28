@@ -3,7 +3,7 @@
 export interface UpgradeHistory {
     id: string;
     deviceId: string;
-    targetVersion: string;
+    target_version: string;
     status: string;
     startedAt: Date;
     completedAt?: Date;

@@ -1,129 +1,145 @@
 <!-- upgrade-list.component.html -->
 <div class="upgrade-list-container">
-  <app-upgrade-page-header></app-upgrade-page-header>
-  <main focusOnNavigation aria-label="Upgrade list" id="upgrade-list" class="upgrade-list">
-    <mat-accordion class="example-headers-align" [formGroup]="upgradeForm">
+    <app-upgrade-page-header></app-upgrade-page-header>
+    <main
+        focusOnNavigation
+        aria-label="Upgrade list"
+        id="upgrade-list"
+        class="upgrade-list"
+    >
+        <form [formGroup]="upgradeForm" (ngSubmit)="onUpgradeClick()">
+            <div class="upgrade-form-grid">
+                <div class="form-field">
+                    <mat-form-field class="dropdown">
+                        <mat-label>Devices</mat-label>
+                        <mat-select formControlName="devices" multiple>
+                            @for (device of devices; track device) {
+                                <mat-option [value]="device.uuid">
+                                    {{ device.hostname }}
+                                </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
 
-      <!-- Step 1: Select Devices -->
-      <mat-expansion-panel [expanded]="step === 0" (opened)="stepSet(0)" hideToggle>
-        <mat-expansion-panel-header>
-          <mat-panel-title>Select Devices</mat-panel-title>
-          <mat-panel-description>Choose the devices to upgrade</mat-panel-description>
-        </mat-expansion-panel-header>
-        <mat-form-field class="dropdown">
-          <mat-label>Devices</mat-label>
-          <mat-select formControlName="devices" multiple>
-            @for (device of devices; track device) {
-            <mat-option [value]="device.uuid">
-              {{ device.hostname }}
-            </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <mat-action-row>
-          <button mat-raised-button color="primary" (click)="stepNext()">Next</button>
-        </mat-action-row>
-      </mat-expansion-panel>
+                <div class="form-field">
+                    <mat-form-field class="dropdown">
+                        <mat-label>Profile</mat-label>
+                        <mat-select formControlName="profile">
+                            @for (profile of profiles; track profile) {
+                                <mat-option [value]="profile.uuid">
+                                    {{ profile.name }}
+                                </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
 
-      <!-- Step 2: Select Profile -->
-      <mat-expansion-panel [expanded]="step === 1" (opened)="stepSet(1)" hideToggle>
-        <mat-expansion-panel-header>
-          <mat-panel-title>Select a Profile</mat-panel-title>
-          <mat-panel-description>Choose the upgrade profile</mat-panel-description>
-        </mat-expansion-panel-header>
-        <mat-form-field class="dropdown">
-          <mat-label>Profile</mat-label>
-          <mat-select formControlName="profile">
-            @for (profile of profiles; track profile) {
-            <mat-option [value]="profile.uuid">
-              {{ profile.name }}
-            </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <mat-action-row>
-          <button mat-raised-button color="warn" (click)="stepPrev()">Back</button>
-          <button mat-raised-button color="primary" (click)="stepNext()">Next</button>
-        </mat-action-row>
-      </mat-expansion-panel>
+                <div class="form-field">
+                    <mat-form-field class="dropdown">
+                        <mat-label>Target Version</mat-label>
+                        <mat-select formControlName="target_version">
+                            @for (version of target_versions; track version) {
+                                <mat-option [value]="version">
+                                    {{ version }}
+                                </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
 
-      <!-- Step 3: Select Target Version -->
-      <mat-expansion-panel [expanded]="step === 2" (opened)="stepSet(2)" hideToggle>
-        <mat-expansion-panel-header>
-          <mat-panel-title>Select Target Version</mat-panel-title>
-          <mat-panel-description>Enter the target PAN-OS version</mat-panel-description>
-        </mat-expansion-panel-header>
-        <mat-form-field class="dropdown">
-          <mat-label>Target Version</mat-label>
-          <input matInput formControlName="targetVersion">
-        </mat-form-field>
-        <mat-action-row>
-          <button mat-raised-button color="warn" (click)="stepPrev()">Back</button>
-          <button mat-raised-button color="primary" (click)="stepNext()">Next</button>
-        </mat-action-row>
-      </mat-expansion-panel>
+                <div class="form-field">
+                    <mat-label>Dry Run</mat-label>
+                    <mat-radio-group formControlName="dry_run">
+                        <mat-radio-button [value]="true">True</mat-radio-button>
+                        <mat-radio-button [value]="false"
+                            >False</mat-radio-button
+                        >
+                    </mat-radio-group>
+                </div>
+            </div>
+            <h3>Selected Devices</h3>
+            <div class="selected-devices">
+                @for (
+                    deviceId of upgradeForm.get("devices")?.value;
+                    track deviceId
+                ) {
+                    <mat-card class="device-card">
+                        <mat-card-header class="table-header">
+                            <mat-card-title>{{
+                                getDeviceHostname(deviceId)
+                            }}</mat-card-title>
+                            <mat-card-subtitle
+                                >Current Version:
+                                {{
+                                    getDeviceSwVersion(deviceId)
+                                }}</mat-card-subtitle
+                            >
+                        </mat-card-header>
+                        <mat-card-content>
+                            <mat-divider></mat-divider>
+                            <h4>High Availability</h4>
+                            <ul>
+                                <li>
+                                    Enabled:
+                                    {{
+                                        getDeviceHaProperties(deviceId)
+                                            .ha_enabled
+                                    }}
+                                </li>
+                                <li>
+                                    Local State:
+                                    {{
+                                        getDeviceHaProperties(deviceId)
+                                            .local_state
+                                    }}
+                                </li>
+                                <li>
+                                    Peer State:
+                                    {{
+                                        getDeviceHaProperties(deviceId)
+                                            .peer_state
+                                    }}
+                                </li>
+                                <li>
+                                    Peer IP:
+                                    {{
+                                        getDeviceHaProperties(deviceId).peer_ip
+                                    }}
+                                </li>
+                            </ul>
+                        </mat-card-content>
+                    </mat-card>
+                }
+            </div>
+            <div class="button-container">
+                <button
+                    mat-raised-button
+                    color="primary"
+                    type="submit"
+                    [disabled]="upgradeForm.invalid"
+                >
+                    Upgrade
+                </button>
+            </div>
+        </form>
 
-      <!-- Step 4: Review and Confirm -->
-      <mat-expansion-panel [expanded]="step === 3" (opened)="stepSet(3)" hideToggle>
-        <mat-expansion-panel-header>
-          <mat-panel-title>Review and Confirm</mat-panel-title>
-          <mat-panel-description>Confirm the upgrade details</mat-panel-description>
-        </mat-expansion-panel-header>
-        <div class="confirmation-details">
-          <p><strong>Upgrade Profile:</strong> {{ getProfileName(upgradeForm.get('profile')?.value) }}</p>
-          <p><strong>Target Version:</strong> {{ upgradeForm.get('targetVersion')?.value }}</p>
-        </div>
-        <div class="selected-devices">
-          @for (deviceId of upgradeForm.get('devices')?.value; track deviceId) {
-          <mat-card class="device-card">
-            <mat-card-header class="table-header">
-              <mat-card-title>{{ getDeviceHostname(deviceId) }}</mat-card-title>
-              <mat-card-subtitle>Current Version: {{ getDeviceSwVersion(deviceId) }}</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-              <mat-divider></mat-divider>
-              <h4>High Availability</h4>
-              <ul>
-                <li>Enabled: {{getDeviceHaProperties(deviceId).ha_enabled }}</li>
-                <li>Local State: {{getDeviceHaProperties(deviceId).local_state }}</li>
-                <li>Peer State: {{getDeviceHaProperties(deviceId).peer_state }}</li>
-                <li>Peer IP: {{getDeviceHaProperties(deviceId).peer_ip }}</li>
-              </ul>
-            </mat-card-content>
-          </mat-card>
-          }
-        </div>
-        <mat-action-row>
-          <button mat-raised-button color="warn" (click)="stepPrev()">Back</button>
-          <button mat-raised-button color="primary" (click)="onUpgradeClick()">Upgrade</button>
-        </mat-action-row>
-      </mat-expansion-panel>
+        @if (jobIds.length > 0) {
+            <div class="upgrade-progress">
+                <h3>Upgrade Progress</h3>
+                <div class="progress-items">
+                    @for (jobId of jobIds; track jobId) {
+                        <div class="progress-item">
+                            <p>Job ID: {{ jobId }}</p>
+                            <mat-progress-bar
+                                mode="determinate"
+                            ></mat-progress-bar>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </main>
 
-      <!-- Step 5: Upgrade Progress -->
-      <mat-expansion-panel [expanded]="step === 4" (opened)="stepSet(4)" hideToggle>
-        <mat-expansion-panel-header>
-          <mat-panel-title>Upgrade Progress</mat-panel-title>
-          <mat-panel-description>Track the upgrade progress</mat-panel-description>
-        </mat-expansion-panel-header>
-        <mat-accordion>
-          @for (jobId of jobIds; track jobId) {
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                Job ID: {{ jobId }}
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-            <mat-progress-bar mode="determinate"></mat-progress-bar>
-          </mat-expansion-panel>
-          }
-        </mat-accordion>
-        <mat-action-row>
-          <button mat-raised-button color="primary" (click)="resetForm()">New Upgrade</button>
-        </mat-action-row>
-      </mat-expansion-panel>
-
-    </mat-accordion>
-  </main>
-
-  <app-footer></app-footer>
+    <app-footer></app-footer>
 </div>
