@@ -30,7 +30,7 @@ from django.core.exceptions import ObjectDoesNotExist  # noqa: E402
 
 # Create a logger instance
 logger = logging.getLogger("pan-os-inventory")
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 # Create a Logstash handler
 logstash_handler = AsynchronousLogstashHandler(
