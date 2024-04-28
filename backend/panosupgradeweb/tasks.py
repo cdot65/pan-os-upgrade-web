@@ -9,6 +9,7 @@ import traceback
 from celery import shared_task
 from django.contrib.auth import get_user_model
 from panosupgradeweb.models import Job
+import json
 
 # import your inventory sync script
 from panosupgradeweb.scripts import (
@@ -115,10 +116,11 @@ def execute_refresh_device_task(
 @shared_task(bind=True)
 def execute_upgrade_device_task(
     self,
-    device_uuid,
-    author_id,
-    profile_uuid,
-    target_version,
+    author_id: int,
+    device_uuid: str,
+    dry_run: bool,
+    profile_uuid: str,
+    target_version: str,
 ):
     logging.debug(f"Device upgrade task started for device: {device_uuid}")
     author = User.objects.get(id=author_id)
@@ -133,14 +135,23 @@ def execute_upgrade_device_task(
     logging.debug(f"Job ID: {job.pk}")
 
     try:
+        # Update the job status to indicate the task has started
+        json_data = {
+            "status": "Starting PAN-OS upgrade task, change refresh rate below to view logs live..."
+        }
+        job.json_data = json.dumps(json_data)
+
+        # Run the PAN-OS upgrade script
         json_output = run_panos_upgrade(
             author_id=author_id,
             device_uuid=device_uuid,
-            dry_run=True,
+            dry_run=dry_run,
             job_id=job.task_id,
             profile_uuid=profile_uuid,
             target_version=target_version,
         )
+
+        # Update the job status with the output from the script
         job.json_data = json_output
     except Exception as e:
         job.json_data = f"Job ID: {job.pk}\nError: {e}"
