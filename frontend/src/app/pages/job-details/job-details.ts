@@ -44,7 +44,6 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
     logPath: string = "";
     logs: any[] = [];
     logSubscription: Subscription | undefined;
-    parsedJsonData: any;
     pollingEnabled = true;
     pollingIntervalOptions = [0, 1000, 3000, 5000, 10000, 30000];
     selectedPollingInterval = 0;
@@ -66,7 +65,6 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
                 (item: Job) => {
                     this.jobItem = item;
                     this.logPath = item.job_type.replace(/_/g, "-");
-                    this.parsedJsonData = JSON.parse(item.json_data);
 
                     // Move the calls to fetchLogsOnce and fetchLogsSubscription
                     // inside the subscription callback
