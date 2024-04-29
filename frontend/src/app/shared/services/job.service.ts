@@ -55,6 +55,23 @@ export class JobService {
             );
     }
 
+    getJobStatus(taskId: string): Observable<string> {
+        const authToken = localStorage.getItem("auth_token");
+        const headers = new HttpHeaders().set(
+            "Authorization",
+            `Token ${authToken}`,
+        );
+        return this.http
+            .get<Job>(`${this.apiUrl}/api/v1/jobs/${taskId}/`, { headers })
+            .pipe(
+                map((job) => job.job_status),
+                catchError((error) => {
+                    console.error("Error fetching job status:", error);
+                    return of("errored");
+                }),
+            );
+    }
+
     deleteJob(uuid: string): Observable<any> {
         const authToken = localStorage.getItem("auth_token");
         const headers = new HttpHeaders().set(
