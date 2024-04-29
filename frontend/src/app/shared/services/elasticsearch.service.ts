@@ -31,6 +31,7 @@ export class ElasticsearchService {
                 {
                     "@timestamp": {
                         order: "asc",
+                        unmapped_type: "long",
                     },
                 },
             ],
@@ -61,6 +62,7 @@ export class ElasticsearchService {
                 {
                     "@timestamp": {
                         order: "asc",
+                        unmapped_type: "long",
                     },
                 },
             ],
@@ -89,6 +91,7 @@ export class ElasticsearchService {
                 {
                     "@timestamp": {
                         order: "asc",
+                        unmapped_type: "long",
                     },
                 },
             ],
