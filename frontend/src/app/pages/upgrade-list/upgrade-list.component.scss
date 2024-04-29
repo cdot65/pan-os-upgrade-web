@@ -1,71 +1,122 @@
+// src/app/pages/upgrade-list/upgrade-list.component.scss
+
 .upgrade-list-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
+}
 
-  .upgrade-list {
-    flex: 1;
-    overflow: auto;
-    padding: 16px;
+.upgrade-list {
+    width: 97%;
+    padding: 25px;
 
-    .selected-devices {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
+    form {
+        padding: 20px;
+    }
 
-      .table-header {
+    .table-header {
         display: flex;
         justify-content: space-between;
-        align-items: left;
-        padding-top: 10px;
+        align-items: center;
+        margin-bottom: 20px;
 
-        .th {
-          margin: 0;
+        h2 {
+            margin: 0;
         }
 
-        .clear-all {
-          color: var(--color-primary);
-          cursor: pointer;
+        button {
+            mat-icon {
+                margin-right: 5px;
+            }
         }
-      }
+
+        .refresh-header {
+            display: flex;
+            align-items: center;
+        }
+    }
+
+    .refresh-progress {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    .refresh-header {
+        outline: none;
+        // padding: 24px 8px;
+        font-size: 20px;
+        text-align: center;
+        color: accent;
+    }
+
+    .refresh-error {
+        outline: none;
+        // padding: 24px 8px;
+        font-size: 20px;
+        text-align: center;
+        color: red;
+    }
+
+    .selected-devices {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: left;
+            padding-top: 10px;
+
+            .th {
+                margin: 0;
+            }
+
+            .clear-all {
+                color: var(--color-primary);
+                cursor: pointer;
+            }
+        }
     }
 
     .device-card {
-      width: 300px;
+        width: 300px;
     }
 
     .confirmation-details {
-      margin-top: 16px;
+        margin-top: 16px;
     }
 
     .dropdown {
-      width: 100%;
-      margin-top: 16px;
-    }
-  }
-
-  .upgrade-form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-
-    .form-field {
-      mat-form-field {
         width: 100%;
-      }
+        margin-top: 16px;
     }
-  }
 
+    .upgrade-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
 
-  button {
-    margin-top: 16px;
-  }
-}
+        .form-field {
+            mat-form-field {
+                width: 100%;
+            }
+        }
+    }
 
-.mat-expansion-panel {
-  margin-top: 16px;
+    .button-container {
+        margin-top: 20px;
+        display: flex;
+        justify-content: flex-end;
+
+        button {
+            margin-left: 10px;
+        }
+    }
 }
 
 .mat-progress-bar {
-  margin-top: 16px;
+    margin-top: 16px;
 }
