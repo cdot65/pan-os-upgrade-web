@@ -1,299 +1,469 @@
 <!-- src/app/pages/profile-details/profile-details.html -->
 <div class="profile-details-container">
+    <app-profile-page-header></app-profile-page-header>
+    <main
+        focusOnNavigation
+        aria-label="Profile Details"
+        id="profile-details"
+        class="profile-details"
+    >
+        <form
+            [formGroup]="updateProfileForm"
+            (ngSubmit)="updateProfile()"
+            class="mat-elevation-z2"
+        >
+            <div class="profile-details-grid">
+                <div>
+                    <!-- Heading for the profile section -->
+                    <h3>Profile</h3>
 
-  <app-profile-page-header></app-profile-page-header>
-  <main focusOnNavigation aria-label="Profile Details" id="profile-details" class="profile-details">
-    <form [formGroup]="updateProfileForm" (ngSubmit)="updateProfile()" class="mat-elevation-z2">
-      <div class="profile-details-grid">
+                    <!-- Form field for entering the profile name -->
+                    <div class="form-field">
+                        <mat-form-field>
+                            <mat-label>Profile Name</mat-label>
+                            <!-- Input field for the profile name, bound to the 'name' form control -->
+                            <!-- The 'required' attribute ensures that the field is mandatory -->
+                            <input
+                                matInput
+                                id="name"
+                                formControlName="name"
+                                required
+                            />
+                        </mat-form-field>
+                    </div>
 
-        <div>
-          <!-- Heading for the profile section -->
-          <h3>Profile</h3>
+                    <!-- Form field for entering the profile description -->
+                    <div class="form-field">
+                        <mat-form-field>
+                            <mat-label>Description</mat-label>
+                            <!-- Input field for the profile description, bound to the 'description' form control -->
+                            <input
+                                matInput
+                                id="description"
+                                formControlName="description"
+                            />
+                        </mat-form-field>
+                    </div>
+                </div>
 
-          <!-- Form field for entering the profile name -->
-          <div class="form-field">
-            <mat-form-field>
-              <mat-label>Profile Name</mat-label>
-              <!-- Input field for the profile name, bound to the 'name' form control -->
-              <!-- The 'required' attribute ensures that the field is mandatory -->
-              <input matInput id="name" formControlName="name" required>
-            </mat-form-field>
-          </div>
+                <!-- Form group for authentication-related fields -->
+                <div formGroupName="authentication">
+                    <!-- Heading for the authentication section -->
+                    <h3>Authentication</h3>
 
-          <!-- Form field for entering the profile description -->
-          <div class="form-field">
-            <mat-form-field>
-              <mat-label>Description</mat-label>
-              <!-- Input field for the profile description, bound to the 'description' form control -->
-              <input matInput id="description" formControlName="description">
-            </mat-form-field>
-          </div>
-        </div>
+                    <!-- Container for the form fields -->
+                    <div class="form-field">
+                        <!-- Form field for entering the PAN username -->
+                        <mat-form-field>
+                            <mat-label>PAN Username</mat-label>
+                            <!-- Input field for the PAN username, bound to the 'pan_username' form control -->
+                            <!-- The 'autocomplete' attribute is set to "username" for browser autofill support -->
+                            <!-- The 'required' attribute ensures that the field is mandatory -->
+                            <input
+                                matInput
+                                id="pan_username"
+                                autocomplete="username"
+                                formControlName="pan_username"
+                                required
+                            />
+                        </mat-form-field>
 
-        <!-- Form group for authentication-related fields -->
-        <div formGroupName="authentication">
-          <!-- Heading for the authentication section -->
-          <h3>Authentication</h3>
+                        <!-- Form field for entering the PAN password -->
+                        <mat-form-field>
+                            <mat-label>PAN Password</mat-label>
+                            <!-- Input field for the PAN password, bound to the 'pan_password' form control -->
+                            <!-- The 'type' attribute is set to "password" to mask the input -->
+                            <!-- The 'autocomplete' attribute is set to "current-password" for browser autofill support -->
+                            <!-- The 'required' attribute ensures that the field is mandatory -->
+                            <input
+                                matInput
+                                id="pan_password"
+                                type="password"
+                                autocomplete="current-password"
+                                formControlName="pan_password"
+                                required
+                            />
+                        </mat-form-field>
+                    </div>
+                </div>
 
-          <!-- Container for the form fields -->
-          <div class="form-field">
-            <!-- Form field for entering the PAN username -->
-            <mat-form-field>
-              <mat-label>PAN Username</mat-label>
-              <!-- Input field for the PAN username, bound to the 'pan_username' form control -->
-              <!-- The 'autocomplete' attribute is set to "username" for browser autofill support -->
-              <!-- The 'required' attribute ensures that the field is mandatory -->
-              <input matInput id="pan_username" autocomplete="username" formControlName="pan_username" required>
-            </mat-form-field>
+                <!-- Form group for the readiness checks section -->
+                <div formGroupName="readiness_checks">
+                    <!-- Heading for the readiness checks section -->
+                    <h3>Readiness Checks</h3>
 
-            <!-- Form field for entering the PAN password -->
-            <mat-form-field>
-              <mat-label>PAN Password</mat-label>
-              <!-- Input field for the PAN password, bound to the 'pan_password' form control -->
-              <!-- The 'type' attribute is set to "password" to mask the input -->
-              <!-- The 'autocomplete' attribute is set to "current-password" for browser autofill support -->
-              <!-- The 'required' attribute ensures that the field is mandatory -->
-              <input matInput id="pan_password" type="password" autocomplete="current-password"
-                formControlName="pan_password" required>
-            </mat-form-field>
-          </div>
-        </div>
+                    <div class="form-field">
+                        <div formGroupName="checks">
+                            <!-- Checkbox for checking if active support is available -->
+                            <mat-checkbox formControlName="active_support_check"
+                                >Check if active support is
+                                available</mat-checkbox
+                            >
 
-        <!-- Form group for the readiness checks section -->
-        <div formGroupName="readiness_checks">
-          <!-- Heading for the readiness checks section -->
-          <h3>Readiness Checks</h3>
+                            <!-- Checkbox for checking if a given ARP entry is available in the ARP table -->
+                            <mat-checkbox
+                                formControlName="arp_entry_exist_check"
+                                >Check if a given ARP entry is available in the
+                                ARP table</mat-checkbox
+                            >
 
-          <div class="form-field">
-            <div formGroupName="checks">
-              <!-- Checkbox for checking if active support is available -->
-              <mat-checkbox formControlName="active_support_check">Check if active support is available</mat-checkbox>
+                            <!-- Checkbox for checking if there are pending changes on the device -->
+                            <mat-checkbox
+                                formControlName="candidate_config_check"
+                                >Check if there are pending changes on device
+                            </mat-checkbox>
 
-              <!-- Checkbox for checking if a given ARP entry is available in the ARP table -->
-              <mat-checkbox formControlName="arp_entry_exist_check">Check if a given ARP entry is available in the ARP
-                table</mat-checkbox>
+                            <!-- Checkbox for checking if the certificates' keys meet minimum size requirements -->
+                            <mat-checkbox
+                                formControlName="certificates_requirements_check"
+                                >Check if the certificates' keys meet minimum
+                                size requirements</mat-checkbox
+                            >
 
-              <!-- Checkbox for checking if there are pending changes on the device -->
-              <mat-checkbox formControlName="candidate_config_check">Check if there are pending changes on device
-              </mat-checkbox>
+                            <!-- Checkbox for checking if running the latest content version -->
+                            <mat-checkbox
+                                formControlName="content_version_check"
+                                >Running Latest Content Version</mat-checkbox
+                            >
 
-              <!-- Checkbox for checking if the certificates' keys meet minimum size requirements -->
-              <mat-checkbox formControlName="certificates_requirements_check">Check if the certificates' keys meet
-                minimum size requirements</mat-checkbox>
+                            <!-- Checkbox for checking if any Dynamic Update job is scheduled to run within the specified time window -->
+                            <mat-checkbox
+                                formControlName="dynamic_updates_check"
+                                >Check if any Dynamic Update job is scheduled to
+                                run within the specified time
+                                window</mat-checkbox
+                            >
 
-              <!-- Checkbox for checking if running the latest content version -->
-              <mat-checkbox formControlName="content_version_check">Running Latest Content Version</mat-checkbox>
+                            <!-- Checkbox for checking if there are no expired licenses -->
+                            <mat-checkbox
+                                formControlName="expired_licenses_check"
+                                >No Expired Licenses</mat-checkbox
+                            >
 
-              <!-- Checkbox for checking if any Dynamic Update job is scheduled to run within the specified time window -->
-              <mat-checkbox formControlName="dynamic_updates_check">Check if any Dynamic Update job is scheduled to run
-                within the specified time window</mat-checkbox>
+                            <!-- Checkbox for checking if there is enough space on the `/opt/panrepo` volume for PAN-OS image -->
+                            <mat-checkbox
+                                formControlName="free_disk_space_check"
+                                >Check if there is enough space on the
+                                `/opt/panrepo` volume for PAN-OS
+                                image</mat-checkbox
+                            >
 
-              <!-- Checkbox for checking if there are no expired licenses -->
-              <mat-checkbox formControlName="expired_licenses_check">No Expired Licenses</mat-checkbox>
+                            <!-- Checkbox for checking the HA pair status from the perspective of the current device -->
+                            <mat-checkbox formControlName="ha_check"
+                                >Check HA pair status from the perspective of
+                                the current device
+                            </mat-checkbox>
 
-              <!-- Checkbox for checking if there is enough space on the `/opt/panrepo` volume for PAN-OS image -->
-              <mat-checkbox formControlName="free_disk_space_check">Check if there is enough space on the `/opt/panrepo`
-                volume for PAN-OS image</mat-checkbox>
+                            <!-- Checkbox for checking if a given IPsec tunnel is in active state -->
+                            <mat-checkbox
+                                formControlName="ip_sec_tunnel_status_check"
+                                >Check if a given IPsec tunnel is in active
+                                state</mat-checkbox
+                            >
 
-              <!-- Checkbox for checking the HA pair status from the perspective of the current device -->
-              <mat-checkbox formControlName="ha_check">Check HA pair status from the perspective of the current device
-              </mat-checkbox>
+                            <!-- Checkbox for checking for any job with status different than FIN -->
+                            <mat-checkbox formControlName="jobs_check"
+                                >Check for any job with status different than
+                                FIN</mat-checkbox
+                            >
 
-              <!-- Checkbox for checking if a given IPsec tunnel is in active state -->
-              <mat-checkbox formControlName="ip_sec_tunnel_status_check">Check if a given IPsec tunnel is in active
-                state</mat-checkbox>
+                            <!-- Checkbox for checking if NTP is synchronized -->
+                            <mat-checkbox formControlName="ntp_sync_check"
+                                >Check if NTP is synchronized</mat-checkbox
+                            >
 
-              <!-- Checkbox for checking for any job with status different than FIN -->
-              <mat-checkbox formControlName="jobs_check">Check for any job with status different than FIN</mat-checkbox>
+                            <!-- Checkbox for checking connectivity with the Panorama appliance -->
+                            <mat-checkbox formControlName="panorama_check"
+                                >Check connectivity with the Panorama appliance
+                            </mat-checkbox>
 
-              <!-- Checkbox for checking if NTP is synchronized -->
-              <mat-checkbox formControlName="ntp_sync_check">Check if NTP is synchronized</mat-checkbox>
+                            <!-- Checkbox for checking if the clock is synchronized between dataplane and management plane -->
+                            <mat-checkbox
+                                formControlName="planes_clock_sync_check"
+                                >Check if the clock is synchronized between
+                                dataplane and management plane</mat-checkbox
+                            >
 
-              <!-- Checkbox for checking connectivity with the Panorama appliance -->
-              <mat-checkbox formControlName="panorama_check">Check connectivity with the Panorama appliance
-              </mat-checkbox>
+                            <!-- Checkbox for checking if a critical session is present in the sessions table -->
+                            <mat-checkbox formControlName="session_exist_check"
+                                >Check if a critical session is present in the
+                                sessions table</mat-checkbox
+                            >
+                        </div>
 
-              <!-- Checkbox for checking if the clock is synchronized between dataplane and management plane -->
-              <mat-checkbox formControlName="planes_clock_sync_check">Check if the clock is synchronized between
-                dataplane and management plane</mat-checkbox>
+                        <!-- Form field for entering the readiness checks location -->
+                        <mat-form-field>
+                            <mat-label>Readiness Checks Location</mat-label>
+                            <input
+                                matInput
+                                id="readiness_checks_location"
+                                formControlName="readiness_checks_location"
+                            />
+                        </mat-form-field>
+                    </div>
+                </div>
 
-              <!-- Checkbox for checking if a critical session is present in the sessions table -->
-              <mat-checkbox formControlName="session_exist_check">Check if a critical session is present in the sessions
-                table</mat-checkbox>
+                <!-- Form group for the snapshots section -->
+                <div formGroupName="snapshots">
+                    <!-- Heading for the snapshots section -->
+                    <h3>Snapshots</h3>
+
+                    <div class="form-field">
+                        <!-- Form field for entering the snapshots location -->
+                        <mat-form-field>
+                            <mat-label>Snapshots Location</mat-label>
+                            <input
+                                matInput
+                                id="snapshots_location"
+                                formControlName="snapshots_location"
+                            />
+                        </mat-form-field>
+
+                        <!-- Form field for entering the maximum number of snapshot tries -->
+                        <mat-form-field>
+                            <mat-label>Snapshots maximum tries</mat-label>
+                            <input
+                                matInput
+                                id="max_snapshot_tries"
+                                type="number"
+                                formControlName="max_snapshot_tries"
+                            />
+                        </mat-form-field>
+
+                        <!-- Form field for entering the snapshot retry interval in seconds -->
+                        <mat-form-field>
+                            <mat-label
+                                >Snapshots retry interval (seconds)</mat-label
+                            >
+                            <input
+                                matInput
+                                id="snapshot_retry_interval"
+                                type="number"
+                                formControlName="snapshot_retry_interval"
+                            />
+                        </mat-form-field>
+
+                        <!-- Form group for the snapshot state options -->
+                        <div formGroupName="state">
+                            <!-- Checkbox for enabling/disabling the snapshot of the ARP table -->
+                            <mat-checkbox formControlName="arp_table_snapshot"
+                                >Snapshot of the ARP Table</mat-checkbox
+                            >
+
+                            <!-- Checkbox for enabling/disabling the snapshot of the content version -->
+                            <mat-checkbox
+                                formControlName="content_version_snapshot"
+                                >Snapshot of the Content Version</mat-checkbox
+                            >
+
+                            <!-- Checkbox for enabling/disabling the snapshot of the IPsec tunnels -->
+                            <mat-checkbox
+                                formControlName="ip_sec_tunnels_snapshot"
+                                >Snapshot of the IPsec Tunnels</mat-checkbox
+                            >
+
+                            <!-- Checkbox for enabling/disabling the snapshot of the license information -->
+                            <mat-checkbox formControlName="license_snapshot"
+                                >Snapshot of the License
+                                Information</mat-checkbox
+                            >
+
+                            <!-- Checkbox for enabling/disabling the snapshot of the network interfaces -->
+                            <mat-checkbox formControlName="nics_snapshot"
+                                >Snapshot of the Network
+                                Interfaces</mat-checkbox
+                            >
+
+                            <!-- Checkbox for enabling/disabling the snapshot of the routing table -->
+                            <mat-checkbox formControlName="routes_snapshot"
+                                >Snapshot of the Routing Table</mat-checkbox
+                            >
+
+                            <!-- Checkbox for enabling/disabling the snapshot of the session statistics -->
+                            <mat-checkbox
+                                formControlName="session_stats_snapshot"
+                                >Snapshot of the Session
+                                Statistics</mat-checkbox
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form group for download-related settings -->
+                <div formGroupName="download">
+                    <!-- Heading for the download section -->
+                    <h3>Download</h3>
+
+                    <div class="form-field">
+                        <!-- Form field for setting the maximum download tries -->
+                        <mat-form-field>
+                            <mat-label>PAN-OS maximum download tries</mat-label>
+                            <!-- Input field for the maximum download tries, bound to the 'max_download_tries' form control -->
+                            <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
+                            <input
+                                matInput
+                                id="max_download_tries"
+                                type="number"
+                                formControlName="max_download_tries"
+                            />
+                        </mat-form-field>
+
+                        <!-- Form field for setting the download retry interval -->
+                        <mat-form-field>
+                            <mat-label
+                                >PAN-OS download retry interval
+                                (seconds)</mat-label
+                            >
+                            <!-- Input field for the download retry interval, bound to the 'download_retry_interval' form control -->
+                            <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
+                            <input
+                                matInput
+                                id="download_retry_interval"
+                                type="number"
+                                formControlName="download_retry_interval"
+                            />
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Form group for install-related settings -->
+                <div formGroupName="install">
+                    <!-- Heading for the install section -->
+                    <h3>Install</h3>
+
+                    <div class="form-field">
+                        <!-- Form field for setting the maximum install attempts -->
+                        <mat-form-field>
+                            <mat-label
+                                >PAN-OS maximum install attempts</mat-label
+                            >
+                            <!-- Input field for the maximum install attempts -->
+                            <!-- The 'type' attribute is set to 'number' for numeric input -->
+                            <!-- The 'formControlName' binds the input to the 'max_install_attempts' form control -->
+                            <input
+                                matInput
+                                id="max_install_attempts"
+                                type="number"
+                                formControlName="max_install_attempts"
+                            />
+                        </mat-form-field>
+
+                        <!-- Form field for setting the install retry interval -->
+                        <mat-form-field>
+                            <mat-label
+                                >PAN-OS install retry interval
+                                (seconds)</mat-label
+                            >
+                            <!-- Input field for the install retry interval -->
+                            <!-- The 'type' attribute is set to 'number' for numeric input -->
+                            <!-- The 'formControlName' binds the input to the 'install_retry_interval' form control -->
+                            <input
+                                matInput
+                                id="install_retry_interval"
+                                type="number"
+                                formControlName="install_retry_interval"
+                            />
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Form group for reboot-related settings -->
+                <div formGroupName="reboot">
+                    <!-- Heading for the reboot section -->
+                    <h3>Reboot</h3>
+
+                    <div class="form-field">
+                        <!-- Form field for setting the maximum number of reboot tries -->
+                        <mat-form-field>
+                            <mat-label>Device maximum reboot tries</mat-label>
+                            <!-- Input field for the maximum reboot tries, bound to the 'max_reboot_tries' form control -->
+                            <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
+                            <input
+                                matInput
+                                id="max_reboot_tries"
+                                type="number"
+                                formControlName="max_reboot_tries"
+                            />
+                        </mat-form-field>
+
+                        <!-- Form field for setting the reboot retry interval -->
+                        <mat-form-field>
+                            <mat-label
+                                >Device reboot retry interval
+                                (seconds)</mat-label
+                            >
+                            <!-- Input field for the reboot retry interval, bound to the 'reboot_retry_interval' form control -->
+                            <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
+                            <input
+                                matInput
+                                id="reboot_retry_interval"
+                                type="number"
+                                formControlName="reboot_retry_interval"
+                            />
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- form field for the timeout inputs. -->
+                <div formGroupName="timeout_settings">
+                    <!-- Heading for the timeout settings section -->
+                    <h3>Timeout Settings</h3>
+
+                    <div class="form-field">
+                        <!-- Form field for setting the command timeout -->
+                        <mat-form-field>
+                            <mat-label>Command timeout (seconds)</mat-label>
+                            <!-- Input field for the command timeout value -->
+                            <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
+                            <!-- The 'formControlName' attribute binds the input to the 'command_timeout' form control -->
+                            <input
+                                matInput
+                                id="command_timeout"
+                                type="number"
+                                formControlName="command_timeout"
+                            />
+                        </mat-form-field>
+
+                        <!-- Form field for setting the connection timeout -->
+                        <mat-form-field>
+                            <mat-label>Connection timeout (seconds)</mat-label>
+                            <!-- Input field for the connection timeout value -->
+                            <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
+                            <!-- The 'formControlName' attribute binds the input to the 'connection_timeout' form control -->
+                            <input
+                                matInput
+                                id="connection_timeout"
+                                type="number"
+                                formControlName="connection_timeout"
+                            />
+                        </mat-form-field>
+                    </div>
+                </div>
             </div>
 
-            <!-- Form field for entering the readiness checks location -->
-            <mat-form-field>
-              <mat-label>Readiness Checks Location</mat-label>
-              <input matInput id="readiness_checks_location" formControlName="readiness_checks_location">
-            </mat-form-field>
-          </div>
-        </div>
+            <!-- container for the Update and Cancel buttons. -->
+            <div class="button-container">
+                <!-- Cancel button -->
+                <button
+                    mat-raised-button
+                    color="warn"
+                    type="button"
+                    (click)="onCancel()"
+                >
+                    Cancel
+                </button>
 
-        <!-- Form group for the snapshots section -->
-        <div formGroupName="snapshots">
-          <!-- Heading for the snapshots section -->
-          <h3>Snapshots</h3>
-
-          <div class="form-field">
-            <!-- Form field for entering the snapshots location -->
-            <mat-form-field>
-              <mat-label>Snapshots Location</mat-label>
-              <input matInput id="snapshots_location" formControlName="snapshots_location">
-            </mat-form-field>
-
-            <!-- Form field for entering the maximum number of snapshot tries -->
-            <mat-form-field>
-              <mat-label>Snapshots maximum tries</mat-label>
-              <input matInput id="max_snapshot_tries" type="number" formControlName="max_snapshot_tries">
-            </mat-form-field>
-
-            <!-- Form field for entering the snapshot retry interval in seconds -->
-            <mat-form-field>
-              <mat-label>Snapshots retry interval (seconds)</mat-label>
-              <input matInput id="snapshot_retry_interval" type="number" formControlName="snapshot_retry_interval">
-            </mat-form-field>
-
-            <!-- Form group for the snapshot state options -->
-            <div formGroupName="state">
-              <!-- Checkbox for enabling/disabling the snapshot of the ARP table -->
-              <mat-checkbox formControlName="arp_table_snapshot">Snapshot of the ARP Table</mat-checkbox>
-
-              <!-- Checkbox for enabling/disabling the snapshot of the content version -->
-              <mat-checkbox formControlName="content_version_snapshot">Snapshot of the Content Version</mat-checkbox>
-
-              <!-- Checkbox for enabling/disabling the snapshot of the IPsec tunnels -->
-              <mat-checkbox formControlName="ip_sec_tunnels_snapshot">Snapshot of the IPsec Tunnels</mat-checkbox>
-
-              <!-- Checkbox for enabling/disabling the snapshot of the license information -->
-              <mat-checkbox formControlName="license_snapshot">Snapshot of the License Information</mat-checkbox>
-
-              <!-- Checkbox for enabling/disabling the snapshot of the network interfaces -->
-              <mat-checkbox formControlName="nics_snapshot">Snapshot of the Network Interfaces</mat-checkbox>
-
-              <!-- Checkbox for enabling/disabling the snapshot of the routing table -->
-              <mat-checkbox formControlName="routes_snapshot">Snapshot of the Routing Table</mat-checkbox>
-
-              <!-- Checkbox for enabling/disabling the snapshot of the session statistics -->
-              <mat-checkbox formControlName="session_stats_snapshot">Snapshot of the Session Statistics</mat-checkbox>
+                <!-- Update button -->
+                <button
+                    mat-raised-button
+                    color="primary"
+                    type="submit"
+                    [disabled]="updateProfileForm.invalid"
+                >
+                    Update
+                </button>
             </div>
-          </div>
-        </div>
-
-        <!-- Form group for download-related settings -->
-        <div formGroupName="download">
-          <!-- Heading for the download section -->
-          <h3>Download</h3>
-
-          <div class="form-field">
-            <!-- Form field for setting the maximum download tries -->
-            <mat-form-field>
-              <mat-label>PAN-OS maximum download tries</mat-label>
-              <!-- Input field for the maximum download tries, bound to the 'max_download_tries' form control -->
-              <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
-              <input matInput id="max_download_tries" type="number" formControlName="max_download_tries">
-            </mat-form-field>
-
-            <!-- Form field for setting the download retry interval -->
-            <mat-form-field>
-              <mat-label>PAN-OS download retry interval (seconds)</mat-label>
-              <!-- Input field for the download retry interval, bound to the 'download_retry_interval' form control -->
-              <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
-              <input matInput id="download_retry_interval" type="number" formControlName="download_retry_interval">
-            </mat-form-field>
-          </div>
-        </div>
-
-        <!-- Form group for install-related settings -->
-        <div formGroupName="install">
-          <!-- Heading for the install section -->
-          <h3>Install</h3>
-
-          <div class="form-field">
-            <!-- Form field for setting the maximum install attempts -->
-            <mat-form-field>
-              <mat-label>PAN-OS maximum install attempts</mat-label>
-              <!-- Input field for the maximum install attempts -->
-              <!-- The 'type' attribute is set to 'number' for numeric input -->
-              <!-- The 'formControlName' binds the input to the 'max_install_attempts' form control -->
-              <input matInput id="max_install_attempts" type="number" formControlName="max_install_attempts">
-            </mat-form-field>
-
-            <!-- Form field for setting the install retry interval -->
-            <mat-form-field>
-              <mat-label>PAN-OS install retry interval (seconds)</mat-label>
-              <!-- Input field for the install retry interval -->
-              <!-- The 'type' attribute is set to 'number' for numeric input -->
-              <!-- The 'formControlName' binds the input to the 'install_retry_interval' form control -->
-              <input matInput id="install_retry_interval" type="number" formControlName="install_retry_interval">
-            </mat-form-field>
-          </div>
-        </div>
-
-        <!-- Form group for reboot-related settings -->
-        <div formGroupName="reboot">
-          <!-- Heading for the reboot section -->
-          <h3>Reboot</h3>
-
-          <div class="form-field">
-            <!-- Form field for setting the maximum number of reboot tries -->
-            <mat-form-field>
-              <mat-label>Device maximum reboot tries</mat-label>
-              <!-- Input field for the maximum reboot tries, bound to the 'max_reboot_tries' form control -->
-              <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
-              <input matInput id="max_reboot_tries" type="number" formControlName="max_reboot_tries">
-            </mat-form-field>
-
-            <!-- Form field for setting the reboot retry interval -->
-            <mat-form-field>
-              <mat-label>Device reboot retry interval (seconds)</mat-label>
-              <!-- Input field for the reboot retry interval, bound to the 'reboot_retry_interval' form control -->
-              <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
-              <input matInput id="reboot_retry_interval" type="number" formControlName="reboot_retry_interval">
-            </mat-form-field>
-          </div>
-        </div>
-
-        <!-- form field for the timeout inputs. -->
-        <div formGroupName="timeout_settings">
-          <!-- Heading for the timeout settings section -->
-          <h3>Timeout Settings</h3>
-
-          <div class="form-field">
-            <!-- Form field for setting the command timeout -->
-            <mat-form-field>
-              <mat-label>Command timeout (seconds)</mat-label>
-              <!-- Input field for the command timeout value -->
-              <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
-              <!-- The 'formControlName' attribute binds the input to the 'command_timeout' form control -->
-              <input matInput id="command_timeout" type="number" formControlName="command_timeout">
-            </mat-form-field>
-
-            <!-- Form field for setting the connection timeout -->
-            <mat-form-field>
-              <mat-label>Connection timeout (seconds)</mat-label>
-              <!-- Input field for the connection timeout value -->
-              <!-- The 'type' attribute is set to 'number' to restrict input to numeric values -->
-              <!-- The 'formControlName' attribute binds the input to the 'connection_timeout' form control -->
-              <input matInput id="connection_timeout" type="number" formControlName="connection_timeout">
-            </mat-form-field>
-          </div>
-        </div>
-      </div>
-
-      <!-- container for the Update and Cancel buttons. -->
-      <div class="button-container">
-        <!-- Cancel button -->
-        <button mat-raised-button color="warn" type="button" (click)="onCancel()">
-          Cancel
-        </button>
-
-        <!-- Update button -->
-        <button mat-raised-button color="primary" type="submit" [disabled]="updateProfileForm.invalid">
-          Update
-        </button>
-      </div>
-    </form>
-  </main>
-  <app-footer></app-footer>
+        </form>
+    </main>
+    <app-footer></app-footer>
 </div>
