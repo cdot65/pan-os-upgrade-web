@@ -7,6 +7,10 @@ import {
     ReactiveFormsModule,
     Validators,
 } from "@angular/forms";
+import {
+    UpgradeJob,
+    UpgradeResponse,
+} from "../../shared/interfaces/upgrade-response.interface";
 
 import { ComponentPageTitle } from "../page-title/page-title";
 import { Device } from "../../shared/interfaces/device.interface";
@@ -28,7 +32,6 @@ import { Router } from "@angular/router";
 import { Subject } from "rxjs";
 import { UpgradeForm } from "../../shared/interfaces/upgrade-form.interface";
 import { UpgradePageHeader } from "../upgrade-page-header/upgrade-page-header";
-import { UpgradeResponse } from "../../shared/interfaces/upgrade-response.interface";
 import { UpgradeService } from "../../shared/services/upgrade.service";
 import { takeUntil } from "rxjs/operators";
 
@@ -58,9 +61,9 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
     devices: Device[] = [];
     profiles: Profile[] = [];
     upgradeForm: FormGroup;
-    jobIds: string[] = [];
     step = 0;
     target_versions: string[] = ["10.1.3", "10.2.9-h1", "11.1.1-h1"];
+    upgradeJobs: UpgradeJob[] = [];
     private destroy$ = new Subject<void>();
 
     constructor(
@@ -199,8 +202,8 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
                 .pipe(takeUntil(this.destroy$))
                 .subscribe(
                     (response: UpgradeResponse | null) => {
-                        if (response && response.job_ids) {
-                            this.jobIds = response.job_ids;
+                        if (response && response.upgrade_jobs) {
+                            this.upgradeJobs = response.upgrade_jobs;
                             this.snackBar.open(
                                 "Upgrade initiated successfully.",
                                 "Close",
@@ -237,6 +240,10 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
     resetForm() {
         this.step = 0;
         this.upgradeForm.reset();
-        this.jobIds = [];
+        this.upgradeJobs = [];
+    }
+
+    trackByJobId(index: number, job: UpgradeJob): string {
+        return job.job;
     }
 }
