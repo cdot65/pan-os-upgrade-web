@@ -7,6 +7,7 @@ import {
     ReactiveFormsModule,
     Validators,
 } from "@angular/forms";
+import { Subject, timer } from "rxjs";
 import {
     UpgradeJob,
     UpgradeResponse,
@@ -16,6 +17,7 @@ import { ComponentPageTitle } from "../page-title/page-title";
 import { Device } from "../../shared/interfaces/device.interface";
 import { Footer } from "src/app/shared/footer/footer";
 import { InventoryService } from "../../shared/services/inventory.service";
+import { JobService } from "src/app/shared/services/job.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
 import { MatDividerModule } from "@angular/material/divider";
@@ -29,7 +31,6 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { Profile } from "../../shared/interfaces/profile.interface";
 import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
-import { Subject } from "rxjs";
 import { UpgradeForm } from "../../shared/interfaces/upgrade-form.interface";
 import { UpgradePageHeader } from "../upgrade-page-header/upgrade-page-header";
 import { UpgradeService } from "../../shared/services/upgrade.service";
@@ -59,10 +60,12 @@ import { takeUntil } from "rxjs/operators";
 export class UpgradeListComponent implements OnInit, OnDestroy {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     devices: Device[] = [];
+    jobStatuses: { [jobId: string]: string } = {};
+    pollingSubscriptions: { [jobId: string]: Subject<void> } = {};
     profiles: Profile[] = [];
-    upgradeForm: FormGroup;
     step = 0;
     target_versions: string[] = ["10.1.3", "10.2.9-h1", "11.1.1-h1"];
+    upgradeForm: FormGroup;
     upgradeJobs: UpgradeJob[] = [];
     private destroy$ = new Subject<void>();
 
@@ -70,6 +73,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         private inventoryService: InventoryService,
         private profileService: ProfileService,
         private upgradeService: UpgradeService,
+        private jobService: JobService,
         private router: Router,
         private snackBar: MatSnackBar,
         private formBuilder: FormBuilder,
@@ -204,6 +208,10 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
                     (response: UpgradeResponse | null) => {
                         if (response && response.upgrade_jobs) {
                             this.upgradeJobs = response.upgrade_jobs;
+                            this.upgradeJobs.forEach((job) => {
+                                this.jobStatuses[job.job] = "pending";
+                                this.startPollingJobStatus(job.job);
+                            });
                             this.snackBar.open(
                                 "Upgrade initiated successfully.",
                                 "Close",
@@ -241,6 +249,30 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         this.step = 0;
         this.upgradeForm.reset();
         this.upgradeJobs = [];
+    }
+
+    startPollingJobStatus(jobId: string): void {
+        const pollingSubject = new Subject<void>();
+        this.pollingSubscriptions[jobId] = pollingSubject;
+
+        timer(0, 5000)
+            .pipe(takeUntil(pollingSubject))
+            .subscribe(() => {
+                this.jobService.getJobStatus(jobId).subscribe((status) => {
+                    this.jobStatuses[jobId] = status;
+                    if (status === "completed" || status === "errored") {
+                        this.stopPollingJobStatus(jobId);
+                    }
+                });
+            });
+    }
+
+    stopPollingJobStatus(jobId: string): void {
+        if (this.pollingSubscriptions[jobId]) {
+            this.pollingSubscriptions[jobId].next();
+            this.pollingSubscriptions[jobId].complete();
+            delete this.pollingSubscriptions[jobId];
+        }
     }
 
     trackByJobId(index: number, job: UpgradeJob): string {
