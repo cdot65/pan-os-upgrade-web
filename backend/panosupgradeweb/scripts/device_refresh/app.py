@@ -543,7 +543,7 @@ def run_device_refresh(
             action="error",
             message=f"Error while connecting to the PAN device: {str(e)}",
         )
-        raise e
+        return "errored"
 
     # Connect to the PAN device and retrieve the system information
     try:
@@ -676,7 +676,7 @@ def run_device_refresh(
             action="report",
             message="Serializing device data to JSON",
         )
-        return json.dumps(device_data)
+        return "completed"
 
     except Exception as e:
         log_device_refresh(
