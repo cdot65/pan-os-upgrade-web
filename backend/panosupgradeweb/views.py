@@ -229,7 +229,7 @@ class DeviceViewSet(viewsets.ModelViewSet):
             try:
                 profile = Profile.objects.get(uuid=profile_uuid)
 
-                job_ids = []
+                upgrade_jobs = []
                 for device_uuid in devices:
                     try:
                         device = Device.objects.get(uuid=device_uuid)
@@ -244,12 +244,14 @@ class DeviceViewSet(viewsets.ModelViewSet):
                             profile_uuid=str(profile_uuid),
                             target_version=target_version,
                         )
-                        job_ids.append(task.id)
+                        upgrade_jobs.append(
+                            {"hostname": device.hostname, "job": task.id}
+                        )
                     except Device.DoesNotExist:
                         print(f"Invalid device UUID: {device_uuid}")
 
                 return Response(
-                    {"job_ids": job_ids},
+                    {"upgrade_jobs": upgrade_jobs},
                     status=status.HTTP_200_OK,
                 )
 
