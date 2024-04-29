@@ -446,7 +446,7 @@ def run_inventory_sync(
         profile_uuid (str): The UUID of the profile associated with the Panorama device.
 
     Returns:
-        str: The JSON output containing the retrieved device information.
+        str: The string representation of the status.
 
     Raises:
         Exception: If an error occurs during the inventory sync process.
@@ -461,7 +461,7 @@ def run_inventory_sync(
             E --> F[Retrieve connected devices]
             F --> G[Create/update Device objects]
             G --> H[Update peer device information for HA deployments]
-            H --> I[Return JSON output]
+            H --> I[Return status message]
             I --> J[Log any errors and raise exception]
             J --> K[End]
         ```
@@ -543,9 +543,6 @@ def run_inventory_sync(
             action="search",
             message=f"Retrieved connected devices {result_dict['result']['devices']}",
         )
-
-        # Convert the result dictionary to JSON
-        json_output = json.dumps(result_dict)
 
         # Create a list of peer firewalls missing their HA partner
         missing_peer_devices = []
@@ -717,14 +714,14 @@ def run_inventory_sync(
                 action="save",
                 message=f"Updated peer device for: {firewall.serial}",
             )
-        return json_output
+        return "completed"
 
     except Exception as e:
         log_inventory_sync(
             action="error",
             message=f"Error during inventory sync: {str(e)}",
         )
-        raise e
+        return "errored"
 
 
 if __name__ == "__main__":
