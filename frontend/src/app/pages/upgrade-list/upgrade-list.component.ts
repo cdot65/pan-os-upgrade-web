@@ -16,6 +16,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
 import { MatDividerModule } from "@angular/material/divider";
 import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { MatRadioModule } from "@angular/material/radio";
@@ -41,6 +42,7 @@ import { takeUntil } from "rxjs/operators";
         UpgradePageHeader,
         MatDividerModule,
         MatFormFieldModule,
+        MatIconModule,
         MatSelectModule,
         MatButtonModule,
         FormsModule,
