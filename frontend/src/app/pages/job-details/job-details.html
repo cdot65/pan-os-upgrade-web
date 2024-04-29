@@ -22,12 +22,7 @@
                             <b>Created at</b>: {{ jobItem?.created_at |
                             date:'medium' }}
                         </p>
-                        <p>
-                            <b>Status</b>:
-                            <ngx-json-viewer
-                                [json]="parsedJsonData"
-                            ></ngx-json-viewer>
-                        </p>
+                        <p><b>Status</b>: {{ jobItem?.job_status }}</p>
                     </div>
 
                     <mat-divider></mat-divider>
