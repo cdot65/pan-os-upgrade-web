@@ -246,4 +246,11 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
     trackByJobId(index: number, job: UpgradeJob): string {
         return job.job;
     }
+
+    viewJobDetails(jobId: string): void {
+        const url = this.router.serializeUrl(
+            this.router.createUrlTree(["/jobs", jobId]),
+        );
+        window.open(url, "_blank");
+    }
 }
