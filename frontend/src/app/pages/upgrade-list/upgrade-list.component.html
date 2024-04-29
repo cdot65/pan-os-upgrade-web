@@ -30,22 +30,25 @@
                 </div>
             </div>
 
-            @if (jobIds.length > 0) {
+            @if (upgradeJobs.length > 0) {
                 <div class="refresh-header">
                     <h3>Upgrade Progress</h3>
                     <div class="progress-items">
-                        @for (jobId of jobIds; track jobId) {
-                            <p>Job ID: {{ jobId }}</p>
-                            <div class="refresh-progress">
-                                <mat-progress-bar
-                                    mode="buffer"
-                                ></mat-progress-bar>
+                        @for (job of upgradeJobs; track job) {
+                            <div>
+                                <p>
+                                    {{ job.hostname }} - Job ID: {{ job.job }}
+                                </p>
+                                <div class="refresh-progress">
+                                    <mat-progress-bar
+                                        mode="buffer"
+                                    ></mat-progress-bar>
+                                </div>
                             </div>
                         }
                     </div>
                 </div>
             }
-
             <div class="upgrade-form-grid">
                 <!-- Form field for entering the profile name -->
                 <div class="form-field">
