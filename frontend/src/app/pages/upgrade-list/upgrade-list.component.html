@@ -7,150 +7,151 @@
         id="upgrade-list"
         class="upgrade-list"
     >
-        <div>
-            <form [formGroup]="upgradeForm" (ngSubmit)="onUpgradeClick()">
-                <!-- Heading for the upgrade form section -->
-                <h3>Upgrade Devices</h3>
+        <form
+            [formGroup]="upgradeForm"
+            (ngSubmit)="onUpgradeClick()"
+            class="mat-elevation-z2"
+        >
+            <div class="table-header">
+                <h2>Upgrade Devices</h2>
 
-                <div class="upgrade-form-grid">
-                    <!-- Form field for entering the profile name -->
-                    <div class="form-field">
-                        <mat-form-field class="dropdown">
-                            <mat-label>Devices</mat-label>
-                            <mat-select formControlName="devices" multiple>
-                                @for (device of devices; track device) {
-                                    <mat-option [value]="device.uuid">
-                                        {{ device.hostname }}
-                                    </mat-option>
-                                }
-                            </mat-select>
-                        </mat-form-field>
-                    </div>
-
-                    <div class="form-field">
-                        <mat-form-field class="dropdown">
-                            <mat-label>Profile</mat-label>
-                            <mat-select formControlName="profile">
-                                @for (profile of profiles; track profile) {
-                                    <mat-option [value]="profile.uuid">
-                                        {{ profile.name }}
-                                    </mat-option>
-                                }
-                            </mat-select>
-                        </mat-form-field>
-                    </div>
-
-                    <div class="form-field">
-                        <mat-form-field class="dropdown">
-                            <mat-label>Target Version</mat-label>
-                            <mat-select formControlName="target_version">
-                                @for (
-                                    version of target_versions;
-                                    track version
-                                ) {
-                                    <mat-option [value]="version">
-                                        {{ version }}
-                                    </mat-option>
-                                }
-                            </mat-select>
-                        </mat-form-field>
-                    </div>
-
-                    <div class="form-field">
-                        <mat-label>Dry Run</mat-label>
-                        <mat-radio-group formControlName="dry_run">
-                            <mat-radio-button [value]="true"
-                                >True</mat-radio-button
-                            >
-                            <mat-radio-button [value]="false"
-                                >False</mat-radio-button
-                            >
-                        </mat-radio-group>
-                    </div>
-                </div>
-                <h3>Selected Devices</h3>
-                <div class="selected-devices">
-                    @for (
-                        deviceId of upgradeForm.get("devices")?.value;
-                        track deviceId
-                    ) {
-                        <mat-card class="device-card">
-                            <mat-card-header class="table-header">
-                                <mat-card-title>{{
-                                    getDeviceHostname(deviceId)
-                                }}</mat-card-title>
-                                <mat-card-subtitle
-                                    >Current Version:
-                                    {{
-                                        getDeviceSwVersion(deviceId)
-                                    }}</mat-card-subtitle
-                                >
-                            </mat-card-header>
-                            <mat-card-content>
-                                <mat-divider></mat-divider>
-                                <h4>High Availability</h4>
-                                <ul>
-                                    <li>
-                                        Enabled:
-                                        {{
-                                            getDeviceHaProperties(deviceId)
-                                                .ha_enabled
-                                        }}
-                                    </li>
-                                    <li>
-                                        Local State:
-                                        {{
-                                            getDeviceHaProperties(deviceId)
-                                                .local_state
-                                        }}
-                                    </li>
-                                    <li>
-                                        Peer State:
-                                        {{
-                                            getDeviceHaProperties(deviceId)
-                                                .peer_state
-                                        }}
-                                    </li>
-                                    <li>
-                                        Peer IP:
-                                        {{
-                                            getDeviceHaProperties(deviceId)
-                                                .peer_ip
-                                        }}
-                                    </li>
-                                </ul>
-                            </mat-card-content>
-                        </mat-card>
-                    }
-                </div>
-                <div class="button-container">
+                <!-- container for the Refresh button. -->
+                <div class="refresh-header">
                     <button
                         mat-raised-button
-                        color="primary"
+                        color="accent"
                         type="submit"
+                        aria-label="Upgrade Devices"
                         [disabled]="upgradeForm.invalid"
                     >
-                        Upgrade
+                        <mat-icon>sync</mat-icon>
+                        Start Upgrade
                     </button>
                 </div>
-            </form>
+            </div>
 
             @if (jobIds.length > 0) {
-                <div class="upgrade-progress">
+                <div class="refresh-header">
                     <h3>Upgrade Progress</h3>
                     <div class="progress-items">
                         @for (jobId of jobIds; track jobId) {
-                            <div class="progress-item">
-                                <p>Job ID: {{ jobId }}</p>
+                            <p>Job ID: {{ jobId }}</p>
+                            <div class="refresh-progress">
                                 <mat-progress-bar
-                                    mode="determinate"
+                                    mode="buffer"
                                 ></mat-progress-bar>
                             </div>
                         }
                     </div>
                 </div>
             }
-        </div>
+
+            <div class="upgrade-form-grid">
+                <!-- Form field for entering the profile name -->
+                <div class="form-field">
+                    <mat-form-field class="dropdown">
+                        <mat-label>Devices</mat-label>
+                        <mat-select formControlName="devices" multiple>
+                            @for (device of devices; track device) {
+                                <mat-option [value]="device.uuid">
+                                    {{ device.hostname }}
+                                </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-field">
+                    <mat-form-field class="dropdown">
+                        <mat-label>Profile</mat-label>
+                        <mat-select formControlName="profile">
+                            @for (profile of profiles; track profile) {
+                                <mat-option [value]="profile.uuid">
+                                    {{ profile.name }}
+                                </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-field">
+                    <mat-form-field class="dropdown">
+                        <mat-label>Target Version</mat-label>
+                        <mat-select formControlName="target_version">
+                            @for (version of target_versions; track version) {
+                                <mat-option [value]="version">
+                                    {{ version }}
+                                </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-field">
+                    <mat-label>Dry Run</mat-label>
+                    <mat-radio-group formControlName="dry_run">
+                        <mat-radio-button [value]="true">True</mat-radio-button>
+                        <mat-radio-button [value]="false"
+                            >False</mat-radio-button
+                        >
+                    </mat-radio-group>
+                </div>
+            </div>
+            <h3>Selected Devices</h3>
+            <div class="selected-devices">
+                @for (
+                    deviceId of upgradeForm.get("devices")?.value;
+                    track deviceId
+                ) {
+                    <mat-card class="device-card">
+                        <mat-card-header class="table-header">
+                            <mat-card-title>{{
+                                getDeviceHostname(deviceId)
+                            }}</mat-card-title>
+                            <mat-card-subtitle
+                                >Current Version:
+                                {{
+                                    getDeviceSwVersion(deviceId)
+                                }}</mat-card-subtitle
+                            >
+                        </mat-card-header>
+                        <mat-card-content>
+                            <mat-divider></mat-divider>
+                            <h4>High Availability</h4>
+                            <ul>
+                                <li>
+                                    Enabled:
+                                    {{
+                                        getDeviceHaProperties(deviceId)
+                                            .ha_enabled
+                                    }}
+                                </li>
+                                <li>
+                                    Local State:
+                                    {{
+                                        getDeviceHaProperties(deviceId)
+                                            .local_state
+                                    }}
+                                </li>
+                                <li>
+                                    Peer State:
+                                    {{
+                                        getDeviceHaProperties(deviceId)
+                                            .peer_state
+                                    }}
+                                </li>
+                                <li>
+                                    Peer IP:
+                                    {{
+                                        getDeviceHaProperties(deviceId).peer_ip
+                                    }}
+                                </li>
+                            </ul>
+                        </mat-card-content>
+                    </mat-card>
+                }
+            </div>
+        </form>
     </main>
 
     <app-footer></app-footer>
