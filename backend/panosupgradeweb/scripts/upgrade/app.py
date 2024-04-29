@@ -285,7 +285,7 @@ def determine_upgrade(
             action="stop",
             message=f"{device['db_device'].hostname}: Halting upgrade.",
         )
-        raise WorkerTerminate()
+        return "errored"
 
 
 def get_emoji(action: str) -> str:
@@ -972,7 +972,7 @@ def software_download(
                 message=f"{device['db_device'].hostname}: Download Error {download_error}",
             )
 
-            raise WorkerTerminate()
+            return "errored"
 
         while True:
             device["pan_device"].software.info()
@@ -1019,7 +1019,7 @@ def software_download(
             message=f"{device['db_device'].hostname}: Error downloading {target_version}.",
         )
 
-        raise WorkerTerminate()
+        return "errored"
 
 
 def software_update_check(
@@ -1384,7 +1384,7 @@ def upgrade_firewall(
             action="error",
             message=f"{device['db_device'].hostname}: Not ready for upgrade to {target_version}.",
         )
-        raise WorkerTerminate()
+        return "errored"
 
     # If firewall is part of HA pair, determine if it's active or passive
     if device["db_device"].ha_enabled:
@@ -1434,7 +1434,7 @@ def upgrade_firewall(
             action="error",
             message=f"{device['db_device'].hostname}: Image not downloaded, exiting.",
         )
-        raise WorkerTerminate()
+        return "errored"
 
     # Perform the pre-upgrade snapshot
     pre_snapshot = perform_snapshot(device=device)
@@ -1602,7 +1602,7 @@ def run_panos_upgrade(
         target_version (str): The target PAN-OS version for the upgrade.
 
     Returns:
-        str: A JSON string indicating the execution status of the upgrade workflow.
+        str: A of the execution status of the upgrade workflow.
 
     Raises:
         Exception: If an error occurs during the PAN-OS upgrade process.
@@ -1626,7 +1626,7 @@ def run_panos_upgrade(
             L --> M[Upgrade passive and active-secondary firewalls]
             M --> N[Iterate over active and active-primary devices]
             N --> O[Upgrade active and active-primary firewalls]
-            O --> P[Return JSON output]
+            O --> P[Return job status]
             P --> Q[End]
         ```
     """
@@ -1759,12 +1759,13 @@ def run_panos_upgrade(
                         action="error",
                         message=f"{each['db_device'].hostname}: Worker lost: {exc}",
                     )
-                    raise WorkerTerminate()
+                    return "errored"
                 except Exception as exc:
                     log_upgrade(
                         action="error",
                         message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
                     )
+                    return "errored"
 
         # Iterate over the list of devices to upgrade
         for each in upgrade_devices:
@@ -1784,34 +1785,28 @@ def run_panos_upgrade(
                         action="error",
                         message=f"{each['db_device'].hostname}: Worker lost: {exc}",
                     )
-                    raise WorkerTerminate()
+                    return "errored"
                 except Exception as exc:
                     log_upgrade(
                         action="error",
                         message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
                     )
+                    return "errored"
 
-        # Return the JSON output indicating the execution status
-        json_output = json.dumps(
-            {
-                "exec": "upgrade workflow executed",
-                "device": f"{each['db_device'].hostname}",
-            }
-        )
-        return json_output
+        return "completed"
 
     except WorkerLostError as e:
         log_upgrade(
             action="error",
             message=f"Worker lost during PAN-OS upgrade: {str(e)}",
         )
-        raise WorkerTerminate()
+        return "errored"
     except Exception as e:
         log_upgrade(
             action="error",
             message=f"Error during PAN-OS upgrade: {str(e)}",
         )
-        raise e
+        return "errored"
 
 
 if __name__ == "__main__":
@@ -1901,7 +1896,7 @@ if __name__ == "__main__":
     author = get_user_model().objects.get(id=author_id)
     job = Job.objects.create(
         job_type="device_upgrade",
-        json_data=None,
+        job_status="running",
         author=author,
         task_id=str(uuid.uuid4()),
     )
