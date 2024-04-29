@@ -7,5 +7,5 @@ export interface Job {
     created_at: string;
     updated_at: string;
     job_type: string;
-    json_data: string;
+    job_status: string;
 }
