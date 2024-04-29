@@ -184,8 +184,19 @@ class Job(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    job_status = models.CharField(
+        max_length=20,
+        choices=(
+            ("completed", "Completed"),
+            ("errored", "Errored"),
+            ("pending", "Pending"),
+            ("running", "Running"),
+        ),
+        blank=True,
+        null=True,
+        verbose_name="Job Status",
+    )
     job_type = models.CharField(max_length=255)
-    json_data = models.JSONField(null=True, blank=True)
 
     def __str__(self) -> str:
         return str(self.task_id)
