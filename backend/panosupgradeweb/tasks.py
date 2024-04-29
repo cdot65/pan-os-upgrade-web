@@ -9,14 +9,15 @@ import traceback
 from celery import shared_task
 from django.contrib.auth import get_user_model
 from panosupgradeweb.models import Job
-import json
 
-# import your inventory sync script
+# import the inventory sync script
 from panosupgradeweb.scripts import (
     run_inventory_sync,
     run_device_refresh,
     run_panos_upgrade,
 )
+
+from celery.exceptions import WorkerTerminate
 
 # ----------------------------------------------------------------------------
 # Configure logging
@@ -48,28 +49,39 @@ def execute_inventory_sync(
 
     # Create a new Job entry
     job = Job.objects.create(
-        job_type="inventory_sync",
-        json_data=None,
         author=author,
+        job_status="pending",
+        job_type="inventory_sync",
         task_id=self.request.id,
     )
     logging.debug(f"Job ID: {job.pk}")
 
     try:
-        json_output = run_inventory_sync(
+        job.job_status = "running"
+        job.save()
+
+        job_status = run_inventory_sync(
             author_id=author_id,
             job_id=job.task_id,
             panorama_device_uuid=panorama_device_uuid,
             profile_uuid=profile_uuid,
         )
-        job.json_data = json_output
+
+        if job_status == "errored":
+            job.job_status = "errored"
+            raise WorkerTerminate()
+        else:
+            job.job_status = "completed"
+
     except Exception as e:
-        job.json_data = f"Job ID: {job.pk}\nError: {e}"
+        job.job_status = "errored"
+        logging.error(f"{job.pk}\nError: {e}")
         logging.error(f"Exception Type: {type(e).__name__}")
         logging.error(f"Traceback: {traceback.format_exc()}")
+        raise WorkerTerminate()
 
-    # Save the updated job information
-    job.save()
+    finally:
+        job.save()
 
 
 # ----------------------------------------------------------------------------
@@ -87,27 +99,39 @@ def execute_refresh_device_task(
     logging.debug(f"Author: {author}")
 
     job = Job.objects.create(
-        job_type="device_refresh",
-        json_data=None,
         author=author,
+        job_status="pending",
+        job_type="device_refresh",
         task_id=self.request.id,
     )
     logging.debug(f"Job ID: {job.pk}")
 
     try:
-        json_output = run_device_refresh(
+        job.job_status = "running"
+        job.save()
+
+        job_status = run_device_refresh(
             author_id=author_id,
             device_uuid=device_uuid,
             job_id=job.task_id,
             profile_uuid=profile_uuid,
         )
-        job.json_data = json_output
+
+        if job_status == "errored":
+            job.job_status = "errored"
+            raise WorkerTerminate()
+        else:
+            job.job_status = "completed"
+
     except Exception as e:
-        job.json_data = f"Job ID: {job.pk}\nError: {e}"
+        job.job_status = "errored"
+        logging.debug(f"Job ID: {job.pk}\nError: {e}")
         logging.error(f"Exception Type: {type(e).__name__}")
         logging.error(f"Traceback: {traceback.format_exc()}")
+        raise WorkerTerminate()
 
-    job.save()
+    finally:
+        job.save()
 
 
 # ----------------------------------------------------------------------------
@@ -127,22 +151,19 @@ def execute_upgrade_device_task(
     logging.debug(f"Author: {author}")
 
     job = Job.objects.create(
-        job_type="device_upgrade",
-        json_data=None,
         author=author,
+        job_status="pending",
+        job_type="device_upgrade",
         task_id=self.request.id,
     )
     logging.debug(f"Job ID: {job.pk}")
 
     try:
-        # Update the job status to indicate the task has started
-        json_data = {
-            "status": "Starting PAN-OS upgrade task, change refresh rate below to view logs live..."
-        }
-        job.json_data = json.dumps(json_data)
+        job.job_status = "running"
+        job.save()
 
         # Run the PAN-OS upgrade script
-        json_output = run_panos_upgrade(
+        job_status = run_panos_upgrade(
             author_id=author_id,
             device_uuid=device_uuid,
             dry_run=dry_run,
@@ -151,11 +172,18 @@ def execute_upgrade_device_task(
             target_version=target_version,
         )
 
-        # Update the job status with the output from the script
-        job.json_data = json_output
+        if job_status == "errored":
+            job.job_status = "errored"
+            raise WorkerTerminate()
+        else:
+            job.job_status = "completed"
+
     except Exception as e:
-        job.json_data = f"Job ID: {job.pk}\nError: {e}"
+        job.job_status = "errored"
+        logging.debug(f"Job ID: {job.pk}\nError: {e}")
         logging.error(f"Exception Type: {type(e).__name__}")
         logging.error(f"Traceback: {traceback.format_exc()}")
+        raise WorkerTerminate()
 
-    job.save()
+    finally:
+        job.save()
