@@ -123,13 +123,8 @@ class DeviceViewSet(viewsets.ModelViewSet):
         if job_id:
             try:
                 job = Job.objects.get(task_id=job_id)
-                # Check the status of the job based on the job object
-                if job.json_data:
-                    status = "completed"
-                else:
-                    status = "running"
 
-                return JsonResponse({"job_id": job_id, "status": status})
+                return JsonResponse({"job_id": job_id, "status": job.job_status})
             except Job.DoesNotExist:
                 return JsonResponse({"error": "Invalid job ID."}, status=400)
         else:
@@ -306,7 +301,9 @@ class JobViewSet(viewsets.ModelViewSet):
             "created_at": instance.created_at.isoformat(),
             "updated_at": instance.updated_at.isoformat(),
             "job_type": instance.job_type,
-            "json_data": instance.json_data if instance.json_data is not None else {},
+            "job_status": (
+                instance.job_status if instance.job_status is not None else "pending"
+            ),
         }
         return JsonResponse(response_data, status=200)
 
