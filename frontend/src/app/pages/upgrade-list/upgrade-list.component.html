@@ -132,17 +132,33 @@
                                 </li>
                             </ul>
                             @if (upgradeJobs.length > 0) {
+                                <mat-divider></mat-divider>
                                 @for (job of upgradeJobs; track job) {
                                     @if (
                                         job.hostname ===
                                         getDeviceHostname(deviceId)
                                     ) {
                                         <div>
-                                            <p>Job ID: {{ job.job }}</p>
+                                            <h4>Upgrade Job Information</h4>
+                                            <ul>
+                                                <li>
+                                                    Status:
+                                                    {{ jobStatuses[job.job] }}
+                                                </li>
+                                            </ul>
                                             <div class="refresh-progress">
-                                                <mat-progress-bar
-                                                    mode="buffer"
-                                                ></mat-progress-bar>
+                                                @if (
+                                                    jobStatuses[job.job] ===
+                                                    "completed"
+                                                ) {
+                                                    <mat-icon
+                                                        >check_circle</mat-icon
+                                                    >
+                                                } @else {
+                                                    <mat-progress-bar
+                                                        mode="buffer"
+                                                    ></mat-progress-bar>
+                                                }
                                             </div>
                                             <div class="button-container">
                                                 <button
