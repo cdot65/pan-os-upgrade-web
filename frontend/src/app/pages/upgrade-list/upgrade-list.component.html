@@ -92,55 +92,18 @@
                             <mat-card-title>{{
                                 getDeviceHostname(deviceId)
                             }}</mat-card-title>
-                            <mat-card-subtitle
-                                >Current Version:
-                                {{
-                                    getDeviceSwVersion(deviceId)
-                                }}</mat-card-subtitle
-                            >
                         </mat-card-header>
                         <mat-card-content>
-                            <mat-divider></mat-divider>
-                            <h4>High Availability</h4>
-                            <ul>
-                                <li>
-                                    Enabled:
-                                    {{
-                                        getDeviceHaProperties(deviceId)
-                                            .ha_enabled
-                                    }}
-                                </li>
-                                <li>
-                                    Local State:
-                                    {{
-                                        getDeviceHaProperties(deviceId)
-                                            .local_state
-                                    }}
-                                </li>
-                                <li>
-                                    Peer State:
-                                    {{
-                                        getDeviceHaProperties(deviceId)
-                                            .peer_state
-                                    }}
-                                </li>
-                                <li>
-                                    Peer IP:
-                                    {{
-                                        getDeviceHaProperties(deviceId).peer_ip
-                                    }}
-                                </li>
-                            </ul>
+                            <!-- container for the upgrade status. -->
                             @if (upgradeJobs.length > 0) {
-                                <mat-divider></mat-divider>
                                 @for (job of upgradeJobs; track job) {
                                     @if (
                                         job.hostname ===
                                         getDeviceHostname(deviceId)
                                     ) {
                                         <div>
-                                            <h4>Upgrade Job Information</h4>
                                             <ul>
+                                                <li>Job ID: {{ job.job }}</li>
                                                 <li>
                                                     Status:
                                                     {{ jobStatuses[job.job] }}
@@ -177,6 +140,49 @@
                                         </div>
                                     }
                                 }
+                            }
+                            <mat-divider></mat-divider>
+                            <h4>High Availability</h4>
+                            <ul>
+                                <li>
+                                    Local State:
+                                    {{
+                                        getDeviceHaProperties(deviceId)
+                                            .local_state
+                                    }}
+                                </li>
+                                <li>
+                                    Peer State:
+                                    {{
+                                        getDeviceHaProperties(deviceId)
+                                            .peer_state
+                                    }}
+                                </li>
+                            </ul>
+                            <mat-divider></mat-divider>
+                            <h4>Upgrade Information</h4>
+                            <ul>
+                                <li>
+                                    Current Version:
+                                    {{ getDeviceSwVersion(deviceId) }}
+                                </li>
+                                <li>
+                                    Target Version:
+                                    {{
+                                        upgradeForm.get("target_version")?.value
+                                    }}
+                                </li>
+                            </ul>
+                            @if (checkDeviceEligibility(deviceId) == false) {
+                                <div class="warning-message">
+                                    This is the primary firewall in an HA pair,
+                                    its upgrade will be performed through the HA
+                                    peer upgrade job.
+                                </div>
+                            } @else {
+                                <div class="info-message">
+                                    Ready to be upgraded.
+                                </div>
                             }
                         </mat-card-content>
                     </mat-card>
