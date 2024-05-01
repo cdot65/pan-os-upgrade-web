@@ -1,89 +1,88 @@
 // src/app/pages/inventory-details/inventory-details.scss
 
 .inventory-details-container {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
 }
 
 .inventory-details {
-  width: 97%;
-  padding: 25px;
+    width: 97%;
+    padding: 25px;
 
-  form {
-    padding: 20px;
-  }
-
-  .table-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-
-    h2 {
-      margin: 0;
+    form {
+        padding: 20px;
     }
 
-    button {
-      mat-icon {
-        margin-right: 5px;
-      }
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+
+        h2 {
+            margin: 0;
+        }
+
+        button {
+            mat-icon {
+                margin-right: 5px;
+            }
+        }
+
+        .refresh-header {
+            display: flex;
+            align-items: center;
+        }
+    }
+
+    .refresh-progress {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
     }
 
     .refresh-header {
-      display: flex;
-      align-items: center;
+        outline: none;
+        // padding: 24px 8px;
+        font-size: 20px;
+        text-align: center;
+        color: accent;
     }
-  }
 
-  .refresh-progress {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-
-  }
-
-  .refresh-header {
-    outline: none;
-    // padding: 24px 8px;
-    font-size: 20px;
-    text-align: center;
-    color: accent;
-  }
-
-  .refresh-error {
-    outline: none;
-    // padding: 24px 8px;
-    font-size: 20px;
-    text-align: center;
-    color: red;
-  }
-
-  .inventory-details-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-
-    .form-field {
-      mat-form-field {
-        width: 100%;
-      }
+    .refresh-error {
+        outline: none;
+        // padding: 24px 8px;
+        font-size: 20px;
+        text-align: center;
+        color: red;
     }
-  }
 
-  .button-container {
-    margin-top: 20px;
-    display: flex;
-    justify-content: flex-end;
+    .inventory-details-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
 
-    button {
-      margin-left: 10px;
+        .form-field {
+            mat-form-field {
+                width: 100%;
+            }
+        }
     }
-  }
+
+    .button-container {
+        margin-top: 20px;
+        display: flex;
+        justify-content: flex-end;
+
+        button {
+            margin-left: 10px;
+        }
+    }
 }
 
 .form-field.disabled {
-  opacity: 0.5;
-  pointer-events: none;
+    opacity: 0.5;
+    pointer-events: none;
 }
