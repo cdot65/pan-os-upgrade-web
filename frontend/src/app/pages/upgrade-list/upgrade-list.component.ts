@@ -88,6 +88,20 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         });
     }
 
+    checkDeviceEligibility(deviceId: string): boolean {
+        const device = this.devices.find((d) => d.uuid === deviceId);
+        if (device) {
+            if (
+                device.local_state === "passive" ||
+                device.local_state === "active-secondary" ||
+                device.ha_enabled === false
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     getDevice(deviceId: string): Device | undefined {
         return this.devices.find((d) => d.uuid === deviceId);
     }
