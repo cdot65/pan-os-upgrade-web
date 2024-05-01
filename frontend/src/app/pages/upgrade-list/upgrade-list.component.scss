@@ -60,29 +60,19 @@
     }
 
     .selected-devices {
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 16px;
 
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: left;
-            padding-top: 10px;
-
-            .th {
-                margin: 0;
-            }
-
-            .clear-all {
-                color: var(--color-primary);
-                cursor: pointer;
-            }
+        .device-card {
+            width: 100%;
         }
     }
 
-    .device-card {
-        width: 300px;
+    @media screen and (min-width: 1200px) {
+        .selected-devices {
+            grid-template-columns: repeat(3, 1fr);
+        }
     }
 
     .confirmation-details {
@@ -96,8 +86,12 @@
 
     .upgrade-form-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 20px;
+
+        @media screen and (min-width: 1200px) {
+            grid-template-columns: repeat(3, 1fr);
+        }
 
         .form-field {
             mat-form-field {
@@ -108,6 +102,7 @@
 
     .button-container {
         margin-top: 20px;
+        margin-bottom: 20px;
         display: flex;
         justify-content: flex-end;
 
@@ -119,4 +114,16 @@
 
 .mat-progress-bar {
     margin-top: 16px;
+}
+
+.warning-message {
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.info-message {
+    // color: blue;
+    font-weight: bold;
+    margin-top: 10px;
 }
