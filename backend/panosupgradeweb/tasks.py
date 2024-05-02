@@ -70,6 +70,8 @@ def execute_inventory_sync(
         if job_status == "errored":
             job.job_status = "errored"
             raise WorkerTerminate()
+        elif job_status == "skipped":
+            job.job_status = "skipped"
         else:
             job.job_status = "completed"
 
@@ -120,6 +122,8 @@ def execute_refresh_device_task(
         if job_status == "errored":
             job.job_status = "errored"
             raise WorkerTerminate()
+        elif job_status == "skipped":
+            job.job_status = "skipped"
         else:
             job.job_status = "completed"
 
@@ -175,6 +179,8 @@ def execute_upgrade_device_task(
         if job_status == "errored":
             job.job_status = "errored"
             raise WorkerTerminate()
+        elif job_status == "skipped":
+            job.job_status = "skipped"
         else:
             job.job_status = "completed"
 
