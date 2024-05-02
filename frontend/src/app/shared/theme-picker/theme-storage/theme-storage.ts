@@ -13,7 +13,8 @@ export interface DocsSiteTheme {
 export class ThemeStorage {
     static storageKey = "panosupgrade-theme-storage-current-name";
 
-    onThemeUpdate: EventEmitter<DocsSiteTheme> = new EventEmitter<DocsSiteTheme>();
+    onThemeUpdate: EventEmitter<DocsSiteTheme> =
+        new EventEmitter<DocsSiteTheme>();
 
     storeTheme(theme: DocsSiteTheme) {
         try {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // src/app/shared/interfaces/upgrade-history.interface.ts
 
 export interface UpgradeHistory {

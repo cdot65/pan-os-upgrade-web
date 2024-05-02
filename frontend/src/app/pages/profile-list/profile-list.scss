@@ -1,70 +1,70 @@
 // src/app/pages/profile-list/profile-list.scss
 
 .profile-list-container {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
 }
 
 .profile-list {
-  width: 97%;
-  padding: 25px;
+    width: 97%;
+    padding: 25px;
 
-  .table-header {
-    margin-bottom: 20px;
+    .table-header {
+        margin-bottom: 20px;
 
-    h2 {
-      margin: 0;
+        h2 {
+            margin: 0;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+
+            .button-container {
+                display: flex;
+                justify-content: flex-start;
+
+                button {
+                    margin-right: 8px;
+                }
+            }
+
+            .selected-actions {
+                display: flex;
+                justify-content: flex-end;
+
+                button {
+                    margin-left: 8px;
+                }
+            }
+        }
     }
 
-    .button-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 10px;
+    .mat-table {
+        width: 100%;
 
-      .button-container {
-        display: flex;
-        justify-content: flex-start;
-
-        button {
-          margin-right: 8px;
+        .mat-row {
+            &:hover {
+                .mat-cell {
+                    background-color: rgba(0, 0, 0, 0.2);
+                }
+            }
         }
-      }
 
-      .selected-actions {
-        display: flex;
-        justify-content: flex-end;
-
-        button {
-          margin-left: 8px;
-        }
-      }
-    }
-  }
-
-  .mat-table {
-    width: 100%;
-
-    .mat-row {
-      &:hover {
         .mat-cell {
-          background-color: rgba(0, 0, 0, 0.2);
+            padding-right: 20px;
+            transition: background-color 0.3s;
         }
-      }
-    }
 
-    .mat-cell {
-      padding-right: 20px;
-      transition: background-color 0.3s;
-    }
+        .mat-header-cell {
+            font-weight: bold;
+        }
 
-    .mat-header-cell {
-      font-weight: bold;
+        .edit-button {
+            margin-left: 10px;
+        }
     }
-
-    .edit-button {
-      margin-left: 10px;
-    }
-  }
 }
