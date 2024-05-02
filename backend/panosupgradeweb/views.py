@@ -236,7 +236,6 @@ class DeviceViewSet(viewsets.ModelViewSet):
                         print(f"Upgrading device {device.hostname}...")
                         print(f"Profile: {profile.name}")
 
-                        # Trigger the Celery task for device upgrade and get the task ID
                         task = execute_upgrade_device_task.delay(
                             author_id=author_id,
                             dry_run=dry_run,
