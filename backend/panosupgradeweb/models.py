@@ -191,6 +191,7 @@ class Job(models.Model):
             ("errored", "Errored"),
             ("pending", "Pending"),
             ("running", "Running"),
+            ("skipped", "Skipped"),
         ),
         blank=True,
         null=True,
