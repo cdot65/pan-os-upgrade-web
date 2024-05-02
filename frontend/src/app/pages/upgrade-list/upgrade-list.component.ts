@@ -274,7 +274,11 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
             .subscribe(() => {
                 this.jobService.getJobStatus(jobId).subscribe((status) => {
                     this.jobStatuses[jobId] = status;
-                    if (status === "completed" || status === "errored") {
+                    if (
+                        status === "completed" ||
+                        status === "skipped" ||
+                        status === "errored"
+                    ) {
                         this.stopPollingJobStatus(jobId);
                     }
                 });
