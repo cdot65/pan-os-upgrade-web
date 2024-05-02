@@ -14,7 +14,10 @@ export class NavigationFocusService implements OnDestroy {
     private skipLinkHref: string | null | undefined;
 
     readonly navigationEndEvents = this.router.events.pipe(
-        filter((event: Event): event is NavigationEnd => event instanceof NavigationEnd),
+        filter(
+            (event: Event): event is NavigationEnd =>
+                event instanceof NavigationEnd,
+        ),
     );
     readonly softNavigations = this.navigationEndEvents.pipe(skip(1));
 
@@ -44,7 +47,10 @@ export class NavigationFocusService implements OnDestroy {
     }
 
     relinquishFocusOnNavigation(el: HTMLElement) {
-        this.navigationFocusRequests.splice(this.navigationFocusRequests.indexOf(el), 1);
+        this.navigationFocusRequests.splice(
+            this.navigationFocusRequests.indexOf(el),
+            1,
+        );
     }
 
     requestSkipLinkFocus(el: HTMLElement) {
@@ -53,7 +59,10 @@ export class NavigationFocusService implements OnDestroy {
     }
 
     relinquishSkipLinkFocus(el: HTMLElement) {
-        this.skipLinkFocusRequests.splice(this.skipLinkFocusRequests.indexOf(el), 1);
+        this.skipLinkFocusRequests.splice(
+            this.skipLinkFocusRequests.indexOf(el),
+            1,
+        );
         const skipLinkFocusTarget =
             this.skipLinkFocusRequests[this.skipLinkFocusRequests.length - 1];
         this.setSkipLinkHref(skipLinkFocusTarget);

@@ -1,48 +1,48 @@
 .panosupgrade-navbar-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  padding: 4px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 4px 16px;
 
-  >.mat-mdc-button {
-    &:last-child {
-      margin-left: auto;
+    > .mat-mdc-button {
+        &:last-child {
+            margin-left: auto;
+        }
     }
-  }
 }
 
 .mat-mdc-button-base:not(:disabled) {
-  color: inherit;
+    color: inherit;
 }
 
 .flex-spacer {
-  flex-grow: 1;
+    flex-grow: 1;
 }
 
 .logo {
-  height: 26px;
-  margin-right: 6px;
+    height: 26px;
+    margin-right: 6px;
 }
 
 .docs-navbar-link {
-  text-decoration: inherit;
-  flex: 1;
+    text-decoration: inherit;
+    flex: 1;
 }
 
 .docs-navbar {
-  display: none;
+    display: none;
 }
 
 .docs-navbar-show-small {
-  display: none;
+    display: none;
 }
 
 .skip-link-wrapper {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-radius: 5px;
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 5px;
 }
 
 /**
@@ -50,27 +50,27 @@
   * Moves content two rows instead of one.
   */
 @media (max-width: 720px) {
-  .panosupgrade-navbar-hide-small {
-    display: none;
-  }
+    .panosupgrade-navbar-hide-small {
+        display: none;
+    }
 
-  .docs-navbar-show-small {
-    display: block;
-  }
+    .docs-navbar-show-small {
+        display: block;
+    }
 
-  .docs-navbar {
-    display: flex;
-  }
+    .docs-navbar {
+        display: flex;
+    }
 
-  .docs-navbar--github-logo {
-    margin: 0;
-  }
+    .docs-navbar--github-logo {
+        margin: 0;
+    }
 }
 
 theme-picker {
-  display: none;
+    display: none;
 
-  @media (min-width: 328px) {
-    display: block;
-  }
+    @media (min-width: 328px) {
+        display: block;
+    }
 }

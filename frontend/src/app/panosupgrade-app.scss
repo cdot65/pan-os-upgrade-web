@@ -1,35 +1,34 @@
-@use '../styles/constants';
+@use "../styles/constants";
 
 panosupgrade-app {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
 
 app-navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 2;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
 }
 
-panosupgrade-app>app-component-sidenav {
-  flex: 1;
+panosupgrade-app > app-component-sidenav {
+    flex: 1;
 }
 
-panosupgrade-app>router-outlet+.main-content,
-panosupgrade-app>router-outlet+app-component-sidenav {
-  margin-top: 56px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+panosupgrade-app > router-outlet + .main-content,
+panosupgrade-app > router-outlet + app-component-sidenav {
+    margin-top: 56px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 @media (max-width: constants.$extra-small-breakpoint-width) {
-
-  panosupgrade-app>router-outlet+.main-content,
-  panosupgrade-app>router-outlet+app-component-sidenav {
-    margin-top: 92px;
-    overflow-y: visible;
-  }
+    panosupgrade-app > router-outlet + .main-content,
+    panosupgrade-app > router-outlet + app-component-sidenav {
+        margin-top: 92px;
+        overflow-y: visible;
+    }
 }

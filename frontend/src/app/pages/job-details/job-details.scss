@@ -1,72 +1,72 @@
 // src/app/pages/job-details/job-details.scss
 
 .job-details-container {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
 }
 
 .job-details {
-  width: 97%;
-  padding: 25px;
+    width: 97%;
+    padding: 25px;
 
-  form {
-    padding: 20px;
-  }
-
-  .job-details-card {
-    width: 100%;
-
-    .job-details-info {
-      gap: 20px;
-
-      .form-field {
-        mat-form-field {
-          width: 100%;
-        }
-      }
+    form {
+        padding: 20px;
     }
-  }
+
+    .job-details-card {
+        width: 100%;
+
+        .job-details-info {
+            gap: 20px;
+
+            .form-field {
+                mat-form-field {
+                    width: 100%;
+                }
+            }
+        }
+    }
 }
 
 .live-logs {
-  .polling-info {
-    color: #666;
-    margin-bottom: 16px;
-    font-style: italic;
-  }
-
-  .polling-warning {
-    color: #f00;
-    margin-bottom: 16px;
-    font-style: italic;
-  }
-
-  .polling-interval-dropdown {
-    mat-form-field {
-      width: 50%;
-    }
-  }
-
-  .log-entry {
-    margin-bottom: 16px;
-
-    .mat-card-header {
-      background-color: #fAfAfA;
-      padding: 8px 16px;
+    .polling-info {
+        color: #666;
+        margin-bottom: 16px;
+        font-style: italic;
     }
 
-    .mat-card-title {
-      font-size: 18px;
-      font-weight: bold;
+    .polling-warning {
+        color: #f00;
+        margin-bottom: 16px;
+        font-style: italic;
     }
 
-    .mat-card-subtitle {
-      color: #666;
+    .polling-interval-dropdown {
+        mat-form-field {
+            width: 50%;
+        }
     }
 
-    .mat-card-content {
-      padding: 16px;
+    .log-entry {
+        margin-bottom: 16px;
+
+        .mat-card-header {
+            background-color: #fafafa;
+            padding: 8px 16px;
+        }
+
+        .mat-card-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .mat-card-subtitle {
+            color: #666;
+        }
+
+        .mat-card-content {
+            padding: 16px;
+        }
     }
-  }
 }

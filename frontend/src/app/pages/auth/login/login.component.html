@@ -1,34 +1,49 @@
 <div class="login-container">
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>Login</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <form (ngSubmit)="onSubmit(loginForm)" #loginForm="ngForm">
-        <mat-form-field appearance="outline">
-          <mat-label>Username</mat-label>
-          <input matInput type="text" name="username" [(ngModel)]="username" required autocomplete="username">
-          <mat-icon matSuffix>person</mat-icon>
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Password</mat-label>
-          <input matInput type="password" name="password" [(ngModel)]="password" required
-            autocomplete="current-password">
-          <mat-icon matSuffix>lock</mat-icon>
-        </mat-form-field>
-        @if (errorMessage) {
-        <div class="error-message">
-          {{ errorMessage }}
-        </div>
-        } @else {
-        <div class="info-message">
-          Please enter your credentials.
-        </div>
-        }
-        <div class="button-flex-container">
-          <button mat-raised-button color="primary" type="submit">Login</button>
-        </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title>Login</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <form (ngSubmit)="onSubmit(loginForm)" #loginForm="ngForm">
+                <mat-form-field appearance="outline">
+                    <mat-label>Username</mat-label>
+                    <input
+                        matInput
+                        type="text"
+                        name="username"
+                        [(ngModel)]="username"
+                        required
+                        autocomplete="username"
+                    />
+                    <mat-icon matSuffix>person</mat-icon>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label>Password</mat-label>
+                    <input
+                        matInput
+                        type="password"
+                        name="password"
+                        [(ngModel)]="password"
+                        required
+                        autocomplete="current-password"
+                    />
+                    <mat-icon matSuffix>lock</mat-icon>
+                </mat-form-field>
+                @if (errorMessage) {
+                    <div class="error-message">
+                        {{ errorMessage }}
+                    </div>
+                } @else {
+                    <div class="info-message">
+                        Please enter your credentials.
+                    </div>
+                }
+                <div class="button-flex-container">
+                    <button mat-raised-button color="primary" type="submit">
+                        Login
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
 </div>

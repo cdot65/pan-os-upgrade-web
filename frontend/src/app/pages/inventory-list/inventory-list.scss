@@ -1,123 +1,121 @@
 // src/app/pages/inventory-list/inventory-list.scss
 
 .inventory-list-container {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
 }
 
 .inventory-list {
-  width: 97%;
-  padding: 25px;
+    width: 97%;
+    padding: 25px;
 
-  .table-header {
-    margin-bottom: 20px;
+    .table-header {
+        margin-bottom: 20px;
 
-    h2 {
-      margin: 0;
+        h2 {
+            margin: 0;
+        }
+
+        .refresh-header {
+            display: flex;
+            align-items: center;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+
+            .button-container {
+                display: flex;
+                justify-content: flex-start;
+
+                button {
+                    margin-right: 8px;
+                }
+            }
+
+            .selected-actions {
+                display: flex;
+                justify-content: flex-end;
+
+                button {
+                    margin-left: 8px;
+                }
+            }
+        }
+    }
+
+    .refresh-progress {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
     }
 
     .refresh-header {
-      display: flex;
-      align-items: center;
+        outline: none;
+        // padding: 24px 8px;
+        font-size: 20px;
+        text-align: center;
+        color: accent;
     }
 
-    .button-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 10px;
-
-      .button-container {
-        display: flex;
-        justify-content: flex-start;
-
-        button {
-          margin-right: 8px;
-        }
-      }
-
-      .selected-actions {
-        display: flex;
-        justify-content: flex-end;
-
-        button {
-          margin-left: 8px;
-        }
-      }
+    .refresh-error {
+        outline: none;
+        // padding: 24px 8px;
+        font-size: 20px;
+        text-align: center;
+        color: red;
     }
-  }
 
-  .refresh-progress {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
+    .sync-progress {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
 
-  }
+    .sync-header {
+        outline: none;
+        // padding: 24px 8px;
+        font-size: 20px;
+        text-align: center;
+        color: accent;
+    }
 
-  .refresh-header {
-    outline: none;
-    // padding: 24px 8px;
-    font-size: 20px;
-    text-align: center;
-    color: accent;
-  }
+    .sync-error {
+        outline: none;
+        // padding: 24px 8px;
+        font-size: 20px;
+        text-align: center;
+        color: red;
+    }
 
-  .refresh-error {
-    outline: none;
-    // padding: 24px 8px;
-    font-size: 20px;
-    text-align: center;
-    color: red;
-  }
+    .mat-table {
+        width: 100%;
 
-  .sync-progress {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
+        .mat-row {
+            &:hover {
+                .mat-cell {
+                    background-color: rgba(0, 0, 0, 0.2);
+                }
+            }
+        }
 
-  }
-
-  .sync-header {
-    outline: none;
-    // padding: 24px 8px;
-    font-size: 20px;
-    text-align: center;
-    color: accent;
-  }
-
-  .sync-error {
-    outline: none;
-    // padding: 24px 8px;
-    font-size: 20px;
-    text-align: center;
-    color: red;
-  }
-
-  .mat-table {
-    width: 100%;
-
-    .mat-row {
-      &:hover {
         .mat-cell {
-          background-color: rgba(0, 0, 0, 0.2);
+            padding-right: 20px;
+            transition: background-color 0.3s;
         }
-      }
-    }
 
-    .mat-cell {
-      padding-right: 20px;
-      transition: background-color 0.3s;
-    }
+        .mat-header-cell {
+            font-weight: bold;
+        }
 
-    .mat-header-cell {
-      font-weight: bold;
+        .edit-button {
+            margin-left: 10px;
+        }
     }
-
-    .edit-button {
-      margin-left: 10px;
-    }
-  }
 }

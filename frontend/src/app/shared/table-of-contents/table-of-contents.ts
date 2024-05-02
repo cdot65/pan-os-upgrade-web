@@ -93,7 +93,9 @@ export class TableOfContents implements OnInit, AfterViewInit, OnDestroy {
         this._ngZone.runOutsideAngular(() => {
             Promise.resolve().then(() => {
                 this._scrollContainer = this.container
-                    ? (this._document.querySelector(this.container) as HTMLElement)
+                    ? (this._document.querySelector(
+                          this.container,
+                      ) as HTMLElement)
                     : window;
 
                 if (this._scrollContainer) {
@@ -124,19 +126,28 @@ export class TableOfContents implements OnInit, AfterViewInit, OnDestroy {
         this._links = [];
     }
 
-    addHeaders(sectionName: string, docViewerContent: HTMLElement, sectionIndex = 0) {
-        const links = Array.from(docViewerContent.querySelectorAll("h3, h4"), (header) => {
-            // remove the 'link' icon name from the inner text
-            const name = (header as HTMLElement).innerText.trim().replace(/^link/, "");
-            const { top } = header.getBoundingClientRect();
-            return {
-                name,
-                type: header.tagName.toLowerCase(),
-                top: top,
-                id: header.id,
-                active: false,
-            };
-        });
+    addHeaders(
+        sectionName: string,
+        docViewerContent: HTMLElement,
+        sectionIndex = 0,
+    ) {
+        const links = Array.from(
+            docViewerContent.querySelectorAll("h3, h4"),
+            (header) => {
+                // remove the 'link' icon name from the inner text
+                const name = (header as HTMLElement).innerText
+                    .trim()
+                    .replace(/^link/, "");
+                const { top } = header.getBoundingClientRect();
+                return {
+                    name,
+                    type: header.tagName.toLowerCase(),
+                    top: top,
+                    id: header.id,
+                    active: false,
+                };
+            },
+        );
 
         this._linkSections[sectionIndex] = { name: sectionName, links };
         this._links.push(...links);
@@ -170,7 +181,8 @@ export class TableOfContents implements OnInit, AfterViewInit, OnDestroy {
             const currentLink = this._links[i];
             const nextLink = this._links[i + 1];
             const isActive =
-                scrollOffset >= currentLink.top && (!nextLink || nextLink.top >= scrollOffset);
+                scrollOffset >= currentLink.top &&
+                (!nextLink || nextLink.top >= scrollOffset);
 
             if (isActive !== currentLink.active) {
                 currentLink.active = isActive;

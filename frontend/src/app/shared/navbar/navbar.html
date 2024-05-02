@@ -1,40 +1,70 @@
 <!-- TODO: figure out if the <nav> should go inside of a <header> element. -->
 <nav class="panosupgrade-navbar-header" aria-label="Top Toolbar">
-  @if (skipLinkHref) {
-  <div class="skip-link-wrapper" [class.cdk-visually-hidden]="skipLinkHidden">
-    <a mat-raised-button [href]="skipLinkHref" (focus)="skipLinkHidden = false" (blur)="skipLinkHidden = true"
-      color="accent">
-      Skip to main content
+    @if (skipLinkHref) {
+    <div class="skip-link-wrapper" [class.cdk-visually-hidden]="skipLinkHidden">
+        <a
+            mat-raised-button
+            [href]="skipLinkHref"
+            (focus)="skipLinkHidden = false"
+            (blur)="skipLinkHidden = true"
+            color="accent"
+        >
+            Skip to main content
+        </a>
+    </div>
+    }
+    <a
+        mat-button
+        class="panosupgrade-button"
+        routerLink="/"
+        aria-label="PAN-OS Upgrade"
+    >
+        <img
+            class="logo"
+            matButtonIcon
+            src="../../../assets/img/homepage/pan-orange.svg"
+            alt="angular"
+            aria-hidden="true"
+        />
+        <span>PAN-OS Upgrade</span>
     </a>
-  </div>
-  }
-  <a mat-button class="panosupgrade-button" routerLink="/" aria-label="PAN-OS Upgrade">
-    <img class="logo" matButtonIcon src="../../../assets/img/homepage/pan-orange.svg" alt="angular"
-      aria-hidden="true" />
-    <span>PAN-OS Upgrade</span>
-  </a>
-  @for (key of sectionKeys; track key) {
-  <a mat-button class="panosupgrade-navbar-hide-small panosupgrade-button" [routerLink]="key"
-    routerLinkActive="panosupgrade-navbar-header-item-selected">
-    {{sections[key].name}}
-  </a>
-  }
-  <div class="flex-spacer"></div>
-  <theme-picker></theme-picker>
-  @if (!hasAuthToken) {
-  <a mat-button class="panosupgrade-button panosupgrade-navbar-hide-small" routerLink="/auth/login">
-    <mat-icon>login</mat-icon>
-    Login
-  </a>
-  } @else {
-  <a mat-button class="panosupgrade-button panosupgrade-navbar-hide-small" routerLink="/auth/login" (click)="logout()">
-    <mat-icon>logout</mat-icon>
-    Logout
-  </a>
-  }
+    @for (key of sectionKeys; track key) {
+    <a
+        mat-button
+        class="panosupgrade-navbar-hide-small panosupgrade-button"
+        [routerLink]="key"
+        routerLinkActive="panosupgrade-navbar-header-item-selected"
+    >
+        {{sections[key].name}}
+    </a>
+    }
+    <div class="flex-spacer"></div>
+    <theme-picker></theme-picker>
+    @if (!hasAuthToken) {
+    <a
+        mat-button
+        class="panosupgrade-button panosupgrade-navbar-hide-small"
+        routerLink="/auth/login"
+    >
+        <mat-icon>login</mat-icon>
+        Login
+    </a>
+    } @else {
+    <a
+        mat-button
+        class="panosupgrade-button panosupgrade-navbar-hide-small"
+        routerLink="/auth/login"
+        (click)="logout()"
+    >
+        <mat-icon>logout</mat-icon>
+        Logout
+    </a>
+    }
 </nav>
 <nav class="docs-navbar docs-navbar-show-small" aria-label="Section Nav Bar">
-  @for (key of sectionKeys; track key) {
-  <a mat-button class="docs-navbar-link" [routerLink]="key">{{sections[key].name}}</a>
-  }
+    @for (key of sectionKeys; track key) {
+    <a mat-button class="docs-navbar-link" [routerLink]="key"
+        >{{sections[key].name}}</a
+    >
+    }
 </nav>

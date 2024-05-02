@@ -1,23 +1,23 @@
 // src/app/pages/job-delete-dialog/job-delete-dialog.scss
 
 .mat-dialog-title {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
 }
 
 .mat-dialog-content {
-  margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 .button-container {
-  margin-top: 20px;
-  margin-right: 20px;
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: flex-end;
+    margin-top: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: flex-end;
 
-  button {
-    margin-left: 10px;
-  }
+    button {
+        margin-left: 10px;
+    }
 }
