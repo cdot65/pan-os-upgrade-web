@@ -213,7 +213,7 @@ def determine_upgrade(
     target_maintenance: Union[int, str],
     target_major: int,
     target_minor: int,
-) -> None:
+) -> bool:
     """
     Determine if a firewall requires an upgrade based on the current and target versions.
 
@@ -274,6 +274,8 @@ def determine_upgrade(
             action="start",
             message=f"{device['db_device'].hostname}: Upgrade required from {device['db_device'].sw_version} to {target_major}.{target_minor}.{target_maintenance}",
         )
+        return True
+
     else:
         # Log no upgrade required or downgrade attempt detected message
         log_upgrade(
@@ -285,7 +287,7 @@ def determine_upgrade(
             action="stop",
             message=f"{device['db_device'].hostname}: Halting upgrade.",
         )
-        return "errored"
+        return False
 
 
 def get_emoji(action: str) -> str:
@@ -1088,12 +1090,15 @@ def software_update_check(
         target_maintenance = int(target_maintenance)
 
     # Check if the specified version is older than the current version
-    determine_upgrade(
+    upgrade_required = determine_upgrade(
         device=device,
         target_maintenance=target_maintenance,
         target_major=target_major,
         target_minor=target_minor,
     )
+
+    if not upgrade_required:
+        return False
 
     current_parts = device["db_device"].sw_version.split(".")
     current_major, current_minor = map(int, current_parts[:2])
