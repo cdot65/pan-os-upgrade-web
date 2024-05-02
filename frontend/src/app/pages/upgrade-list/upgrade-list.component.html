@@ -81,6 +81,9 @@
                     </mat-radio-group>
                 </div>
             </div>
+
+            <mat-divider></mat-divider>
+
             <h3>Selected Devices</h3>
             <div class="selected-devices">
                 @for (
@@ -112,10 +115,19 @@
                                             <div class="refresh-progress">
                                                 @if (
                                                     jobStatuses[job.job] ===
-                                                    "completed"
+                                                        "completed" ||
+                                                    jobStatuses[job.job] ===
+                                                        "skipped"
                                                 ) {
                                                     <mat-icon
                                                         >check_circle</mat-icon
+                                                    >
+                                                } @else if (
+                                                    jobStatuses[job.job] ===
+                                                    "errored"
+                                                ) {
+                                                    <mat-icon
+                                                        >error_outline</mat-icon
                                                     >
                                                 } @else {
                                                     <mat-progress-bar
@@ -159,29 +171,11 @@
                                     }}
                                 </li>
                             </ul>
-                            <mat-divider></mat-divider>
-                            <h4>Upgrade Information</h4>
-                            <ul>
-                                <li>
-                                    Current Version:
-                                    {{ getDeviceSwVersion(deviceId) }}
-                                </li>
-                                <li>
-                                    Target Version:
-                                    {{
-                                        upgradeForm.get("target_version")?.value
-                                    }}
-                                </li>
-                            </ul>
                             @if (checkDeviceEligibility(deviceId) == false) {
                                 <div class="warning-message">
                                     This is the primary firewall in an HA pair,
-                                    its upgrade will be performed through the HA
-                                    peer upgrade job.
-                                </div>
-                            } @else {
-                                <div class="info-message">
-                                    Ready to be upgraded.
+                                    its upgrade will only be performed through
+                                    the HA peer's upgrade job.
                                 </div>
                             }
                         </mat-card-content>
