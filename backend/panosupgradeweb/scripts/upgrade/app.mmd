@@ -1,0 +1,47 @@
+graph TD
+    A[Start] --> B{Operation Type}
+    B -->|Upgrade| C[run_panos_upgrade]
+    C --> D[Parse command-line arguments]
+    D --> E[Configure logging level]
+    E --> F[Create a new Job entry]
+    F --> G[Retrieve Device and Profile from database]
+    G --> H{Device panorama managed?}
+    H -->|Yes| I[Create Firewall object with serial and Panorama]
+    H -->|No| J[Create Firewall object with IP address]
+    I --> K[Create device dictionary object]
+    J --> K
+    K --> L[Add device to upgrade_devices list]
+    L --> M{Device in HA pair?}
+    M -->|Yes| N[Create Firewall object for HA peer]
+    N --> O[Iterate over passive and active-secondary devices]
+    M -->|No| O
+    O --> P[upgrade_firewall]
+    P --> Q{Check if upgrade is available}
+    Q -->|No| R[Log error and exit]
+    Q -->|Yes| S{Is firewall part of HA pair?}
+    S -->|Yes| T{Determine active/passive role}
+    T -->|Not ready| U[Switch control to peer firewall]
+    T -->|Ready| V[Proceed with upgrade]
+    S -->|No| V
+    V --> W{Is target version already downloaded?}
+    W -->|Yes| X[Log success]
+    W -->|No| Y[software_download]
+    Y --> Z{Download successful?}
+    Z -->|Yes| AA[Log success]
+    Z -->|No| AB[Log error and exit]
+    AA --> AC[perform_snapshot]
+    X --> AC
+    AC --> AD[Perform upgrade]
+    AD -->|Success| AE[Perform post-upgrade tasks]
+    AD -->|Failure| AF[Log error]
+    AE --> AG[End]
+    AF --> AG
+    AB --> AG
+    R --> AG
+    U --> P
+    O --> AH[Iterate over active and active-primary devices]
+    AH --> P
+    P --> AI[Return job status]
+    AI --> AG
+    B -->|Other| AJ[Log error and exit]
+    AJ --> AG
