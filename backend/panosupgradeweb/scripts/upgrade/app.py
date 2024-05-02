@@ -1630,10 +1630,12 @@ def run_panos_upgrade(
             P --> Q[End]
         ```
     """
+
+    # Set the global JOB_ID variable to be equal to the job_id parameter
     global JOB_ID
     JOB_ID = job_id
 
-    # Check to see if the firewall is ready for an upgrade
+    # Log the upgrade job details to Elasticsearch
     log_upgrade(
         action="report",
         message=f"Running PAN-OS upgrade for device: {device_uuid}",
@@ -1651,16 +1653,29 @@ def run_panos_upgrade(
         message=f"Target PAN-OS version: {target_version}",
     )
 
+    # Initialize an empty list to store the devices to upgrade
     upgrade_devices = []
 
+    # Perform the PAN-OS upgrade process
     try:
         # Retrieve the Device and Profile objects from the database
         device = Device.objects.get(uuid=device_uuid)
         profile = Profile.objects.get(uuid=profile_uuid)
 
-        # Perform common setup tasks, return a connected device
+        # Gracefully exit if the device is the primary device in an HA pair
+        if device.ha_enabled and device.local_state in ["active", "active-primary"]:
+            log_upgrade(
+                action="report",
+                message=f"{device.hostname}: Device is the primary device in an HA pair.",
+            )
+            log_upgrade(
+                action="report",
+                message=f"{device.hostname}: The upgrade of this device can only be initiated by the workflow to upgrade the HA peer firewall.",
+            )
+            return "skipped"
+
+        # Create a Firewall object using the serial if the device is Panorama-managed
         if device.panorama_managed:
-            # Create a Firewall object using the serial and Panorama if the device is Panorama-managed
             firewall = Firewall(
                 serial=device.serial,
                 api_username=profile.pan_username,
@@ -1676,15 +1691,16 @@ def run_panos_upgrade(
                 api_password=profile.pan_password,
             )
             pan.add(firewall)
+
+        # Create a Firewall object using the IP address if the device is not Panorama-managed
         else:
-            # Create a Firewall object using the IP address if the device is not Panorama-managed
             firewall = Firewall(
                 hostname=device.ipv4_address,
                 username=profile.pan_username,
                 password=profile.pan_password,
             )
 
-        # Create a dictionary object to store the device, firewall, and profile objects
+        # Create a dictionary object to store the database device, pan-os-python firewall object, and upgrade profile
         device = {
             "db_device": device,
             "job_id": JOB_ID,
@@ -1701,13 +1717,16 @@ def run_panos_upgrade(
 
         # If the device is in an HA pair, create a Firewall object for the peer device
         if upgrade_devices[0]["db_device"].ha_enabled:
-            # Create a Firewall object based on HA peer information within device object.
+
+            # Create a Firewall object based on HA peer information within the database device object.
             if upgrade_devices[0]["db_device"].peer_device is not None:
+
+                # Retrieve the peer device object from the database
                 peer = Device.objects.get(
                     pk=upgrade_devices[0]["db_device"].peer_device.pk
                 )
 
-                # If the device is managed by Panorama, use the serial instead of the IP address
+                # If the peer device is managed by Panorama, use the serial to create the firewall object
                 if upgrade_devices[0]["db_device"].panorama_managed:
                     peer_firewall = Firewall(
                         serial=peer.serial,
@@ -1720,6 +1739,8 @@ def run_panos_upgrade(
                         api_password=upgrade_devices[0]["profile"].pan_password,
                     )
                     pan.add(peer_firewall)
+
+                # If the peer device is not managed by Panorama, use the IP address to create the firewall object
                 else:
                     peer_firewall = Firewall(
                         hostname=peer.ipv4_address,
@@ -1731,29 +1752,33 @@ def run_panos_upgrade(
                 upgrade_devices.append(
                     {
                         "db_device": peer,
+                        "job_id": JOB_ID,
                         "pan_device": peer_firewall,
                         "profile": upgrade_devices[0]["profile"],
                     }
                 )
-
                 log_upgrade(
                     action="report",
                     message=f"{upgrade_devices[0]['db_device'].hostname}: HA peer firewall added to the upgrade list.",
                 )
 
         # Iterate over the list of passive and active-secondary devices to upgrade
-        for each in upgrade_devices:
+        for i, each in enumerate(upgrade_devices):
+
             # First round of upgrades, targeting passive and active-secondary firewalls
-            if each["db_device"].local_state in [
-                "passive",
-                "active-secondary",
-            ]:
+            if each["db_device"].local_state in ["passive", "active-secondary"]:
+
+                # Perform the upgrade process for the secondary device first
                 try:
                     upgrade_firewall(
                         device=each,
                         dry_run=dry_run,
                         target_version=target_version,
                     )
+                    # Remove the upgraded device from the list
+                    upgrade_devices.pop(i)
+
+                # Handle exceptions that occur during the PAN-OS upgrade process
                 except WorkerLostError as exc:
                     log_upgrade(
                         action="error",
@@ -1767,19 +1792,19 @@ def run_panos_upgrade(
                     )
                     return "errored"
 
-        # Iterate over the list of devices to upgrade
+        # Iterate over the remaining devices to upgrade
         for each in upgrade_devices:
+
             # Second round of upgrades, targeting active and active-primary firewalls
-            if each["db_device"].local_state in [
-                "active",
-                "active-primary",
-            ]:
+            if each["db_device"].local_state in ["active", "active-primary"]:
                 try:
                     upgrade_firewall(
                         device=each,
                         dry_run=dry_run,
                         target_version=target_version,
                     )
+
+                # Handle exceptions that occur during the PAN-OS upgrade process
                 except WorkerLostError as exc:
                     log_upgrade(
                         action="error",
@@ -1795,6 +1820,7 @@ def run_panos_upgrade(
 
         return "completed"
 
+    # Handle exceptions that occur during the PAN-OS upgrade process
     except WorkerLostError as e:
         log_upgrade(
             action="error",
