@@ -29,6 +29,12 @@ export class ElasticsearchService {
             },
             sort: [
                 {
+                    "extra.sequence_number": {
+                        order: "asc",
+                        unmapped_type: "long",
+                    },
+                },
+                {
                     "@timestamp": {
                         order: "asc",
                         unmapped_type: "long",
@@ -60,6 +66,12 @@ export class ElasticsearchService {
             },
             sort: [
                 {
+                    "extra.sequence_number": {
+                        order: "asc",
+                        unmapped_type: "long",
+                    },
+                },
+                {
                     "@timestamp": {
                         order: "asc",
                         unmapped_type: "long",
@@ -88,6 +100,12 @@ export class ElasticsearchService {
                 },
             },
             sort: [
+                {
+                    "extra.sequence_number": {
+                        order: "asc",
+                        unmapped_type: "long",
+                    },
+                },
                 {
                     "@timestamp": {
                         order: "asc",
