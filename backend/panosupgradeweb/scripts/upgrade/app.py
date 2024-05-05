@@ -11,6 +11,7 @@ import time
 from typing import Dict, List, Optional, Tuple, Union
 import uuid
 
+import ipdb
 import django
 from django.contrib.auth import get_user_model
 from logstash_async.handler import AsynchronousLogstashHandler
@@ -58,6 +59,26 @@ from panosupgradeweb.models import (  # noqa: E402
 
 
 class UpgradeLogger(logging.Logger):
+    """
+    A custom logger class for logging upgrade-related messages.
+
+    This class extends the built-in logging.Logger class and provides additional functionality
+    for logging upgrade-related messages. It includes methods to set the job ID, log tasks with
+    emojis, and send logs to a Logstash server.
+
+    Attributes:
+        name (str): The name of the logger.
+        level (int): The logging level (default: logging.NOTSET).
+        sequence_number (int): The sequence number for log messages.
+        job_id (str): The ID of the job associated with the upgrade.
+
+    Methods:
+        __init__: Initialize the UpgradeLogger instance.
+        get_emoji: Map specific action keywords to their corresponding emoji symbols.
+        log_task: Log a task message with an emoji and extra information.
+        set_job_id: Set the job ID for the logger.
+    """
+
     def __init__(self, name, level=logging.NOTSET):
         super().__init__(name, level)
         self.sequence_number = 0
@@ -151,6 +172,38 @@ class UpgradeLogger(logging.Logger):
 
 
 class PanosUpgrade:
+    """
+    A class to handle the PAN-OS upgrade process for Palo Alto Networks devices.
+
+    This class provides methods to perform various tasks related to upgrading PAN-OS devices,
+    such as checking version compatibility, preparing upgrade devices, upgrading passive and
+    active devices, and handling HA scenarios.
+
+    Attributes:
+        job_id (str): The ID of the job associated with the upgrade.
+        logger (UpgradeLogger): An instance of the UpgradeLogger class for logging upgrade-related messages.
+        upgrade_devices (List[Dict]): A list of dictionaries containing information about the devices to be upgraded.
+
+    Methods:
+        check_ha_compatibility: Check the compatibility of upgrading a firewall in an HA pair to a target version.
+        compare_versions: Compare two version strings and determine their relative order.
+        determine_upgrade: Determine if a firewall requires an upgrade based on the current and target versions.
+        get_ha_status: Retrieve the deployment information and HA status of a firewall device.
+        handle_firewall_ha: Handle the upgrade process for a firewall device in an HA configuration.
+        parse_version: Parse a version string into its major, minor, maintenance, and hotfix components.
+        perform_snapshot: Perform a snapshot of the network state information for a given device.
+        prepare_upgrade_devices: Prepare the upgrade devices by creating device and firewall objects.
+        run_assurance: Run assurance checks or snapshots on a firewall device.
+        run_upgrade: Orchestrate the upgrade process by calling the appropriate methods based on the device state.
+        software_download: Download the target software version to the firewall device.
+        software_update_check: Check if a software update to the target version is available and compatible.
+        suspend_ha_active: Suspend the active device in a high-availability (HA) pair.
+        suspend_ha_passive: Suspend the HA state of the passive target device in an HA pair.
+        upgrade_active_devices: Upgrade the active devices in the upgrade_devices list.
+        upgrade_firewall: Upgrade a firewall to a target PAN-OS version.
+        upgrade_passive_devices: Upgrade the passive devices in the upgrade_devices list.
+    """
+
     def __init__(
         self,
         job_id: str,
@@ -158,6 +211,7 @@ class PanosUpgrade:
         self.job_id = job_id
         self.logger = UpgradeLogger("pan-os-upgrade-upgrade")
         self.logger.set_job_id(job_id)
+        self.upgrade_devices = []
 
     def check_ha_compatibility(
         self,
@@ -789,6 +843,88 @@ class PanosUpgrade:
 
         return snapshot
 
+    def prepare_upgrade_devices(
+        self,
+        device_uuid: str,
+        profile_uuid: str,
+    ) -> None:
+        device = Device.objects.get(uuid=device_uuid)
+        profile = Profile.objects.get(uuid=profile_uuid)
+
+        if device.panorama_managed:
+            firewall = Firewall(
+                serial=device.serial,
+                api_username=profile.pan_username,
+                api_password=profile.pan_password,
+            )
+            pan = Panorama(
+                hostname=(
+                    device.panorama_ipv4_address
+                    if device.panorama_ipv4_address
+                    else device.ipv6_address
+                ),
+                api_username=profile.pan_username,
+                api_password=profile.pan_password,
+            )
+            pan.add(firewall)
+        else:
+            firewall = Firewall(
+                hostname=device.ipv4_address,
+                username=profile.pan_username,
+                password=profile.pan_password,
+            )
+
+        device = {
+            "db_device": device,
+            "job_id": self.job_id,
+            "pan_device": firewall,
+            "profile": profile,
+        }
+        self.logger.log_task(
+            action="report",
+            message=f"{device['db_device'].hostname}: Device and firewall objects created.",
+        )
+
+        self.upgrade_devices.append(device)
+
+        if self.upgrade_devices[0]["db_device"].ha_enabled:
+            if self.upgrade_devices[0]["db_device"].peer_device is not None:
+                peer = Device.objects.get(
+                    pk=self.upgrade_devices[0]["db_device"].peer_device.pk
+                )
+
+                if self.upgrade_devices[0]["db_device"].panorama_managed:
+                    peer_firewall = Firewall(
+                        serial=peer.serial,
+                        api_username=self.upgrade_devices[0]["profile"].pan_username,
+                        api_password=self.upgrade_devices[0]["profile"].pan_password,
+                    )
+                    pan = Panorama(
+                        hostname=peer.panorama_ipv4_address,
+                        api_username=self.upgrade_devices[0]["profile"].pan_username,
+                        api_password=self.upgrade_devices[0]["profile"].pan_password,
+                    )
+                    pan.add(peer_firewall)
+                else:
+                    peer_firewall = Firewall(
+                        hostname=peer.ipv4_address,
+                        api_username=self.upgrade_devices[0]["profile"].pan_username,
+                        api_password=self.upgrade_devices[0]["profile"].pan_password,
+                    )
+
+                self.upgrade_devices.append(
+                    {
+                        "db_device": peer,
+                        "job_id": self.job_id,
+                        "pan_device": peer_firewall,
+                        "profile": self.upgrade_devices[0]["profile"],
+                    }
+                )
+                self.logger.log_task(
+                    action="report",
+                    message=f"{self.upgrade_devices[0]['db_device'].hostname}: HA peer firewall added to the upgrade list.",
+                )
+
     def run_assurance(
         self,
         device: Device,
@@ -829,6 +965,7 @@ class PanosUpgrade:
             ```
         """
 
+        ipdb.set_trace()
         # Setup Firewall client
         proxy_firewall = FirewallProxy(device["pan_device"])
         checks_firewall = CheckFirewall(proxy_firewall)
@@ -886,6 +1023,65 @@ class PanosUpgrade:
             return
 
         return results
+
+    def run_upgrade(
+        self,
+        author_id: int,
+        device_uuid: str,
+        dry_run: bool,
+        profile_uuid: str,
+        target_version: str,
+    ) -> str:
+
+        self.logger.log_task(
+            action="report",
+            message=f"Running PAN-OS upgrade for device: {device_uuid}",
+        )
+        self.logger.log_task(
+            action="report",
+            message=f"Author ID: {author_id}",
+        )
+        self.logger.log_task(
+            action="report",
+            message=f"Using profile: {profile_uuid}",
+        )
+        self.logger.log_task(
+            action="report",
+            message=f"Target PAN-OS version: {target_version}",
+        )
+
+        try:
+            device = Device.objects.get(uuid=device_uuid)
+            if device.ha_enabled and device.local_state in ["active", "active-primary"]:
+                self.logger.log_task(
+                    action="report",
+                    message=f"{device.hostname}: Device is the primary device in an HA pair.",
+                )
+                self.logger.log_task(
+                    action="report",
+                    message=f"{device.hostname}: The upgrade of this device can only be initiated by the workflow to upgrade the HA peer firewall.",
+                )
+                return "skipped"
+
+            self.prepare_upgrade_devices(device_uuid, profile_uuid)
+            ipdb.set_trace()
+            self.upgrade_passive_devices(dry_run, target_version)
+            self.upgrade_active_devices(dry_run, target_version)
+
+            return "completed"
+
+        except WorkerLostError as e:
+            self.logger.log_task(
+                action="error",
+                message=f"Worker lost during PAN-OS upgrade: {str(e)}",
+            )
+            return "errored"
+        except Exception as e:
+            self.logger.log_task(
+                action="error",
+                message=f"Error during PAN-OS upgrade: {str(e)}",
+            )
+            return "errored"
 
     def software_download(
         self,
@@ -1324,6 +1520,28 @@ class PanosUpgrade:
             )
             return False
 
+    def upgrade_active_devices(self, dry_run: bool, target_version: str) -> None:
+        for each in self.upgrade_devices:
+            if each["db_device"].local_state in ["active", "active-primary"]:
+                try:
+                    self.upgrade_firewall(
+                        device=each,
+                        dry_run=dry_run,
+                        target_version=target_version,
+                    )
+                except WorkerLostError as exc:
+                    self.logger.log_task(
+                        action="error",
+                        message=f"{each['db_device'].hostname}: Worker lost: {exc}",
+                    )
+                    raise
+                except Exception as exc:
+                    self.logger.log_task(
+                        action="error",
+                        message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
+                    )
+                    raise
+
     def upgrade_firewall(
         self,
         device: Dict,
@@ -1375,6 +1593,8 @@ class PanosUpgrade:
             message=f"{device['db_device'].hostname}: Checking to see if a PAN-OS upgrade is available.",
         )
 
+        ipdb.set_trace()
+
         update_available = self.software_update_check(
             device=device,
             target_version=target_version,
@@ -1388,6 +1608,7 @@ class PanosUpgrade:
             )
             return "errored"
 
+        # TODO: Revisit this block of code to see if it's redundant since we already checked for the state of the HA in our previous methods
         # If firewall is part of HA pair, determine if it's active or passive
         if device["db_device"].ha_enabled:
             proceed_with_upgrade, peer_firewall = self.handle_firewall_ha(
@@ -1578,12 +1799,43 @@ class PanosUpgrade:
         #         f"{get_emoji(action='error')} {hostname}: Installation of the target version was not successful. Skipping reboot."
         #     )
 
+    def upgrade_passive_devices(self, dry_run: bool, target_version: str) -> None:
+        for i, each in enumerate(self.upgrade_devices):
+            if each["db_device"].local_state in ["passive", "active-secondary"]:
+                try:
+                    ipdb.set_trace()
+                    self.upgrade_firewall(
+                        device=each,
+                        dry_run=dry_run,
+                        target_version=target_version,
+                    )
+                    self.upgrade_devices.pop(i)
+                except WorkerLostError as exc:
+                    self.logger.log_task(
+                        action="error",
+                        message=f"{each['db_device'].hostname}: Worker lost: {exc}",
+                    )
+                    raise
+                except Exception as exc:
+                    self.logger.log_task(
+                        action="error",
+                        message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
+                    )
+                    raise
+            elif each["db_device"].local_state in ["suspended"]:
+                self.logger.log_task(
+                    action="report",
+                    message=f"{each['db_device'].hostname}: Device is suspended. Skipping upgrade.",
+                )
+                self.upgrade_devices.pop(i)
+                raise
+
 
 # Create an instance of the custom logger
 job_logger = UpgradeLogger("pan-os-upgrade-upgrade")
 
 
-def run_panos_upgrade(
+def main(
     author_id: int,
     device_uuid: str,
     dry_run: bool,
@@ -1591,258 +1843,15 @@ def run_panos_upgrade(
     profile_uuid: str,
     target_version: str,
 ) -> str:
-    """
-    Runs the PAN-OS upgrade process for a specified device.
-
-    This function performs the PAN-OS upgrade workflow for a given device. It retrieves the device
-    and profile information from the database, creates Firewall objects for the device and its HA peer
-    (if applicable), and executes the upgrade process. The upgrade is performed in two rounds:
-    first targeting passive and active-secondary firewalls, and then targeting active and active-primary firewalls.
-
-    Args:
-        author_id (int): The ID of the author performing the upgrade.
-        device_uuid (str): The UUID of the device to upgrade.
-        dry_run (bool): Indicates whether to perform a dry run without making any changes.
-        job_id (str): The ID of the job associated with the upgrade.
-        profile_uuid (str): The UUID of the profile to use for authentication.
-        target_version (str): The target PAN-OS version for the upgrade.
-
-    Returns:
-        str: A of the execution status of the upgrade workflow.
-
-    Raises:
-        Exception: If an error occurs during the PAN-OS upgrade process.
-
-    Mermaid Workflow:
-        ```mermaid
-        graph TD
-            A[Start] --> B[Set global JOB_ID]
-            B --> C[Log upgrade details]
-            C --> D[Retrieve Device and Profile from database]
-            D --> E{Device panorama managed?}
-            E -->|Yes| F[Create Firewall object with serial and Panorama]
-            E -->|No| G[Create Firewall object with IP address]
-            F --> H[Create device dictionary object]
-            G --> H
-            H --> I[Add device to upgrade_devices list]
-            I --> J{Device in HA pair?}
-            J -->|Yes| K[Create Firewall object for HA peer]
-            J -->|No| L[Iterate over passive and active-secondary devices]
-            K --> L
-            L --> M[Upgrade passive and active-secondary firewalls]
-            M --> N[Iterate over active and active-primary devices]
-            N --> O[Upgrade active and active-primary firewalls]
-            O --> P[Return job status]
-            P --> Q[End]
-        ```
-    """
 
     upgrade = PanosUpgrade(job_id)
-
-    # Set the job_id for the logger
-    upgrade.logger.set_job_id(job_id)
-
-    # Log the upgrade job details to Elasticsearch
-    upgrade.logger.log_task(
-        action="report",
-        message=f"Running PAN-OS upgrade for device: {device_uuid}",
+    return upgrade.run_upgrade(
+        author_id=author_id,
+        device_uuid=device_uuid,
+        dry_run=dry_run,
+        profile_uuid=profile_uuid,
+        target_version=target_version,
     )
-    upgrade.logger.log_task(
-        action="report",
-        message=f"Author ID: {author_id}",
-    )
-    upgrade.logger.log_task(
-        action="report",
-        message=f"Using profile: {profile_uuid}",
-    )
-    upgrade.logger.log_task(
-        action="report",
-        message=f"Target PAN-OS version: {target_version}",
-    )
-
-    # Initialize an empty list to store the devices to upgrade
-    upgrade_devices = []
-
-    # Perform the PAN-OS upgrade process
-    try:
-        # Retrieve the Device and Profile objects from the database
-        device = Device.objects.get(uuid=device_uuid)
-        profile = Profile.objects.get(uuid=profile_uuid)
-
-        # Gracefully exit if the device is the primary device in an HA pair
-        if device.ha_enabled and device.local_state in ["active", "active-primary"]:
-            upgrade.logger.log_task(
-                action="report",
-                message=f"{device.hostname}: Device is the primary device in an HA pair.",
-            )
-            upgrade.logger.log_task(
-                action="report",
-                message=f"{device.hostname}: The upgrade of this device can only be initiated by the workflow to upgrade the HA peer firewall.",
-            )
-            return "skipped"
-
-        # Create a Firewall object using the serial if the device is Panorama-managed
-        if device.panorama_managed:
-            firewall = Firewall(
-                serial=device.serial,
-                api_username=profile.pan_username,
-                api_password=profile.pan_password,
-            )
-            pan = Panorama(
-                hostname=(
-                    device.panorama_ipv4_address
-                    if device.panorama_ipv4_address
-                    else device.ipv6_address
-                ),
-                api_username=profile.pan_username,
-                api_password=profile.pan_password,
-            )
-            pan.add(firewall)
-
-        # Create a Firewall object using the IP address if the device is not Panorama-managed
-        else:
-            firewall = Firewall(
-                hostname=device.ipv4_address,
-                username=profile.pan_username,
-                password=profile.pan_password,
-            )
-
-        # Create a dictionary object to store the database device, pan-os-python firewall object, and upgrade profile
-        device = {
-            "db_device": device,
-            "job_id": job_id,
-            "pan_device": firewall,
-            "profile": profile,
-        }
-        upgrade.logger.log_task(
-            action="report",
-            message=f"{device['db_device'].hostname}: Device and firewall objects created.",
-        )
-
-        # Add the device object to the upgrade_devices list
-        upgrade_devices.append(device)
-
-        # If the device is in an HA pair, create a Firewall object for the peer device
-        if upgrade_devices[0]["db_device"].ha_enabled:
-
-            # Create a Firewall object based on HA peer information within the database device object.
-            if upgrade_devices[0]["db_device"].peer_device is not None:
-
-                # Retrieve the peer device object from the database
-                peer = Device.objects.get(
-                    pk=upgrade_devices[0]["db_device"].peer_device.pk
-                )
-
-                # If the peer device is managed by Panorama, use the serial to create the firewall object
-                if upgrade_devices[0]["db_device"].panorama_managed:
-                    peer_firewall = Firewall(
-                        serial=peer.serial,
-                        api_username=upgrade_devices[0]["profile"].pan_username,
-                        api_password=upgrade_devices[0]["profile"].pan_password,
-                    )
-                    pan = Panorama(
-                        hostname=peer.panorama_ipv4_address,
-                        api_username=upgrade_devices[0]["profile"].pan_username,
-                        api_password=upgrade_devices[0]["profile"].pan_password,
-                    )
-                    pan.add(peer_firewall)
-
-                # If the peer device is not managed by Panorama, use the IP address to create the firewall object
-                else:
-                    peer_firewall = Firewall(
-                        hostname=peer.ipv4_address,
-                        api_username=upgrade_devices[0]["profile"].pan_username,
-                        api_password=upgrade_devices[0]["profile"].pan_password,
-                    )
-
-                # Create another instance of device object for the peer device
-                upgrade_devices.append(
-                    {
-                        "db_device": peer,
-                        "job_id": job_id,
-                        "pan_device": peer_firewall,
-                        "profile": upgrade_devices[0]["profile"],
-                    }
-                )
-                upgrade.logger.log_task(
-                    action="report",
-                    message=f"{upgrade_devices[0]['db_device'].hostname}: HA peer firewall added to the upgrade list.",
-                )
-
-        # Iterate over the list of passive and active-secondary devices to upgrade
-        for i, each in enumerate(upgrade_devices):
-
-            # First round of upgrades, targeting passive and active-secondary firewalls
-            if each["db_device"].local_state in ["passive", "active-secondary"]:
-
-                # Perform the upgrade process for the secondary device first
-                try:
-                    upgrade.upgrade_firewall(
-                        device=each,
-                        dry_run=dry_run,
-                        target_version=target_version,
-                    )
-                    # Remove the upgraded device from the list
-                    upgrade_devices.pop(i)
-
-                # Handle exceptions that occur during the PAN-OS upgrade process
-                except WorkerLostError as exc:
-                    upgrade.logger.log_task(
-                        action="error",
-                        message=f"{each['db_device'].hostname}: Worker lost: {exc}",
-                    )
-                    return "errored"
-                except Exception as exc:
-                    upgrade.logger.log_task(
-                        action="error",
-                        message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
-                    )
-                    return "errored"
-
-        # Iterate over the remaining devices to upgrade
-        for each in upgrade_devices:
-
-            # Second round of upgrades, targeting active and active-primary firewalls
-            if each["db_device"].local_state in [
-                "active",
-                "active-primary",
-            ]:
-                try:
-                    upgrade.upgrade_firewall(
-                        device=each,
-                        dry_run=dry_run,
-                        target_version=target_version,
-                    )
-
-                # Handle exceptions that occur during the PAN-OS upgrade process
-                except WorkerLostError as exc:
-                    upgrade.logger.log_task(
-                        action="error",
-                        message=f"{each['db_device'].hostname}: Worker lost: {exc}",
-                    )
-                    return "errored"
-                except Exception as exc:
-                    upgrade.logger.log_task(
-                        action="error",
-                        message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
-                    )
-                    return "errored"
-
-        return "completed"
-
-    # Handle exceptions that occur during the PAN-OS upgrade process
-    except WorkerLostError as e:
-        upgrade.logger.log_task(
-            action="error",
-            message=f"Worker lost during PAN-OS upgrade: {str(e)}",
-        )
-        return "errored"
-    except Exception as e:
-        upgrade.logger.log_task(
-            action="error",
-            message=f"Error during PAN-OS upgrade: {str(e)}",
-        )
-        return "errored"
 
 
 if __name__ == "__main__":
@@ -1851,7 +1860,7 @@ if __name__ == "__main__":
 
     This script is used to run the PAN-OS upgrade process for Palo Alto Networks devices.
     It parses command-line arguments, configures logging, creates a new job entry, and
-    initiates the upgrade process by calling the `run_panos_upgrade` function.
+    initiates the upgrade process by calling the `main` function.
 
     Command-line arguments:
         -d, --device-uuid (str): UUID of the device to upgrade (required).
@@ -1867,7 +1876,7 @@ if __name__ == "__main__":
             A[Start] --> B[Parse command-line arguments]
             B --> C[Configure logging level]
             C --> D[Create a new Job entry]
-            D --> E[Call run_panos_upgrade function]
+            D --> E[Call main function]
             E --> F[End]
         ```
     """
@@ -1937,8 +1946,20 @@ if __name__ == "__main__":
         task_id=str(uuid.uuid4()),
     )
 
+    status = main(
+        author_id=author_id,
+        device_uuid=device_uuid,
+        dry_run=dry_run,
+        job_id=str(job.task_id),
+        profile_uuid=profile_uuid,
+        target_version=target_version,
+    )
+
+    job.job_status = status
+    job.save()
+
     # Initiate the upgrade process
-    run_panos_upgrade(
+    main(
         author_id=author_id,
         device_uuid=device_uuid,
         dry_run=dry_run,
