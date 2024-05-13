@@ -1033,12 +1033,16 @@ class PanosUpgrade:
                         dry_run=dry_run,
                         target_version=target_version,
                     )
+
+                # General exception handling for celery task
                 except WorkerLostError as exc:
                     self.logger.log_task(
                         action="error",
                         message=f"{each['db_device'].hostname}: Worker lost: {exc}",
                     )
                     raise
+
+                # General exception handling for upgrade process
                 except Exception as exc:
                     self.logger.log_task(
                         action="error",
@@ -1229,6 +1233,24 @@ def main(
                         # Return an error status
                         return "errored"
 
+            # General exception handling for celery task
+            except WorkerLostError as exc:
+                upgrade.logger.log_task(
+                    action="error",
+                    message=f"{each['db_device'].hostname}: Worker lost: {exc}",
+                )
+                return "errored"
+
+            # General exception handling for upgrade evaluation process
+            except Exception as exc:
+                upgrade.logger.log_task(
+                    action="error",
+                    message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
+                )
+                return "errored"
+
+            # Check if the software update is available and, if so, download the base/target versions
+            try:
                 # Check if a software update is available for the firewall
                 available_versions = upgrade.software_available_check(
                     device=each,
@@ -1396,7 +1418,7 @@ def main(
                             else:
                                 return "errored"
 
-            # Gracefully exit if the firewall is not ready for an upgrade to target version
+            # General exception handling for celery task
             except WorkerLostError as exc:
                 upgrade.logger.log_task(
                     action="error",
@@ -1404,7 +1426,7 @@ def main(
                 )
                 return "errored"
 
-            # Skip the upgrade process for devices that are suspended
+            # General exception handling for the software download process
             except Exception as exc:
                 upgrade.logger.log_task(
                     action="error",
@@ -1628,7 +1650,7 @@ def main(
                         # Continue with upgrade process on the passive target device
                         proceed_with_upgrade = True
 
-                # Gracefully exit if the celery worker is lost during the upgrade process
+                # General exception handling for celery task
                 except WorkerLostError as exc:
 
                     # Log the error message
@@ -1640,7 +1662,7 @@ def main(
                     # Return an error status
                     return "errored"
 
-                # Gracefully exit if an exception is generated during the process
+                # General exception handling for HA scenarios
                 except Exception as exc:
 
                     # Log the error message
@@ -1724,13 +1746,15 @@ def main(
                 # Remove the device from the upgrade list
                 upgrade.upgrade_devices.pop(i)
 
-            # Gracefully exit the execution if the firewall is not ready for an upgrade to target version
+            # General exception handling for celery task
             except WorkerLostError as exc:
                 upgrade.logger.log_task(
                     action="error",
                     message=f"{each['db_device'].hostname}: Worker lost: {exc}",
                 )
                 return "errored"
+
+            # General exception handling for pre-upgrade snapshot process
             except Exception as exc:
                 upgrade.logger.log_task(
                     action="error",
@@ -1764,12 +1788,15 @@ def main(
                     )
                     return "errored"
 
+            # General exception handling for celery task
             except WorkerLostError as exc:
                 upgrade.logger.log_task(
                     action="error",
                     message=f"{each['db_device'].hostname}: Worker lost: {exc}",
                 )
                 return "errored"
+
+            # General exception handling for upgrade evaluation process
             except Exception as exc:
                 upgrade.logger.log_task(
                     action="error",
@@ -1793,12 +1820,15 @@ def main(
                         )
                         return "errored"
 
+            # General exception handling for celery task
             except WorkerLostError as exc:
                 upgrade.logger.log_task(
                     action="error",
                     message=f"{each['db_device'].hostname}: Worker lost: {exc}",
                 )
                 return "errored"
+
+            # General exception handling for HA scenarios
             except Exception as exc:
                 upgrade.logger.log_task(
                     action="error",
@@ -1835,12 +1865,15 @@ def main(
                     )
                     return "errored"
 
+            # General exception handling for celery task
             except WorkerLostError as exc:
                 upgrade.logger.log_task(
                     action="error",
                     message=f"{each['db_device'].hostname}: Worker lost: {exc}",
                 )
                 return "errored"
+
+            # General exception handling for software download process
             except Exception as exc:
                 upgrade.logger.log_task(
                     action="error",
@@ -1859,12 +1892,15 @@ def main(
 
                 upgrade.upgrade_devices.pop(i)
 
+            # General exception handling for celery task
             except WorkerLostError as exc:
                 upgrade.logger.log_task(
                     action="error",
                     message=f"{each['db_device'].hostname}: Worker lost: {exc}",
                 )
                 return "errored"
+
+            # General exception handling for pre-upgrade snapshot process
             except Exception as exc:
                 upgrade.logger.log_task(
                     action="error",
