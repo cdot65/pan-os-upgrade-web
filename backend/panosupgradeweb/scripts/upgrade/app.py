@@ -1270,11 +1270,23 @@ def main(
                     # if the base image is not present, attempt to download it
                     if not base_image_downloaded:
 
-                        # log the message to the console
-                        upgrade.logger.log_task(
-                            action="start",
-                            message=f"{each['db_device'].hostname}: Downloading base image for target version {target_version}.",
-                        )
+                        # Special log if the device is in HA mode:
+                        if each["db_device"].ha_enabled:
+
+                            # Log the message to the console
+                            upgrade.logger.log_task(
+                                action="start",
+                                message=f"{each['db_device'].hostname}: Downloading base image {base_version_key} for target version {target_version}, will sync to HA peer.",
+                            )
+
+                        # Non-HA log message for standalone devices
+                        else:
+
+                            # Log the message to the console
+                            upgrade.logger.log_task(
+                                action="start",
+                                message=f"{each['db_device'].hostname}: Downloading base image {base_version_key} for target version {target_version}.",
+                            )
 
                         # Retry downloading the base image if it is not already downloaded
                         for attempt in range(retry_count):
@@ -1291,13 +1303,13 @@ def main(
                                 # Log the download success message
                                 upgrade.logger.log_task(
                                     action="success",
-                                    message=f"{each['db_device'].hostname}: Base image downloaded for target version {target_version}.",
+                                    message=f"{each['db_device'].hostname}: Base image {base_version_key} downloaded for target version {target_version}.",
                                 )
 
                                 # Log the waiting message
                                 upgrade.logger.log_task(
                                     action="success",
-                                    message=f"{each['db_device'].hostname}: Waiting {wait_time} seconds to let the base image load into the software manager before downloading {target_version}.",
+                                    message=f"{each['db_device'].hostname}: Waiting {wait_time} seconds to let the base image {base_version_key} load into the software manager before downloading {target_version}.",
                                 )
 
                                 # Wait for the base image to load into the software manager
@@ -1312,7 +1324,7 @@ def main(
                                 if attempt < retry_count - 1:
                                     upgrade.logger.log_task(
                                         action="error",
-                                        message=f"{each['db_device'].hostname}: Failed to download base image for target version {target_version}. Retrying after {wait_time} seconds.",
+                                        message=f"{each['db_device'].hostname}: Failed to download base image {base_version_key} for target version {target_version}. Retrying after {wait_time} seconds.",
                                     )
                                     time.sleep(wait_time)
 
@@ -1323,14 +1335,22 @@ def main(
                     # Log the message to the console
                     upgrade.logger.log_task(
                         action="success",
-                        message=f"{each['db_device'].hostname}: Base image {base_version_key} on target device.",
+                        message=f"{each['db_device'].hostname}: Base image {base_version_key} is on the device.",
                     )
 
-                    # Download the target version if the base image is already downloaded
-                    upgrade.logger.log_task(
-                        action="start",
-                        message=f"{each['db_device'].hostname}: Downloading target version {target_version}.",
-                    )
+                    # Special log if the device is in HA mode:
+                    if each["db_device"].ha_enabled:
+                        upgrade.logger.log_task(
+                            action="success",
+                            message=f"{each['db_device'].hostname}: Downloading target version {target_version}, will sync to HA peer.",
+                        )
+
+                    # Non-HA log message for standalone devices
+                    else:
+                        upgrade.logger.log_task(
+                            action="start",
+                            message=f"{each['db_device'].hostname}: Downloading target version {target_version}.",
+                        )
 
                     # Retry loop for downloading the target image
                     for attempt in range(retry_count):
@@ -1347,7 +1367,7 @@ def main(
                             # Log the download success message
                             upgrade.logger.log_task(
                                 action="success",
-                                message=f"{each['db_device'].hostname}: Target image version {target_version} downloaded.",
+                                message=f"{each['db_device'].hostname}: Target image {target_version} on the device.",
                             )
 
                             # Log the waiting message
