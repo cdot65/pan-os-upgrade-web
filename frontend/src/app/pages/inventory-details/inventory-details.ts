@@ -219,9 +219,6 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
                         console.error("Error checking job status:", error);
                         if (error.status === 400 && this.retryCount < 3) {
                             this.retryCount++;
-                            console.log(
-                                `Retrying job status check (attempt ${this.retryCount})`,
-                            );
                             setTimeout(() => this.getJobStatus(), 2000);
                         } else {
                             this.showRefreshProgress = false;
