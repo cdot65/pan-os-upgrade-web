@@ -20,7 +20,8 @@ export class AuthInterceptor implements HttpInterceptor {
         const authToken = localStorage.getItem("auth_token");
         if (
             authToken &&
-            request.url !== `${environment.apiUrl}${environment.tokenUrl}`
+            request.url !==
+                `${environment.apiUrl}${environment.apiEndpointToken}`
         ) {
             request = request.clone({
                 setHeaders: {
