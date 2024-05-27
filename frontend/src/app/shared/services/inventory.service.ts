@@ -28,6 +28,7 @@ import { environment } from "../../../environments/environment.prod";
     providedIn: "root",
 })
 export class InventoryService {
+    // Define the API endpoints
     private apiUrl = environment.apiUrl;
     private apiEndpointInventory = `${this.apiUrl}/api/v1/inventory/`;
     private apiEndpointFirewallPlatforms = `${this.apiUrl}/api/v1/inventory/platforms/firewall/`;
