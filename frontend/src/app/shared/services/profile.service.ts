@@ -4,6 +4,7 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable, of } from "rxjs";
 
+import { CookieService } from "ngx-cookie-service";
 import { Injectable } from "@angular/core";
 import { Profile } from "../interfaces/profile.interface";
 import { catchError } from "rxjs/operators";
@@ -15,10 +16,13 @@ import { environment } from "../../../environments/environment.prod";
 export class ProfileService {
     private apiUrl = environment.apiUrl;
 
-    constructor(private http: HttpClient) {}
+    constructor(
+        private http: HttpClient,
+        private cookieService: CookieService,
+    ) {}
 
     getProfiles(): Observable<Profile[]> {
-        const authToken = localStorage.getItem("auth_token");
+        const authToken = this.cookieService.get("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
@@ -29,7 +33,7 @@ export class ProfileService {
     }
 
     getProfile(uuid: string): Observable<Profile> {
-        const authToken = localStorage.getItem("auth_token");
+        const authToken = this.cookieService.get("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
@@ -43,7 +47,7 @@ export class ProfileService {
     }
 
     createProfile(createProfileForm: Profile): Observable<Profile> {
-        const authToken = localStorage.getItem("auth_token");
+        const authToken = this.cookieService.get("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
@@ -58,7 +62,7 @@ export class ProfileService {
     }
 
     deleteProfile(uuid: string): Observable<any> {
-        const authToken = localStorage.getItem("auth_token");
+        const authToken = this.cookieService.get("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
@@ -76,7 +80,7 @@ export class ProfileService {
     }
 
     updateProfile(profile: Profile, uuid: string): Observable<Profile> {
-        const authToken = localStorage.getItem("auth_token");
+        const authToken = this.cookieService.get("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,

@@ -14,6 +14,7 @@ import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
 
 import { CommonModule } from "@angular/common";
 import { ComponentPageTitle } from "../page-title/page-title";
+import { CookieService } from "ngx-cookie-service";
 import { Device } from "../../shared/interfaces/device.interface";
 import { DeviceType } from "../../shared/interfaces/device-type.interface";
 import { Footer } from "src/app/shared/footer/footer";
@@ -61,6 +62,7 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
     private destroy$ = new Subject<void>();
 
     constructor(
+        private cookieService: CookieService,
         private formBuilder: FormBuilder,
         private inventoryService: InventoryService,
         private router: Router,
@@ -124,7 +126,7 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
 
     createDevice(): void {
         if (this.createInventoryForm && this.createInventoryForm.valid) {
-            const author = localStorage.getItem("author");
+            const author = this.cookieService.get("author");
             const formValue = this.createInventoryForm.value;
             formValue.author = author;
 

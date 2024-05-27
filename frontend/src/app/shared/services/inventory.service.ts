@@ -17,6 +17,7 @@ import {
 import { Observable, throwError, timer } from "rxjs";
 import { catchError, map, mergeMap, retryWhen, tap } from "rxjs/operators";
 
+import { CookieService } from "ngx-cookie-service";
 import { Device } from "../interfaces/device.interface";
 import { DeviceSyncForm } from "../interfaces/device-sync-form.interface";
 import { DeviceType } from "../interfaces/device-type.interface";
@@ -40,6 +41,7 @@ export class InventoryService {
     constructor(
         private http: HttpClient,
         private snackBar: MatSnackBar,
+        private cookieService: CookieService,
     ) {}
 
     /**
@@ -48,7 +50,7 @@ export class InventoryService {
      * @returns The HttpHeaders object.
      */
     private getAuthHeaders(): HttpHeaders {
-        const authToken = localStorage.getItem("auth_token");
+        const authToken = this.cookieService.get("auth_token");
         return new HttpHeaders().set("Authorization", `Token ${authToken}`);
     }
 

@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { NgFor, NgIf } from "@angular/common";
-import { Router, RouterLink, RouterLinkActive } from "@angular/router";
+import { RouterLink, RouterLinkActive } from "@angular/router";
 
 import { AuthService } from "../services/auth.service";
 import { MatButtonModule } from "@angular/material/button";
@@ -76,9 +76,8 @@ export class NavBar implements OnDestroy, OnInit {
     hasAuthToken = false;
 
     constructor(
+        public authService: AuthService,
         private navigationFocusService: NavigationFocusService,
-        private authService: AuthService,
-        private router: Router,
     ) {
         setTimeout(
             () =>
@@ -100,12 +99,6 @@ export class NavBar implements OnDestroy, OnInit {
 
     get sectionKeys() {
         return SECTIONS_KEYS;
-    }
-
-    logout() {
-        localStorage.removeItem("auth_token");
-        this.hasAuthToken = false;
-        this.router.navigate(["/auth/login"]);
     }
 
     ngOnDestroy() {

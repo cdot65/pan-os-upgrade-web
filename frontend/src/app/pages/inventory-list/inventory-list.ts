@@ -15,6 +15,7 @@ import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 import { Subject, forkJoin } from "rxjs";
 
 import { ComponentPageTitle } from "../page-title/page-title";
+import { CookieService } from "ngx-cookie-service";
 import { Device } from "../../shared/interfaces/device.interface";
 import { DeviceSyncForm } from "../../shared/interfaces/device-sync-form.interface";
 import { Footer } from "src/app/shared/footer/footer";
@@ -91,6 +92,7 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild(MatSort) sort: MatSort = new MatSort();
 
     constructor(
+        private cookieService: CookieService,
         private dialog: MatDialog,
         private inventoryService: InventoryService,
         private profileService: ProfileService,
@@ -341,7 +343,7 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
             .pipe(takeUntil(this.destroy$))
             .subscribe((selectedProfileUuid) => {
                 if (selectedProfileUuid && selectedItems.length > 0) {
-                    const author = localStorage.getItem("author");
+                    const author = this.cookieService.get("author");
                     const refreshRequests = selectedItems.map((item) => {
                         const refreshForm = {
                             author: author ? parseInt(author, 10) : 0,
@@ -407,7 +409,7 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
             .pipe(takeUntil(this.destroy$))
             .subscribe((selectedProfileUuid) => {
                 if (selectedProfileUuid) {
-                    const author = localStorage.getItem("author");
+                    const author = this.cookieService.get("author");
                     const syncRequests = selectedPanoramaDevices.map(
                         (device) => {
                             const syncForm: DeviceSyncForm = {

@@ -16,6 +16,7 @@ import { MatDialog, MatDialogModule } from "@angular/material/dialog";
 
 import { CommonModule } from "@angular/common";
 import { ComponentPageTitle } from "../page-title/page-title";
+import { CookieService } from "ngx-cookie-service";
 import { Device } from "../../shared/interfaces/device.interface";
 import { DeviceType } from "src/app/shared/interfaces/device-type.interface";
 import { Footer } from "src/app/shared/footer/footer";
@@ -82,6 +83,7 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
     private retryCount = 0;
 
     constructor(
+        private cookieService: CookieService,
         private dialog: MatDialog,
         private formBuilder: FormBuilder,
         private inventoryService: InventoryService,
@@ -331,7 +333,7 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
             .pipe(takeUntil(this.destroy$))
             .subscribe((selectedProfileUuid) => {
                 if (selectedProfileUuid && this.inventoryItem) {
-                    const author = localStorage.getItem("author");
+                    const author = this.cookieService.get("author");
                     const refreshForm = {
                         author: author ? parseInt(author, 10) : 0,
                         device: this.inventoryItem.uuid,

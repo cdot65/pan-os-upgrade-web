@@ -15,6 +15,7 @@ import {
 } from "@angular/common/http";
 import { catchError, map, mergeMap, retryWhen, tap } from "rxjs/operators";
 
+import { CookieService } from "ngx-cookie-service";
 import { Injectable } from "@angular/core";
 import { LoginResponse } from "../interfaces/login-response";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -42,9 +43,10 @@ export class AuthService {
         private http: HttpClient,
         private router: Router,
         private snackBar: MatSnackBar,
+        private cookieService: CookieService,
     ) {
         this.isLoggedIn$ = this.isLoggedInSubject.asObservable();
-        const token = localStorage.getItem("auth_token");
+        const token = this.cookieService.get("auth_token");
         this.isLoggedInSubject.next(!!token);
     }
 
@@ -56,12 +58,11 @@ export class AuthService {
      * @param token - The authorization token (optional)
      * @returns The HttpHeaders object with the Authorization token
      */
-    private getAuthHeaders(token: string | null = null): HttpHeaders {
-        const authToken = token || localStorage.getItem("auth_token");
+    private getAuthHeaders(): HttpHeaders {
+        const authToken = this.cookieService.get("auth_token");
         if (authToken) {
             return new HttpHeaders().set("Authorization", `Token ${authToken}`);
         } else {
-            // Return empty headers if no token
             return new HttpHeaders();
         }
     }
@@ -149,8 +150,20 @@ export class AuthService {
             .pipe(
                 tap((response) => {
                     if (response && response.key) {
-                        localStorage.setItem("auth_token", response.key);
-                        localStorage.setItem("author", response.author);
+                        const expirationTime = new Date();
+                        expirationTime.setHours(expirationTime.getHours() + 1); // Expires in 1 hour
+                        this.cookieService.set(
+                            "auth_token",
+                            response.key,
+                            expirationTime,
+                            "/",
+                        );
+                        this.cookieService.set(
+                            "author",
+                            response.author,
+                            expirationTime,
+                            "/",
+                        );
                         this.isLoggedInSubject.next(true);
                     }
                 }),
@@ -215,7 +228,8 @@ export class AuthService {
      * updating the login status, and navigating to the login page.
      */
     logout(): void {
-        localStorage.removeItem("auth_token");
+        this.cookieService.delete("auth_token", "/");
+        this.cookieService.delete("author", "/");
         this.isLoggedInSubject.next(false);
         this.router.navigate(["/auth/login"]);
     }
