@@ -124,7 +124,15 @@ class DeviceViewSet(viewsets.ModelViewSet):
             try:
                 job = Job.objects.get(task_id=job_id)
 
-                return JsonResponse({"job_id": job_id, "status": job.job_status})
+                # Check for the "errored" status and return 422 if found
+                if job.job_status == "errored":
+                    return JsonResponse(
+                        {"job_id": job_id, "status": job.job_status},
+                        status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    )
+                else:
+                    return JsonResponse({"job_id": job_id, "status": job.job_status})
+
             except Job.DoesNotExist:
                 return JsonResponse({"error": "Invalid job ID."}, status=400)
         else:
