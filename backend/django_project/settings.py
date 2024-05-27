@@ -1,4 +1,4 @@
-# django_project/settings.py
+# backend/django_project/settings.py
 
 from pathlib import Path
 from environs import Env
