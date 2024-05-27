@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable, of } from "rxjs";
 
 import { CancelUpgradeResponse } from "../interfaces/cancel-upgrade-response.interface";
+import { CookieService } from "ngx-cookie-service";
 import { Injectable } from "@angular/core";
 import { UpgradeForm } from "../interfaces/upgrade-form.interface";
 import { UpgradeHistory } from "../interfaces/upgrade-history.interface";
@@ -18,12 +19,15 @@ import { environment } from "../../../environments/environment.prod";
 export class UpgradeService {
     private apiUrl = environment.apiUrl;
 
-    constructor(private http: HttpClient) {}
+    constructor(
+        private http: HttpClient,
+        private cookieService: CookieService,
+    ) {}
 
     upgradeDevice(
         upgradeForm: UpgradeForm,
     ): Observable<UpgradeResponse | null> {
-        const authToken = localStorage.getItem("auth_token");
+        const authToken = this.cookieService.get("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
@@ -45,7 +49,7 @@ export class UpgradeService {
     }
 
     getUpgradeHistory(deviceId: string): Observable<UpgradeHistory[]> {
-        const authToken = localStorage.getItem("auth_token");
+        const authToken = this.cookieService.get("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
@@ -57,7 +61,7 @@ export class UpgradeService {
     }
 
     getUpgradeStatus(jobId: string): Observable<UpgradeStatus> {
-        const authToken = localStorage.getItem("auth_token");
+        const authToken = this.cookieService.get("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
@@ -69,7 +73,7 @@ export class UpgradeService {
     }
 
     cancelUpgrade(jobId: string): Observable<CancelUpgradeResponse> {
-        const authToken = localStorage.getItem("auth_token");
+        const authToken = this.cookieService.get("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,

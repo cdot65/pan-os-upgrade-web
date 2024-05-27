@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
 
+import { CookieService } from "ngx-cookie-service";
 import { Injectable } from "@angular/core";
 import { Job } from "../interfaces/job.interface";
 import { environment } from "../../../environments/environment.prod";
@@ -14,10 +15,13 @@ import { environment } from "../../../environments/environment.prod";
 export class JobService {
     private apiUrl = environment.apiUrl;
 
-    constructor(private http: HttpClient) {}
+    constructor(
+        private http: HttpClient,
+        private cookieService: CookieService,
+    ) {}
 
     getJobs(): Observable<Job[]> {
-        const authToken = localStorage.getItem("auth_token");
+        const authToken = this.cookieService.get("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
@@ -40,7 +44,7 @@ export class JobService {
     }
 
     getJob(taskId: string): Observable<Job> {
-        const authToken = localStorage.getItem("auth_token");
+        const authToken = this.cookieService.get("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
@@ -56,7 +60,7 @@ export class JobService {
     }
 
     getJobStatus(taskId: string): Observable<string> {
-        const authToken = localStorage.getItem("auth_token");
+        const authToken = this.cookieService.get("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
@@ -73,7 +77,7 @@ export class JobService {
     }
 
     deleteJob(uuid: string): Observable<any> {
-        const authToken = localStorage.getItem("auth_token");
+        const authToken = this.cookieService.get("auth_token");
         const headers = new HttpHeaders().set(
             "Authorization",
             `Token ${authToken}`,
