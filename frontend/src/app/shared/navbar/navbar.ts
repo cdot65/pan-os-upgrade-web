@@ -91,7 +91,6 @@ export class NavBar implements OnDestroy, OnInit {
     ngOnInit() {
         this.authService.isLoggedIn$.subscribe((isLoggedIn: boolean) => {
             this.hasAuthToken = isLoggedIn;
-            console.log("isLoggedIn", isLoggedIn);
         });
     }
 
