@@ -1,4 +1,4 @@
-// frontend/src/app/shared/errors/inventory.error.ts
+// frontend/src/app/shared/errors/upgrade.error.ts
 
 export class UpgradeError extends Error {
     constructor(

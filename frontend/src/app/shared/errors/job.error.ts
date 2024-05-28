@@ -1,4 +1,4 @@
-// frontend/src/app/shared/errors/inventory.error.ts
+// frontend/src/app/shared/errors/job.error.ts
 
 export class JobError extends Error {
     constructor(
