@@ -51,23 +51,6 @@ export class AuthService {
     }
 
     /**
-     * Retrieves the HttpHeaders object with the Authorization token.
-     * If a token is provided, it will be used. Otherwise, it will attempt to retrieve the token from local storage.
-     * If no token is found, an empty HttpHeaders object will be returned.
-     *
-     * @param token - The authorization token (optional)
-     * @returns The HttpHeaders object with the Authorization token
-     */
-    private getAuthHeaders(): HttpHeaders {
-        const authToken = this.cookieService.get("auth_token");
-        if (authToken) {
-            return new HttpHeaders().set("Authorization", `Token ${authToken}`);
-        } else {
-            return new HttpHeaders();
-        }
-    }
-
-    /**
      * Handles the error response from an HTTP request.
      *
      * @param error - The error response from the HTTP request.
