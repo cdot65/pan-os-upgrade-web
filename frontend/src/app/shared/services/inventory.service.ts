@@ -454,25 +454,50 @@ export class InventoryService {
                         },
                     );
                 }),
-                // Retry the request for server errors up to 3 times with an exponential backoff strategy
+                // Retry the request for server errors and 400 errors up to 5 times with a delay
                 retryWhen((errors) =>
                     errors.pipe(
                         mergeMap((error: HttpErrorResponse, i) => {
                             const retryAttempt = i + 1;
-                            if (retryAttempt <= 3 && this.shouldRetry(error)) {
-                                // Apply an exponential backoff strategy
-                                const delayTime =
-                                    Math.pow(2, retryAttempt) * 1000;
+                            if (
+                                retryAttempt <= 5 &&
+                                (this.shouldRetry(error) ||
+                                    (error.status === 400 &&
+                                        error.error &&
+                                        error.error.error ===
+                                            "Invalid job ID."))
+                            ) {
+                                // Apply a delay of 2 seconds before retrying
+                                const delayTime = 2000;
                                 return timer(delayTime);
                             } else {
-                                // After 3 retries, throw error
+                                // After 5 retries or for other errors, throw the error
                                 return throwError(() => error);
                             }
                         }),
                     ),
                 ),
-                // Log an error message and return an empty array if the request fails
-                catchError(this.handleError.bind(this)),
+                catchError((error: HttpErrorResponse) => {
+                    if (
+                        error.status === 400 &&
+                        error.error &&
+                        error.error.error === "Invalid job ID."
+                    ) {
+                        // Handle the case when the job ID is not found after retries
+                        this.snackBar.open(
+                            `Job ID ${jobId} not found. Please try again later.`,
+                            "Close",
+                            {
+                                duration: 5000,
+                                verticalPosition: "bottom",
+                            },
+                        );
+                        return throwError(() => new NotFoundError(error));
+                    } else {
+                        // Handle other errors
+                        return this.handleError(error);
+                    }
+                }),
             );
     }
 
