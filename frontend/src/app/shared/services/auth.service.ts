@@ -13,7 +13,7 @@ import {
     HttpErrorResponse,
     HttpHeaders,
 } from "@angular/common/http";
-import { catchError, map, mergeMap, retryWhen, tap } from "rxjs/operators";
+import { catchError, mergeMap, retryWhen, tap } from "rxjs/operators";
 
 import { CookieService } from "ngx-cookie-service";
 import { Injectable } from "@angular/core";
@@ -211,19 +211,6 @@ export class AuthService {
     }
 
     /**
-     * Retrieves the user profile from the server.
-     *
-     * @returns An Observable that emits the user profile data.
-     */
-    getUserProfile() {
-        return this.http
-            .get<any>(this.apiEndpointUserProfile, {
-                headers: this.getAuthHeaders(),
-            })
-            .pipe(catchError(this.handleError.bind(this)));
-    }
-
-    /**
      * Logs out the user by removing the authentication token from local storage,
      * updating the login status, and navigating to the login page.
      */
@@ -232,24 +219,5 @@ export class AuthService {
         this.cookieService.delete("author", "/");
         this.isLoggedInSubject.next(false);
         this.router.navigate(["/auth/login"]);
-    }
-
-    /**
-     * Retrieves user data from the server.
-     *
-     * @returns An Observable that emits the user data.
-     */
-    getUserData() {
-        return this.http
-            .get(this.apiEndpointUserProfile, {
-                headers: this.getAuthHeaders(),
-            })
-            .pipe(
-                map((response: any) => ({
-                    ...response,
-                    pk: Number(response.pk),
-                })),
-                catchError(this.handleError.bind(this)),
-            );
     }
 }
