@@ -1,4 +1,4 @@
-// frontend/src/app/shared/errors/inventory.error.ts
+// frontend/src/app/shared/errors/profile.error.ts
 
 export class ProfileError extends Error {
     constructor(
