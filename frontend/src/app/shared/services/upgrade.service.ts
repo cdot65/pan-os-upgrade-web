@@ -182,6 +182,12 @@ export class UpgradeService {
             );
     }
 
+    /**
+     * Retrieves the upgrade status for a given UUID.
+     *
+     * @param uuid - The UUID of the upgrade status to retrieve.
+     * @returns An Observable that emits the UpgradeStatus object.
+     */
     getUpgradeStatus(uuid: string): Observable<UpgradeStatus> {
         return this.http
             .get<UpgradeStatus>(`${this.apiEndpointUpgradeStatus}${uuid}`, {
@@ -210,6 +216,13 @@ export class UpgradeService {
             );
     }
 
+    /**
+     * TODO: This endpoint does not currently exist
+     * Cancels an upgrade operation.
+     *
+     * @param uuid - The UUID of the upgrade operation to cancel.
+     * @returns An Observable that emits a CancelUpgradeResponse object.
+     */
     cancelUpgrade(uuid: string): Observable<CancelUpgradeResponse> {
         // Construct URL with placeholder
         const url = `${this.apiEndpointUpgradeCancel}${uuid}/`;
