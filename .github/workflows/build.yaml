@@ -1,0 +1,207 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - development
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - ".github/workflows/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+  schedule:
+    - cron: "0 8 * * *" # Run every day at 2am CST (which is 8am UTC)
+
+jobs:
+  build_and_test_backend:
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_ALLOWED_HOSTS: ${{ secrets.DJANGO_ALLOWED_HOSTS }}
+      DJANGO_DEBUG: ${{ secrets.DJANGO_DEBUG }}
+      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
+
+      - name: Create .env file for GitHub Actions
+        run: |
+          touch backend/.env
+          echo "DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}" >> backend/.env
+          echo "DJANGO_DEBUG=${{ secrets.DJANGO_DEBUG }}" >> backend/.env
+          echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> backend/.env
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> backend/.env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> backend/.env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> backend/.env
+          echo "POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" >> backend/.env
+          echo "POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}" >> backend/.env
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Code formatting with Black
+        run: |
+          pip install black
+          black --check --exclude '/(backend/accounts/migrations|backend/saute/migrations)/' backend/
+
+      - name: Linting with Flake8 and yamllint
+        run: |
+          pip install flake8 yamllint
+          flake8 backend/ --exit-zero
+          yamllint backend/
+
+      - name: Build Docker images
+        env:
+          CPU_ARCHITECTURE: x86_64
+        run: |
+          docker-compose build
+
+      - name: Deploy with Docker Compose
+        run: |
+          docker-compose up -d
+
+      - name: Wait for web application to start
+        run: |
+          echo "Waiting for web application to start..."
+          sleep 10
+
+      - name: Make database migrations files
+        run: |
+          docker-compose exec -T backend python manage.py makemigrations
+          docker-compose exec -T backend python manage.py migrate
+
+  build_and_test_frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Run frontend tests
+        run: |
+          cd frontend
+          npm test
+
+  test_backend:
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_ALLOWED_HOSTS: ${{ secrets.DJANGO_ALLOWED_HOSTS }}
+      DJANGO_DEBUG: ${{ secrets.DJANGO_DEBUG }}
+      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
+
+      - name: Create .env file for GitHub Actions
+        run: |
+          touch backend/.env
+          echo "DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}" >> backend/.env
+          echo "DJANGO_DEBUG=${{ secrets.DJANGO_DEBUG }}" >> backend/.env
+          echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> backend/.env
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> backend/.env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> backend/.env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> backend/.env
+          echo "POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" >> backend/.env
+          echo "POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}" >> backend/.env
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run backend tests
+        run: |
+          cd backend
+          python manage.py test
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build_and_test_backend, build_and_test_frontend, test_backend]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to production
+        run: |
+          # Add your deployment commands here
+          # For example, you can use SSH to connect to your server and deploy the application
+
+  static_code_analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [build_and_test_backend, build_and_test_frontend, test_backend, deploy, static_code_analysis]
+    if: always()
+    steps:
+      - name: Send Slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+          author_name: GitHub Actions
+          mention: here
+          if_mention: failure,cancelled
+          job_name: ${{ github.job }}
+          channel: github-notifications
+          icon_emoji: ':github:'
+          username: GitHub Actions
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()
