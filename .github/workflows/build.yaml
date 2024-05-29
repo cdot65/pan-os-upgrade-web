@@ -104,17 +104,3 @@ jobs:
         file: ./backend/Dockerfile
         push: false
         tags: worker:latest
-
-    - name: Copy .env file to backend
-      run: |
-        cp ./backend/.env.example ./backend/.env
-
-    - name: Start Docker Compose
-      run: |
-        docker-compose -f docker-compose.yml up --build -d
-
-    - name: Wait for services to be healthy
-      run: |
-        while ! docker-compose -f docker-compose.yml exec db pg_isready -U postgres; do sleep 5; done
-        while ! docker-compose -f docker-compose.yml exec redis redis-cli ping; do sleep 5; done
-        while ! docker-compose -f docker-compose.yml exec elasticsearch curl -s http://localhost:9200
