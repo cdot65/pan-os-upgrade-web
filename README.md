@@ -1,6 +1,6 @@
 # PAN-OS Upgrade Web
 
-[![Build and Deploy](https://github.com/cdot65/saute/actions/workflows/backend.yml/badge.svg)](https://github.com/cdot65/saute/actions/workflows/backend.yml)
+> **⚠️ DISCLAIMER: This project is currently in an alpha state and is not ready for production. Use at your own risk.**
 
 PAN-OS Upgrade Web is a full stack application designed to simplify the process of executing automated upgrades of PAN-OS firewalls and Panorama appliances. It provides a user-friendly web interface to manage and execute upgrades, building upon the functionalities of the existing python project `pan-os-upgrade`.
 
