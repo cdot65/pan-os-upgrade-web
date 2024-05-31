@@ -1,12 +1,11 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
 import { NgFor, NgIf } from "@angular/common";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 
 import { AuthService } from "../services/auth.service";
+import { Component } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 import { NavigationFocusService } from "../navigation-focus/navigation-focus.service";
-import { Subscription } from "rxjs";
 import { ThemePicker } from "../theme-picker/theme-picker";
 
 export interface DocSection {
@@ -69,11 +68,9 @@ const SECTIONS_KEYS = Object.keys(SECTIONS);
         ThemePicker,
     ],
 })
-export class NavBar implements OnDestroy, OnInit {
-    private subscriptions = new Subscription();
+export class NavBar {
     skipLinkHref: string | null | undefined;
     skipLinkHidden = true;
-    hasAuthToken = false;
 
     constructor(
         public authService: AuthService,
@@ -87,10 +84,8 @@ export class NavBar implements OnDestroy, OnInit {
         );
     }
 
-    ngOnInit() {
-        this.authService.isLoggedIn$.subscribe((isLoggedIn: boolean) => {
-            this.hasAuthToken = isLoggedIn;
-        });
+    get hasAuthToken() {
+        return this.authService.getIsLoggedIn();
     }
 
     get sections() {
@@ -99,9 +94,5 @@ export class NavBar implements OnDestroy, OnInit {
 
     get sectionKeys() {
         return SECTIONS_KEYS;
-    }
-
-    ngOnDestroy() {
-        this.subscriptions.unsubscribe();
     }
 }
