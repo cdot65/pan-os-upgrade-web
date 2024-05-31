@@ -7,16 +7,16 @@ import {
     InvalidCredentialsError,
     RegistrationError,
 } from "../errors/auth.error";
-import { BehaviorSubject, Observable, throwError, timer } from "rxjs";
 import {
     HttpClient,
     HttpErrorResponse,
     HttpHeaders,
 } from "@angular/common/http";
+import { Injectable, signal } from "@angular/core";
+import { Observable, throwError, timer } from "rxjs";
 import { catchError, mergeMap, retryWhen, tap } from "rxjs/operators";
 
 import { CookieService } from "ngx-cookie-service";
-import { Injectable } from "@angular/core";
 import { LoginResponse } from "../interfaces/login-response";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Router } from "@angular/router";
@@ -33,8 +33,11 @@ export class AuthService {
     private apiEndpointUserProfile = `${this.apiUrl}/api/v1/dj-rest-auth/user/`;
 
     // BehaviorSubject to keep track of the login status
-    private isLoggedInSubject = new BehaviorSubject<boolean>(false);
-    isLoggedIn$: Observable<boolean>;
+    // private isLoggedInSubject = new BehaviorSubject<boolean>(false);
+    // isLoggedIn$: Observable<boolean>;
+
+    // Replace BehaviorSubject with signal
+    private isLoggedIn = signal(false);
 
     /**
      * Represents the AuthService class that handles authentication-related functionality.
@@ -45,9 +48,12 @@ export class AuthService {
         private snackBar: MatSnackBar,
         private cookieService: CookieService,
     ) {
-        this.isLoggedIn$ = this.isLoggedInSubject.asObservable();
+        // Replacing the use of BehaviorSubject with signal
+        // this.isLoggedIn$ = this.isLoggedInSubject.asObservable();
+        // const token = this.cookieService.get("auth_token");
+        // this.isLoggedInSubject.next(!!token);
         const token = this.cookieService.get("auth_token");
-        this.isLoggedInSubject.next(!!token);
+        this.isLoggedIn.set(!!token); // Replace BehaviorSubject
     }
 
     /**
@@ -115,6 +121,14 @@ export class AuthService {
     }
 
     /**
+     * Gets the current login status.
+     * @returns: boolean - The login status.
+     */
+    public getIsLoggedIn(): boolean {
+        return this.isLoggedIn();
+    }
+
+    /**
      * Logs in the user with the provided username and password.
      *
      * @param username - The username of the user.
@@ -147,7 +161,8 @@ export class AuthService {
                             expirationTime,
                             "/",
                         );
-                        this.isLoggedInSubject.next(true);
+                        // this.isLoggedInSubject.next(true);
+                        this.isLoggedIn.set(true);
                     }
                 }),
                 retryWhen((errors) =>
@@ -200,7 +215,9 @@ export class AuthService {
     logout(): void {
         this.cookieService.delete("auth_token", "/");
         this.cookieService.delete("author", "/");
-        this.isLoggedInSubject.next(false);
+        // Replace BehaviorSubject with signal
+        // this.isLoggedInSubject.next(false);
+        this.isLoggedIn.set(false);
         this.router.navigate(["/auth/login"]);
     }
 }
