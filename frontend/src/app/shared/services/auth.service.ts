@@ -32,10 +32,6 @@ export class AuthService {
     private apiEndpointRegistration = `${this.apiUrl}/api/v1/dj-rest-auth/registration/`;
     private apiEndpointUserProfile = `${this.apiUrl}/api/v1/dj-rest-auth/user/`;
 
-    // BehaviorSubject to keep track of the login status
-    // private isLoggedInSubject = new BehaviorSubject<boolean>(false);
-    // isLoggedIn$: Observable<boolean>;
-
     // Replace BehaviorSubject with signal
     private isLoggedIn = signal(false);
 
@@ -48,10 +44,6 @@ export class AuthService {
         private snackBar: MatSnackBar,
         private cookieService: CookieService,
     ) {
-        // Replacing the use of BehaviorSubject with signal
-        // this.isLoggedIn$ = this.isLoggedInSubject.asObservable();
-        // const token = this.cookieService.get("auth_token");
-        // this.isLoggedInSubject.next(!!token);
         const token = this.cookieService.get("auth_token");
         this.isLoggedIn.set(!!token); // Replace BehaviorSubject
     }
@@ -122,6 +114,7 @@ export class AuthService {
 
     /**
      * Gets the current login status.
+     *
      * @returns: boolean - The login status.
      */
     public getIsLoggedIn(): boolean {
