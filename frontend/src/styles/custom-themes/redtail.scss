@@ -1,0 +1,71 @@
+@use "@angular/material" as mat;
+@use "../../app-theme";
+
+// Custom color palettes
+$redtail-primary-palette: (
+    50: #e3f0fa,
+    100: #b7d7f5,
+    200: #89bcf0,
+    300: #59a0ea,
+    400: #2985e5,
+    500: #395873,
+    600: #0961d1,
+    700: #0857bd,
+    800: #074cb8,
+    900: #063fa3,
+    contrast: (
+        50: #000000,
+        100: #000000,
+        200: #000000,
+        300: #000000,
+        400: #000000,
+        500: #ffffff,
+        600: #ffffff,
+        700: #ffffff,
+        800: #ffffff,
+        900: #ffffff,
+    ),
+);
+
+$redtail-accent-palette: (
+    50: #fff3e0,
+    100: #ffe0b2,
+    200: #ffcc80,
+    300: #ffb74d,
+    400: #ffa726,
+    500: #d96704,
+    600: #fb8c00,
+    700: #f57c00,
+    800: #ef6c00,
+    900: #e65100,
+    contrast: (
+        50: #000000,
+        100: #000000,
+        200: #000000,
+        300: #000000,
+        400: #000000,
+        500: #ffffff,
+        600: #ffffff,
+        700: #ffffff,
+        800: #ffffff,
+        900: #ffffff,
+    ),
+);
+
+// Define the theme using the custom palettes
+$primary: mat.define-palette($redtail-primary-palette);
+$accent: mat.define-palette($redtail-accent-palette);
+
+// Create the theme
+$theme: mat.define-light-theme(
+    (
+        color: (
+            primary: $primary,
+            accent: $accent,
+        ),
+    )
+);
+
+// Apply to Angular Material components and your app
+@include mat.all-component-themes($theme);
+@include app-theme.theme($theme);

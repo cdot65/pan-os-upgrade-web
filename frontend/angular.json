@@ -1,227 +1,254 @@
 {
-  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
-  "version": 1,
-  "newProjectRoot": "projects",
-  "projects": {
-    "pan-os-upgrade": {
-      "root": "",
-      "sourceRoot": "./src",
-      "projectType": "application",
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss"
-        }
-      },
-      "architect": {
-        "build": {
-          "builder": "@angular-devkit/build-angular:browser",
-          "options": {
-            "sourceMap": true,
-            "allowedCommonJsDependencies": ["moment", "path-normalize"],
-            "outputPath": "dist/pan-os-upgrade",
-            "index": "src/index.html",
-            "polyfills": "src/polyfills.ts",
-            "main": "src/main.ts",
-            "tsConfig": "tsconfig.app.json",
-            "assets": [{
-                "glob": "**/*",
-                "input": "src/assets",
-                "output": "/assets"
-              },
-              {
-                "glob": "favicon.ico",
-                "input": "src",
-                "output": "/"
-              }
-            ],
-            "styles": [{
-                "input": "src/styles.scss"
-              },
-              {
-                "input": "src/highlightjs/material-light.scss"
-              },
-              {
-                "inject": false,
-                "input": "src/styles/custom-themes/pink-bluegrey.scss",
-                "bundleName": "pink-bluegrey"
-              },
-              {
-                "inject": false,
-                "input": "src/styles/custom-themes/deeppurple-amber.scss",
-                "bundleName": "deeppurple-amber"
-              },
-              {
-                "inject": false,
-                "input": "src/styles/custom-themes/indigo-pink.scss",
-                "bundleName": "indigo-pink"
-              },
-              {
-                "inject": false,
-                "input": "src/styles/custom-themes/purple-green.scss",
-                "bundleName": "purple-green"
-              }
-            ],
-            "stylePreprocessorOptions": {
-              "includePaths": ["node_modules", "src", "src/styles"]
-            },
-            "scripts": [],
-            "vendorChunk": true,
-            "extractLicenses": false,
-            "buildOptimizer": false,
-            "optimization": false,
-            "namedChunks": true
-          },
-          "configurations": {
-            "production": {
-              "budgets": [{
-                "type": "anyComponentStyle",
-                "maximumWarning": "6kb"
-              }],
-              "commonChunk": false,
-              "optimization": true,
-              "outputHashing": "all",
-              "sourceMap": false,
-              "namedChunks": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
-              "fileReplacements": [{
-                "replace": "src/environments/environment.ts",
-                "with": "src/environments/environment.prod.ts"
-              }]
-            }
-          }
-        },
-        "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
-          "options": {
-            "proxyConfig": "src/proxy.conf.json",
-            "buildTarget": "pan-os-upgrade:build"
-          },
-          "configurations": {
-            "production": {
-              "buildTarget": "pan-os-upgrade:build:production"
-            }
-          }
-        },
-        "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
-          "options": {
-            "buildTarget": "pan-os-upgrade:build"
-          }
-        },
-        "lint": {
-          "builder": "@angular-eslint/builder:lint",
-          "options": {
-            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
-          }
-        },
-        "e2e": {
-          "builder": "@angular-devkit/build-angular:protractor",
-          "options": {
-            "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "pan-os-upgrade:serve"
-          },
-          "configurations": {
-            "production": {
-              "devServerTarget": "pan-os-upgrade:serve:production"
-            }
-          }
-        }
-      }
-    },
-    "scenes": {
-      "projectType": "application",
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss"
-        }
-      },
-      "root": "scenes",
-      "sourceRoot": "scenes/src",
-      "prefix": "app",
-      "architect": {
-        "build": {
-          "builder": "@angular-devkit/build-angular:browser",
-          "options": {
-            "outputPath": "dist/scenes",
-            "index": "scenes/src/index.html",
-            "main": "scenes/src/main.ts",
-            "polyfills": "scenes/src/polyfills.ts",
-            "tsConfig": "scenes/tsconfig.app.json",
-            "assets": ["scenes/src/favicon.ico", "scenes/src/assets"],
-            "styles": ["scenes/src/styles.scss"],
-            "scripts": [],
-            "vendorChunk": true,
-            "extractLicenses": false,
-            "buildOptimizer": false,
-            "sourceMap": true,
-            "optimization": false,
-            "namedChunks": true
-          },
-          "configurations": {
-            "production": {
-              "fileReplacements": [{
-                "replace": "scenes/src/environments/environment.ts",
-                "with": "scenes/src/environments/environment.prod.ts"
-              }],
-              "optimization": true,
-              "outputHashing": "all",
-              "sourceMap": false,
-              "namedChunks": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
-              "budgets": [{
-                  "type": "initial",
-                  "maximumWarning": "2mb",
-                  "maximumError": "5mb"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "6kb",
-                  "maximumError": "10kb"
+    "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+    "version": 1,
+    "newProjectRoot": "projects",
+    "projects": {
+        "pan-os-upgrade": {
+            "root": "",
+            "sourceRoot": "./src",
+            "projectType": "application",
+            "schematics": {
+                "@schematics/angular:component": {
+                    "style": "scss"
                 }
-              ]
+            },
+            "architect": {
+                "build": {
+                    "builder": "@angular-devkit/build-angular:browser",
+                    "options": {
+                        "sourceMap": true,
+                        "allowedCommonJsDependencies": [
+                            "moment",
+                            "path-normalize"
+                        ],
+                        "outputPath": "dist/pan-os-upgrade",
+                        "index": "src/index.html",
+                        "polyfills": "src/polyfills.ts",
+                        "main": "src/main.ts",
+                        "tsConfig": "tsconfig.app.json",
+                        "assets": [
+                            {
+                                "glob": "**/*",
+                                "input": "src/assets",
+                                "output": "/assets"
+                            },
+                            {
+                                "glob": "favicon.ico",
+                                "input": "src",
+                                "output": "/"
+                            }
+                        ],
+                        "styles": [
+                            {
+                                "input": "src/styles.scss"
+                            },
+                            {
+                                "input": "src/highlightjs/material-light.scss"
+                            },
+                            {
+                                "inject": false,
+                                "input": "src/styles/custom-themes/pink-bluegrey.scss",
+                                "bundleName": "pink-bluegrey"
+                            },
+                            {
+                                "inject": false,
+                                "input": "src/styles/custom-themes/deeppurple-amber.scss",
+                                "bundleName": "deeppurple-amber"
+                            },
+                            {
+                                "inject": false,
+                                "input": "src/styles/custom-themes/indigo-pink.scss",
+                                "bundleName": "indigo-pink"
+                            },
+                            {
+                                "inject": false,
+                                "input": "src/styles/custom-themes/purple-green.scss",
+                                "bundleName": "purple-green"
+                            },
+                            {
+                                "inject": false,
+                                "input": "src/styles/custom-themes/redtail.scss",
+                                "bundleName": "redtail"
+                            }
+                        ],
+                        "stylePreprocessorOptions": {
+                            "includePaths": [
+                                "node_modules",
+                                "src",
+                                "src/styles"
+                            ]
+                        },
+                        "scripts": [],
+                        "vendorChunk": true,
+                        "extractLicenses": false,
+                        "buildOptimizer": false,
+                        "optimization": false,
+                        "namedChunks": true
+                    },
+                    "configurations": {
+                        "production": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "commonChunk": false,
+                            "optimization": true,
+                            "outputHashing": "all",
+                            "sourceMap": false,
+                            "namedChunks": false,
+                            "extractLicenses": true,
+                            "vendorChunk": false,
+                            "buildOptimizer": true,
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.prod.ts"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "serve": {
+                    "builder": "@angular-devkit/build-angular:dev-server",
+                    "options": {
+                        "proxyConfig": "src/proxy.conf.json",
+                        "buildTarget": "pan-os-upgrade:build"
+                    },
+                    "configurations": {
+                        "production": {
+                            "buildTarget": "pan-os-upgrade:build:production"
+                        }
+                    }
+                },
+                "extract-i18n": {
+                    "builder": "@angular-devkit/build-angular:extract-i18n",
+                    "options": {
+                        "buildTarget": "pan-os-upgrade:build"
+                    }
+                },
+                "lint": {
+                    "builder": "@angular-eslint/builder:lint",
+                    "options": {
+                        "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+                    }
+                },
+                "e2e": {
+                    "builder": "@angular-devkit/build-angular:protractor",
+                    "options": {
+                        "protractorConfig": "e2e/protractor.conf.js",
+                        "devServerTarget": "pan-os-upgrade:serve"
+                    },
+                    "configurations": {
+                        "production": {
+                            "devServerTarget": "pan-os-upgrade:serve:production"
+                        }
+                    }
+                }
             }
-          }
         },
-        "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
-          "options": {
-            "buildTarget": "scenes:build"
-          },
-          "configurations": {
-            "production": {
-              "buildTarget": "scenes:build:production"
+        "scenes": {
+            "projectType": "application",
+            "schematics": {
+                "@schematics/angular:component": {
+                    "style": "scss"
+                }
+            },
+            "root": "scenes",
+            "sourceRoot": "scenes/src",
+            "prefix": "app",
+            "architect": {
+                "build": {
+                    "builder": "@angular-devkit/build-angular:browser",
+                    "options": {
+                        "outputPath": "dist/scenes",
+                        "index": "scenes/src/index.html",
+                        "main": "scenes/src/main.ts",
+                        "polyfills": "scenes/src/polyfills.ts",
+                        "tsConfig": "scenes/tsconfig.app.json",
+                        "assets": [
+                            "scenes/src/favicon.ico",
+                            "scenes/src/assets"
+                        ],
+                        "styles": ["scenes/src/styles.scss"],
+                        "scripts": [],
+                        "vendorChunk": true,
+                        "extractLicenses": false,
+                        "buildOptimizer": false,
+                        "sourceMap": true,
+                        "optimization": false,
+                        "namedChunks": true
+                    },
+                    "configurations": {
+                        "production": {
+                            "fileReplacements": [
+                                {
+                                    "replace": "scenes/src/environments/environment.ts",
+                                    "with": "scenes/src/environments/environment.prod.ts"
+                                }
+                            ],
+                            "optimization": true,
+                            "outputHashing": "all",
+                            "sourceMap": false,
+                            "namedChunks": false,
+                            "extractLicenses": true,
+                            "vendorChunk": false,
+                            "buildOptimizer": true,
+                            "budgets": [
+                                {
+                                    "type": "initial",
+                                    "maximumWarning": "2mb",
+                                    "maximumError": "5mb"
+                                },
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb",
+                                    "maximumError": "10kb"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "serve": {
+                    "builder": "@angular-devkit/build-angular:dev-server",
+                    "options": {
+                        "buildTarget": "scenes:build"
+                    },
+                    "configurations": {
+                        "production": {
+                            "buildTarget": "scenes:build:production"
+                        }
+                    }
+                },
+                "extract-i18n": {
+                    "builder": "@angular-devkit/build-angular:extract-i18n",
+                    "options": {
+                        "buildTarget": "scenes:build"
+                    }
+                },
+                "lint": {
+                    "builder": "@angular-eslint/builder:lint",
+                    "options": {
+                        "lintFilePatterns": [
+                            "scenes/**/*.ts",
+                            "scenes/**/*.html"
+                        ]
+                    }
+                },
+                "e2e": {
+                    "builder": "@angular-devkit/build-angular:protractor",
+                    "options": {
+                        "protractorConfig": "scenes/e2e/protractor.conf.js",
+                        "devServerTarget": "scenes:serve"
+                    },
+                    "configurations": {
+                        "production": {
+                            "devServerTarget": "scenes:serve:production"
+                        }
+                    }
+                }
             }
-          }
-        },
-        "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
-          "options": {
-            "buildTarget": "scenes:build"
-          }
-        },
-        "lint": {
-          "builder": "@angular-eslint/builder:lint",
-          "options": {
-            "lintFilePatterns": ["scenes/**/*.ts", "scenes/**/*.html"]
-          }
-        },
-        "e2e": {
-          "builder": "@angular-devkit/build-angular:protractor",
-          "options": {
-            "protractorConfig": "scenes/e2e/protractor.conf.js",
-            "devServerTarget": "scenes:serve"
-          },
-          "configurations": {
-            "production": {
-              "devServerTarget": "scenes:serve:production"
-            }
-          }
         }
-      }
     }
-  }
 }

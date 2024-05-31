@@ -41,26 +41,19 @@ export class ThemePicker implements OnInit, OnDestroy {
     // The below colors need to align with the themes defined in theme-picker.scss
     themes: DocsSiteTheme[] = [
         {
+            primary: "#395873",
+            accent: "#d96704",
+            displayName: "Redtail",
+            name: "redtail",
+            isDark: false,
+            isDefault: true,
+        },
+        {
             primary: "#673AB7",
             accent: "#FFC107",
             displayName: "Deep Purple & Amber",
             name: "deeppurple-amber",
             isDark: false,
-        },
-        {
-            primary: "#3F51B5",
-            accent: "#E91E63",
-            displayName: "Indigo & Pink",
-            name: "indigo-pink",
-            isDark: false,
-            isDefault: true,
-        },
-        {
-            primary: "#E91E63",
-            accent: "#607D8B",
-            displayName: "Pink & Blue-grey",
-            name: "pink-bluegrey",
-            isDark: true,
         },
         {
             primary: "#9C27B0",
@@ -115,18 +108,14 @@ export class ThemePicker implements OnInit, OnDestroy {
         const theme = this.themes.find(
             (currentTheme) => currentTheme.name === themeName,
         );
-
         if (!theme) {
             return;
         }
 
         this.currentTheme = theme;
 
-        if (theme.isDefault) {
-            this.styleManager.removeStyle("theme");
-        } else {
-            this.styleManager.setStyle("theme", `${theme.name}.css`);
-        }
+        // Always set the style, even for the default theme
+        this.styleManager.setStyle("theme", `${theme.name}.css`);
 
         if (this.currentTheme) {
             this.liveAnnouncer.announce(
