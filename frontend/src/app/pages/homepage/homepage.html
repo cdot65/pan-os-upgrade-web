@@ -14,7 +14,7 @@
         <div class="app-headerstart">
             <a
                 mat-raised-button
-                class="panosupgrade-button"
+                class="app-button"
                 routerLink="/guide/getting-started"
                 >Get started</a
             >
@@ -23,8 +23,8 @@
 </header>
 
 <main class="homepage-promo">
-    <div class="panosupgrade-homepage-row docs-introduction">
-        <div class="panosupgrade-homepage-row-column">
+    <div class="app-homepage-row docs-introduction">
+        <div class="app-homepage-row-column">
             <h2>Customizable and Extensible</h2>
             <p>
                 Tailor the execution to fit your unique network environments and
@@ -35,7 +35,7 @@
                 scenarios.
             </p>
         </div>
-        <div class="panosupgrade-homepage-row-column">
+        <div class="app-homepage-row-column">
             <h2>Automation of Routine Tasks</h2>
             <p>
                 Reduce manual errors and save valuable time with automated
@@ -46,7 +46,7 @@
                 backups.
             </p>
         </div>
-        <div class="panosupgrade-homepage-row-column">
+        <div class="app-homepage-row-column">
             <h2>High Availability Workflows</h2>
             <p>
                 Seamless upgrading of firewalls and Panorama appliances in HA
@@ -61,13 +61,11 @@
 
     <mat-divider></mat-divider>
 
-    <div
-        class="panosupgrade-homepage-guides panosupgrade-homepage-carousel-row"
-    >
+    <div class="app-homepage-guides app-homepage-carousel-row">
         <div class="homepage-header">
             <h2>Guides</h2>
 
-            <a class="panosupgrade-link" routerLink="/guides">
+            <a class="app-link" routerLink="/guides">
                 View all guides
                 <mat-icon>chevron_right</mat-icon>
             </a>
@@ -76,14 +74,12 @@
             @for (guide of guideItems.getAllItems(); track guide) {
             <a
                 carousel-item
-                class="carousel-item panosupgrade-homepage-guides-carousel-item"
+                class="carousel-item app-homepage-guides-carousel-item"
                 routerLink="/guide/{{guide.id}}"
             >
-                <mat-card class="panosupgrade-homepage-guides-card">
+                <mat-card class="app-homepage-guides-card">
                     <mat-card-title>{{guide.name}}</mat-card-title>
-                    <div
-                        class="panosupgrade-homepage-guides-card-divider"
-                    ></div>
+                    <div class="app-homepage-guides-card-divider"></div>
                     <mat-card-content
                         class="docs-component-category-list-card-summary"
                     >

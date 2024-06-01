@@ -5,7 +5,7 @@
         @for (link of linkSection?.links; track link) {
         <a
             [href]="_rootUrl + '#' + link.id"
-            class="docs-level-{{link.type}} panosupgrade-link"
+            class="docs-level-{{link.type}} app-link"
             [class.docs-active]="link.active"
         >
             {{link.name}}

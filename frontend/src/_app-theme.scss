@@ -28,7 +28,7 @@
         background: mat.get-color-from-palette($background, background);
     }
 
-    .panosupgrade-primary-header {
+    .app-primary-header {
         background: mat.get-color-from-palette($primary);
 
         h1 {
@@ -36,12 +36,12 @@
         }
     }
 
-    .panosupgrade-footer {
+    .app-footer {
         background: mat.get-color-from-palette($primary);
         color: mat.get-color-from-palette($primary, default-contrast);
     }
 
-    .panosupgrade-help-support {
+    .app-help-support {
         color: mat.get-color-from-palette($foreground, secondary-text);
 
         a {

@@ -12,7 +12,7 @@
         color: mat.get-color-from-palette($primary, default-contrast);
 
         .docs-navbar,
-        .panosupgrade-navbar-header {
+        .app-navbar-header {
             background: mat.get-color-from-palette($primary);
 
             & a:hover,
@@ -20,7 +20,7 @@
                 background: rgba(0, 0, 0, 0.4);
             }
 
-            .panosupgrade-navbar-header-item-selected {
+            .app-navbar-header-item-selected {
                 background: rgba(0, 0, 0, 0.2);
             }
         }

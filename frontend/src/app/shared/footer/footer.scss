@@ -1,27 +1,27 @@
 // src/app/shared/footer/footer.scss
 
-.panosupgrade-footer {
+.app-footer {
     padding: 12px;
     font-size: 12px;
 }
 
-.panosupgrade-footer-list {
+.app-footer-list {
     align-items: center;
     display: flex;
     flex-flow: row wrap;
     padding: 8px;
 }
 
-.panosupgrade-footer-logo {
+.app-footer-logo {
     flex: 1;
 }
 
-.panosupgrade-footer-github-logo {
+.app-footer-github-logo {
     height: 40px;
     margin-right: 6px;
 }
 
-.panosupgrade-footer-version {
+.app-footer-version {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -38,7 +38,7 @@
     }
 }
 
-.panosupgrade-footer-copyright {
+.app-footer-copyright {
     display: flex;
     flex: 1;
     justify-content: flex-end;
@@ -58,7 +58,7 @@
     }
 }
 
-.panosupgrade-footer-logo span {
+.app-footer-logo span {
     display: inline-block;
     line-height: 50px;
     margin: 0 40px;
@@ -81,7 +81,7 @@ a {
 }
 
 @media screen and (max-width: 884px) {
-    .panosupgrade-footer-list {
+    .app-footer-list {
         flex-direction: column;
     }
 }

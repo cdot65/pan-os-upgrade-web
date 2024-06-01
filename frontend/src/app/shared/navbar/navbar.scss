@@ -1,4 +1,4 @@
-.panosupgrade-navbar-header {
+.app-navbar-header {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -50,7 +50,7 @@
   * Moves content two rows instead of one.
   */
 @media (max-width: 720px) {
-    .panosupgrade-navbar-hide-small {
+    .app-navbar-hide-small {
         display: none;
     }
 

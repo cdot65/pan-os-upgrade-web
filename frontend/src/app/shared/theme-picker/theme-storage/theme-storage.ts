@@ -11,7 +11,7 @@ export interface DocsSiteTheme {
 
 @Injectable({ providedIn: "root" })
 export class ThemeStorage {
-    static storageKey = "panosupgrade-theme-storage-current-name";
+    static storageKey = "app-theme-storage-current-name";
 
     onThemeUpdate: EventEmitter<DocsSiteTheme> =
         new EventEmitter<DocsSiteTheme>();
