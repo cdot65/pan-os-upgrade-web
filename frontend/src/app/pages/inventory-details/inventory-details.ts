@@ -20,7 +20,6 @@ import { CookieService } from "ngx-cookie-service";
 import { Device } from "../../shared/interfaces/device.interface";
 import { DeviceType } from "src/app/shared/interfaces/device-type.interface";
 import { Footer } from "src/app/shared/footer/footer";
-import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
@@ -43,7 +42,6 @@ import { takeUntil } from "rxjs/operators";
     imports: [
         CommonModule,
         Footer,
-        InventoryPageHeader,
         MatButtonModule,
         MatCardModule,
         MatCheckboxModule,

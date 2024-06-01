@@ -1,0 +1,60 @@
+<!-- src/app/shared/sidenav/sidenav.html -->
+
+<mat-sidenav-container class="sidenav-container">
+    <mat-sidenav mode="side" opened class="sidenav">
+        <mat-nav-list>
+            <a
+                mat-list-item
+                routerLink="/"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{exact: true}"
+            >
+                <mat-icon>home</mat-icon>
+                <span>Home</span>
+            </a>
+            <a mat-list-item routerLink="/inventory" routerLinkActive="active">
+                <mat-icon>inventory</mat-icon>
+                <span>Inventory</span>
+            </a>
+            <a mat-list-item routerLink="/inventory" routerLinkActive="active">
+                <mat-icon>list</mat-icon>
+                <span>Inventory List</span>
+            </a>
+            <a
+                mat-list-item
+                routerLink="/inventory/create"
+                routerLinkActive="active"
+            >
+                <mat-icon>add</mat-icon>
+                <span>Create Inventory</span>
+            </a>
+            <a mat-list-item routerLink="/profiles" routerLinkActive="active">
+                <mat-icon>person</mat-icon>
+                <span>Profiles</span>
+            </a>
+            <a mat-list-item routerLink="/profiles" routerLinkActive="active">
+                <mat-icon>list</mat-icon>
+                <span>Profile List</span>
+            </a>
+            <a
+                mat-list-item
+                routerLink="/profiles/create"
+                routerLinkActive="active"
+            >
+                <mat-icon>add</mat-icon>
+                <span>Create Profile</span>
+            </a>
+            <a mat-list-item routerLink="/upgrade" routerLinkActive="active">
+                <mat-icon>upgrade</mat-icon>
+                <span>Upgrade</span>
+            </a>
+            <a mat-list-item routerLink="/jobs" routerLinkActive="active">
+                <mat-icon>work</mat-icon>
+                <span>Jobs</span>
+            </a>
+        </mat-nav-list>
+    </mat-sidenav>
+    <mat-sidenav-content>
+        <router-outlet></router-outlet>
+    </mat-sidenav-content>
+</mat-sidenav-container>

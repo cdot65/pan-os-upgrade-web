@@ -15,6 +15,7 @@ import { Subject, forkJoin } from "rxjs";
 import { ComponentPageTitle } from "../page-title/page-title";
 import { Footer } from "src/app/shared/footer/footer";
 import { InventoryDeleteDialogComponent } from "../inventory-delete-dialog/inventory-delete-dialog";
+import { Layout } from "../../shared/layout/layout";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
@@ -22,7 +23,6 @@ import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Profile } from "../../shared/interfaces/profile.interface";
-import { ProfilePageHeader } from "../profile-page-header/profile-page-header";
 import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
 import { SelectionModel } from "@angular/cdk/collections";
@@ -35,12 +35,12 @@ import { takeUntil } from "rxjs/operators";
     standalone: true,
     imports: [
         Footer,
+        Layout,
         MatCheckboxModule,
         MatTableModule,
         MatSortModule,
         MatIconModule,
         MatButtonModule,
-        ProfilePageHeader,
     ],
 })
 export class ProfileListComponent implements OnInit, AfterViewInit, OnDestroy {

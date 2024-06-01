@@ -18,7 +18,6 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { ProfilePageHeader } from "../profile-page-header/profile-page-header";
 import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
 import { Subject } from "rxjs";
@@ -31,7 +30,6 @@ import { takeUntil } from "rxjs/operators";
     standalone: true,
     imports: [
         CommonModule,
-        ProfilePageHeader,
         ReactiveFormsModule,
         MatButtonModule,
         MatCheckboxModule,

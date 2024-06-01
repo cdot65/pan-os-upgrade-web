@@ -16,7 +16,6 @@ import { ComponentPageTitle } from "../page-title/page-title";
 import { Footer } from "src/app/shared/footer/footer";
 import { Job } from "../../shared/interfaces/job.interface";
 import { JobDeleteDialogComponent } from "../job-delete-dialog/job-delete-dialog";
-import { JobPageHeader } from "../job-page-header/job-page-header";
 import { JobService } from "../../shared/services/job.service";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { MatButtonModule } from "@angular/material/button";
@@ -35,7 +34,6 @@ import { takeUntil } from "rxjs/operators";
     standalone: true,
     imports: [
         Footer,
-        JobPageHeader,
         MatCheckboxModule,
         MatTableModule,
         MatSortModule,

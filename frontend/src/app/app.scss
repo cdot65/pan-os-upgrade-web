@@ -25,6 +25,10 @@ app > router-outlet + app-component-sidenav {
     -webkit-overflow-scrolling: touch;
 }
 
+.content-container {
+    margin-top: 56px;
+}
+
 @media (max-width: constants.$extra-small-breakpoint-width) {
     app > router-outlet + .main-content,
     app > router-outlet + app-component-sidenav {
