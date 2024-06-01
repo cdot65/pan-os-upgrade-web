@@ -20,41 +20,41 @@
         .app-headerstart {
             color: mat.get-color-from-palette($primary);
 
-            .panosupgrade-link {
+            .app-link {
                 color: mat.get-color-from-palette($primary, default-contrast);
             }
         }
 
-        .panosupgrade-homepage-row {
+        .app-homepage-row {
             color: mat.get-color-from-palette($foreground, secondary-text);
         }
 
-        .panosupgrade-homepage-carousel-row h2 {
+        .app-homepage-carousel-row h2 {
             color: mat.get-color-from-palette($foreground, secondary-text);
         }
 
-        a.panosupgrade-link,
-        a.panosupgrade-featured-components-carousel-item {
+        a.app-link,
+        a.app-featured-components-carousel-item {
             color: mat.get-color-from-palette($foreground, secondary-text);
         }
 
-        .panosupgrade-homepage-guides-card,
-        a.panosupgrade-link:hover {
+        .app-homepage-guides-card,
+        a.app-link:hover {
             color: mat.get-color-from-palette($foreground, text);
         }
 
-        .panosupgrade-homepage-guides-card-divider {
+        .app-homepage-guides-card-divider {
             background: mat.get-color-from-palette($accent);
         }
 
         [carousel-item]:hover {
-            .panosupgrade-homepage-guides-card {
+            .app-homepage-guides-card {
                 background: mat.get-color-from-palette($background, hover);
             }
         }
 
         [carousel-item]:focus {
-            .panosupgrade-homepage-guides-card {
+            .app-homepage-guides-card {
                 background: mat.get-color-from-palette(
                     $background,
                     focused-button

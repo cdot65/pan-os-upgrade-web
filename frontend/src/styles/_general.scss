@@ -9,8 +9,8 @@ body {
     margin: 0;
 }
 
-.panosupgrade-button[md-button],
-.panosupgrade-button[md-raised-button] {
+.app-button[md-button],
+.app-button[md-raised-button] {
     text-transform: uppercase;
 }
 
@@ -19,7 +19,7 @@ h2 {
     font-weight: 400;
 }
 
-.panosupgrade-primary-header {
+.app-primary-header {
     padding-left: 20px;
 
     h1 {
@@ -36,7 +36,7 @@ h2 {
     width: 100%;
 }
 
-.panosupgrade-footer-github-logo svg {
+.app-footer-github-logo svg {
     height: 50px;
 }
 

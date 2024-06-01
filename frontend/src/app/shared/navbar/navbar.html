@@ -1,5 +1,5 @@
 <!-- TODO: figure out if the <nav> should go inside of a <header> element. -->
-<nav class="panosupgrade-navbar-header" aria-label="Top Toolbar">
+<nav class="app-navbar-header" aria-label="Top Toolbar">
     @if (skipLinkHref) {
     <div class="skip-link-wrapper" [class.cdk-visually-hidden]="skipLinkHidden">
         <a
@@ -13,12 +13,7 @@
         </a>
     </div>
     }
-    <a
-        mat-button
-        class="panosupgrade-button"
-        routerLink="/"
-        aria-label="PAN-OS Upgrade"
-    >
+    <a mat-button class="app-button" routerLink="/" aria-label="PAN-OS Upgrade">
         <img
             class="logo"
             matButtonIcon
@@ -31,9 +26,9 @@
     <!-- @for (key of sectionKeys; track key) {
     <a
         mat-button
-        class="panosupgrade-navbar-hide-small panosupgrade-button"
+        class="app-navbar-hide-small app-button"
         [routerLink]="key"
-        routerLinkActive="panosupgrade-navbar-header-item-selected"
+        routerLinkActive="app-navbar-header-item-selected"
     >
         {{sections[key].name}}
     </a>
@@ -43,7 +38,7 @@
     @if (!hasAuthToken) {
     <a
         mat-button
-        class="panosupgrade-button panosupgrade-navbar-hide-small"
+        class="app-button app-navbar-hide-small"
         routerLink="/auth/login"
     >
         <mat-icon>login</mat-icon>
@@ -52,7 +47,7 @@
     } @else {
     <a
         mat-button
-        class="panosupgrade-button panosupgrade-navbar-hide-small"
+        class="app-button app-navbar-hide-small"
         routerLink="/auth/login"
         (click)="authService.logout()"
     >

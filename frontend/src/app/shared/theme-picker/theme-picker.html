@@ -7,15 +7,11 @@
     <mat-icon>format_color_fill</mat-icon>
 </button>
 
-<mat-menu
-    #themeMenu="matMenu"
-    xPosition="before"
-    class="panosupgrade-theme-picker-menu"
->
+<mat-menu #themeMenu="matMenu" xPosition="before" class="app-theme-picker-menu">
     @for (theme of themes; track theme) {
     <button mat-menu-item (click)="selectTheme(theme.name)">
         <mat-icon
-            [class.panosupgrade-theme-selected-icon]="currentTheme === theme"
+            [class.app-theme-selected-icon]="currentTheme === theme"
             [color]="currentTheme === theme ? 'accent' : undefined"
         >
             {{currentTheme === theme ? 'radio_button_checked' :

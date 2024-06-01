@@ -12,7 +12,7 @@
     .docs-toc-container {
         border-left: solid 4px mat.get-color-from-palette($primary);
 
-        .panosupgrade-link {
+        .app-link {
             color: mat.get-color-from-palette($foreground, secondary-text);
 
             &:hover,

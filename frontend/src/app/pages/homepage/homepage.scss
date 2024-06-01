@@ -97,13 +97,13 @@ $margin-promotion-sections-small: 15px;
     }
 }
 
-.panosupgrade-homepage-row {
+.app-homepage-row {
     display: flex;
     flex-direction: row;
     margin: $margin-promotion-sections 0;
 }
 
-.panosupgrade-homepage-carousel-row {
+.app-homepage-carousel-row {
     margin: $margin-promotion-sections 0;
     display: flex;
     flex-direction: column;
@@ -126,19 +126,19 @@ $margin-promotion-sections-small: 15px;
     }
 }
 
-.panosupgrade-link {
+.app-link {
     display: inline-flex;
     align-items: center;
 }
 
-.panosupgrade-homepage-guides {
-    .panosupgrade-homepage-guides-card-divider {
+.app-homepage-guides {
+    .app-homepage-guides-card-divider {
         width: 30%;
         height: 5px;
         margin: 15px auto;
     }
 
-    .panosupgrade-homepage-guides-carousel-item {
+    .app-homepage-guides-carousel-item {
         display: flex;
         text-decoration: none;
         box-sizing: border-box;
@@ -153,11 +153,11 @@ $margin-promotion-sections-small: 15px;
         }
     }
 
-    .panosupgrade-homepage-guides-card.mat-mdc-card {
+    .app-homepage-guides-card.mat-mdc-card {
         text-align: center;
     }
 
-    .panosupgrade-homepage-guides-card .mat-mdc-card-title {
+    .app-homepage-guides-card .mat-mdc-card-title {
         height: 35%;
         display: flex;
         align-items: center;
@@ -167,12 +167,12 @@ $margin-promotion-sections-small: 15px;
 }
 
 .homepage-featured-components {
-    .panosupgrade-featured-components-carousel-item {
+    .app-featured-components-carousel-item {
         text-align: center;
         box-sizing: border-box;
         font-size: 18px;
 
-        .panosupgrade-homepage-img-container {
+        .app-homepage-img-container {
             overflow: hidden;
             margin-bottom: 16px;
             max-height: 200px;
@@ -196,7 +196,7 @@ $margin-promotion-sections-small: 15px;
     }
 }
 
-.panosupgrade-homepage-row-column {
+.app-homepage-row-column {
     display: flex;
     flex-direction: column;
     width: 32%;
@@ -234,7 +234,7 @@ $margin-promotion-sections-small: 15px;
         flex-direction: column;
     }
 
-    .panosupgrade-homepage-row-column {
+    .app-homepage-row-column {
         width: 100%;
 
         & + & {
@@ -251,8 +251,8 @@ $margin-promotion-sections-small: 15px;
         margin: $margin-promotion-sections-small 0 0 0;
     }
 
-    .panosupgrade-homepage-row,
-    .panosupgrade-homepage-carousel-row {
+    .app-homepage-row,
+    .app-homepage-carousel-row {
         margin: $margin-promotion-sections-small 0;
     }
 }
