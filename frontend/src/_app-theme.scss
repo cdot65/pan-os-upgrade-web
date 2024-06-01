@@ -1,5 +1,6 @@
-@use "@angular/material" as mat;
+// src/_app-theme.scss
 
+@use "@angular/material" as mat;
 @use "sass:map";
 @use "./app/pages/guide-list/guide-list-theme";
 @use "./app/pages/homepage/homepage-theme";
@@ -7,6 +8,7 @@
 @use "./app/shared/carousel/carousel-theme";
 @use "./app/shared/footer/footer-theme";
 @use "./app/shared/navbar/navbar-theme";
+@use "./app/shared/sidenav/sidenav-theme";
 @use "./app/shared/table-of-contents/table-of-contents-theme";
 @use "./styles/api-theme";
 @use "./styles/markdown-theme";
@@ -57,5 +59,6 @@
     @include homepage-theme.theme($theme);
     @include not-found-theme.theme($theme);
     @include navbar-theme.theme($theme);
+    @include sidenav-theme.theme($theme);
     @include table-of-contents-theme.theme($theme);
 }

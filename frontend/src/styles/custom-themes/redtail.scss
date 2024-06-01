@@ -1,18 +1,20 @@
+// src/styles/custom-themes/redtail.scss
+
 @use "@angular/material" as mat;
 @use "../../app-theme";
 
 // Custom color palettes
 $redtail-primary-palette: (
-    50: #e3f0fa,
-    100: #b7d7f5,
-    200: #89bcf0,
-    300: #59a0ea,
-    400: #2985e5,
+    50: #80bde7,
+    100: #73abd1,
+    200: #6699bb,
+    300: #5986a5,
+    400: #4c6f8c,
     500: #395873,
-    600: #0961d1,
-    700: #0857bd,
-    800: #074cb8,
-    900: #063fa3,
+    600: #30485d,
+    700: #273847,
+    800: #1e2831,
+    900: #151c1b,
     contrast: (
         50: #000000,
         100: #000000,
@@ -28,16 +30,16 @@ $redtail-primary-palette: (
 );
 
 $redtail-accent-palette: (
-    50: #fff3e0,
-    100: #ffe0b2,
-    200: #ffcc80,
-    300: #ffb74d,
-    400: #ffa726,
+    50: #ffd5c2,
+    100: #f8bf9c,
+    200: #f0a976,
+    300: #e89350,
+    400: #e07d2a,
     500: #d96704,
-    600: #fb8c00,
-    700: #f57c00,
-    800: #ef6c00,
-    900: #e65100,
+    600: #c15c03,
+    700: #ab5103,
+    800: #954702,
+    900: #7f3d02,
     contrast: (
         50: #000000,
         100: #000000,
