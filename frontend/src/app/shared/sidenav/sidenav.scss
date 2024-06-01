@@ -12,19 +12,16 @@
 
     .mat-nav-list {
         .mat-list-item {
-            .sidenav-text {
-                // Target text within list items
-                color: #f2e8df;
-                // Add other styles as needed (e.g., font-size)
-            }
-        }
-    }
+            display: flex;
+            align-items: center;
+            padding-left: 24px;
 
-    .mat-expansion-panel-header {
-        .mat-panel-title {
+            .sidenav-icon {
+                margin-right: 16px;
+            }
+
             .sidenav-text {
-                // Target text within panel titles
-                color: #f2e8df;
+                line-height: 24px; // Adjust this value to vertically align the text with the icon
             }
         }
     }
