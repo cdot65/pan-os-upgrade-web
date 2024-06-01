@@ -1,1 +1,1 @@
-export * from "./panosupgrade-app";
+export * from "./app";

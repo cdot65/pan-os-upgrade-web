@@ -22,7 +22,7 @@
     $foreground: map.get($theme, foreground);
     $next-theme: mat.define-palette(mat.$red-palette);
 
-    .panosupgrade-app-background {
+    .app-background {
         background: mat.get-color-from-palette($background, background);
     }
 
