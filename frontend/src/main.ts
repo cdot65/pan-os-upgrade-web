@@ -8,7 +8,7 @@ import {
 import { provideRouter, withInMemoryScrolling } from "@angular/router";
 
 import { PANOSUPGRADE_ROUTES } from "./app/routes";
-import { PanOsUpgradeApp } from "./app/panosupgrade-app";
+import { PanOsUpgradeApp } from "./app/app";
 import { bootstrapApplication } from "@angular/platform-browser";
 import { provideHttpClient } from "@angular/common/http";
 import { unregisterServiceWorkers } from "./unregister-service-workers";
