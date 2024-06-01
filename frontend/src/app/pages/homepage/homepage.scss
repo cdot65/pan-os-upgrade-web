@@ -2,13 +2,13 @@
 $margin-promotion-sections: 50px;
 $margin-promotion-sections-small: 15px;
 
-.panosupgrade-header-background {
+.app-headerbackground {
     overflow: hidden;
     position: relative;
     height: 420px;
 }
 
-.panosupgrade-header-background::before {
+.app-headerbackground::before {
     content: "";
     position: absolute;
     background-image: url("../../../assets/img/homepage/pan-trans.svg");
@@ -22,7 +22,7 @@ $margin-promotion-sections-small: 15px;
     opacity: 0.2;
 }
 
-.panosupgrade-header-section {
+.app-headersection {
     width: 90%;
     position: absolute;
     z-index: 0;
@@ -32,7 +32,7 @@ $margin-promotion-sections-small: 15px;
     transform: translate(-50%, -50%);
 }
 
-.panosupgrade-header-headline {
+.app-headerheadline {
     h1 {
         font-size: 56px;
         font-weight: bold;
@@ -206,7 +206,7 @@ $margin-promotion-sections-small: 15px;
     }
 }
 
-.panosupgrade-header-start {
+.app-headerstart {
     text-align: center;
     margin: $margin-promotion-sections 0 0 0;
 
@@ -216,17 +216,17 @@ $margin-promotion-sections-small: 15px;
 }
 
 @media (max-width: 1200px) {
-    .panosupgrade-header-background {
+    .app-headerbackground {
         height: 330px;
     }
 
-    .panosupgrade-header-background:before {
+    .app-headerbackground:before {
         background-image: none;
     }
 }
 
 @media (max-width: 850px) {
-    .panosupgrade-header-background:before {
+    .app-headerbackground:before {
         background-image: none;
     }
 
@@ -247,7 +247,7 @@ $margin-promotion-sections-small: 15px;
   * Rules for when the device is detected to be a small screen.
   */
 @media (max-width: 720px) {
-    .panosupgrade-header-start {
+    .app-headerstart {
         margin: $margin-promotion-sections-small 0 0 0;
     }
 
