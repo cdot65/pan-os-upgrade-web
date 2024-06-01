@@ -20,7 +20,6 @@ import { Device } from "../../shared/interfaces/device.interface";
 import { DeviceSyncForm } from "../../shared/interfaces/device-sync-form.interface";
 import { Footer } from "src/app/shared/footer/footer";
 import { InventoryDeleteDialogComponent } from "../inventory-delete-dialog/inventory-delete-dialog";
-import { InventoryPageHeader } from "../inventory-page-header/inventory-page-header";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { MatButtonModule } from "@angular/material/button";
@@ -28,7 +27,6 @@ import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatIconModule } from "@angular/material/icon";
 import { MatListModule } from "@angular/material/list";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
-import { MatSidenavModule } from "@angular/material/sidenav";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Profile } from "../../shared/interfaces/profile.interface";
 import { ProfileDialogComponent } from "../profile-select-dialog/profile-select-dialog.component";
@@ -44,7 +42,6 @@ import { takeUntil } from "rxjs/operators";
     standalone: true,
     imports: [
         Footer,
-        InventoryPageHeader,
         MatCheckboxModule,
         MatTableModule,
         MatSortModule,
@@ -52,7 +49,6 @@ import { takeUntil } from "rxjs/operators";
         MatButtonModule,
         MatDialogModule,
         MatProgressBarModule,
-        MatSidenavModule,
         MatListModule,
     ],
 })

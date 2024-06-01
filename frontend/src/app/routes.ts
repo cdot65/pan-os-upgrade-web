@@ -8,8 +8,15 @@ import { authGuard } from "./shared/guards/auth.guard";
 export const PANOSUPGRADE_ROUTES: Routes = [
     {
         path: "",
-        pathMatch: "full",
-        loadComponent: () => import("./pages/homepage").then((m) => m.Homepage),
+        component: Layout,
+        canActivate: [authGuard],
+        children: [
+            {
+                path: "",
+                loadComponent: () =>
+                    import("./pages/homepage").then((m) => m.Homepage),
+            },
+        ],
     },
     {
         path: "auth",

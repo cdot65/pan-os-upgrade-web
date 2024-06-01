@@ -8,7 +8,6 @@ import { ComponentPageTitle } from "../page-title/page-title";
 import { ElasticsearchService } from "../../shared/services/elasticsearch.service";
 import { Footer } from "src/app/shared/footer/footer";
 import { Job } from "../../shared/interfaces/job.interface";
-import { JobPageHeader } from "../job-page-header/job-page-header";
 import { JobService } from "../../shared/services/job.service";
 import { MatCardModule } from "@angular/material/card";
 import { MatDividerModule } from "@angular/material/divider";
@@ -27,7 +26,6 @@ import { takeUntil } from "rxjs/operators";
     imports: [
         CommonModule,
         Footer,
-        JobPageHeader,
         MatCardModule,
         MatDividerModule,
         MatFormFieldModule,

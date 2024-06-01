@@ -32,7 +32,6 @@ import { Profile } from "../../shared/interfaces/profile.interface";
 import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
 import { UpgradeForm } from "../../shared/interfaces/upgrade-form.interface";
-import { UpgradePageHeader } from "../upgrade-page-header/upgrade-page-header";
 import { UpgradeService } from "../../shared/services/upgrade.service";
 import { takeUntil } from "rxjs/operators";
 
@@ -43,7 +42,6 @@ import { takeUntil } from "rxjs/operators";
     standalone: true,
     imports: [
         Footer,
-        UpgradePageHeader,
         MatDividerModule,
         MatFormFieldModule,
         MatIconModule,

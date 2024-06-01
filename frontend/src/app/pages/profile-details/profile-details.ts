@@ -25,7 +25,6 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatSliderModule } from "@angular/material/slider";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Profile } from "../../shared/interfaces/profile.interface";
-import { ProfilePageHeader } from "../profile-page-header/profile-page-header";
 import { ProfileService } from "../../shared/services/profile.service";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -48,7 +47,6 @@ import { takeUntil } from "rxjs/operators";
         MatSelectModule,
         MatRadioModule,
         MatSliderModule,
-        ProfilePageHeader,
         ReactiveFormsModule,
     ],
 })

@@ -1,0 +1,12 @@
+// src/app/shared/layout/layout.scss
+
+.app-layout {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 56px);
+}
+
+.app-content {
+    flex: 1;
+    overflow: auto;
+}
