@@ -1,5 +1,6 @@
 // src/app/routes.ts
 
+import { Layout } from "./shared/layout/layout";
 // eslint-disable-next-line max-len
 import { Routes } from "@angular/router";
 import { authGuard } from "./shared/guards/auth.guard";
@@ -29,71 +30,100 @@ export const PANOSUPGRADE_ROUTES: Routes = [
     },
     {
         path: "inventory",
-        loadComponent: () =>
-            import("./pages/inventory-list").then((m) => m.InventoryList),
+        component: Layout,
         canActivate: [authGuard],
+        children: [
+            {
+                path: "",
+                loadComponent: () =>
+                    import("./pages/inventory-list").then(
+                        (m) => m.InventoryList,
+                    ),
+            },
+            {
+                path: "create",
+                loadComponent: () =>
+                    import("./pages/inventory-create").then(
+                        (m) => m.InventoryCreateComponent,
+                    ),
+            },
+            {
+                path: ":id",
+                loadComponent: () =>
+                    import("./pages/inventory-details").then(
+                        (m) => m.InventoryDetailsComponent,
+                    ),
+            },
+        ],
     },
-    {
-        path: "inventory/create",
-        loadComponent: () =>
-            import("./pages/inventory-create").then(
-                (m) => m.InventoryCreateComponent,
-            ),
-        canActivate: [authGuard],
-    },
-    {
-        path: "inventory/:id",
-        loadComponent: () =>
-            import("./pages/inventory-details").then(
-                (m) => m.InventoryDetailsComponent,
-            ),
-        canActivate: [authGuard],
-    },
+
     {
         path: "jobs",
-        loadComponent: () =>
-            import("./pages/job-list").then((m) => m.JobListComponent),
+        component: Layout,
         canActivate: [authGuard],
-    },
-    {
-        path: "jobs/:id",
-        loadComponent: () =>
-            import("./pages/job-details").then((m) => m.JobDetailsComponent),
-        canActivate: [authGuard],
+        children: [
+            {
+                path: "",
+                loadComponent: () =>
+                    import("./pages/job-list").then((m) => m.JobListComponent),
+            },
+            {
+                path: ":id",
+                loadComponent: () =>
+                    import("./pages/job-details").then(
+                        (m) => m.JobDetailsComponent,
+                    ),
+            },
+        ],
     },
     {
         path: "profiles",
-        loadComponent: () =>
-            import("./pages/profile-list").then((m) => m.ProfileListComponent),
+        component: Layout,
         canActivate: [authGuard],
-    },
-    {
-        path: "profiles/create",
-        loadComponent: () =>
-            import("./pages/profile-create").then(
-                (m) => m.ProfileCreateComponent,
-            ),
-        canActivate: [authGuard],
-    },
-    {
-        path: "profiles/:uuid",
-        loadComponent: () =>
-            import("./pages/profile-details").then(
-                (m) => m.ProfileDetailsComponent,
-            ),
-        canActivate: [authGuard],
+        children: [
+            {
+                path: "",
+                loadComponent: () =>
+                    import("./pages/profile-list").then(
+                        (m) => m.ProfileListComponent,
+                    ),
+            },
+            {
+                path: "create",
+                loadComponent: () =>
+                    import("./pages/profile-create").then(
+                        (m) => m.ProfileCreateComponent,
+                    ),
+            },
+            {
+                path: ":uuid",
+                loadComponent: () =>
+                    import("./pages/profile-details").then(
+                        (m) => m.ProfileDetailsComponent,
+                    ),
+            },
+        ],
     },
     {
         path: "upgrade",
-        loadComponent: () =>
-            import("./pages/upgrade-list").then((m) => m.UpgradeListComponent),
+        component: Layout,
         canActivate: [authGuard],
-    },
-    {
-        path: "upgrade/:uuid",
-        loadComponent: () =>
-            import("./pages/upgrade-list").then((m) => m.UpgradeListComponent),
-        canActivate: [authGuard],
+        children: [
+            {
+                path: "",
+                loadComponent: () =>
+                    import("./pages/upgrade-list").then(
+                        (m) => m.UpgradeListComponent,
+                    ),
+            },
+            {
+                path: ":uuid",
+                loadComponent: () =>
+                    import("./pages/upgrade-list").then(
+                        (m) => m.UpgradeListComponent,
+                    ),
+            },
+        ],
     },
     {
         path: "404",
