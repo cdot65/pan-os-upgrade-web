@@ -9,15 +9,15 @@
     $foreground: map.get($theme, foreground);
 
     app-homepage {
-        .panosupgrade-header-background {
+        .app-headerbackground {
             background: mat.get-color-from-palette($primary);
         }
 
-        .panosupgrade-header-headline {
+        .app-headerheadline {
             color: mat.get-color-from-palette($primary, default-contrast);
         }
 
-        .panosupgrade-header-start {
+        .app-headerstart {
             color: mat.get-color-from-palette($primary);
 
             .panosupgrade-link {
