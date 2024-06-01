@@ -1,6 +1,4 @@
-<!-- src/app/shared/sidenav/sidenav.html -->
-
-<mat-sidenav-container class="sidenav-container">
+<mat-sidenav-container>
     <mat-sidenav mode="side" opened class="sidenav">
         <mat-nav-list>
             <a
@@ -9,51 +7,76 @@
                 routerLinkActive="active"
                 [routerLinkActiveOptions]="{exact: true}"
             >
-                <mat-icon>home</mat-icon>
-                <span>Home</span>
+                <mat-icon class="sidenav-text">home</mat-icon>
+                <span class="sidenav-text">Home</span>
             </a>
-            <a mat-list-item routerLink="/inventory" routerLinkActive="active">
-                <mat-icon>inventory</mat-icon>
-                <span>Inventory</span>
-            </a>
-            <a mat-list-item routerLink="/inventory" routerLinkActive="active">
-                <mat-icon>list</mat-icon>
-                <span>Inventory List</span>
-            </a>
-            <a
-                mat-list-item
-                routerLink="/inventory/create"
-                routerLinkActive="active"
-            >
-                <mat-icon>add</mat-icon>
-                <span>Create Inventory</span>
-            </a>
-            <a mat-list-item routerLink="/profiles" routerLinkActive="active">
-                <mat-icon>person</mat-icon>
-                <span>Profiles</span>
-            </a>
-            <a mat-list-item routerLink="/profiles" routerLinkActive="active">
-                <mat-icon>list</mat-icon>
-                <span>Profile List</span>
-            </a>
-            <a
-                mat-list-item
-                routerLink="/profiles/create"
-                routerLinkActive="active"
-            >
-                <mat-icon>add</mat-icon>
-                <span>Create Profile</span>
-            </a>
+
+            <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        <mat-icon class="sidenav-text">inventory</mat-icon>
+                        <span class="sidenav-text">Inventory</span>
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+                <mat-nav-list>
+                    <a
+                        mat-list-item
+                        routerLink="/inventory"
+                        routerLinkActive="active"
+                    >
+                        <mat-icon class="sidenav-text">list</mat-icon>
+                        <span class="sidenav-text">Inventory List</span>
+                    </a>
+                    <a
+                        mat-list-item
+                        routerLink="/inventory/create"
+                        routerLinkActive="active"
+                    >
+                        <mat-icon class="sidenav-text">add</mat-icon>
+                        <span class="sidenav-text">Create Inventory</span>
+                    </a>
+                </mat-nav-list>
+            </mat-expansion-panel>
+
+            <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        <mat-icon class="sidenav-text">person</mat-icon>
+                        <span class="sidenav-text">Profiles</span>
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+                <mat-nav-list>
+                    <a
+                        mat-list-item
+                        routerLink="/profiles"
+                        routerLinkActive="active"
+                    >
+                        <mat-icon class="sidenav-text">list</mat-icon>
+                        <span class="sidenav-text">Profile List</span>
+                    </a>
+                    <a
+                        mat-list-item
+                        routerLink="/profiles/create"
+                        routerLinkActive="active"
+                    >
+                        <mat-icon class="sidenav-text">add</mat-icon>
+                        <span class="sidenav-text">Create Profile</span>
+                    </a>
+                </mat-nav-list>
+            </mat-expansion-panel>
+
             <a mat-list-item routerLink="/upgrade" routerLinkActive="active">
-                <mat-icon>upgrade</mat-icon>
-                <span>Upgrade</span>
+                <mat-icon class="sidenav-text">upgrade</mat-icon>
+                <span class="sidenav-text">Upgrade</span>
             </a>
+
             <a mat-list-item routerLink="/jobs" routerLinkActive="active">
-                <mat-icon>work</mat-icon>
-                <span>Jobs</span>
+                <mat-icon class="sidenav-text">work</mat-icon>
+                <span class="sidenav-text">Jobs</span>
             </a>
         </mat-nav-list>
     </mat-sidenav>
+
     <mat-sidenav-content>
         <router-outlet></router-outlet>
     </mat-sidenav-content>

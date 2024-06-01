@@ -1,0 +1,25 @@
+// src/app/shared/sidenav/_sidenav-theme.scss
+
+@use "@angular/material" as mat;
+
+@mixin theme($theme) {
+    $primary: map-get($theme, primary);
+
+    .sidenav {
+        background-color: mat.get-color-from-palette($primary, 500) !important;
+        color: mat.get-color-from-palette($primary, default-contrast);
+
+        .sidenav-text {
+            // Style the custom div class
+            color: #f2e8df;
+            // Add any other desired styles (font size, etc.)
+        }
+
+        .mat-expansion-panel {
+            background-color: mat.get-color-from-palette(
+                $primary,
+                500
+            ) !important;
+        }
+    }
+}
