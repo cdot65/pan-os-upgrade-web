@@ -1,6 +1,6 @@
 @use "../styles/constants";
 
-panosupgrade-app {
+app {
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -14,20 +14,20 @@ app-navbar {
     z-index: 2;
 }
 
-panosupgrade-app > app-component-sidenav {
+app > app-component-sidenav {
     flex: 1;
 }
 
-panosupgrade-app > router-outlet + .main-content,
-panosupgrade-app > router-outlet + app-component-sidenav {
+app > router-outlet + .main-content,
+app > router-outlet + app-component-sidenav {
     margin-top: 56px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 }
 
 @media (max-width: constants.$extra-small-breakpoint-width) {
-    panosupgrade-app > router-outlet + .main-content,
-    panosupgrade-app > router-outlet + app-component-sidenav {
+    app > router-outlet + .main-content,
+    app > router-outlet + app-component-sidenav {
         margin-top: 92px;
         overflow-y: visible;
     }

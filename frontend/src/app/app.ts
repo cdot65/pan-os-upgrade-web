@@ -1,4 +1,4 @@
-// src/app/panosupgrade-app.ts
+// src/app/app.ts
 
 import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { map, pairwise, startWith } from "rxjs/operators";
@@ -12,9 +12,9 @@ import { RouterOutlet } from "@angular/router";
 import { Subscription } from "rxjs";
 
 @Component({
-    selector: "panosupgrade-app",
-    templateUrl: "./panosupgrade-app.html",
-    styleUrls: ["./panosupgrade-app.scss"],
+    selector: "app",
+    templateUrl: "./app.html",
+    styleUrls: ["./app.scss"],
     encapsulation: ViewEncapsulation.None,
     standalone: true,
     imports: [NavBar, RouterOutlet],
