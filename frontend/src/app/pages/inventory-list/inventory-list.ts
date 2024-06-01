@@ -26,7 +26,9 @@ import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatIconModule } from "@angular/material/icon";
+import { MatListModule } from "@angular/material/list";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
+import { MatSidenavModule } from "@angular/material/sidenav";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Profile } from "../../shared/interfaces/profile.interface";
 import { ProfileDialogComponent } from "../profile-select-dialog/profile-select-dialog.component";
@@ -50,6 +52,8 @@ import { takeUntil } from "rxjs/operators";
         MatButtonModule,
         MatDialogModule,
         MatProgressBarModule,
+        MatSidenavModule,
+        MatListModule,
     ],
 })
 /**
