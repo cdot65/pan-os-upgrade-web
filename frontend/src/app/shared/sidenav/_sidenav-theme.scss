@@ -4,22 +4,37 @@
 
 @mixin theme($theme) {
     $primary: map-get($theme, primary);
+    $accent: map-get($theme, accent);
 
     .sidenav {
         background-color: mat.get-color-from-palette($primary, 500) !important;
         color: mat.get-color-from-palette($primary, default-contrast);
 
-        .sidenav-text {
-            // Style the custom div class
-            color: #f2e8df;
-            // Add any other desired styles (font size, etc.)
+        .sidenav-icon {
+            color: mat.get-color-from-palette($primary, 700);
+            height: 24px;
         }
 
-        .mat-expansion-panel {
-            background-color: mat.get-color-from-palette(
-                $primary,
-                500
-            ) !important;
+        .sidenav-text {
+            color: #f2e8df;
+            padding-left: 15px;
+        }
+
+        .sidenav-divider {
+            height: 1px;
+            background-color: mat.get-color-from-palette($primary, 400);
+            margin: 10px 0;
+        }
+
+        .mat-list-item,
+        .mat-expansion-panel-header {
+            .mat-icon,
+            span {
+                color: mat.get-color-from-palette(
+                    $primary,
+                    default-contrast
+                ) !important;
+            }
         }
     }
 }
