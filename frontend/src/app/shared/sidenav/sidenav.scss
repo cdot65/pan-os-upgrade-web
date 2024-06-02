@@ -9,6 +9,15 @@
     width: 275px;
     padding: 20px;
     background-color: inherit;
+    transition: width 0.3s ease;
+
+    &.minimized {
+        width: 100px;
+
+        .sidenav-text {
+            display: none;
+        }
+    }
 
     .mat-nav-list {
         .mat-list-item {
@@ -21,8 +30,15 @@
             }
 
             .sidenav-text {
-                line-height: 24px; // Adjust this value to vertically align the text with the icon
+                line-height: 24px;
             }
         }
+    }
+
+    .sidenav-toggle {
+        // position: absolute;
+        // top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
     }
 }

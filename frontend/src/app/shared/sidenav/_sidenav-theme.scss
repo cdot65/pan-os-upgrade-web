@@ -13,6 +13,13 @@
         .sidenav-icon {
             color: #f2e8df;
             height: 24px;
+            transition: margin-right 0.3s ease;
+        }
+
+        &.collapsed {
+            .sidenav-icon {
+                margin-right: 0;
+            }
         }
 
         .sidenav-text {

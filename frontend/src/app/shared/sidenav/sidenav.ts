@@ -1,7 +1,8 @@
 // src/app/shared/sidenav/sidenav.ts
 
+import { Component, OnInit } from "@angular/core";
+
 import { CommonModule } from "@angular/common";
-import { Component } from "@angular/core";
 import { MatDividerModule } from "@angular/material/divider";
 import { MatExpansionModule } from "@angular/material/expansion";
 import { MatIconModule } from "@angular/material/icon";
@@ -24,4 +25,19 @@ import { RouterModule } from "@angular/router";
     templateUrl: "./sidenav.html",
     styleUrls: ["./sidenav.scss"],
 })
-export class SideNav {}
+export class SideNav implements OnInit {
+    sidenavExpanded: boolean = true;
+
+    ngOnInit() {
+        const storedState = localStorage.getItem("sidenavExpanded");
+        this.sidenavExpanded = storedState ? JSON.parse(storedState) : true;
+    }
+
+    toggleSidenav() {
+        this.sidenavExpanded = !this.sidenavExpanded;
+        localStorage.setItem(
+            "sidenavExpanded",
+            JSON.stringify(this.sidenavExpanded),
+        );
+    }
+}
