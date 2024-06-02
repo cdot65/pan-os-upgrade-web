@@ -27,10 +27,12 @@ import { RouterModule } from "@angular/router";
 })
 export class SideNav implements OnInit {
     sidenavExpanded: boolean = true;
+    sidenavWidth: number = 275;
 
     ngOnInit() {
         const storedState = localStorage.getItem("sidenavExpanded");
         this.sidenavExpanded = storedState ? JSON.parse(storedState) : true;
+        this.updateSidenavWidth();
     }
 
     toggleSidenav() {
@@ -39,5 +41,10 @@ export class SideNav implements OnInit {
             "sidenavExpanded",
             JSON.stringify(this.sidenavExpanded),
         );
+        this.updateSidenavWidth();
+    }
+
+    updateSidenavWidth() {
+        this.sidenavWidth = this.sidenavExpanded ? 275 : 100;
     }
 }
