@@ -69,6 +69,11 @@
                                 "inject": false,
                                 "input": "src/styles/custom-themes/redtail.scss",
                                 "bundleName": "redtail"
+                            },
+                            {
+                                "inject": false,
+                                "input": "src/styles/custom-themes/redtail-dark.scss",
+                                "bundleName": "redtail-dark"
                             }
                         ],
                         "stylePreprocessorOptions": {

@@ -11,6 +11,34 @@
             }
 
             // The below colors need to align with the themes defined in ThemePicker
+            &.redtail svg {
+                .app-theme-icon-background {
+                    fill: #fafafa;
+                }
+
+                .app-theme-icon-button {
+                    fill: #ffc107;
+                }
+
+                .app-theme-icon-toolbar {
+                    fill: #673ab7;
+                }
+            }
+
+            &.redtail-dark svg {
+                .app-theme-icon-background {
+                    fill: #303030;
+                }
+
+                .app-theme-icon-button {
+                    fill: #d96704;
+                }
+
+                .app-theme-icon-toolbar {
+                    fill: #395873;
+                }
+            }
+
             &.deeppurple-amber svg {
                 .app-theme-icon-background {
                     fill: #fafafa;
