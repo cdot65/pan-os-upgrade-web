@@ -4,7 +4,7 @@
 @use "../../app-theme";
 
 // Custom color palettes
-$redtail-primary-palette: (
+$redtail-light-primary-palette: (
     50: #80bde7,
     100: #73abd1,
     200: #6699bb,
@@ -29,7 +29,7 @@ $redtail-primary-palette: (
     ),
 );
 
-$redtail-accent-palette: (
+$redtail-light-accent-palette: (
     50: #ffd5c2,
     100: #f8bf9c,
     200: #f0a976,
@@ -55,8 +55,8 @@ $redtail-accent-palette: (
 );
 
 // Define the theme using the custom palettes
-$primary: mat.define-palette($redtail-primary-palette);
-$accent: mat.define-palette($redtail-accent-palette);
+$primary: mat.define-palette($redtail-light-primary-palette);
+$accent: mat.define-palette($redtail-light-accent-palette);
 
 // Create the theme
 $theme: mat.define-light-theme(

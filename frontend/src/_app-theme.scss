@@ -2,12 +2,13 @@
 
 @use "@angular/material" as mat;
 @use "sass:map";
+@use "./app/pages/auth/login/login-theme";
 @use "./app/pages/guide-list/guide-list-theme";
 @use "./app/pages/homepage/homepage-theme";
 @use "./app/pages/not-found/not-found-theme";
+@use "./app/pages/job-details/job-details-theme";
 @use "./app/shared/carousel/carousel-theme";
 @use "./app/shared/footer/footer-theme";
-@use "./app/pages/auth/login/login-theme";
 @use "./app/shared/navbar/navbar-theme";
 @use "./app/shared/sidenav/sidenav-theme";
 @use "./app/shared/table-of-contents/table-of-contents-theme";
@@ -60,6 +61,7 @@
     @include homepage-theme.theme($theme);
     @include not-found-theme.theme($theme);
     @include login-theme.theme($theme);
+    @include job-details-theme.theme($theme);
     @include navbar-theme.theme($theme);
     @include sidenav-theme.theme($theme);
     @include table-of-contents-theme.theme($theme);
