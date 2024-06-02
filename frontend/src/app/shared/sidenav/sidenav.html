@@ -14,7 +14,7 @@
                 [routerLinkActiveOptions]="{exact: true}"
             >
                 <mat-icon class="sidenav-icon">home</mat-icon>
-                @if (sidenavExpanded) {
+                @if (sidenavStateService.isExpanded()) {
                 <span class="sidenav-text">Home</span>
                 }
             </a>
@@ -23,7 +23,7 @@
 
             <a mat-list-item routerLink="/inventory" routerLinkActive="active">
                 <mat-icon class="sidenav-icon">inventory</mat-icon>
-                @if (sidenavExpanded) {
+                @if (sidenavStateService.isExpanded()) {
                 <span class="sidenav-text">Inventory</span>
                 }
             </a>
@@ -32,7 +32,7 @@
 
             <a mat-list-item routerLink="/profiles" routerLinkActive="active">
                 <mat-icon class="sidenav-icon">person</mat-icon>
-                @if (sidenavExpanded) {
+                @if (sidenavStateService.isExpanded()) {
                 <span class="sidenav-text">Profiles</span>
                 }
             </a>
@@ -41,7 +41,7 @@
 
             <a mat-list-item routerLink="/upgrade" routerLinkActive="active">
                 <mat-icon class="sidenav-icon">upgrade</mat-icon>
-                @if (sidenavExpanded) {
+                @if (sidenavStateService.isExpanded()) {
                 <span class="sidenav-text">Upgrade</span>
                 }
             </a>
@@ -50,7 +50,7 @@
 
             <a mat-list-item routerLink="/jobs" routerLinkActive="active">
                 <mat-icon class="sidenav-icon">work</mat-icon>
-                @if (sidenavExpanded) {
+                @if (sidenavStateService.isExpanded()) {
                 <span class="sidenav-text">Jobs</span>
                 }
             </a>
@@ -61,7 +61,7 @@
                 <mat-icon class="sidenav-icon"
                     >{{ sidenavExpanded ? 'menu_open' : 'menu' }}</mat-icon
                 >
-                @if (sidenavExpanded) {
+                @if (sidenavStateService.isExpanded()) {
                 <span class="sidenav-text">Minimize</span>
                 }
             </a>
