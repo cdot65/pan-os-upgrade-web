@@ -3,7 +3,8 @@
         mode="side"
         [opened]="true"
         class="sidenav"
-        [class.minimized]="!sidenavExpanded"
+        [class.minimized]="!sidenavStateService.isExpanded()"
+        [@sidenavAnimation]="sidenavStateService.isExpanded() ? 'expanded' : 'minimized'"
     >
         <mat-nav-list>
             <a
@@ -57,7 +58,9 @@
         </mat-nav-list>
     </mat-sidenav>
 
-    <mat-sidenav-content [style.marginLeft.px]="sidenavWidth">
+    <mat-sidenav-content
+        [style.marginLeft.px]="sidenavStateService.isExpanded() ? 275 : 100"
+    >
         <router-outlet></router-outlet>
     </mat-sidenav-content>
 </mat-sidenav-container>

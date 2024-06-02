@@ -6,17 +6,20 @@
 }
 
 .sidenav {
-    width: 275px;
     padding: 20px;
     background-color: inherit;
-    transition: width 0.3s ease;
+    transition: width 0.2s ease-out;
 
     &.minimized {
-        width: 100px;
-
         .sidenav-text {
-            display: none;
+            opacity: 0;
+            transition: opacity 0.2s ease-out;
         }
+    }
+
+    .sidenav-text {
+        opacity: 1;
+        transition: opacity 0.2s ease-out;
     }
 
     .mat-nav-list {
