@@ -234,48 +234,6 @@ class JobLogEntry(models.Model):
         return f"{self.job.task_id} - {self.timestamp}"
 
 
-class UpgradeLog(models.Model):
-    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="upgrade_logs")
-    timestamp = models.DateTimeField(auto_now_add=True)
-    level = models.CharField(max_length=20)
-    message = models.TextField()
-
-    class Meta:
-        ordering = ["timestamp"]
-
-    def __str__(self):
-        return f"{self.job.task_id} - {self.timestamp}"
-
-
-class SnapshotLog(models.Model):
-    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="snapshot_logs")
-    timestamp = models.DateTimeField(auto_now_add=True)
-    snapshot_type = models.CharField(max_length=100)
-    snapshot_data = models.JSONField()
-
-    class Meta:
-        ordering = ["timestamp"]
-
-    def __str__(self):
-        return f"{self.job.task_id} - {self.timestamp}"
-
-
-class ReadinessCheckLog(models.Model):
-    job = models.ForeignKey(
-        Job, on_delete=models.CASCADE, related_name="readiness_check_logs"
-    )
-    timestamp = models.DateTimeField(auto_now_add=True)
-    check_name = models.CharField(max_length=100)
-    check_result = models.BooleanField()
-    check_details = models.TextField()
-
-    class Meta:
-        ordering = ["timestamp"]
-
-    def __str__(self):
-        return f"{self.job.task_id} - {self.timestamp}"
-
-
 class Profile(models.Model):
     active_support_check = models.BooleanField(
         verbose_name="Active Support Check",
