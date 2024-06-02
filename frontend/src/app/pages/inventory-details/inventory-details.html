@@ -30,26 +30,6 @@
                 </div>
             </div>
 
-            <!-- Display the progress bar when a user has requested a refresh-->
-            @if (showRefreshProgress) {
-            <p class="refresh-header">
-                Refreshing information from live device
-            </p>
-            <div class="refresh-progress">
-                <mat-progress-bar mode="buffer"></mat-progress-bar>
-            </div>
-            }
-
-            <!-- Display the error message if there is a problem with the job -->
-            @if (showRefreshError) {
-            <div class="refresh-error">
-                <p>
-                    There was a problem with the refresh job. Please refresh the
-                    page and try again.
-                </p>
-            </div>
-            }
-
             <div class="inventory-details-grid">
                 <div>
                     <!-- Heading for the firewall information section -->
