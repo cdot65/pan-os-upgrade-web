@@ -1,0 +1,84 @@
+// src/app/shared/sidenav/_sidenav-theme.scss
+
+@use "@angular/material" as mat;
+@use "sass:map";
+
+@mixin theme($theme) {
+    $primary: map.get($theme, primary);
+    $accent: map.get($theme, accent);
+    $warn: map.get($theme, warn);
+    $background: map.get($theme, background);
+    $foreground: map.get($theme, foreground);
+    $next-theme: mat.define-palette(mat.$red-palette);
+
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 52px);
+        padding: 52px;
+
+        background: mat.get-color-from-palette($background, background);
+        color: mat.get-color-from-palette($primary, 500);
+
+        mat-card {
+            width: 400px;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px
+                mat.get-color-from-palette($background, background);
+        }
+
+        mat-card-header {
+            justify-content: center;
+            margin-bottom: 24px;
+            // background: mat.get-color-from-palette($primary);
+            color: mat.get-color-from-palette($primary, default-contrast);
+        }
+
+        mat-card-title {
+            font-size: 24px;
+            font-weight: 500;
+            // background: mat.get-color-from-palette($primary);
+            color: mat.get-color-from-palette($foreground, secondary-text);
+        }
+
+        mat-form-field {
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        mat-label {
+            color: mat.get-color-from-palette($foreground, secondary-text);
+        }
+
+        mat-icon {
+            color: mat.get-color-from-palette($foreground, secondary-text);
+        }
+
+        .error-message {
+            color: #f44336;
+            margin-bottom: 16px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+
+        .info-message {
+            color: mat.get-color-from-palette($foreground, secondary-text);
+            margin-bottom: 16px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+
+        .button-flex-container {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        button {
+            width: 120px;
+        }
+    }
+}
