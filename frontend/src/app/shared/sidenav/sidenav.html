@@ -14,35 +14,45 @@
                 [routerLinkActiveOptions]="{exact: true}"
             >
                 <mat-icon class="sidenav-icon">home</mat-icon>
-                <span class="sidenav-text" *ngIf="sidenavExpanded">Home</span>
+                @if (sidenavExpanded) {
+                <span class="sidenav-text">Home</span>
+                }
             </a>
 
             <mat-divider class="sidenav-divider"></mat-divider>
 
             <a mat-list-item routerLink="/inventory" routerLinkActive="active">
                 <mat-icon class="sidenav-icon">inventory</mat-icon>
+                @if (sidenavExpanded) {
                 <span class="sidenav-text">Inventory</span>
+                }
             </a>
 
             <mat-divider class="sidenav-divider"></mat-divider>
 
             <a mat-list-item routerLink="/profiles" routerLinkActive="active">
                 <mat-icon class="sidenav-icon">person</mat-icon>
+                @if (sidenavExpanded) {
                 <span class="sidenav-text">Profiles</span>
+                }
             </a>
 
             <mat-divider class="sidenav-divider"></mat-divider>
 
             <a mat-list-item routerLink="/upgrade" routerLinkActive="active">
                 <mat-icon class="sidenav-icon">upgrade</mat-icon>
+                @if (sidenavExpanded) {
                 <span class="sidenav-text">Upgrade</span>
+                }
             </a>
 
             <mat-divider class="sidenav-divider"></mat-divider>
 
             <a mat-list-item routerLink="/jobs" routerLinkActive="active">
                 <mat-icon class="sidenav-icon">work</mat-icon>
+                @if (sidenavExpanded) {
                 <span class="sidenav-text">Jobs</span>
+                }
             </a>
 
             <mat-divider class="sidenav-divider"></mat-divider>
