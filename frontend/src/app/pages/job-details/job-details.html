@@ -64,14 +64,14 @@
                                         >{{ log._source.message
                                         }}</mat-card-title
                                     >
-                                    <mat-card-subtitle
+                                    <mat-card-subtitle class="mat-card-subtitle"
                                         >Timestamp: {{ log._source['@timestamp']
                                         | date:'medium' }}
                                     </mat-card-subtitle>
-                                    <mat-card-subtitle
+                                    <mat-card-subtitle class="mat-card-subtitle"
                                         >Log Level: {{ log._source.log_level }}
                                     </mat-card-subtitle>
-                                    <mat-card-subtitle
+                                    <mat-card-subtitle class="mat-card-subtitle"
                                         >Log Sequence: {{
                                         log._source.sequence_number }}
                                     </mat-card-subtitle>
