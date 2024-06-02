@@ -43,8 +43,8 @@ export class ThemePicker implements OnInit, OnDestroy {
         {
             primary: "#395873",
             accent: "#d96704",
-            displayName: "Redtail",
-            name: "redtail",
+            displayName: "Redtail Light",
+            name: "redtail-light",
             isDark: false,
         },
         {
@@ -54,20 +54,6 @@ export class ThemePicker implements OnInit, OnDestroy {
             name: "redtail-dark",
             isDark: true,
             isDefault: true,
-        },
-        {
-            primary: "#673AB7",
-            accent: "#FFC107",
-            displayName: "Deep Purple & Amber",
-            name: "deeppurple-amber",
-            isDark: false,
-        },
-        {
-            primary: "#9C27B0",
-            accent: "#4CAF50",
-            displayName: "Purple & Green",
-            name: "purple-green",
-            isDark: true,
         },
     ];
 
