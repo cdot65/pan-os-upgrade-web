@@ -23,16 +23,6 @@
         />
         <span>PAN-OS Upgrade</span>
     </a>
-    <!-- @for (key of sectionKeys; track key) {
-    <a
-        mat-button
-        class="app-navbar-hide-small app-button"
-        [routerLink]="key"
-        routerLinkActive="app-navbar-header-item-selected"
-    >
-        {{sections[key].name}}
-    </a>
-    } -->
     <div class="flex-spacer"></div>
     <theme-picker></theme-picker>
     @if (!hasAuthToken) {
@@ -54,12 +44,5 @@
         <mat-icon>logout</mat-icon>
         Logout
     </a>
-    }
-</nav>
-<nav class="docs-navbar docs-navbar-show-small" aria-label="Section Nav Bar">
-    @for (key of sectionKeys; track key) {
-    <a mat-button class="docs-navbar-link" [routerLink]="key"
-        >{{sections[key].name}}</a
-    >
     }
 </nav>

@@ -13,46 +13,6 @@ export interface DocSection {
     summary: string;
 }
 
-const INVENTORY = "inventory";
-const PROFILES = "profiles";
-const UPGRADE = "upgrade";
-const JOBS = "jobs";
-const HELP = "guides";
-
-const SECTIONS: { [key: string]: DocSection } = {
-    [INVENTORY]: {
-        name: "Inventory",
-        summary:
-            "Manage your environments inventory of Palo Alto Networks firewalls and" +
-            " Panorama appliances.",
-    },
-    [PROFILES]: {
-        name: "Profiles",
-        summary:
-            "Manage your environments inventory of Palo Alto Networks firewalls and" +
-            " Panorama appliances.",
-    },
-    [UPGRADE]: {
-        name: "Upgrade",
-        summary:
-            "Manage your environments inventory of Palo Alto Networks firewalls and" +
-            " Panorama appliances.",
-    },
-    [JOBS]: {
-        name: "Jobs",
-        summary:
-            "Manage your environments inventory of Palo Alto Networks firewalls and" +
-            " Panorama appliances.",
-    },
-    [HELP]: {
-        name: "Help",
-        summary:
-            "Manage your environments inventory of Palo Alto Networks firewalls and" +
-            " Panorama appliances.",
-    },
-};
-const SECTIONS_KEYS = Object.keys(SECTIONS);
-
 @Component({
     selector: "app-navbar",
     templateUrl: "./navbar.html",
@@ -86,13 +46,5 @@ export class NavBar {
 
     get hasAuthToken() {
         return this.authService.getIsLoggedIn();
-    }
-
-    get sections() {
-        return SECTIONS;
-    }
-
-    get sectionKeys() {
-        return SECTIONS_KEYS;
     }
 }
