@@ -29,34 +29,6 @@
                 margin-right: 5px;
             }
         }
-
-        .refresh-header {
-            display: flex;
-            align-items: center;
-        }
-    }
-
-    .refresh-progress {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-    }
-
-    .refresh-header {
-        outline: none;
-        // padding: 24px 8px;
-        font-size: 20px;
-        text-align: center;
-        color: accent;
-    }
-
-    .refresh-error {
-        outline: none;
-        // padding: 24px 8px;
-        font-size: 20px;
-        text-align: center;
-        color: red;
     }
 
     .inventory-details-grid {

@@ -54,52 +54,6 @@
                 </div>
                 }
             </div>
-
-            <!-- Display the progress bar when a user has requested a refresh -->
-            @if (showRefreshProgress) {
-            <p class="refresh-header">
-                Refreshing {{ refreshJobsCompleted }} of {{ totalRefreshJobs }}
-                devices
-            </p>
-            <div class="refresh-progress">
-                <mat-progress-bar
-                    mode="determinate"
-                    [value]="(refreshJobsCompleted / totalRefreshJobs) * 100"
-                >
-                </mat-progress-bar>
-            </div>
-            }
-
-            <!-- Display the error message if there is a problem with the job -->
-            @if (showRefreshError) {
-            <div class="refresh-error">
-                <p>
-                    There was a problem with the refresh job with selected
-                    Profile. Please try again.
-                </p>
-            </div>
-            }
-
-            <!-- Display the progress bar when a user has requested a sync -->
-            @if (showSyncProgress) {
-            <p class="sync-header">
-                Syncing inventory from {{ syncJobsCompleted }} of {{
-                totalSyncJobs }} Panorama devices
-            </p>
-            <div class="sync-progress">
-                <mat-progress-bar
-                    mode="determinate"
-                    [value]="(syncJobsCompleted / totalSyncJobs) * 100"
-                ></mat-progress-bar>
-            </div>
-            }
-
-            <!-- Display the error message if there is a problem with the sync job -->
-            @if (showSyncError) {
-            <div class="sync-error">
-                <p>There was a problem with the sync job. Please try again.</p>
-            </div>
-            }
         </div>
 
         <table
