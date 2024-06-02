@@ -8,18 +8,18 @@
 .sidenav {
     padding: 20px;
     background-color: inherit;
-    transition: width 0.2s ease-out;
+    transition: width 0.2s ease-in-out;
 
     &.minimized {
         .sidenav-text {
             opacity: 0;
-            transition: opacity 0.2s ease-out;
+            transition: opacity 0.2s ease-in-out;
         }
     }
 
     .sidenav-text {
         opacity: 1;
-        transition: opacity 0.2s ease-out;
+        transition: opacity 0.2s ease-in-out;
     }
 
     .mat-nav-list {
