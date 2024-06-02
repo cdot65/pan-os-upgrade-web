@@ -1,15 +1,15 @@
 {
     "folders": [
-			{
-				"path": "./backend"
-			},
-			{
-				"path": "./frontend"
-			},
-			{
-				"path": "."
-			}
-		],
+        {
+            "path": "./backend"
+        },
+        {
+            "path": "./frontend"
+        },
+        {
+            "path": "."
+        }
+    ],
     "settings": {
         "debug.openExplorerOnEnd": true,
         "explorer.openEditors.visible": 0,
@@ -18,6 +18,19 @@
         "workbench.iconTheme": "material-icon-theme",
         "gitlens.menus": {
             "editorGroup": false
-        }
+        },
+        "sqltools.connections": [
+            {
+                "previewLimit": 50,
+                "server": "localhost",
+                "port": 5432,
+                "driver": "PostgreSQL",
+                "name": "localhost",
+                "group": "panosupgrade",
+                "username": "django_user",
+                "password": "django_password",
+                "database": "postgres"
+            }
+        ]
     }
 }
