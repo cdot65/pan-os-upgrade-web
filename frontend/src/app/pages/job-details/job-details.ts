@@ -8,13 +8,16 @@ import { CommonModule } from "@angular/common";
 import { ComponentPageTitle } from "../page-title/page-title";
 import { Footer } from "src/app/shared/footer/footer";
 import { LoggingService } from "../../shared/services/logging.service";
+import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
 import { MatDividerModule } from "@angular/material/divider";
 import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { NgxJsonViewerModule } from "ngx-json-viewer";
+import { SortingService } from "../../shared/services/sorting.service";
 
 @Component({
     selector: "app-job-details",
@@ -24,9 +27,11 @@ import { NgxJsonViewerModule } from "ngx-json-viewer";
     imports: [
         CommonModule,
         Footer,
+        MatButtonModule,
         MatCardModule,
         MatDividerModule,
         MatFormFieldModule,
+        MatIconModule,
         MatInputModule,
         MatSelectModule,
         NgxJsonViewerModule,
@@ -42,6 +47,7 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
         private loggingService: LoggingService,
         private route: ActivatedRoute,
         private snackBar: MatSnackBar,
+        public sortingService: SortingService,
         public _componentPageTitle: ComponentPageTitle,
     ) {}
 
@@ -84,5 +90,9 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
                     );
                 },
             );
+    }
+
+    toggleSortOrder() {
+        this.sortingService.toggleSortOrder();
     }
 }
