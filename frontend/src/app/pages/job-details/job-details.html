@@ -59,13 +59,7 @@
                                     <mat-card-subtitle
                                         class="mat-card-subtitle"
                                     >
-                                        Timestamp: {{ log.timestamp |
-                                        date:'medium' }}
-                                    </mat-card-subtitle>
-                                    <mat-card-subtitle
-                                        class="mat-card-subtitle"
-                                    >
-                                        Log Level: {{ log.severity_level }}
+                                        {{ log.timestamp | date:'medium' }}
                                     </mat-card-subtitle>
                                 </mat-card-header>
                             </mat-card>
