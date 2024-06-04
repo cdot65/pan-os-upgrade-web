@@ -171,7 +171,6 @@ export class LoggingService {
      * @param uuid - The UUID of the job.
      * @returns An Observable that emits the combined job details and logs.
      */
-    // logging.service.ts
     getJobDetailsAndLogs(uuid: string): Observable<JobDetails> {
         return forkJoin([this.getJob(uuid), this.getJobLogs(uuid)]).pipe(
             map(([job, logs]) => ({ job, logs })),
