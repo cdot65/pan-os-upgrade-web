@@ -74,7 +74,11 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
             )
             .subscribe(
                 (jobDetails) => {
-                    this.loggingService.setJobDetailsAndLogs(jobDetails);
+                    const sortedLogs = this.sortLogs(jobDetails.logs);
+                    this.loggingService.setJobDetailsAndLogs({
+                        ...jobDetails,
+                        logs: sortedLogs,
+                    });
                 },
                 (error) => {
                     console.error(
@@ -94,5 +98,11 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
 
     toggleSortOrder() {
         this.sortingService.toggleSortOrder();
+    }
+
+    private sortLogs(logs: any[]) {
+        return this.sortingService.sortOrder() === "asc"
+            ? logs.sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+            : logs.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
     }
 }
