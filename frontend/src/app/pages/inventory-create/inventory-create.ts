@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable max-len */
 // src/app/pages/inventory-create/inventory-create.ts
 
 import {
@@ -49,12 +50,6 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     createInventoryForm: FormGroup;
     devices: Device[] = [];
-    haStates: string[] = [
-        "active",
-        "passive",
-        "active-primary",
-        "active-secondary",
-    ];
     firewallPlatforms: DeviceType[] = [];
     panoramaPlatforms: DeviceType[] = [];
     private destroy$ = new Subject<void>();
@@ -122,6 +117,11 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
         });
     }
 
+    /**
+     * Creates a device in the inventory.
+     *
+     * @returns
+     */
     createDevice(): void {
         if (this.createInventoryForm && this.createInventoryForm.valid) {
             const author = this.cookieService.get("author");
@@ -155,6 +155,11 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
         }
     }
 
+    /**
+     * Fetches devices from the inventory service and assigns them to the "devices" property.
+     *
+     * @returns
+     */
     getDevices(): void {
         this.inventoryService
             .getDevices()
@@ -169,6 +174,11 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
             );
     }
 
+    /**
+     * Fetches the firewall platforms from the inventory service.
+     *
+     * @returns
+     */
     getFirewallPlatforms(): void {
         this.inventoryService
             .getFirewallPlatforms()
@@ -190,6 +200,11 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
             );
     }
 
+    /**
+     * Retrieves the panorama platforms from the inventory service and stores them in the "panoramaPlatforms" property.
+     *
+     * @returns
+     */
     getPanoramaPlatforms(): void {
         this.inventoryService
             .getPanoramaPlatforms()
@@ -211,11 +226,25 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
             );
     }
 
+    /**
+     * Executes the ngOnDestroy method to clean up resources.
+     *
+     * @return
+     */
     ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
     }
 
+    /**
+     * Initializes the component and performs necessary initialization tasks.
+     * Sets the page title to "Inventory Create".
+     * Retrieves devices and firewall platforms.
+     * Sets validators for the createInventoryForm.
+     * Subscribes to changes in the "device_type" form control and updates the form validation accordingly.
+     *
+     * @return
+     */
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory Create";
         this.getDevices();
@@ -234,11 +263,22 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
             });
     }
 
+    /**
+     * Resets the inventory form and navigates to the inventory page.
+     *
+     * @returns
+     */
     onCancel(): void {
         this.createInventoryForm.reset();
         this.router.navigate(["/inventory"]);
     }
 
+    /**
+     * Validates the IP addresses in a form control.
+     *
+     * @param control - The form control to validate.
+     * @returns An object containing validation errors, or null if the IP addresses are valid.
+     */
     requireIpAddress(): ValidatorFn {
         return (control: AbstractControl): ValidationErrors | null => {
             const ipv4Control = control.get("ipv4_address");
@@ -282,6 +322,14 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
         };
     }
 
+    /**
+     * Update form validation based on the given device type.
+     * Clears or sets validators for specific form controls
+     *
+     * @param device_type - The type of the device (e.g., "Firewall", "Panorama")
+     *
+     * @return
+     */
     updateFormValidation(device_type: string): void {
         const device_groupControl =
             this.createInventoryForm.get("device_group");
