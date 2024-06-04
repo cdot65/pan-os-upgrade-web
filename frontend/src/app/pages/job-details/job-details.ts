@@ -101,15 +101,17 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
                 switchMap(() =>
                     this.loggingService.getJobDetailsAndLogs(this.jobUuid!),
                 ),
-                takeUntil(this.destroy$),
-            )
-            .subscribe(
-                (jobDetails) => {
+                tap((jobDetails) => {
                     const sortedLogs = this.sortLogs(jobDetails.logs);
                     this.loggingService.setJobDetailsAndLogs({
                         ...jobDetails,
                         logs: sortedLogs,
                     });
+                }),
+                takeUntil(this.destroy$),
+            )
+            .subscribe(
+                (jobDetails) => {
                     if (
                         jobDetails.job.job_status !== "pending" &&
                         jobDetails.job.job_status !== "running"
@@ -135,6 +137,14 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
 
     toggleSortOrder() {
         this.sortingService.toggleSortOrder();
+        const jobDetails = this.loggingService.getJobDetailsAndLogsValue();
+        if (jobDetails) {
+            const sortedLogs = this.sortLogs(jobDetails.logs);
+            this.loggingService.setJobDetailsAndLogs({
+                ...jobDetails,
+                logs: sortedLogs,
+            });
+        }
     }
 
     private sortLogs(logs: any[]) {
