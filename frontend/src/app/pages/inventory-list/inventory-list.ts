@@ -257,6 +257,13 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         } else {
             this.dataSource.data.forEach((row) => this.selection.select(row));
         }
+        // Deselect the header checkbox
+        const headerCheckbox = document.querySelector(
+            "th.mat-column-select .mat-checkbox-input",
+        ) as HTMLInputElement;
+        if (headerCheckbox) {
+            headerCheckbox.checked = false;
+        }
     }
 
     navigateToCreateInventory(): void {
