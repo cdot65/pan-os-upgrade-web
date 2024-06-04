@@ -30,21 +30,20 @@
                         </p>
                     </div>
 
+                    <div class="job-details-button-row">
+                        <button
+                            mat-flat-button
+                            color="accent"
+                            (click)="toggleSortOrder()"
+                        >
+                            Toggle Sorting (Current: {{
+                            sortingService.sortOrder() }})
+                        </button>
+                    </div>
+
                     <mat-divider></mat-divider>
 
                     <div class="live-logs">
-                        <h3>Live Logs</h3>
-                        <div class="job-details-button-row">
-                            <button
-                                mat-button
-                                color="accent"
-                                (click)="toggleSortOrder()"
-                            >
-                                Toggle Sort Order (Current: {{
-                                sortingService.sortOrder() }})
-                            </button>
-                        </div>
-
                         @if ((jobDetails$ | async)?.logs?.length === 0) {
                         <div>No logs found.</div>
                         } @else {

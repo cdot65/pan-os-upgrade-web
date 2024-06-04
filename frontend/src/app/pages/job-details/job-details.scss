@@ -1,5 +1,10 @@
 // src/app/pages/job-details/job-details.scss
 
+.live-logs {
+    padding-top: 10px;
+    gap: 20px;
+}
+
 .job-details-container {
     display: grid;
     grid-template-rows: auto 1fr auto;
