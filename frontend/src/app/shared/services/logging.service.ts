@@ -22,6 +22,7 @@ import { CookieService } from "ngx-cookie-service";
 import { Injectable } from "@angular/core";
 import { Job } from "../interfaces/job.interface";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { SortingService } from "./sorting.service";
 import { environment } from "../../../environments/environment.prod";
 
 @Injectable({
@@ -38,6 +39,7 @@ export class LoggingService {
         private cookieService: CookieService,
         private http: HttpClient,
         private snackBar: MatSnackBar,
+        private sortingService: SortingService,
     ) {}
 
     /**
@@ -173,11 +175,20 @@ export class LoggingService {
      */
     getJobDetailsAndLogs(uuid: string): Observable<JobDetails> {
         return forkJoin([this.getJob(uuid), this.getJobLogs(uuid)]).pipe(
-            map(([job, logs]) => ({ job, logs })),
+            map(([job, logs]) => {
+                const sortedLogs =
+                    this.sortingService.sortOrder() === "asc"
+                        ? logs.sort((a, b) =>
+                              a.timestamp.localeCompare(b.timestamp),
+                          )
+                        : logs.sort((a, b) =>
+                              b.timestamp.localeCompare(a.timestamp),
+                          );
+                return { job, logs: sortedLogs };
+            }),
             catchError(this.handleError.bind(this)),
         );
     }
-
     /**
      * Retrieves the current value of the job details and logs.
      *
