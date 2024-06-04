@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
 import { Subject, timer } from "rxjs";
-import { switchMap, takeUntil } from "rxjs/operators";
+import { catchError, switchMap, takeUntil, tap } from "rxjs/operators";
 
 import { ActivatedRoute } from "@angular/router";
 import { CommonModule } from "@angular/common";
@@ -44,6 +44,7 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
     jobDetails$ = this.loggingService.jobDetails$;
     private destroy$ = new Subject<void>();
     private pollingInterval = 3000; // 3 seconds
+    private jobUuid: string | null = null;
 
     constructor(
         private loggingService: LoggingService,
@@ -60,17 +61,45 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
 
     ngOnInit(): void {
         this._componentPageTitle.title = "Job Details";
-        const jobUuid = this.route.snapshot.paramMap.get("id");
-        if (jobUuid) {
-            this.fetchJobDetailsAndLogs(jobUuid);
+        this.jobUuid = this.route.snapshot.paramMap.get("id");
+        if (this.jobUuid) {
+            this.fetchInitialJobDetailsAndLogs();
         }
     }
 
-    private fetchJobDetailsAndLogs(jobUuid: string): void {
+    private fetchInitialJobDetailsAndLogs(): void {
+        this.loggingService
+            .getJobDetailsAndLogs(this.jobUuid!)
+            .pipe(
+                tap((jobDetails) => {
+                    const sortedLogs = this.sortLogs(jobDetails.logs);
+                    this.loggingService.setJobDetailsAndLogs({
+                        ...jobDetails,
+                        logs: sortedLogs,
+                    });
+                    if (
+                        jobDetails.job.job_status === "pending" ||
+                        jobDetails.job.job_status === "running"
+                    ) {
+                        this.startPolling();
+                    }
+                }),
+                catchError((error) => {
+                    console.error(
+                        "Error fetching initial job details and logs:",
+                        error,
+                    );
+                    return [];
+                }),
+            )
+            .subscribe();
+    }
+
+    private startPolling(): void {
         timer(0, this.pollingInterval)
             .pipe(
                 switchMap(() =>
-                    this.loggingService.getJobDetailsAndLogs(jobUuid),
+                    this.loggingService.getJobDetailsAndLogs(this.jobUuid!),
                 ),
                 takeUntil(this.destroy$),
             )
@@ -81,6 +110,12 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
                         ...jobDetails,
                         logs: sortedLogs,
                     });
+                    if (
+                        jobDetails.job.job_status !== "pending" &&
+                        jobDetails.job.job_status !== "running"
+                    ) {
+                        this.destroy$.next();
+                    }
                 },
                 (error) => {
                     console.error(
