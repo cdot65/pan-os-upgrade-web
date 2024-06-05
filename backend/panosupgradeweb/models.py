@@ -197,46 +197,35 @@ class Job(models.Model):
         null=True,
         verbose_name="Job Status",
     )
-    job_type = models.CharField(max_length=255)
+    job_type = models.CharField(
+        max_length=20,
+        choices=(
+            ("upgrade", "Upgrade"),
+            ("panorama_sync", "Panorama Sync"),
+            ("device_refresh", "Device Refresh"),
+        ),
+        verbose_name="Job Type",
+    )
 
     def __str__(self) -> str:
         return str(self.task_id)
 
 
-class UpgradeLog(models.Model):
-    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="upgrade_logs")
-    timestamp = models.DateTimeField(auto_now_add=True)
-    level = models.CharField(max_length=20)
-    message = models.TextField()
-
-    class Meta:
-        ordering = ["timestamp"]
-
-    def __str__(self):
-        return f"{self.job.task_id} - {self.timestamp}"
-
-
-class SnapshotLog(models.Model):
-    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="snapshot_logs")
-    timestamp = models.DateTimeField(auto_now_add=True)
-    snapshot_type = models.CharField(max_length=100)
-    snapshot_data = models.JSONField()
-
-    class Meta:
-        ordering = ["timestamp"]
-
-    def __str__(self):
-        return f"{self.job.task_id} - {self.timestamp}"
-
-
-class ReadinessCheckLog(models.Model):
-    job = models.ForeignKey(
-        Job, on_delete=models.CASCADE, related_name="readiness_check_logs"
+class JobLogEntry(models.Model):
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="log_entries")
+    timestamp = models.DateTimeField()
+    severity_level = models.CharField(
+        max_length=20,
+        choices=(
+            ("debug", "Debug"),
+            ("info", "Info"),
+            ("warning", "Warning"),
+            ("error", "Error"),
+            ("critical", "Critical"),
+        ),
+        verbose_name="Severity Level",
     )
-    timestamp = models.DateTimeField(auto_now_add=True)
-    check_name = models.CharField(max_length=100)
-    check_result = models.BooleanField()
-    check_details = models.TextField()
+    message = models.CharField(max_length=40960)
 
     class Meta:
         ordering = ["timestamp"]

@@ -1,12 +1,12 @@
 <!-- src/app/pages/profile-select-dialog/profile-select-dialog.component.html -->
 <h2 mat-dialog-title>{{ data.message }}</h2>
-<div mat-dialog-content>
+<div class="dialog-content">
     <div class="form-field">
-        <mat-form-field>
-            <mat-label>Select Profile</mat-label>
-            <mat-select [(ngModel)]="selectedProfile" required>
+        <mat-form-field class="profile-select-field">
+            <mat-label class="profile-select-label">Select Profile</mat-label>
+            <mat-select class="profile-select" [(ngModel)]="selectedProfile" required>
                 @for (profile of profiles$ | async; track profile) {
-                    <mat-option [value]="profile.uuid">
+                    <mat-option class="profile-option" [value]="profile.uuid">
                         {{ profile.name }}
                     </mat-option>
                 }
@@ -18,7 +18,7 @@
     <button mat-button (click)="onCancelClick()">Cancel</button>
     <button
         mat-button
-        color="primary"
+        class="submit-button"
         type="submit"
         (click)="onSelectClick()"
         [disabled]="!selectedProfile"

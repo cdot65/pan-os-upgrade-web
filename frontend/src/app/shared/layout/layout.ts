@@ -14,7 +14,7 @@ import { SideNav } from "../sidenav/sidenav";
         <div class="app-layout">
             <app-sidenav></app-sidenav>
             <div class="app-content">
-                <router-outlet></router-outlet>
+                <ng-content></ng-content>
             </div>
             <app-footer></app-footer>
         </div>

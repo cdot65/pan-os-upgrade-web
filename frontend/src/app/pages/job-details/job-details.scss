@@ -1,9 +1,23 @@
 // src/app/pages/job-details/job-details.scss
 
+.live-logs {
+    padding-top: 10px;
+    gap: 20px;
+}
+
 .job-details-container {
     display: grid;
     grid-template-rows: auto 1fr auto;
     min-height: 100vh;
+}
+
+.job-details-button-row {
+    display: table-cell;
+    max-width: 600px;
+}
+
+.job-details-button-row .mat-mdc-button-base {
+    margin: 8px 8px 8px 0;
 }
 
 .job-details {

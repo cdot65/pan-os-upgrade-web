@@ -7,15 +7,24 @@ import os
 import re
 import sys
 import time
-
-from typing import Dict, List, Optional, Tuple, Union
 import uuid
+
+from datetime import datetime
+from typing import Dict, List, Optional, Tuple, Union
 
 import ipdb
 import django
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from logstash_async.handler import AsynchronousLogstashHandler
 from celery.exceptions import WorkerTerminate, WorkerLostError
+
+from panosupgradeweb.models import (  # noqa: E402
+    Device,
+    Job,
+    JobLogEntry,
+    Profile,
+)
 
 # Palo Alto Networks SDK imports
 from panos.base import PanDevice
@@ -47,16 +56,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_project.settings")
 # Initialize the Django application
 django.setup()
 
-# import our Django models
-from panosupgradeweb.models import (  # noqa: E402
-    Device,
-    Job,
-    Profile,
-    ReadinessCheckLog,
-    SnapshotLog,
-    UpgradeLog,
-)
-
 
 class UpgradeLogger(logging.Logger):
     """
@@ -64,7 +63,7 @@ class UpgradeLogger(logging.Logger):
 
     This class extends the built-in logging.Logger class and provides additional functionality
     for logging upgrade-related messages. It includes methods to set the job ID, log tasks with
-    emojis, and send logs to a Logstash server.
+    emojis, and save logs to the database.
 
     Attributes:
         name (str): The name of the logger.
@@ -83,14 +82,6 @@ class UpgradeLogger(logging.Logger):
         super().__init__(name, level)
         self.sequence_number = 0
         self.job_id = None
-
-        # Create a Logstash handler
-        logstash_handler = AsynchronousLogstashHandler(
-            host="logstash",
-            port=5000,
-            database_path=None,
-        )
-        self.addHandler(logstash_handler)
 
     def get_emoji(
         self,
@@ -149,11 +140,6 @@ class UpgradeLogger(logging.Logger):
     def log_task(self, action, message):
         emoji = self.get_emoji(action=action)
         message = f"{emoji} {message}"
-        extra = {
-            "job_id": self.job_id,
-            "job_type": "upgrade",
-            "sequence_number": self.sequence_number,
-        }
 
         level_mapping = {
             "debug": logging.DEBUG,
@@ -162,9 +148,25 @@ class UpgradeLogger(logging.Logger):
             "error": logging.ERROR,
             "critical": logging.CRITICAL,
         }
+        severity_level = action
         level = level_mapping.get(action, logging.INFO)
 
-        self.log(level, message, extra=extra)
+        timestamp = timezone.now()
+
+        # Save the log entry to the database
+        try:
+            job = Job.objects.get(task_id=self.job_id)
+            log_entry = JobLogEntry(
+                job=job,
+                timestamp=timestamp,
+                severity_level=severity_level,
+                message=message,
+            )
+            log_entry.save()
+        except Job.DoesNotExist:
+            pass
+
+        self.log(level, message)
         self.sequence_number += 1
 
     def set_job_id(self, job_id):
@@ -2005,7 +2007,7 @@ if __name__ == "__main__":
     # Create a new Job entry
     author = get_user_model().objects.get(id=author_id)
     job = Job.objects.create(
-        job_type="device_upgrade",
+        job_type="upgrade",
         job_status="running",
         author=author,
         task_id=str(uuid.uuid4()),

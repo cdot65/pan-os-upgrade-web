@@ -7,7 +7,7 @@ import {
 } from "@angular/platform-browser/animations";
 import { provideRouter, withInMemoryScrolling } from "@angular/router";
 
-import { PANOSUPGRADE_ROUTES } from "./app/routes";
+import { APP_ROUTES } from "./app/routes";
 import { PanOsUpgradeApp } from "./app/app";
 import { bootstrapApplication } from "@angular/platform-browser";
 import { provideHttpClient } from "@angular/common/http";
@@ -29,7 +29,7 @@ bootstrapApplication(PanOsUpgradeApp, {
         prefersReducedMotion ? provideNoopAnimations() : provideAnimations(),
         { provide: LocationStrategy, useClass: PathLocationStrategy },
         provideRouter(
-            PANOSUPGRADE_ROUTES,
+            APP_ROUTES,
             withInMemoryScrolling({
                 scrollPositionRestoration: "enabled",
                 anchorScrolling: "enabled",

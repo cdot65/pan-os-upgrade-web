@@ -17,7 +17,6 @@ import { MatProgressBarModule } from "@angular/material/progress-bar";
 @Component({
     selector: "app-profile-select-dialog",
     templateUrl: "./profile-select-dialog.component.html",
-    styleUrls: ["./profile-select-dialog.component.scss"],
     standalone: true,
     imports: [
         MatButtonModule,
@@ -32,24 +31,38 @@ import { MatProgressBarModule } from "@angular/material/progress-bar";
 export class ProfileDialogComponent implements OnInit {
     profiles$: Observable<Profile[]> = new Observable<Profile[]>();
     selectedProfile: string = "";
-    showProgress: boolean = false;
 
     constructor(
         public dialogRef: MatDialogRef<ProfileDialogComponent>,
         private profileService: ProfileService,
         @Inject(MAT_DIALOG_DATA) public data: { message: string },
-    ) {}
-
+    ) {
+        // Set the width of the dialog
+        this.dialogRef.updateSize("530px");
+    }
+    /**
+     * Initializes the component and fetches the profiles from the profile service.
+     *
+     * @returns
+     */
     ngOnInit(): void {
         this.profiles$ = this.profileService.getProfiles();
     }
 
+    /**
+     * Closes the dialog when the cancel button is clicked.
+     * @returns
+     */
     onCancelClick(): void {
         this.dialogRef.close();
     }
 
+    /**
+     * Executes when the select button is clicked.
+     *
+     * @returns
+     */
     onSelectClick(): void {
-        this.showProgress = true;
         this.dialogRef.close(this.selectedProfile);
     }
 }

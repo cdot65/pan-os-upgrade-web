@@ -5,10 +5,10 @@ import argparse
 import json
 import logging
 import xml.etree.ElementTree as ET
+import uuid
 
 import django
 from typing import List, Dict, Optional
-from logstash_async.handler import AsynchronousLogstashHandler
 
 from panos.firewall import Firewall
 from panos.panorama import Panorama
@@ -25,26 +25,20 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_project.settings")
 django.setup()
 
 # import our Django models
-from panosupgradeweb.models import Device, DeviceType, Profile  # noqa: E402
+from panosupgradeweb.models import (  # noqa: E402
+    Device,
+    DeviceType,
+    Job,
+    JobLogEntry,
+    Profile,
+)
 from django.core.exceptions import ObjectDoesNotExist  # noqa: E402
+from django.utils import timezone  # noqa: E402
 
 
 # Create a logger instance
 logger = logging.getLogger("pan-os-device-refresh")
 logger.setLevel(logging.DEBUG)
-
-# Create a Logstash handler
-logstash_handler = AsynchronousLogstashHandler(
-    # Use the Logstash service name from the Docker Compose file
-    host="logstash",
-    # The port Logstash is listening on
-    port=5000,
-    # Disable the local queue database
-    database_path=None,
-)
-
-# Add the Logstash handler to the logger
-logger.addHandler(logstash_handler)
 
 # Debugging: Add a console handler to the logger
 # console_handler = logging.StreamHandler()
@@ -160,61 +154,33 @@ def flatten_xml_to_dict(element: ET.Element) -> dict:
             B --> L[Return flattened dictionary]
         ```
     """
-    log_device_refresh(
-        action="start",
-        message="Flattening XML element to dictionary",
-    )
     result = {}
     for child_element in element:
         child_tag = child_element.tag
 
         # If the child element has text and no further child elements, add it as a key-value pair to the result dictionary
         if child_element.text and len(child_element) == 0:
-            log_device_refresh(
-                action="info",
-                message=f"Adding key-value pair to result dictionary: {child_tag}",
-            )
             result[child_tag] = child_element.text
         else:
             # If the child element tag already exists in the result dictionary
             if child_tag in result:
                 # If the existing value is not a list, convert it to a list and append the flattened child element
                 if not isinstance(result.get(child_tag), list):
-                    log_device_refresh(
-                        action="info",
-                        message=f"Converting existing value to list and appending flattened child element: {child_tag}",
-                    )
                     result[child_tag] = [
                         result.get(child_tag),
                         flatten_xml_to_dict(element=child_element),
                     ]
                 # If the existing value is already a list, append the flattened child element to the list
                 else:
-                    log_device_refresh(
-                        action="info",
-                        message=f"Appending flattened child element to existing list: {child_tag}",
-                    )
                     result[child_tag].append(flatten_xml_to_dict(element=child_element))
             else:
                 # If the child element tag is "entry", flatten it and add as a single-element list to the result dictionary
                 if child_tag == "entry":
-                    log_device_refresh(
-                        action="info",
-                        message=f"Flattening child element and adding as single-element list: {child_tag}",
-                    )
                     result[child_tag] = [flatten_xml_to_dict(element=child_element)]
                 # Otherwise, flatten the child element and add as a key-value pair to the result dictionary
                 else:
-                    log_device_refresh(
-                        action="info",
-                        message=f"Flattening child element and adding as key-value pair: {child_tag}",
-                    )
                     result[child_tag] = flatten_xml_to_dict(element=child_element)
 
-    log_device_refresh(
-        action="success",
-        message="XML element flattened to dictionary successfully",
-    )
     return result
 
 
@@ -391,12 +357,6 @@ def log_device_refresh(
     # Prepend the emoji to the message
     message = f"{emoji} {message}"
 
-    # Create a dictionary with additional information to be included in the log record
-    extra = {
-        "job_id": JOB_ID,
-        "job_type": "device_refresh",
-    }
-
     level_mapping = {
         "debug": logging.DEBUG,
         "info": logging.INFO,
@@ -404,10 +364,25 @@ def log_device_refresh(
         "error": logging.ERROR,
         "critical": logging.CRITICAL,
     }
+    severity_level = action
     level = level_mapping.get(action, logging.INFO)
 
-    # Log the message with the corresponding log level, message, and extra information
-    logger.log(level, message, extra=extra)
+    timestamp = timezone.now()
+
+    # Save the log entry to the database
+    try:
+        job = Job.objects.get(task_id=JOB_ID)
+        log_entry = JobLogEntry(
+            job=job,
+            timestamp=timestamp,
+            severity_level=severity_level,
+            message=message,
+        )
+        log_entry.save()
+    except Job.DoesNotExist:
+        pass
+
+    logger.log(level, message)
 
 
 def run_device_refresh(
@@ -466,6 +441,17 @@ def run_device_refresh(
     # JOB_ID global variable
     global JOB_ID
     JOB_ID = job_id
+
+    # Generate a unique task_id using uuid
+    unique_task_id = str(uuid.uuid4())
+
+    # Create a new Job instance with the unique task_id
+    job = Job.objects.create(
+        task_id=unique_task_id,
+        author_id=author_id,
+        job_status="running",
+        job_type="device_refresh",
+    )
 
     log_device_refresh(
         action="start",
@@ -541,8 +527,10 @@ def run_device_refresh(
     except Exception as e:
         log_device_refresh(
             action="error",
-            message=f"Error while connecting to the PAN device: {str(e)}",
+            message=f"Error while retrieving system information: {str(e)}",
         )
+        job.job_status = "errored"
+        job.save()
         return "errored"
 
     # Connect to the PAN device and retrieve the system information

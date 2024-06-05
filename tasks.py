@@ -14,13 +14,13 @@ from invoke import task
 # ---------------------------------------------------------------------------
 # DOCKER PARAMETERS
 # ---------------------------------------------------------------------------
-DOCKER_IMG_BACKEND = "ghcr.io/cdot65/saute-backend"
+DOCKER_IMG_BACKEND = "ghcr.io/cdot65/pan-os-upgrade-web-backend"
 DOCKER_TAG_BACKEND = "0.0.1"
 
-DOCKER_IMG_FRONTEND = "ghcr.io/cdot65/saute-frontend"
+DOCKER_IMG_FRONTEND = "ghcr.io/cdot65/pan-os-upgrade-web-frontend"
 DOCKER_TAG_FRONTEND = "0.0.1"
 
-DOCKER_IMG_WORKER = "ghcr.io/cdot65/saute-worker"
+DOCKER_IMG_WORKER = "ghcr.io/cdot65/pan-os-upgrade-web-worker"
 DOCKER_TAG_WORKER = "0.0.1"
 
 
@@ -64,7 +64,7 @@ def rebuild(context):
     remove_migrations = "rm backend/panosupgradeweb/migrations/*.py"
     stop_containers = "docker-compose stop"
     remove_containers = "docker-compose rm -f"
-    remove_volumes = "docker volume rm pan-os-upgrade-web_elasticsearch_data && docker volume rm pan-os-upgrade-web_postgres_data"
+    remove_volumes = "docker volume rm pan-os-upgrade-web_postgres_data"
     build_containers = "docker-compose build"
     start_containers = "docker-compose up -d"
     context.run(

@@ -22,10 +22,20 @@ export class InventoryDeleteDialogComponent {
         public data: { title: string; message: string },
     ) {}
 
+    /**
+     * Closes the dialog without any action.
+     *
+     * @return
+     */
     onNoClick(): void {
         this.dialogRef.close(false);
     }
 
+    /**
+     * Closes the dialog with a "true" value indicating that the yes button was clicked.
+     *
+     * @return
+     */
     onYesClick(): void {
         this.dialogRef.close(true);
     }
