@@ -14,7 +14,7 @@ import { MatDialog, MatDialogModule } from "@angular/material/dialog";
 import { MatSort, MatSortModule, Sort } from "@angular/material/sort";
 import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 import { Subject, forkJoin } from "rxjs";
-import { ProfileSelectionDialogComponent } from "../../shared/profile-selection-dialog/profile-selection-dialog.component"
+
 import { ComponentPageTitle } from "../page-title/page-title";
 import { CookieService } from "ngx-cookie-service";
 import { Device } from "../../shared/interfaces/device.interface";
@@ -49,7 +49,6 @@ import { takeUntil } from "rxjs/operators";
         MatButtonModule,
         MatDialogModule,
         MatListModule,
-      ProfileSelectionDialogComponent,
     ],
 })
 /**
@@ -98,7 +97,8 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         private snackBar: MatSnackBar,
         private _liveAnnouncer: LiveAnnouncer,
         public _componentPageTitle: ComponentPageTitle,
-    ) {}
+    ) {
+    }
 
     /**
      * Announces the change in sort state.
