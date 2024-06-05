@@ -1,0 +1,102 @@
+// src/app/shared/sidenav/_sidenav-theme.scss
+
+@use "@angular/material" as mat;
+@use "sass:map";
+
+@mixin theme($theme) {
+    $primary: map.get($theme, primary);
+    $accent: map.get($theme, accent);
+    $warn: map.get($theme, warn);
+    $background: map.get($theme, background);
+    $foreground: map.get($theme, foreground);
+    $next-theme: mat.define-palette(mat.$red-palette);
+
+    .mat-dialog-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .dialog-content {
+        margin-bottom: 20px;
+
+        .form-field {
+            width: 90%;
+            margin: 0 auto;
+
+            .profile-select-field {
+                width: 100%;
+
+                .mat-form-field-wrapper {
+                    width: 100%;
+                }
+
+                .profile-select-label {
+                    color: mat.get-color-from-palette($foreground, text);
+                }
+
+                .profile-select {
+                    .mat-select-value {
+                        color: mat.get-color-from-palette($foreground, text);
+                    }
+
+                    .mat-select-arrow {
+                        color: mat.get-color-from-palette($foreground, text);
+                    }
+                }
+
+                .profile-option {
+                    color: mat.get-color-from-palette($background, text);
+                }
+            }
+        }
+    }
+
+    .mat-dialog-content {
+        margin-bottom: 20px;
+
+        .form-field {
+            width: 100%;
+
+            mat-form-field {
+                width: 100%;
+
+                .mat-form-field-wrapper {
+                    width: 100%;
+                }
+
+                .mat-form-field-outline {
+                    color: mat.get-color-from-palette($foreground, text);
+                }
+
+                .mat-select-value {
+                    color: mat.get-color-from-palette($foreground, text);
+                }
+
+                .mat-select-arrow {
+                    color: mat.get-color-from-palette($foreground, text);
+                }
+            }
+        }
+    }
+
+
+    .button-container {
+        margin-top: 20px;
+        margin-right: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: flex-end;
+
+        .submit-button {
+            margin-right: 5px;
+            background-color: mat.get-color-from-palette($primary);
+            color: white;
+
+            &[disabled] {
+                background-color: mat.get-color-from-palette($foreground, disabled-button);
+                color: mat.get-color-from-palette($foreground, disabled-text);
+            }
+        }
+    }
+}

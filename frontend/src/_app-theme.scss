@@ -10,6 +10,7 @@
 @use "./app/shared/carousel/carousel-theme";
 @use "./app/shared/footer/footer-theme";
 @use "./app/shared/navbar/navbar-theme";
+@use "./app/pages/profile-select-dialog/profile-select-dialogue-theme";
 @use "./app/shared/sidenav/sidenav-theme";
 @use "./app/shared/table-of-contents/table-of-contents-theme";
 @use "./styles/api-theme";
@@ -63,6 +64,7 @@
     @include login-theme.theme($theme);
     @include job-details-theme.theme($theme);
     @include navbar-theme.theme($theme);
+    @include profile-select-dialogue-theme.theme($theme);
     @include sidenav-theme.theme($theme);
     @include table-of-contents-theme.theme($theme);
 }
