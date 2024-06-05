@@ -4,12 +4,12 @@ import sys
 import argparse
 import json
 import logging
+import uuid
 import xml.etree.ElementTree as ET
 
 import django
 
 from typing import List, Dict, Optional
-from logstash_async.handler import AsynchronousLogstashHandler
 
 from panos.firewall import Firewall
 from panos.panorama import Panorama
@@ -26,26 +26,20 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_project.settings")
 django.setup()
 
 # import our Django models
-from panosupgradeweb.models import Device, DeviceType, Profile  # noqa: E402
+from panosupgradeweb.models import (  # noqa: E402
+    Device,
+    DeviceType,
+    Job,
+    JobLogEntry,
+    Profile,
+)  # noqa: E402
 from django.core.exceptions import ObjectDoesNotExist  # noqa: E402
+from django.utils import timezone  # noqa: E402
 
 
 # Create a logger instance
 logger = logging.getLogger("inventory-sync")
 logger.setLevel(logging.DEBUG)
-
-# Create a Logstash handler
-logstash_handler = AsynchronousLogstashHandler(
-    # Use the Logstash service name from the Docker Compose file
-    host="logstash",
-    # The port Logstash is listening on
-    port=5000,
-    # Disable the local queue database
-    database_path=None,
-)
-
-# Add the Logstash handler to the logger
-logger.addHandler(logstash_handler)
 
 # Debugging: Add a console handler to the logger
 # console_handler = logging.StreamHandler()
@@ -184,20 +178,12 @@ def flatten_xml_to_dict(element: ET.Element) -> dict:
             B --> L[Return flattened dictionary]
         ```
     """
-    log_inventory_sync(
-        action="start",
-        message="Flattening XML element to dictionary",
-    )
     result = {}
     for child_element in element:
         child_tag = child_element.tag
 
         # If the child element has text and no further child elements, add it as a key-value pair to the result dictionary
         if child_element.text and len(child_element) == 0:
-            log_inventory_sync(
-                action="info",
-                message=f"Adding key-value pair to result dictionary: {child_tag}",
-            )
             result[child_tag] = child_element.text
         else:
             # If the child element tag already exists in the result dictionary
@@ -214,31 +200,15 @@ def flatten_xml_to_dict(element: ET.Element) -> dict:
                     ]
                 # If the existing value is already a list, append the flattened child element to the list
                 else:
-                    log_inventory_sync(
-                        action="info",
-                        message=f"Appending flattened child element to existing list: {child_tag}",
-                    )
                     result[child_tag].append(flatten_xml_to_dict(element=child_element))
             else:
                 # If the child element tag is "entry", flatten it and add as a single-element list to the result dictionary
                 if child_tag == "entry":
-                    log_inventory_sync(
-                        action="info",
-                        message=f"Flattening child element and adding as single-element list: {child_tag}",
-                    )
                     result[child_tag] = [flatten_xml_to_dict(element=child_element)]
                 # Otherwise, flatten the child element and add as a key-value pair to the result dictionary
                 else:
-                    log_inventory_sync(
-                        action="info",
-                        message=f"Flattening child element and adding as key-value pair: {child_tag}",
-                    )
                     result[child_tag] = flatten_xml_to_dict(element=child_element)
 
-    log_inventory_sync(
-        action="success",
-        message="XML element flattened to dictionary successfully",
-    )
     return result
 
 
@@ -273,10 +243,6 @@ def log_inventory_sync(
     """
     emoji = get_emoji(action=action)
     message = f"{emoji} {message}"
-    extra = {
-        "job_id": JOB_ID,
-        "job_type": "inventory_sync",
-    }
 
     level_mapping = {
         "debug": logging.DEBUG,
@@ -285,9 +251,25 @@ def log_inventory_sync(
         "error": logging.ERROR,
         "critical": logging.CRITICAL,
     }
+    severity_level = action
     level = level_mapping.get(action, logging.INFO)
 
-    logger.log(level, message, extra=extra)
+    timestamp = timezone.now()
+
+    # Save the log entry to the database
+    try:
+        job = Job.objects.get(task_id=JOB_ID)
+        log_entry = JobLogEntry(
+            job=job,
+            timestamp=timestamp,
+            severity_level=severity_level,
+            message=message,
+        )
+        log_entry.save()
+    except Job.DoesNotExist:
+        pass
+
+    logger.log(level, message)
 
 
 def get_device_group_mapping(pan: Panorama) -> List[Dict]:
@@ -470,6 +452,17 @@ def run_inventory_sync(
     global JOB_ID
     JOB_ID = job_id
 
+    # Generate a unique task_id using uuid
+    unique_task_id = str(uuid.uuid4())
+
+    # Create a new Job instance with the unique task_id
+    job = Job.objects.create(
+        task_id=unique_task_id,
+        author_id=author_id,
+        job_status="running",
+        job_type="inventory_sync",
+    )
+
     log_inventory_sync(
         action="start",
         message=f"Running inventory sync for Panorama device: {panorama_device_uuid}",
@@ -488,6 +481,7 @@ def run_inventory_sync(
         action="start",
         message="Starting inventory sync",
     )
+
     try:
         # Retrieve the Panorama device and profile objects from the database
         panorama_device = Device.objects.get(uuid=panorama_device_uuid)
@@ -601,10 +595,6 @@ def run_inventory_sync(
 
             if ha_enabled:
                 ha_details = flatten_xml_to_dict(element=ha_info[1])
-                log_inventory_sync(
-                    action="debug",
-                    message=f"HA details: {ha_details}",
-                )
                 peer_ip = ha_details["result"]["group"]["peer-info"]["mgmt-ip"].split(
                     "/"
                 )[0]
@@ -721,6 +711,8 @@ def run_inventory_sync(
             action="error",
             message=f"Error during inventory sync: {str(e)}",
         )
+        job.job_status = "errored"
+        job.save()
         return "errored"
 
 

@@ -11,7 +11,6 @@ services:
             - "8000:8000"
         depends_on:
             - db
-            - logstash
         env_file:
             - ./backend/.env
 
@@ -55,28 +54,9 @@ services:
         env_file:
             - ./backend/.env
 
-    elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
-        environment:
-            - discovery.type=single-node
-        ports:
-            - "9200:9200"
-        volumes:
-            - elasticsearch_data:/usr/share/elasticsearch/data
-            - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-
-    logstash:
-        image: docker.elastic.co/logstash/logstash:7.17.0
-        volumes:
-            - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
-            - ./logstash/pipeline:/usr/share/logstash/pipeline
-        depends_on:
-            - elasticsearch
-
 networks:
     app:
         driver: bridge
 
 volumes:
     postgres_data:
-    elasticsearch_data:

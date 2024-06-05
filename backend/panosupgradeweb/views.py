@@ -30,6 +30,7 @@ from .serializers import (
     DeviceUpgradeSerializer,
     InventorySyncSerializer,
     JobSerializer,
+    JobLogEntrySerializer,
     ProfileSerializer,
     UserSerializer,
 )
@@ -316,41 +317,27 @@ class JobViewSet(viewsets.ModelViewSet):
         }
         return JsonResponse(response_data, status=200)
 
+    @action(detail=True, methods=["get"])
+    def logs(self, request, pk=None):
+        job = self.get_object()
+        log_entries = job.log_entries.all()
+        serializer = JobLogEntrySerializer(log_entries, many=True)
+        return Response(serializer.data)
+
 
 class JobLogViewSet(viewsets.ViewSet):
     def list(self, request, job_id):
         job = get_object_or_404(Job, task_id=job_id)
-        upgrade_logs = job.upgrade_logs.all()
-        snapshot_logs = job.snapshot_logs.all()
-        readiness_check_logs = job.readiness_check_logs.all()
+        log_entries = job.log_entries.all()
 
-        data = {
-            "upgrade_logs": [
-                {
-                    "timestamp": log.timestamp,
-                    "level": log.level,
-                    "message": log.message,
-                }
-                for log in upgrade_logs
-            ],
-            "snapshot_logs": [
-                {
-                    "timestamp": log.timestamp,
-                    "snapshot_type": log.snapshot_type,
-                    "snapshot_data": log.snapshot_data,
-                }
-                for log in snapshot_logs
-            ],
-            "readiness_check_logs": [
-                {
-                    "timestamp": log.timestamp,
-                    "check_name": log.check_name,
-                    "check_result": log.check_result,
-                    "check_details": log.check_details,
-                }
-                for log in readiness_check_logs
-            ],
-        }
+        data = [
+            {
+                "timestamp": log.timestamp,
+                "severity_level": log.severity_level,
+                "message": log.message,
+            }
+            for log in log_entries
+        ]
         return Response(data)
 
 

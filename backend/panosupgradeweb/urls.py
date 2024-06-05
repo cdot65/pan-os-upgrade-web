@@ -92,8 +92,8 @@ urlpatterns = [
         name="inventory_exists",
     ),
     path(
-        "jobs/<str:job_id>/logs/",
-        JobLogViewSet.as_view({"get": "list"}),
+        "jobs/<str:pk>/logs/",
+        JobViewSet.as_view({"get": "logs"}),
         name="job-logs",
     ),
 ]

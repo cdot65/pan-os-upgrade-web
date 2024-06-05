@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable max-len */
 // src/app/pages/inventory-details/inventory-details.ts
 
 import {
@@ -127,6 +128,12 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
         });
     }
 
+    /**
+     * Retrieves a device from the inventory service based on the given item ID.
+     *
+     * @param itemId - The ID of the item to retrieve.
+     * @return
+     */
     getDevice(itemId: string): void {
         this.inventoryService
             .getDevice(itemId)
@@ -149,6 +156,11 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
             );
     }
 
+    /**
+     * Retrieves the devices using the inventory service.
+     *
+     * @returns
+     */
     getDevices(): void {
         this.inventoryService
             .getDevices()
@@ -163,6 +175,11 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
             );
     }
 
+    /**
+     * Retrieves the Panorama appliances from the inventory service and filters them.
+     *
+     * @returns
+     */
     getPanoramaAppliances(): void {
         this.inventoryService
             .getDevices()
@@ -179,6 +196,11 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
             );
     }
 
+    /**
+     * Fetches the firewall platforms from the inventory service and assigns the result to the `firewallPlatforms` property.
+     *
+     * @return
+     */
     getFirewallPlatforms(): void {
         this.inventoryService
             .getFirewallPlatforms()
@@ -200,6 +222,11 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
             );
     }
 
+    /**
+     * Retrieves the current status of the job.
+     *
+     * @returns
+     */
     getJobStatus(): void {
         if (this.jobId) {
             this.inventoryService
@@ -237,6 +264,11 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
         }
     }
 
+    /**
+     * Fetches panorama platforms from the inventory service and assigns them to the panoramaPlatforms property.
+     *
+     * @returns
+     */
     getPanoramaPlatforms(): void {
         this.inventoryService
             .getPanoramaPlatforms()
@@ -258,11 +290,29 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
             );
     }
 
+    /**
+     * Executes the necessary cleanup operations when the component is destroyed.
+     *
+     * @return
+     */
     ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
     }
 
+    /**
+     * Initializes the component.
+     *
+     * - Sets the page title to "Inventory Details".
+     * - Retrieves the list of devices.
+     * - Retrieves the list of panorama appliances.
+     * - If an `id` parameter is present in the route snapshot, retrieves the device with that id.
+     * - Sets validators for the `updateInventoryForm` based on the selected `device_type`.
+     * - Sets up value change listeners for the `device_type` form control.
+     * - Updates the validity of the `device_group`, `panorama_appliance_id`, and `panorama_managed` form controls.
+     *
+     * @return
+     */
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory Details";
         this.getDevices();
@@ -315,11 +365,21 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
             });
     }
 
+    /**
+     * Resets the inventory form and navigates to the inventory page.
+     *
+     * @returns
+     */
     onCancel(): void {
         this.updateInventoryForm.reset();
         this.router.navigate(["/inventory"]);
     }
 
+    /**
+     * Opens a dialog to select a profile and refreshes device details based on the selected profile.
+     * If a profile is selected and inventory item is available, an API call is made to refresh the device details.
+     * Shows progress and error message if the refresh process fails.
+     */
     refreshDeviceDetails(): void {
         const dialogRef = this.dialog.open(ProfileDialogComponent, {
             width: "400px",
@@ -371,6 +431,15 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
             });
     }
 
+    /**
+     * Validates if at least one of the IP addresses (IPv4 or IPv6) is provided.
+     *
+     * @returns A ValidatorFn that validates the IP addresses.
+     *
+     * @param control - The AbstractControl object representing the form control being validated.
+     *
+     * @returns An object with validation errors if the IP addresses are invalid or missing, otherwise returns null.
+     */
     requireIpAddress(): ValidatorFn {
         return (control: AbstractControl): ValidationErrors | null => {
             const ipv4Control = control.get("ipv4_address");
@@ -391,6 +460,11 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
         };
     }
 
+    /**
+     * Updates the device in the inventory.
+     *
+     * @returns
+     */
     updateDevice(): void {
         if (this.inventoryItem && this.updateInventoryForm.valid) {
             const updatedItem = {

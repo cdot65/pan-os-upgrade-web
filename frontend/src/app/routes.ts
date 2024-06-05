@@ -1,11 +1,10 @@
 // src/app/routes.ts
 
 import { Layout } from "./shared/layout/layout";
-// eslint-disable-next-line max-len
 import { Routes } from "@angular/router";
 import { authGuard } from "./shared/guards/auth.guard";
 
-export const PANOSUPGRADE_ROUTES: Routes = [
+export const APP_ROUTES: Routes = [
     {
         path: "",
         component: Layout,
@@ -15,6 +14,100 @@ export const PANOSUPGRADE_ROUTES: Routes = [
                 path: "",
                 loadComponent: () =>
                     import("./pages/homepage").then((m) => m.Homepage),
+            },
+            {
+                path: "inventory",
+                canActivate: [authGuard],
+                children: [
+                    {
+                        path: "",
+                        loadComponent: () =>
+                            import("./pages/inventory-list").then(
+                                (m) => m.InventoryList,
+                            ),
+                    },
+                    {
+                        path: "create",
+                        loadComponent: () =>
+                            import("./pages/inventory-create").then(
+                                (m) => m.InventoryCreateComponent,
+                            ),
+                    },
+                    {
+                        path: ":id",
+                        loadComponent: () =>
+                            import("./pages/inventory-details").then(
+                                (m) => m.InventoryDetailsComponent,
+                            ),
+                    },
+                ],
+            },
+            {
+                path: "jobs",
+                canActivate: [authGuard],
+                children: [
+                    {
+                        path: "",
+                        loadComponent: () =>
+                            import("./pages/job-list").then(
+                                (m) => m.JobListComponent,
+                            ),
+                    },
+                    {
+                        path: ":id",
+                        loadComponent: () =>
+                            import("./pages/job-details").then(
+                                (m) => m.JobDetailsComponent,
+                            ),
+                    },
+                ],
+            },
+            {
+                path: "profiles",
+                canActivate: [authGuard],
+                children: [
+                    {
+                        path: "",
+                        loadComponent: () =>
+                            import("./pages/profile-list").then(
+                                (m) => m.ProfileListComponent,
+                            ),
+                    },
+                    {
+                        path: "create",
+                        loadComponent: () =>
+                            import("./pages/profile-create").then(
+                                (m) => m.ProfileCreateComponent,
+                            ),
+                    },
+                    {
+                        path: ":uuid",
+                        loadComponent: () =>
+                            import("./pages/profile-details").then(
+                                (m) => m.ProfileDetailsComponent,
+                            ),
+                    },
+                ],
+            },
+            {
+                path: "upgrade",
+                canActivate: [authGuard],
+                children: [
+                    {
+                        path: "",
+                        loadComponent: () =>
+                            import("./pages/upgrade-list").then(
+                                (m) => m.UpgradeListComponent,
+                            ),
+                    },
+                    {
+                        path: ":uuid",
+                        loadComponent: () =>
+                            import("./pages/upgrade-list").then(
+                                (m) => m.UpgradeListComponent,
+                            ),
+                    },
+                ],
             },
         ],
     },
@@ -34,103 +127,6 @@ export const PANOSUPGRADE_ROUTES: Routes = [
         loadChildren: () =>
             import("./pages/guide-viewer").then((m) => m.GuideViewerModule),
         canActivate: [authGuard],
-    },
-    {
-        path: "inventory",
-        component: Layout,
-        canActivate: [authGuard],
-        children: [
-            {
-                path: "",
-                loadComponent: () =>
-                    import("./pages/inventory-list").then(
-                        (m) => m.InventoryList,
-                    ),
-            },
-            {
-                path: "create",
-                loadComponent: () =>
-                    import("./pages/inventory-create").then(
-                        (m) => m.InventoryCreateComponent,
-                    ),
-            },
-            {
-                path: ":id",
-                loadComponent: () =>
-                    import("./pages/inventory-details").then(
-                        (m) => m.InventoryDetailsComponent,
-                    ),
-            },
-        ],
-    },
-
-    {
-        path: "jobs",
-        component: Layout,
-        canActivate: [authGuard],
-        children: [
-            {
-                path: "",
-                loadComponent: () =>
-                    import("./pages/job-list").then((m) => m.JobListComponent),
-            },
-            {
-                path: ":id",
-                loadComponent: () =>
-                    import("./pages/job-details").then(
-                        (m) => m.JobDetailsComponent,
-                    ),
-            },
-        ],
-    },
-    {
-        path: "profiles",
-        component: Layout,
-        canActivate: [authGuard],
-        children: [
-            {
-                path: "",
-                loadComponent: () =>
-                    import("./pages/profile-list").then(
-                        (m) => m.ProfileListComponent,
-                    ),
-            },
-            {
-                path: "create",
-                loadComponent: () =>
-                    import("./pages/profile-create").then(
-                        (m) => m.ProfileCreateComponent,
-                    ),
-            },
-            {
-                path: ":uuid",
-                loadComponent: () =>
-                    import("./pages/profile-details").then(
-                        (m) => m.ProfileDetailsComponent,
-                    ),
-            },
-        ],
-    },
-    {
-        path: "upgrade",
-        component: Layout,
-        canActivate: [authGuard],
-        children: [
-            {
-                path: "",
-                loadComponent: () =>
-                    import("./pages/upgrade-list").then(
-                        (m) => m.UpgradeListComponent,
-                    ),
-            },
-            {
-                path: ":uuid",
-                loadComponent: () =>
-                    import("./pages/upgrade-list").then(
-                        (m) => m.UpgradeListComponent,
-                    ),
-            },
-        ],
     },
     {
         path: "404",

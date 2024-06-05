@@ -1,22 +1,24 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
-import { Subject, Subscription } from "rxjs";
+import { Subject, timer } from "rxjs";
+import { catchError, switchMap, takeUntil, tap } from "rxjs/operators";
 
 import { ActivatedRoute } from "@angular/router";
 import { CommonModule } from "@angular/common";
 import { ComponentPageTitle } from "../page-title/page-title";
-import { ElasticsearchService } from "../../shared/services/elasticsearch.service";
 import { Footer } from "src/app/shared/footer/footer";
-import { Job } from "../../shared/interfaces/job.interface";
-import { JobService } from "../../shared/services/job.service";
+import { LoggingService } from "../../shared/services/logging.service";
+import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
 import { MatDividerModule } from "@angular/material/divider";
 import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
+import { MatMenuModule } from "@angular/material/menu";
 import { MatSelectModule } from "@angular/material/select";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { NgxJsonViewerModule } from "ngx-json-viewer";
-import { takeUntil } from "rxjs/operators";
+import { SortingService } from "../../shared/services/sorting.service";
 
 @Component({
     selector: "app-job-details",
@@ -26,144 +28,128 @@ import { takeUntil } from "rxjs/operators";
     imports: [
         CommonModule,
         Footer,
+        MatButtonModule,
         MatCardModule,
         MatDividerModule,
         MatFormFieldModule,
+        MatIconModule,
         MatInputModule,
+        MatMenuModule,
         MatSelectModule,
         NgxJsonViewerModule,
     ],
 })
 export class JobDetailsComponent implements OnDestroy, OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
-    inactivityTimer$ = new Subject<void>();
-    jobItem: Job | undefined;
-    jobId: string | null = null;
-    logPath: string = "";
-    logs: any[] = [];
-    logSubscription: Subscription | undefined;
-    pollingEnabled = true;
-    pollingIntervalOptions = [0, 1000, 3000, 5000, 10000, 30000];
-    selectedPollingInterval = 0;
+    jobDetails$ = this.loggingService.jobDetails$;
     private destroy$ = new Subject<void>();
+    private pollingInterval = 3000; // 3 seconds
+    private jobUuid: string | null = null;
 
     constructor(
-        private jobService: JobService,
-        private elasticsearchService: ElasticsearchService,
+        private loggingService: LoggingService,
         private route: ActivatedRoute,
         private snackBar: MatSnackBar,
+        public sortingService: SortingService,
         public _componentPageTitle: ComponentPageTitle,
     ) {}
-
-    fetchJobLogs(itemId: string): void {
-        this.jobService
-            .getJob(itemId)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(
-                (item: Job) => {
-                    this.jobItem = item;
-                    this.logPath = item.job_type.replace(/_/g, "-");
-
-                    // Move the calls to fetchLogsOnce and fetchLogsSubscription
-                    // inside the subscription callback
-                    this.fetchLogsOnce(itemId);
-                    this.fetchLogsSubscription(itemId);
-                },
-                (error: any) => {
-                    console.error("Error fetching job item:", error);
-                    this.snackBar.open(
-                        "Failed to fetch job item. Please try again.",
-                        "Close",
-                        {
-                            duration: 3000,
-                        },
-                    );
-                },
-            );
-    }
-
-    fetchLogsOnce(jobId: string) {
-        this.elasticsearchService
-            .getLogsByIdOnce(jobId, this.logPath)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(
-                (result) => {
-                    this.logs = result.hits.hits;
-                },
-                (error) => {
-                    console.error("Error fetching logs:", error);
-                    this.snackBar.open(
-                        "Failed to fetch logs. Please try again.",
-                        "Close",
-                        {
-                            duration: 3000,
-                        },
-                    );
-                },
-            );
-    }
-
-    fetchLogsSubscription(jobId: string) {
-        if (this.selectedPollingInterval === 0) {
-            this.pollingEnabled = false;
-            if (this.logSubscription) {
-                this.logSubscription.unsubscribe();
-            }
-            return;
-        }
-
-        this.pollingEnabled = true;
-        if (this.logSubscription) {
-            this.logSubscription.unsubscribe();
-        }
-
-        this.logSubscription = this.elasticsearchService
-            .getLogsById(jobId, this.logPath, this.selectedPollingInterval)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(
-                (result) => {
-                    this.logs = result.hits.hits;
-                },
-                (error) => {
-                    console.error("Error searching logs by job ID:", error);
-                    this.snackBar.open(
-                        "Failed to fetch logs. Please try again.",
-                        "Close",
-                        {
-                            duration: 3000,
-                        },
-                    );
-                },
-            );
-    }
 
     ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
-        if (this.logSubscription) {
-            this.logSubscription.unsubscribe();
-        }
     }
 
     ngOnInit(): void {
         this._componentPageTitle.title = "Job Details";
-        const itemId = this.route.snapshot.paramMap.get("id");
-        if (itemId) {
-            this.fetchJobLogs(itemId);
+        this.jobUuid = this.route.snapshot.paramMap.get("id");
+        if (this.jobUuid) {
+            this.fetchInitialJobDetailsAndLogs();
         }
     }
 
-    onPollingIntervalChange() {
-        const itemId = this.route.snapshot.paramMap.get("id");
-        if (itemId) {
-            if (this.selectedPollingInterval === 0) {
-                this.pollingEnabled = false;
-                if (this.logSubscription) {
-                    this.logSubscription.unsubscribe();
-                }
-            } else {
-                this.fetchLogsSubscription(itemId);
-            }
+    private fetchInitialJobDetailsAndLogs(): void {
+        this.loggingService
+            .getJobDetailsAndLogs(this.jobUuid!)
+            .pipe(
+                tap((jobDetails) => {
+                    const sortedLogs = this.sortLogs(jobDetails.logs);
+                    this.loggingService.setJobDetailsAndLogs({
+                        ...jobDetails,
+                        logs: sortedLogs,
+                    });
+                    if (
+                        jobDetails.job.job_status === "pending" ||
+                        jobDetails.job.job_status === "running"
+                    ) {
+                        this.startPolling();
+                    }
+                }),
+                catchError((error) => {
+                    console.error(
+                        "Error fetching initial job details and logs:",
+                        error,
+                    );
+                    return [];
+                }),
+            )
+            .subscribe();
+    }
+
+    private startPolling(): void {
+        timer(0, this.pollingInterval)
+            .pipe(
+                switchMap(() =>
+                    this.loggingService.getJobDetailsAndLogs(this.jobUuid!),
+                ),
+                tap((jobDetails) => {
+                    const sortedLogs = this.sortLogs(jobDetails.logs);
+                    this.loggingService.setJobDetailsAndLogs({
+                        ...jobDetails,
+                        logs: sortedLogs,
+                    });
+                }),
+                takeUntil(this.destroy$),
+            )
+            .subscribe(
+                (jobDetails) => {
+                    if (
+                        jobDetails.job.job_status !== "pending" &&
+                        jobDetails.job.job_status !== "running"
+                    ) {
+                        this.destroy$.next();
+                    }
+                },
+                (error) => {
+                    console.error(
+                        "Error fetching job details and logs:",
+                        error,
+                    );
+                    this.snackBar.open(
+                        "Failed to fetch job details and logs. Please try again.",
+                        "Close",
+                        {
+                            duration: 3000,
+                        },
+                    );
+                },
+            );
+    }
+
+    toggleSortOrder() {
+        this.sortingService.toggleSortOrder();
+        const jobDetails = this.loggingService.getJobDetailsAndLogsValue();
+        if (jobDetails) {
+            const sortedLogs = this.sortLogs(jobDetails.logs);
+            this.loggingService.setJobDetailsAndLogs({
+                ...jobDetails,
+                logs: sortedLogs,
+            });
         }
+    }
+
+    private sortLogs(logs: any[]) {
+        return this.sortingService.sortOrder() === "asc"
+            ? logs.sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+            : logs.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
     }
 }

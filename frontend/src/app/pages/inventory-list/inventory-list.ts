@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable max-len */
 // src/app/pages/inventory-list/inventory-list.ts
 
 import {
@@ -70,7 +71,6 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         "details",
     ];
     dataSource: MatTableDataSource<Device> = new MatTableDataSource<Device>([]);
-    jobId: string | null = null;
     panoramaDevices: Device[] = [];
     profiles: Profile[] = [];
     refreshJobsCompleted: number = 0;
@@ -79,7 +79,6 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
     showRefreshProgress: boolean = false;
     showSyncError: boolean = false;
     showSyncProgress: boolean = false;
-    syncJobId: string | null = null;
     syncJobsCompleted: number = 0;
     totalRefreshJobs: number = 0;
     totalSyncJobs: number = 0;
@@ -98,8 +97,15 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         private snackBar: MatSnackBar,
         private _liveAnnouncer: LiveAnnouncer,
         public _componentPageTitle: ComponentPageTitle,
-    ) {}
+    ) {
+    }
 
+    /**
+     * Announces the change in sort state.
+     *
+     * @param sortState - The new sort state to be announced.
+     * @return
+     */
     announceSortChange(sortState: Sort) {
         if (sortState.direction) {
             this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
@@ -108,6 +114,12 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         }
     }
 
+    /**
+     * Returns the label text for a checkbox based on the provided row.
+     *
+     * @param [row] - The device row object. It is optional and can be omitted.
+     * @returns The label text for the checkbox.
+     */
     checkboxLabel(row?: Device): string {
         if (!row) {
             return `${this.isAllSelected() ? "select" : "deselect"} all`;
@@ -115,6 +127,11 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         return `${this.selection.isSelected(row) ? "deselect" : "select"} row ${row.hostname}`;
     }
 
+    /**
+     * Retrieves devices from the inventory service and updates the component's inventoryItems and dataSource properties.
+     *
+     * @returns
+     */
     getDevices(): void {
         this.inventoryService
             .getDevices()
@@ -143,6 +160,12 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
             );
     }
 
+    /**
+     * Retrieves the status of a job.
+     *
+     * @param jobId - The ID of the job to get status for.
+     * @return
+     */
     getJobStatus(jobId: string): void {
         this.inventoryService
             .getJobStatus(jobId)
@@ -183,6 +206,15 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
             );
     }
 
+    /**
+     * Retrieves the Panorama devices from the inventory service.
+     *
+     * @returns
+     *
+     * @example
+     * // Example usage:
+     * getPanoramaDevices();
+     */
     getPanoramaDevices(): void {
         this.inventoryService.getPanoramaDevices().subscribe(
             (devices) => {
@@ -194,6 +226,11 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         );
     }
 
+    /**
+     * Retrieves profiles from the profile service and assigns them to the local profiles variable.
+     *
+     * @return
+     */
     getProfiles(): void {
         this.profileService.getProfiles().subscribe(
             (profiles) => {
@@ -205,6 +242,12 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         );
     }
 
+    /**
+     * Retrieves the synchronization job status for a given job ID.
+     *
+     * @param jobId - The ID of the synchronization job.
+     * @return
+     */
     getSyncJobStatus(jobId: string): void {
         this.inventoryService
             .getJobStatus(jobId)
@@ -236,12 +279,21 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
             );
     }
 
+    /**
+     * Checks if all items are selected.
+     * @returns - True if all items are selected, false otherwise.
+     */
     isAllSelected() {
         const numSelected = this.selection.selected.length;
         const numRows = this.dataSource.data.length;
         return numSelected === numRows;
     }
 
+    /**
+     * Determines if the sync from panorama button is active.
+     *
+     * @returns True if the button is active, false otherwise.
+     */
     isSyncFromPanoramaButtonActive(): boolean {
         return (
             this.selection.selected.length > 0 &&
@@ -251,31 +303,65 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         );
     }
 
+    /**
+     * Toggles the selection of all items in the data source.
+     * If all items are already selected, clears the selection.
+     * If not all items are selected, selects all items.
+     * Deselects the header checkbox.
+     *
+     * @return void
+     */
     masterToggle() {
         if (this.isAllSelected()) {
             this.selection.clear();
         } else {
             this.dataSource.data.forEach((row) => this.selection.select(row));
         }
+        // Deselect the header checkbox
+        const headerCheckbox = document.querySelector(
+            "th.mat-column-select .mat-checkbox-input",
+        ) as HTMLInputElement;
+        if (headerCheckbox) {
+            headerCheckbox.checked = false;
+        }
     }
 
+    /**
+     * Navigates to the create inventory page.
+     *
+     * @return
+     */
     navigateToCreateInventory(): void {
         this.router.navigate(["/inventory/create"]);
     }
 
-    navigateToSyncInventory(): void {
-        this.router.navigate(["/inventory/sync"]);
-    }
-
+    /**
+     * This method is called after the view has been initialized.
+     * It sets the sort property of the dataSource to the specified sort object.
+     *
+     * @return - No return value
+     */
     ngAfterViewInit() {
         this.dataSource.sort = this.sort;
     }
 
+    /**
+     * Method to destroy the component and clean up resources.
+     * It completes the subject 'destroy$' and emits the complete signal using 'next()' method.
+     *
+     * @returns Indicates that the component has been destroyed.
+     */
     ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
     }
 
+    /**
+     * Initializes the component.
+     * Sets the page title, and fetches devices, panorama devices, and profiles.
+     *
+     * @returns
+     */
     ngOnInit(): void {
         this._componentPageTitle.title = "Inventory List";
         this.getDevices();
@@ -283,6 +369,11 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         this.getProfiles();
     }
 
+    /**
+     * Executes the logic for deleting selected inventory items.
+     *
+     * @returns
+     */
     onDeleteSelectedClick() {
         const selectedItems = this.selection.selected;
         const dialogRef = this.dialog.open(InventoryDeleteDialogComponent, {
@@ -325,10 +416,22 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
             });
     }
 
+    /**
+     * Handles the event when an edit button is clicked.
+     *
+     * @param item - The device associated with the clicked edit button.
+     *
+     * @return
+     */
     onEditClick(item: Device): void {
         this.router.navigate(["/inventory", item.uuid]);
     }
 
+    /**
+     * Executes the onRefreshSelectedClick action.
+     *
+     * @return
+     */
     onRefreshSelectedClick() {
         const selectedItems = this.selection.selected;
         const dialogRef = this.dialog.open(ProfileDialogComponent, {
@@ -386,6 +489,12 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
             });
     }
 
+    /**
+     * Synchronizes inventory from selected Panorama devices.
+     * Opens a dialog to select a profile to sync the inventory from Panorama.
+     *
+     * @returns
+     */
     onSyncFromPanoramaClick(): void {
         const selectedPanoramaDevices = this.selection.selected.filter(
             (device) => device.device_type === "Panorama",
@@ -449,12 +558,4 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
             });
     }
 
-    toggleAllRows() {
-        if (this.isAllSelected()) {
-            this.selection.clear();
-            return;
-        }
-
-        this.selection.select(...this.dataSource.data);
-    }
 }
