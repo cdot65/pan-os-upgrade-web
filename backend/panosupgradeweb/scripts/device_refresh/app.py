@@ -442,17 +442,6 @@ def run_device_refresh(
     global JOB_ID
     JOB_ID = job_id
 
-    # Generate a unique task_id using uuid
-    unique_task_id = str(uuid.uuid4())
-
-    # Create a new Job instance with the unique task_id
-    job = Job.objects.create(
-        task_id=unique_task_id,
-        author_id=author_id,
-        job_status="running",
-        job_type="device_refresh",
-    )
-
     log_device_refresh(
         action="start",
         message=f"Running device refresh for device: {device_uuid}",
@@ -469,10 +458,11 @@ def run_device_refresh(
     # Initialize an empty dictionary to store the device data
     device_data = {}
 
-    # Retrieve the PAN device, device type, and profile objects from the database
+    # Retrieve the PAN device, device type, profile, and job objects from the database
     device = Device.objects.get(uuid=device_uuid)
     profile = Profile.objects.get(uuid=profile_uuid)
     platform = device.platform
+    job = Job.objects.get(task_id=job_id)
 
     # Build the PAN device object
     try:
