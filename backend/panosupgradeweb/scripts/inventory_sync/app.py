@@ -452,17 +452,6 @@ def run_inventory_sync(
     global JOB_ID
     JOB_ID = job_id
 
-    # Generate a unique task_id using uuid
-    unique_task_id = str(uuid.uuid4())
-
-    # Create a new Job instance with the unique task_id
-    job = Job.objects.create(
-        task_id=unique_task_id,
-        author_id=author_id,
-        job_status="running",
-        job_type="inventory_sync",
-    )
-
     log_inventory_sync(
         action="start",
         message=f"Running inventory sync for Panorama device: {panorama_device_uuid}",
@@ -482,7 +471,11 @@ def run_inventory_sync(
         message="Starting inventory sync",
     )
 
+
     try:
+        # Retrieve the existing Job instance using the provided job_id
+        job = Job.objects.get(task_id=job_id)
+
         # Retrieve the Panorama device and profile objects from the database
         panorama_device = Device.objects.get(uuid=panorama_device_uuid)
         log_inventory_sync(
@@ -704,7 +697,9 @@ def run_inventory_sync(
                 action="save",
                 message=f"Updated peer device for: {firewall.serial}",
             )
-        return "completed"
+            job.job_status = "completed"
+            job.save()
+            return "completed"
 
     except Exception as e:
         log_inventory_sync(
