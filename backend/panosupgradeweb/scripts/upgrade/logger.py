@@ -1,9 +1,8 @@
 import logging
+
 from django.utils import timezone
-from panosupgradeweb.models import (
-    Job,
-    JobLogEntry,
-)
+
+from panosupgradeweb.models import Job, JobLogEntry
 
 
 def get_emoji(
@@ -12,17 +11,18 @@ def get_emoji(
     """
     Maps specific action keywords to their corresponding emoji symbols for enhanced log and user interface messages.
 
-    This utility function is designed to add visual cues to log messages or user interface outputs by associating specific action keywords with relevant emoji symbols. It aims to improve the readability and user experience by providing a quick visual reference for the action's nature or outcome. The function supports a predefined set of keywords, each mapping to a unique emoji. If an unrecognized keyword is provided, the function returns an empty string to ensure seamless operation without interrupting the application flow.
+    This utility function is designed to add visual cues to log messages or user interface outputs by associating
+    specific action keywords with relevant emoji symbols. It aims to improve the readability and user experience by
+    providing a quick visual reference for the action's nature or outcome. The function supports a predefined set of
+    keywords, each mapping to a unique emoji. If an unrecognized keyword is provided, the function returns an empty
+    string to ensure seamless operation without interrupting the application flow.
 
-    Parameters
-    ----------
-    action : str
-        A keyword representing the action or status for which an emoji is required. Supported keywords include 'success', 'error', 'warning', 'working', 'report', 'search', 'save', 'stop', and 'start'.
+    Parameters ---------- action : str A keyword representing the action or status for which an emoji is required.
+    Supported keywords include 'success', 'error', 'warning', 'working', 'report', 'search', 'save', 'stop',
+    and 'start'.
 
-    Returns
-    -------
-    str
-        The emoji symbol associated with the specified action keyword. Returns an empty string if the keyword is not recognized, maintaining non-disruptive output.
+    Returns ------- str The emoji symbol associated with the specified action keyword. Returns an empty string if the
+    keyword is not recognized, maintaining non-disruptive output.
 
     Examples
     --------
@@ -34,13 +34,14 @@ def get_emoji(
         >>> print(f"{get_emoji(action='start')} Initiating the process.")
         >>> print(f"{get_emoji(action='stop')} Process terminated.")
 
-    Notes
-    -----
-    - The function enhances the aesthetic and functional aspects of textual outputs, making them more engaging and easier to interpret at a glance.
-    - It is implemented with a fail-safe approach, where unsupported keywords result in an empty string, thus preserving the integrity and continuity of the output.
-    - Customization or extension of the supported action keywords and their corresponding emojis can be achieved by modifying the internal emoji_map dictionary.
+    Notes ----- - The function enhances the aesthetic and functional aspects of textual outputs, making them more
+    engaging and easier to interpret at a glance. - It is implemented with a fail-safe approach, where unsupported
+    keywords result in an empty string, thus preserving the integrity and continuity of the output. - Customization
+    or extension of the supported action keywords and their corresponding emojis can be achieved by modifying the
+    internal emoji_map dictionary.
 
-    This function is not expected to raise any exceptions, ensuring stable and predictable behavior across various usage contexts.
+    This function is not expected to raise any exceptions, ensuring stable and predictable behavior across various
+    usage contexts.
     """
 
     emoji_map = {

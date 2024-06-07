@@ -178,6 +178,9 @@ class Device(models.Model):
     def __str__(self) -> str:
         return str(self.hostname)
 
+    def __getitem__(self, key):
+        return getattr(self, key)
+
 
 class Job(models.Model):
     task_id = models.CharField(max_length=255, unique=True, primary_key=True)

@@ -1,24 +1,26 @@
-import re
 import time
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 
+# Celery error handling
 from celery.exceptions import WorkerLostError
 
 # Palo Alto Networks SDK imports
-from panos.errors import PanDeviceXapiError
 from panos.firewall import Firewall
 from panos.panorama import Panorama
+from panos.errors import PanDeviceXapiError
 
 # Palo Alto Networks Assurance imports
 from panos_upgrade_assurance.check_firewall import CheckFirewall
 from panos_upgrade_assurance.firewall_proxy import FirewallProxy
 
-# project imports
-from panosupgradeweb.models import Device, Profile
+# pan-os-upgrade imports
 from pan_os_upgrade.components.utilities import flatten_xml_to_dict
 from pan_os_upgrade.components.assurance import AssuranceOptions
 
-from .upgrade_logger import UpgradeLogger
+# pan-os-upgrade-web imports
+from panosupgradeweb.models import Device, Profile
+from .logger import UpgradeLogger
+
 
 class PanosUpgrade:
     """
@@ -44,7 +46,6 @@ class PanosUpgrade:
         each: Prepare the upgrade devices by creating device and firewall objects.
         run_assurance: Run assurance checks or snapshots on a firewall device.
         run_upgrade: Orchestrate the upgrade process by calling the appropriate methods based on the device state.
-        software_download: Download the target software version to the firewall device.
         software_available_check: Check if a software update to the target version is available and compatible.
         suspend_ha_device: Suspend the active device in a high-availability (HA) pair.
         upgrade_active_devices: Upgrade the active devices in the upgrade_devices list.
@@ -76,12 +77,10 @@ class PanosUpgrade:
         - If the upgrade is within the same major version but the minor upgrade is more than one release apart
         - If the upgrade spans exactly one major version but also increases the minor version
 
-        Args:
-            device (Dict): A dictionary containing information about the firewall device.
-            current_major (int): The current major version of the firewall.
-            current_minor (int): The current minor version of the firewall.
-            target_major (int): The target major version for the upgrade.
-            target_minor (int): The target minor version for the upgrade.
+        Args: self: The instance of the class containing this method. current_version (Tuple[int, int, int,
+        int]): The current version of the firewall in the format (major, minor, patch, build). device (Dict): A
+        dictionary containing information about the firewall device. target_version (Tuple[int, int, int, int]): The
+        target version for the upgrade in the format (major, minor, patch, build).
 
         Returns:
             bool: True if the upgrade is compatible, False otherwise.
@@ -103,7 +102,8 @@ class PanosUpgrade:
         if target_version[0] - current_version[0] > 1:
             self.logger.log_task(
                 action="warning",
-                message=f"{device['db_device'].hostname}: Upgrading firewalls in an HA pair to a version that is more than one major release apart may cause compatibility issues.",
+                message=f"{device['db_device'].hostname}: Upgrading firewalls in an HA pair to a version that is more "
+                        f"than one major release apart may cause compatibility issues.",
             )
             return False
 
@@ -114,7 +114,8 @@ class PanosUpgrade:
         ):
             self.logger.log_task(
                 action="warning",
-                message=f"{device['db_device'].hostname}: Upgrading firewalls in an HA pair to a version that is more than one minor release apart may cause compatibility issues.",
+                message=f"{device['db_device'].hostname}: Upgrading firewalls in an HA pair to a version that is more "
+                        f"than one minor release apart may cause compatibility issues.",
             )
             return False
 
@@ -122,7 +123,9 @@ class PanosUpgrade:
         elif target_version[0] - current_version[0] == 1 and target_version[1] > 0:
             self.logger.log_task(
                 action="warning",
-                message=f"{device['db_device'].hostname}: Upgrading firewalls in an HA pair to a version that spans more than one major release or increases the minor version beyond the first in the next major release may cause compatibility issues.",
+                message=f"{device['db_device'].hostname}: Upgrading firewalls in an HA pair to a version that spans "
+                        f"more than one major release or increases the minor version beyond the first in the next "
+                        f"major release may cause compatibility issues.",
             )
             return False
 
@@ -140,40 +143,39 @@ class PanosUpgrade:
             peer_version_sliced: Tuple[int, int, int, int],
     ) -> str:
         """
-        Compare two version strings and determine their relative order.
+        Compare two version tuples and determine their relative order.
 
-        This function takes two version strings as input and compares them to determine
-        which version is older, newer, or equal. It uses the `parse_version` function
-        to parse the version strings into comparable objects.
+        This function takes two version tuples as input and compares them to determine
+        which version is older, newer, or equal. The version tuples are assumed to be
+        in the format (major, minor, patch, build).
 
         Args:
-            version1 (str): The first version string to compare.
-            version2 (str): The second version string to compare.
+            local_version_sliced (Tuple[int, int, int, int]): The version tuple of the local device.
+            device (Dict): A dictionary containing information about the device.
+            peer_version_sliced (Tuple[int, int, int, int]): The version tuple of the peer device.
 
         Returns:
             str: The relative order of the versions:
-                - "older" if version1 is older than version2
-                - "newer" if version1 is newer than version2
-                - "equal" if version1 is equal to version2
+                - "older" if the local version is older than the peer version
+                - "newer" if the local version is newer than the peer version
+                - "equal" if the local version is equal to the peer version
 
         Mermaid Workflow:
             ```mermaid
             graph TD
-                A[Start] --> B[Parse version1]
-                A --> C[Parse version2]
-                B --> D{Compare parsed versions}
-                C --> D
-                D -->|version1 < version2| E[Return "older"]
-                D -->|version1 > version2| F[Return "newer"]
-                D -->|version1 == version2| G[Return "equal"]
+                A[Start] --> B[Compare local and peer version tuples]
+                B -->|local < peer| C[Return "older"]
+                B -->|local > peer| D[Return "newer"]
+                B -->|local == peer| E[Return "equal"]
             ```
         """
+        # Log the task of comparing version strings for the device
         self.logger.log_task(
             action="search",
             message=f"{device['db_device'].hostname}: Comparing version strings",
         )
 
-        # Compare the local and peer versions and return the relative order
+        # Compare the local and peer version tuples and return the relative order
         if local_version_sliced < peer_version_sliced:
             return "older"
         elif local_version_sliced > peer_version_sliced:
@@ -191,31 +193,31 @@ class PanosUpgrade:
         Determine if a firewall requires an upgrade based on the current and target versions.
 
         This function compares the current version of a firewall with the target version to determine
-        if an upgrade is necessary. It handles both integer and string maintenance versions and logs
-        the appropriate messages based on the upgrade requirement.
+        if an upgrade is necessary. It logs the current and target versions and checks if the current
+        version is less than the target version. If an upgrade is required, it logs the appropriate
+        message. If no upgrade is required or a downgrade attempt is detected, it logs the corresponding
+        messages and exits the script.
 
         Args:
             device (Dict): A dictionary containing information about the firewall device.
-            target_maintenance (Union[int, str]): The target maintenance version, which can be an integer or a string.
-            target_major (int): The target major version for the upgrade.
-            target_minor (int): The target minor version for the upgrade.
+            current_version (Tuple[int, int, int, int]): The current version of the firewall as a tuple
+                in the format (major, minor, patch, maintenance).
+            target_version (Tuple[int, int, int, int]): The target version for the upgrade as a tuple
+                in the format (major, minor, patch, maintenance).
 
         Returns:
-            None
+            bool: True if an upgrade is required, False otherwise.
 
         Mermaid Workflow:
             ```mermaid
             graph TD
-                A[Start] --> B{Is target_maintenance an integer?}
-                B -->|Yes| C[Set target_version with integer maintenance]
-                B -->|No| D[Parse target_version from string]
-                C --> E[Log current and target versions]
-                D --> E
-                E --> F{Is current_version_parsed less than target_version?}
-                F -->|Yes| G[Log upgrade required message]
-                F -->|No| H[Log no upgrade required or downgrade attempt detected]
-                H --> I[Log halting upgrade message]
-                I --> J[Exit the script]
+                A[Start] --> B[Log current and target versions]
+                B --> C{Is current_version less than target_version?}
+                C -->|Yes| D[Log upgrade required message]
+                C -->|No| E[Log no upgrade required or downgrade attempt detected]
+                E --> F[Log halting upgrade message]
+                F --> G[Return False]
+                D --> H[Return True]
             ```
         """
 
@@ -236,14 +238,13 @@ class PanosUpgrade:
                 message=f"{device['db_device'].hostname}: Upgrade required from {current_version} to {target_version}",
             )
             return True
-
         else:
             # Log no upgrade required or downgrade attempt detected message
             self.logger.log_task(
                 action="skipped",
                 message=f"{device['db_device'].hostname}: No upgrade required or downgrade attempt detected.",
             )
-            # Log halting upgrade message and exit the script
+            # Log halting upgrade message
             self.logger.log_task(
                 action="stop",
                 message=f"{device['db_device'].hostname}: Halting upgrade.",
@@ -323,106 +324,6 @@ class PanosUpgrade:
                 message=f"{device['db_device'].hostname}: No HA details available.",
             )
             return None
-
-    def parse_version(
-            self,
-            version: str,
-    ) -> Tuple[int, int, int, int]:
-        """
-        Parse a version string into its major, minor, maintenance, and hotfix components.
-
-        This function takes a version string in the format "major.minor[.maintenance[-h|-c|-b]hotfix][.xfr]"
-        and returns a tuple of four integers representing the major, minor, maintenance, and hotfix parts
-        of the version. It handles various version formats and validates the input to ensure it follows
-        the expected format.
-
-        Args:
-            version (str): The version string to parse.
-
-        Returns:
-            Tuple[int, int, int, int]: A tuple containing the major, minor, maintenance, and hotfix
-                parts of the version as integers.
-
-        Raises:
-            ValueError: If the version string is in an invalid format or contains invalid characters.
-
-        Examples:
-            >>> parse_version("10.1.2")
-            (10, 1, 2, 0)
-            >>> parse_version("10.1.2-h3")
-            (10, 1, 2, 3)
-            >>> parse_version("10.1.2-c4")
-            (10, 1, 2, 4)
-            >>> parse_version("10.1.2-b5")
-            (10, 1, 2, 5)
-            >>> parse_version("10.1.2.xfr")
-            (10, 1, 2, 0)
-            >>> parse_version("10.1")
-            (10, 1, 0, 0)
-
-        Mermaid Workflow:
-            ```mermaid
-            graph TD
-                A[Start] --> B[Remove .xfr suffix from version string]
-                B --> C[Split version string into parts]
-                C --> D{Number of parts valid?}
-                D -->|No| E[Raise ValueError]
-                D -->|Yes| F{Third part contains invalid characters?}
-                F -->|Yes| E[Raise ValueError]
-                F -->|No| G[Extract major and minor parts]
-                G --> H{Length of parts is 3?}
-                H -->|No| I[Set maintenance and hotfix to 0]
-                H -->|Yes| J[Extract maintenance part]
-                J --> K{Maintenance part contains -h, -c, or -b?}
-                K -->|Yes| L[Split maintenance part into maintenance and hotfix]
-                K -->|No| M[Set hotfix to 0]
-                L --> N{Maintenance and hotfix are digits?}
-                M --> N{Maintenance and hotfix are digits?}
-                N -->|No| E[Raise ValueError]
-                N -->|Yes| O[Convert maintenance and hotfix to integers]
-                I --> P[Return major, minor, maintenance, hotfix]
-                O --> P[Return major, minor, maintenance, hotfix]
-            ```
-        """
-        # Remove .xfr suffix from the version string, keeping the hotfix part intact
-        version = re.sub(r"\.xfr$", "", version)
-
-        parts = version.split(".")
-        # Ensure there are two or three parts, and if three, the third part does not contain invalid characters like 'h' or 'c' without a preceding '-'
-        if (
-                len(parts) < 2
-                or len(parts) > 3
-                or (len(parts) == 3 and re.search(r"[^0-9\-]h|[^0-9\-]c", parts[2]))
-        ):
-            raise ValueError(f"Invalid version format: '{version}'.")
-
-        major, minor = map(int, parts[:2])  # Raises ValueError if conversion fails
-
-        maintenance = 0
-        hotfix = 0
-
-        if len(parts) == 3:
-            maintenance_part = parts[2]
-            if "-h" in maintenance_part:
-                maintenance_str, hotfix_str = maintenance_part.split("-h")
-            elif "-c" in maintenance_part:
-                maintenance_str, hotfix_str = maintenance_part.split("-c")
-            elif "-b" in maintenance_part:
-                maintenance_str, hotfix_str = maintenance_part.split("-b")
-            else:
-                maintenance_str = maintenance_part
-                hotfix_str = "0"
-
-            # Validate and convert maintenance and hotfix parts
-            if not maintenance_str.isdigit() or not hotfix_str.isdigit():
-                raise ValueError(
-                    f"Invalid maintenance or hotfix format in version '{version}'."
-                )
-
-            maintenance = int(maintenance_str)
-            hotfix = int(hotfix_str)
-
-        return major, minor, maintenance, hotfix
 
     def create_list_of_upgrade_devices(
             self,
@@ -504,7 +405,8 @@ class PanosUpgrade:
                 )
                 self.logger.log_task(
                     action="report",
-                    message=f"{self.upgrade_devices[0]['db_device'].hostname}: HA peer firewall added to the upgrade list.",
+                    message=f"{self.upgrade_devices[0]['db_device'].hostname}: HA peer firewall added to the upgrade "
+                            f"list.",
                 )
 
     def run_assurance(
@@ -555,8 +457,6 @@ class PanosUpgrade:
             message=f"{device['db_device'].hostname}: Running assurance on firewall {checks_firewall}",
         )
 
-        results = None
-
         if operation_type == "state_snapshot":
             actions = {
                 "arp_table": device["profile"].arp_table_snapshot,
@@ -605,8 +505,8 @@ class PanosUpgrade:
 
         return results
 
+    @staticmethod
     def software_available_check(
-            self,
             device: Dict,
             target_version: str,
     ) -> Optional[Dict]:
@@ -667,11 +567,11 @@ class PanosUpgrade:
         if target_version in available_versions:
             return available_versions
 
+    @staticmethod
     def software_download(
-            self,
             device: Dict,
             target_version: str,
-    ) -> str:
+    ) -> bool:
         """
         Download the target software version to the firewall device.
 
@@ -709,7 +609,7 @@ class PanosUpgrade:
         try:
             device["pan_device"].software.download(target_version)
         except PanDeviceXapiError:
-            return "errored"
+            return False
 
         while True:
             device["pan_device"].software.info()
@@ -822,4 +722,3 @@ class PanosUpgrade:
                         message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
                     )
                     raise
-
