@@ -34,31 +34,34 @@
             margin-bottom: 16px;
 
             .mat-card-header {
-                // background: mat.get-color-from-palette($accent, 50);
-                background: #f0f0f0;
+                 background: mat.get-color-from-palette($background, 500);
                 padding: 8px 16px;
             }
 
             .mat-card-title {
                 font-size: 18px;
                 font-weight: bold;
-                color: #606060;
+                background: mat.get-color-from-palette($background, 300);
             }
 
             .mat-card-subtitle {
-                color: #606060;
-                // color: #666;
+                background: mat.get-color-from-palette($foreground, 700);
             }
 
             .mat-drawer-container {
                 height: 100%;
-                color: #606060;
+                background: mat.get-color-from-palette($foreground, 300);
             }
 
             .mat-card-content {
                 padding: 16px;
-                color: #606060;
+                background: mat.get-color-from-palette($foreground, 300);
             }
         }
+    }
+
+    .job-details {
+        width: 100%;
+        padding: 20px;
     }
 }
