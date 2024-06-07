@@ -1,29 +1,11 @@
 # backend/panosupgradeweb/scripts/panos_upgrade/app.py
-
-import os
-import sys
 import time
 
-
-import django
 from celery.exceptions import WorkerLostError
-
-from panosupgradeweb.models import Device, Profile
-
-from .upgrade.upgrade import PanosUpgrade
-from .upgrade.upgrade_logger import UpgradeLogger
-
-# Add the Django project's root directory to the Python path
-sys.path.append(
-    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-)
-
-# Set the DJANGO_SETTINGS_MODULE environment variable
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_project.settings")
-
-# Initialize the Django application
-django.setup()
-
+from panosupgradeweb.models import Device
+from .logger import UpgradeLogger
+from .upgrade import PanosUpgrade
+from .utilities import parse_version
 
 # Create an instance of the custom logger
 job_logger = UpgradeLogger("pan-os-upgrade-upgrade")
@@ -102,7 +84,7 @@ def main(
     for i, each in enumerate(upgrade.upgrade_devices):
 
         # Parse the current version into major, minor, maintenance, and hotfix parts
-        current_version_sliced = upgrade.parse_version(
+        current_version_sliced = parse_version(
             version=each["db_device"].sw_version,
         )
 
@@ -113,7 +95,7 @@ def main(
         )
 
         # Parse the target version into major, minor, maintenance, and hotfix parts
-        target_version_sliced = upgrade.parse_version(
+        target_version_sliced = parse_version(
             version=target_version,
         )
 
@@ -153,7 +135,7 @@ def main(
             # If the device is part of an HA pair, parse the peer PAN-OS version
             if each["db_device"].ha_enabled:
                 # Parse the peer PAN-OS version into major, minor, maintenance, and hotfix parts
-                peer_version_sliced = upgrade.parse_version(
+                peer_version_sliced = parse_version(
                     version=ha_details["result"]["group"]["peer-info"]["build-rel"],
                 )
 
@@ -287,8 +269,7 @@ def main(
                             for attempt in range(retry_count):
 
                                 # Download the base image for the target version
-                                downloaded = upgrade.software_download(
-                                    device=each,
+                                downloaded = PanosUpgrade.software_download(
                                     target_version=base_version_key,
                                 )
 
@@ -395,8 +376,7 @@ def main(
                             for attempt in range(retry_count):
 
                                 # Download the target image
-                                downloaded = upgrade.software_download(
-                                    device=each,
+                                downloaded = PanosUpgrade.software_download(
                                     target_version=target_version,
                                 )
 
@@ -886,8 +866,7 @@ def main(
                     message=f"{each['db_device'].hostname}: Performing test to see if {target_version} is already downloaded.",
                 )
 
-                image_downloaded = upgrade.software_download(
-                    device=each,
+                image_downloaded = PanosUpgrade.software_download(
                     target_version=target_version,
                 )
 
