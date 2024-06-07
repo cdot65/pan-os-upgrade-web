@@ -1,39 +1,19 @@
 # backend/panosupgradeweb/scripts/panos_upgrade/app.py
 
-import argparse
-import json
-import logging
 import os
 import re
 import sys
 import time
-import uuid
 
-from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Union
 
-import ipdb
 import django
-from django.contrib.auth import get_user_model
-from django.utils import timezone
-from logstash_async.handler import AsynchronousLogstashHandler
-from celery.exceptions import WorkerTerminate, WorkerLostError
+from celery.exceptions import WorkerLostError
 
-from panosupgradeweb.models import (  # noqa: E402
-    Device,
-    Job,
-    JobLogEntry,
-    Profile,
-)
+from panosupgradeweb.models import Device, Profile
 
 # Palo Alto Networks SDK imports
-from panos.base import PanDevice
-from panos.errors import (
-    PanConnectionTimeout,
-    PanURLError,
-    PanXapiError,
-    PanDeviceXapiError,
-)
+from panos.errors import PanDeviceXapiError
 from panos.firewall import Firewall
 from panos.panorama import Panorama
 
@@ -44,6 +24,7 @@ from panos_upgrade_assurance.firewall_proxy import FirewallProxy
 # project imports
 from pan_os_upgrade.components.utilities import flatten_xml_to_dict
 from pan_os_upgrade.components.assurance import AssuranceOptions
+from .upgrade.upgrade_logger import UpgradeLogger
 
 # Add the Django project's root directory to the Python path
 sys.path.append(
@@ -55,122 +36,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_project.settings")
 
 # Initialize the Django application
 django.setup()
-
-
-class UpgradeLogger(logging.Logger):
-    """
-    A custom logger class for logging upgrade-related messages.
-
-    This class extends the built-in logging.Logger class and provides additional functionality
-    for logging upgrade-related messages. It includes methods to set the job ID, log tasks with
-    emojis, and save logs to the database.
-
-    Attributes:
-        name (str): The name of the logger.
-        level (int): The logging level (default: logging.NOTSET).
-        sequence_number (int): The sequence number for log messages.
-        job_id (str): The ID of the job associated with the upgrade.
-
-    Methods:
-        __init__: Initialize the UpgradeLogger instance.
-        get_emoji: Map specific action keywords to their corresponding emoji symbols.
-        log_task: Log a task message with an emoji and extra information.
-        set_job_id: Set the job ID for the logger.
-    """
-
-    def __init__(self, name, level=logging.NOTSET):
-        super().__init__(name, level)
-        self.sequence_number = 0
-        self.job_id = None
-
-    def get_emoji(
-        self,
-        action: str,
-    ) -> str:
-        """
-        Maps specific action keywords to their corresponding emoji symbols for enhanced log and user interface messages.
-
-        This utility function is designed to add visual cues to log messages or user interface outputs by associating specific action keywords with relevant emoji symbols. It aims to improve the readability and user experience by providing a quick visual reference for the action's nature or outcome. The function supports a predefined set of keywords, each mapping to a unique emoji. If an unrecognized keyword is provided, the function returns an empty string to ensure seamless operation without interrupting the application flow.
-
-        Parameters
-        ----------
-        action : str
-            A keyword representing the action or status for which an emoji is required. Supported keywords include 'success', 'error', 'warning', 'working', 'report', 'search', 'save', 'stop', and 'start'.
-
-        Returns
-        -------
-        str
-            The emoji symbol associated with the specified action keyword. Returns an empty string if the keyword is not recognized, maintaining non-disruptive output.
-
-        Examples
-        --------
-        Adding visual cues to log messages:
-            >>> logging.info(f"{get_emoji(action='success')} Operation successful.")
-            >>> logging.error(f"{get_emoji(action='error')} An error occurred.")
-
-        Enhancing user prompts in a command-line application:
-            >>> print(f"{get_emoji(action='start')} Initiating the process.")
-            >>> print(f"{get_emoji(action='stop')} Process terminated.")
-
-        Notes
-        -----
-        - The function enhances the aesthetic and functional aspects of textual outputs, making them more engaging and easier to interpret at a glance.
-        - It is implemented with a fail-safe approach, where unsupported keywords result in an empty string, thus preserving the integrity and continuity of the output.
-        - Customization or extension of the supported action keywords and their corresponding emojis can be achieved by modifying the internal emoji_map dictionary.
-
-        This function is not expected to raise any exceptions, ensuring stable and predictable behavior across various usage contexts.
-        """
-
-        emoji_map = {
-            "debug": "🐛",
-            "error": "❌",
-            "info": "ℹ️",
-            "report": "📊",
-            "save": "💾",
-            "search": "🔍",
-            "skipped": "⏭️",
-            "start": "🚀",
-            "stop": "🛑",
-            "success": "✅",
-            "warning": "⚠️",
-            "working": "⏳",
-        }
-        return emoji_map.get(action, "")
-
-    def log_task(self, action, message):
-        emoji = self.get_emoji(action=action)
-        message = f"{emoji} {message}"
-
-        level_mapping = {
-            "debug": logging.DEBUG,
-            "info": logging.INFO,
-            "warning": logging.WARNING,
-            "error": logging.ERROR,
-            "critical": logging.CRITICAL,
-        }
-        severity_level = action
-        level = level_mapping.get(action, logging.INFO)
-
-        timestamp = timezone.now()
-
-        # Save the log entry to the database
-        try:
-            job = Job.objects.get(task_id=self.job_id)
-            log_entry = JobLogEntry(
-                job=job,
-                timestamp=timestamp,
-                severity_level=severity_level,
-                message=message,
-            )
-            log_entry.save()
-        except Job.DoesNotExist:
-            pass
-
-        self.log(level, message)
-        self.sequence_number += 1
-
-    def set_job_id(self, job_id):
-        self.job_id = job_id
 
 
 class PanosUpgrade:
@@ -206,8 +71,8 @@ class PanosUpgrade:
     """
 
     def __init__(
-        self,
-        job_id: str,
+            self,
+            job_id: str,
     ):
         self.job_id = job_id
         self.logger = UpgradeLogger("pan-os-upgrade-upgrade")
@@ -215,10 +80,10 @@ class PanosUpgrade:
         self.upgrade_devices = []
 
     def check_ha_compatibility(
-        self,
-        current_version: Tuple[int, int, int, int],
-        device: Dict,
-        target_version: Tuple[int, int, int, int],
+            self,
+            current_version: Tuple[int, int, int, int],
+            device: Dict,
+            target_version: Tuple[int, int, int, int],
     ) -> bool:
         """
         Check the compatibility of upgrading a firewall in an HA pair to a target version.
@@ -262,8 +127,8 @@ class PanosUpgrade:
 
         # Check if the upgrade is within the same major version but the minor upgrade is more than one release apart
         elif (
-            target_version[0] == current_version[0]
-            and target_version[1] - current_version[1] > 1
+                target_version[0] == current_version[0]
+                and target_version[1] - current_version[1] > 1
         ):
             self.logger.log_task(
                 action="warning",
@@ -287,10 +152,10 @@ class PanosUpgrade:
         return True
 
     def compare_versions(
-        self,
-        local_version_sliced: Tuple[int, int, int, int],
-        device: Dict,
-        peer_version_sliced: Tuple[int, int, int, int],
+            self,
+            local_version_sliced: Tuple[int, int, int, int],
+            device: Dict,
+            peer_version_sliced: Tuple[int, int, int, int],
     ) -> str:
         """
         Compare two version strings and determine their relative order.
@@ -335,10 +200,10 @@ class PanosUpgrade:
             return "equal"
 
     def determine_upgrade(
-        self,
-        device: Dict,
-        current_version: Tuple[int, int, int, int],
-        target_version: Tuple[int, int, int, int],
+            self,
+            device: Dict,
+            current_version: Tuple[int, int, int, int],
+            target_version: Tuple[int, int, int, int],
     ) -> bool:
         """
         Determine if a firewall requires an upgrade based on the current and target versions.
@@ -404,8 +269,8 @@ class PanosUpgrade:
             return False
 
     def get_ha_status(
-        self,
-        device: Dict,
+            self,
+            device: Dict,
     ) -> Optional[dict]:
         """
         Retrieve the deployment information and HA status of a firewall device.
@@ -478,8 +343,8 @@ class PanosUpgrade:
             return None
 
     def parse_version(
-        self,
-        version: str,
+            self,
+            version: str,
     ) -> Tuple[int, int, int, int]:
         """
         Parse a version string into its major, minor, maintenance, and hotfix components.
@@ -543,9 +408,9 @@ class PanosUpgrade:
         parts = version.split(".")
         # Ensure there are two or three parts, and if three, the third part does not contain invalid characters like 'h' or 'c' without a preceding '-'
         if (
-            len(parts) < 2
-            or len(parts) > 3
-            or (len(parts) == 3 and re.search(r"[^0-9\-]h|[^0-9\-]c", parts[2]))
+                len(parts) < 2
+                or len(parts) > 3
+                or (len(parts) == 3 and re.search(r"[^0-9\-]h|[^0-9\-]c", parts[2]))
         ):
             raise ValueError(f"Invalid version format: '{version}'.")
 
@@ -578,9 +443,9 @@ class PanosUpgrade:
         return major, minor, maintenance, hotfix
 
     def create_list_of_upgrade_devices(
-        self,
-        device_uuid: str,
-        profile_uuid: str,
+            self,
+            device_uuid: str,
+            profile_uuid: str,
     ) -> None:
 
         device = Device.objects.get(uuid=device_uuid)
@@ -661,9 +526,9 @@ class PanosUpgrade:
                 )
 
     def run_assurance(
-        self,
-        device: Device,
-        operation_type: str,
+            self,
+            device: Device,
+            operation_type: str,
     ) -> any:
         """
         Run assurance checks or snapshots on a firewall device.
@@ -759,9 +624,9 @@ class PanosUpgrade:
         return results
 
     def software_available_check(
-        self,
-        device: Dict,
-        target_version: str,
+            self,
+            device: Dict,
+            target_version: str,
     ) -> Optional[Dict]:
         """
         Check if a software update to the target version is available and compatible.
@@ -821,9 +686,9 @@ class PanosUpgrade:
             return available_versions
 
     def software_download(
-        self,
-        device: Dict,
-        target_version: str,
+            self,
+            device: Dict,
+            target_version: str,
     ) -> str:
         """
         Download the target software version to the firewall device.
@@ -876,8 +741,8 @@ class PanosUpgrade:
             time.sleep(30)
 
     def suspend_ha_device(
-        self,
-        device: Dict,
+            self,
+            device: Dict,
     ) -> bool:
         """
         Suspend the active device in a high-availability (HA) pair.
@@ -921,8 +786,8 @@ class PanosUpgrade:
 
             # Check if the suspension was successful
             if (
-                response_message["result"]
-                == "Successfully changed HA state to suspended"
+                    response_message["result"]
+                    == "Successfully changed HA state to suspended"
             ):
                 self.logger.log_task(
                     action="success",
@@ -947,9 +812,9 @@ class PanosUpgrade:
             return False
 
     def upgrade_active_devices(
-        self,
-        dry_run: bool,
-        target_version: str,
+            self,
+            dry_run: bool,
+            target_version: str,
     ) -> None:
         for each in self.upgrade_devices:
             if each["db_device"].local_state in ["active", "active-primary"]:
@@ -982,14 +847,13 @@ job_logger = UpgradeLogger("pan-os-upgrade-upgrade")
 
 
 def main(
-    author_id: int,
-    device_uuid: str,
-    dry_run: bool,
-    job_id: str,
-    profile_uuid: str,
-    target_version: str,
+        author_id: int,
+        device_uuid: str,
+        dry_run: bool,
+        job_id: str,
+        profile_uuid: str,
+        target_version: str,
 ) -> str:
-
     # Create a new instance of the PanosUpgrade class
     upgrade = PanosUpgrade(job_id)
 
@@ -1017,7 +881,6 @@ def main(
 
         # Check if the device is the primary device in an HA pair, and if so, skip the upgrade
         if device.ha_enabled and device.local_state in ["active", "active-primary"]:
-
             # Log the HA status of the firewall device
             upgrade.logger.log_task(
                 action="report",
@@ -1086,7 +949,6 @@ def main(
 
         # Skip the upgrade process for devices that are suspended
         if each["db_device"].local_state in ["suspended"]:
-
             # Log the message to the console
             upgrade.logger.log_task(
                 action="report",
@@ -1101,13 +963,12 @@ def main(
 
         # Target the passive, active-secondary, or standalone devices for the upgrade process
         if (
-            each["db_device"].local_state in ["passive", "active-secondary"]
-            or not each["db_device"].ha_enabled
+                each["db_device"].local_state in ["passive", "active-secondary"]
+                or not each["db_device"].ha_enabled
         ):
 
             # If the device is part of an HA pair, parse the peer PAN-OS version
             if each["db_device"].ha_enabled:
-
                 # Parse the peer PAN-OS version into major, minor, maintenance, and hotfix parts
                 peer_version_sliced = upgrade.parse_version(
                     version=ha_details["result"]["group"]["peer-info"]["build-rel"],
@@ -1149,7 +1010,6 @@ def main(
 
                     # Gracefully exit if the firewall does not require an upgrade to target version
                     if not upgrade_compatible:
-
                         # Log the message to the console
                         upgrade.logger.log_task(
                             action="error",
@@ -1216,10 +1076,10 @@ def main(
 
                         # If the "downloaded" key is not set to "downloading"
                         if (
-                            each["pan_device"].software.versions[base_version_key][
-                                "downloaded"
-                            ]
-                            != "downloading"
+                                each["pan_device"].software.versions[base_version_key][
+                                    "downloaded"
+                                ]
+                                != "downloading"
                         ):
 
                             # Special log if the device is in HA mode:
@@ -1324,10 +1184,10 @@ def main(
 
                         # If the "downloaded" key is not set to "downloading"
                         if (
-                            each["pan_device"].software.versions[target_version][
-                                "downloaded"
-                            ]
-                            != "downloading"
+                                each["pan_device"].software.versions[target_version][
+                                    "downloaded"
+                                ]
+                                != "downloading"
                         ):
 
                             # Special log if the device is in HA mode:
@@ -1441,7 +1301,7 @@ def main(
 
                     # Wait for HA synchronization to complete
                     while (
-                        ha_details["result"]["group"]["running-sync"] != "synchronized"
+                            ha_details["result"]["group"]["running-sync"] != "synchronized"
                     ):
 
                         # Increment the attempt number for the PAN-OS upgrade
@@ -1458,8 +1318,8 @@ def main(
 
                             # Check if the HA synchronization is complete
                             if (
-                                ha_details["result"]["group"]["running-sync"]
-                                == "synchronized"
+                                    ha_details["result"]["group"]["running-sync"]
+                                    == "synchronized"
                             ):
 
                                 # Log the HA synchronization status
@@ -1518,10 +1378,10 @@ def main(
 
                         # If the current device is active or active-primary
                         if (
-                            ha_details["result"]["group"]["local-info"]["state"]
-                            == "active"
-                            or ha_details["result"]["group"]["local-info"]["state"]
-                            == "active-primary"
+                                ha_details["result"]["group"]["local-info"]["state"]
+                                == "active"
+                                or ha_details["result"]["group"]["local-info"]["state"]
+                                == "active-primary"
                         ):
 
                             # Log message to console
@@ -1535,10 +1395,10 @@ def main(
 
                         # If the current device is passive or active-secondary
                         elif (
-                            ha_details["result"]["group"]["local-info"]["state"]
-                            == "passive"
-                            or ha_details["result"]["group"]["local-info"]["state"]
-                            == "active-secondary"
+                                ha_details["result"]["group"]["local-info"]["state"]
+                                == "passive"
+                                or ha_details["result"]["group"]["local-info"]["state"]
+                                == "active-secondary"
                         ):
 
                             # Suspend HA state of the target device
@@ -1570,8 +1430,8 @@ def main(
 
                         # If the current device is in initial HA state
                         elif (
-                            ha_details["result"]["group"]["local-info"]["state"]
-                            == "initial"
+                                ha_details["result"]["group"]["local-info"]["state"]
+                                == "initial"
                         ):
 
                             # Log message to console
@@ -1585,8 +1445,8 @@ def main(
 
                         # If the current device is in suspended HA state
                         elif (
-                            ha_details["result"]["group"]["local-info"]["state"]
-                            == "suspended"
+                                ha_details["result"]["group"]["local-info"]["state"]
+                                == "suspended"
                         ):
 
                             # Log message to console
@@ -1621,10 +1481,10 @@ def main(
 
                         # Non-Dry Run mode will perform our HA state suspension
                         elif (
-                            ha_details["result"]["group"]["local-info"]["state"]
-                            == "active"
-                            or ha_details["result"]["group"]["local-info"]["state"]
-                            == "active-primary"
+                                ha_details["result"]["group"]["local-info"]["state"]
+                                == "active"
+                                or ha_details["result"]["group"]["local-info"]["state"]
+                                == "active-primary"
                         ):
 
                             # Suspend HA state of active or active-primary
@@ -1731,7 +1591,6 @@ def main(
 
                 # If the pre-upgrade snapshot fails after multiple attempts
                 if pre_snapshot is None:
-
                     # Log the snapshot error message
                     upgrade.logger.log_task(
                         action="error",
@@ -1919,108 +1778,3 @@ def main(
             raise
 
     return "completed"
-
-
-if __name__ == "__main__":
-    """
-    Main entry point for the PAN-OS upgrade script.
-
-    This script is used to run the PAN-OS upgrade process for Palo Alto Networks devices.
-    It parses command-line arguments, configures logging, creates a new job entry, and
-    initiates the upgrade process by calling the `main` function.
-
-    Command-line arguments:
-        -d, --device-uuid (str): UUID of the device to upgrade (required).
-        -a, --author-id (int): ID of the author performing the upgrade (required).
-        --dry-run: Perform a dry run without making any changes (optional).
-        -l, --log-level (str): Set the logging level (default: INFO) (optional).
-        -p, --profile-uuid (str): UUID of the profile to use for authentication (required).
-        -t, --target-version (str): Target PAN-OS version for the upgrade (required).
-
-    Mermaid Workflow:
-        ```mermaid
-        graph TD
-            A[Start] --> B[Parse command-line arguments]
-            B --> C[Configure logging level]
-            C --> D[Create a new Job entry]
-            D --> E[Call main function]
-            E --> F[End]
-        ```
-    """
-
-    parser = argparse.ArgumentParser(
-        description="Run PAN-OS upgrade script for Palo Alto Networks devices"
-    )
-    parser.add_argument(
-        "-d",
-        "--device-uuid",
-        type=str,
-        required=True,
-        help="UUID of the device to upgrade",
-    )
-    parser.add_argument(
-        "-a",
-        "--author-id",
-        type=int,
-        required=True,
-        help="ID of the author performing the upgrade",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Perform a dry run without making any changes",
-    )
-    parser.add_argument(
-        "-l",
-        "--log-level",
-        type=str,
-        default="INFO",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        help="Set the logging level (default: INFO)",
-    )
-    parser.add_argument(
-        "-p",
-        "--profile-uuid",
-        type=str,
-        required=True,
-        help="UUID of the profile to use for authentication",
-    )
-    parser.add_argument(
-        "-t",
-        "--target-version",
-        type=str,
-        required=True,
-        help="Target PAN-OS version for the upgrade",
-    )
-
-    args = parser.parse_args()
-
-    # Configure logging level
-    logging.basicConfig(level=args.log_level)
-
-    device_uuid = args.device_uuid
-    author_id = args.author_id
-    profile_uuid = args.profile_uuid
-    target_version = args.target_version
-    dry_run = args.dry_run
-
-    # Create a new Job entry
-    author = get_user_model().objects.get(id=author_id)
-    job = Job.objects.create(
-        job_type="upgrade",
-        job_status="running",
-        author=author,
-        task_id=str(uuid.uuid4()),
-    )
-
-    status = main(
-        author_id=author_id,
-        device_uuid=device_uuid,
-        dry_run=dry_run,
-        job_id=str(job.task_id),
-        profile_uuid=profile_uuid,
-        target_version=target_version,
-    )
-
-    job.job_status = status
-    job.save()
