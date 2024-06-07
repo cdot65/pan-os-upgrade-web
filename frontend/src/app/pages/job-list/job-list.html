@@ -1,7 +1,6 @@
 <!-- src/app/pages/job-list/job-list.html -->
 <div class="job-list-container">
     <main
-        focusOnNavigation
         aria-label="Job list"
         id="job-list"
         class="job-list"
@@ -9,16 +8,18 @@
         <div class="table-header">
             <h2>Jobs</h2>
 
-            <div class="button-container">
-                <button
-                    mat-raised-button
-                    color="warn"
-                    (click)="onDeleteSelectedClick()"
-                    [disabled]="selection.selected.length === 0"
-                >
-                    <mat-icon>delete</mat-icon>
-                    Delete Selected
-                </button>
+            <div class="button-row">
+                <div class="button-container">
+                    <button
+                        mat-raised-button
+                        color="warn"
+                        (click)="onDeleteSelectedClick()"
+                        [disabled]="selection.selected.length === 0"
+                    >
+                        <mat-icon>delete</mat-icon>
+                        Delete Selected
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -61,7 +62,7 @@
                 >
                     Job ID
                 </th>
-                <td mat-cell *matCellDef="let item">{{item.task_id}}</td>
+                <td mat-cell *matCellDef="let item">{{ item.task_id }}</td>
             </ng-container>
 
             <!-- IPv4/IPv6 Address Column -->
@@ -74,7 +75,7 @@
                 >
                     Job Type
                 </th>
-                <td mat-cell *matCellDef="let item">{{item.job_type}}</td>
+                <td mat-cell *matCellDef="let item">{{ item.job_type }}</td>
             </ng-container>
 
             <!-- Platform Column -->
@@ -87,7 +88,7 @@
                 >
                     Timestamp
                 </th>
-                <td mat-cell *matCellDef="let item">{{item.created_at}}</td>
+                <td mat-cell *matCellDef="let item">{{ item.created_at }}</td>
             </ng-container>
 
             <!-- View Details Column -->

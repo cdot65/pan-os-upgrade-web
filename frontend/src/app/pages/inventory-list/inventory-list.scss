@@ -1,34 +1,4 @@
-@use "sass:map";
-@use "@angular/material" as mat;
-
-@mixin theme($theme) {
-    $primary: map.get($theme, primary);
-
-    // Target the <mat-sidenav> element itself:
-    .inventory-list mat-sidenav {
-        background-color: mat.get-color-from-palette($primary);
-
-        // Use ng-deep to penetrate the sidenav's Shadow DOM:
-        ::ng-deep {
-            .mat-drawer-container {
-                background-color: mat.get-color-from-palette($primary);
-            }
-        }
-
-        // Style the links inside the sidenav:
-        a {
-            color: mat.get-color-from-palette(
-                $primary,
-                default-contrast
-            ); // Ensure text contrast
-
-            &:hover,
-            &:focus {
-                background: rgba(0, 0, 0, 0.4);
-            }
-        }
-    }
-}
+// src/app/pages/inventory-list/inventory-list.scss
 
 .inventory-list-container {
     display: grid;
@@ -76,52 +46,6 @@
                 }
             }
         }
-    }
-
-    .refresh-progress {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-    }
-
-    .refresh-header {
-        outline: none;
-        // padding: 24px 8px;
-        font-size: 20px;
-        text-align: center;
-        color: accent;
-    }
-
-    .refresh-error {
-        outline: none;
-        // padding: 24px 8px;
-        font-size: 20px;
-        text-align: center;
-        color: red;
-    }
-
-    .sync-progress {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-    }
-
-    .sync-header {
-        outline: none;
-        // padding: 24px 8px;
-        font-size: 20px;
-        text-align: center;
-        color: accent;
-    }
-
-    .sync-error {
-        outline: none;
-        // padding: 24px 8px;
-        font-size: 20px;
-        text-align: center;
-        color: red;
     }
 
     .mat-table {
