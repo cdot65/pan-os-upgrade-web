@@ -19,7 +19,7 @@ from pan_os_upgrade.components.assurance import AssuranceOptions
 
 # pan-os-upgrade-web imports
 from panosupgradeweb.models import Device, Profile
-from .logger import UpgradeLogger
+from panosupgradeweb.scripts.logger import PanOsUpgradeLogger
 
 
 class PanosUpgrade:
@@ -32,7 +32,7 @@ class PanosUpgrade:
 
     Attributes:
         job_id (str): The ID of the job associated with the upgrade.
-        logger (UpgradeLogger): An instance of the UpgradeLogger class for logging upgrade-related messages.
+        logger (PanOsUpgradeLogger): An instance of the UpgradeLogger class for logging upgrade-related messages.
         upgrade_devices (List[Dict]): A list of dictionaries containing information about the devices to be upgraded.
 
     Methods:
@@ -58,7 +58,7 @@ class PanosUpgrade:
             job_id: str,
     ):
         self.job_id = job_id
-        self.logger = UpgradeLogger("pan-os-upgrade-upgrade")
+        self.logger = PanOsUpgradeLogger("pan-os-upgrade-upgrade")
         self.logger.set_job_id(job_id)
         self.upgrade_devices = []
 
