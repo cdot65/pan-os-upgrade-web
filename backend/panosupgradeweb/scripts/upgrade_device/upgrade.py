@@ -251,8 +251,8 @@ class PanosUpgrade:
             )
             return False
 
+    @staticmethod
     def get_ha_status(
-        self,
         device: Dict,
     ) -> Optional[dict]:
         """
@@ -286,42 +286,19 @@ class PanosUpgrade:
                 G --> I[Return deployment type and HA details]
             ```
         """
-
-        # Log the start of getting deployment information
-        self.logger.log_task(
-            action="start",
-            message=f"{device['db_device'].hostname}: Getting {device['pan_device'].serial} deployment information.",
-        )
-
         # Get the deployment type using show_highavailability_state()
         deployment_type = device["pan_device"].show_highavailability_state()
-
-        # Log the target device deployment type
-        self.logger.log_task(
-            action="report",
-            message=f"{device['db_device'].hostname}: Target device deployment: {deployment_type[0]}",
-        )
 
         # Check if HA details are available
         if deployment_type[1]:
             # Flatten the XML to a dictionary if HA details are available
             ha_details = flatten_xml_to_dict(element=deployment_type[1])
 
-            # Log that the target device deployment details have been collected
-            self.logger.log_task(
-                action="success",
-                message=f"{device['db_device'].hostname}: Target device deployment details collected.",
-            )
-
             # Return the HA details if available
             return ha_details
 
-        # If no HA details are available, log the deployment type and return None
+        # If no HA details are available, return None
         else:
-            self.logger.log_task(
-                action="report",
-                message=f"{device['db_device'].hostname}: No HA details available.",
-            )
             return None
 
     def create_list_of_upgrade_devices(
@@ -329,9 +306,43 @@ class PanosUpgrade:
         device_uuid: str,
         profile_uuid: str,
     ) -> None:
+        """
+        Create a list of devices to be upgraded.
+
+        This function retrieves the device and profile objects based on the provided UUIDs and creates
+        a list of devices to be upgraded. It handles both Panorama-managed and standalone firewalls.
+        If the device is in an HA pair, it also adds the peer firewall to the upgrade list.
+
+        Args:
+            device_uuid (str): The UUID of the device to be upgraded.
+            profile_uuid (str): The UUID of the profile associated with the device.
+
+        Returns:
+            None
+
+        Mermaid Workflow:
+            ```mermaid
+            graph TD
+                A[Start] --> B{Is device Panorama-managed?}
+                B -->|Yes| C[Create Panorama-managed firewall object]
+                B -->|No| D[Create standalone firewall object]
+                C --> E[Create device dictionary]
+                D --> E
+                E --> F[Append device to upgrade list]
+                F --> G{Is device in an HA pair?}
+                G -->|Yes| H{Is peer device available?}
+                G -->|No| I[End]
+                H -->|Yes| J[Create peer firewall object]
+                H -->|No| I
+                J --> K[Append peer device to upgrade list]
+                K --> I
+            ```
+        """
+        # Retrieve the device and profile objects based on the provided UUIDs
         device = Device.objects.get(uuid=device_uuid)
         profile = Profile.objects.get(uuid=profile_uuid)
 
+        # Create the firewall object based on whether the device is Panorama-managed or standalone
         if device.panorama_managed:
             firewall = Firewall(
                 serial=device.serial,
@@ -355,6 +366,7 @@ class PanosUpgrade:
                 password=profile.pan_password,
             )
 
+        # Create a dictionary containing the device, job ID, firewall object, and profile
         device = {
             "db_device": device,
             "job_id": self.job_id,
@@ -366,8 +378,10 @@ class PanosUpgrade:
             message=f"{device['db_device'].hostname}: Device and firewall objects created.",
         )
 
+        # Append the device to the upgrade list
         self.upgrade_devices.append(device)
 
+        # Check if the device is in an HA pair and add the peer firewall to the upgrade list if available
         if self.upgrade_devices[0]["db_device"].ha_enabled:
             if self.upgrade_devices[0]["db_device"].peer_device is not None:
                 peer = Device.objects.get(
