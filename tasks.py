@@ -61,6 +61,7 @@ def publish(context):
 @task()
 def rebuild(context):
     """Rebuild our Docker images."""
+    stage_migrations = "touch backend/panosupgradeweb/migrations/fake.py"
     remove_migrations = "rm backend/panosupgradeweb/migrations/*.py"
     stop_containers = "docker-compose stop"
     remove_containers = "docker-compose rm -f"
@@ -68,5 +69,11 @@ def rebuild(context):
     build_containers = "docker-compose build"
     start_containers = "docker-compose up -d"
     context.run(
-        f"{remove_migrations} && {stop_containers} && {remove_containers} && {remove_volumes} && {build_containers} && {start_containers}",
+        f"{stage_migrations} && "
+        f"{remove_migrations} && "
+        f"{stop_containers} && "
+        f"{remove_containers} && "
+        f"{remove_volumes} && "
+        f"{build_containers} && "
+        f"{start_containers}",
     )
