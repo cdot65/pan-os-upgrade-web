@@ -18,7 +18,7 @@ from .refresh import DeviceRefresh
 job_logger = PanOsUpgradeLogger("pan-os-upgrade-device-refresh")
 
 
-def run_device_refresh(
+def main(
     author_id: int,
     device_uuid: str,
     job_id: str,
