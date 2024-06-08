@@ -5,8 +5,8 @@ from celery.exceptions import WorkerLostError
 
 from panosupgradeweb.models import Device
 from panosupgradeweb.scripts.logger import PanOsUpgradeLogger
+from panosupgradeweb.scripts.utilities import parse_version
 from .upgrade import PanosUpgrade
-from .utilities import parse_version
 
 # Create an instance of the custom logger
 job_logger = PanOsUpgradeLogger("pan-os-upgrade-upgrade")
