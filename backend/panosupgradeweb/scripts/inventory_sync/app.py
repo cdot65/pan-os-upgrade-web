@@ -1,8 +1,9 @@
 # backend/panosupgradeweb/scripts/inventory_sync/app.py
 from panos.firewall import Firewall
 from panos.panorama import Panorama
+
 from panosupgradeweb.scripts.logger import PanOsUpgradeLogger
-from pan_os_upgrade.components.utilities import flatten_xml_to_dict
+from panosupgradeweb.scripts.utilities import find_devicegroup_by_serial, flatten_xml_to_dict
 
 # import our Django models
 from panosupgradeweb.models import (
@@ -246,7 +247,7 @@ def main(
                 defaults={
                     "app_version": info["system"]["app-version"],
                     "author_id": author_id,
-                    "device_group": InventorySync.find_devicegroup_by_serial(
+                    "device_group": find_devicegroup_by_serial(
                         device_group_mappings,
                         device["serial"],
                     ),
