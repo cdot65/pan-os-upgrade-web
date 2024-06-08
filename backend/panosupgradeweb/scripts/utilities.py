@@ -4,7 +4,7 @@ from xml.etree import ElementTree as ET
 
 
 def parse_version(
-        version: str,
+    version: str,
 ) -> Tuple[int, int, int, int]:
     """
     Parse a version string into its major, minor, maintenance, and hotfix components.
@@ -78,9 +78,9 @@ def parse_version(
     # Ensure there are two or three parts, and if three, the third part does not contain invalid characters like 'h'
     # or 'c' without a preceding '-'
     if (
-            len(parts) < 2
-            or len(parts) > 3
-            or (len(parts) == 3 and re.search(r"[^0-9\-]h|[^0-9\-]c", parts[2]))
+        len(parts) < 2
+        or len(parts) > 3
+        or (len(parts) == 3 and re.search(r"[^0-9\-]h|[^0-9\-]c", parts[2]))
     ):
         raise ValueError(f"Invalid version format: '{version}'.")
 
@@ -114,8 +114,8 @@ def parse_version(
 
 
 def find_devicegroup_by_serial(
-        data: List[Dict],
-        serial: str,
+    data: List[Dict],
+    serial: str,
 ) -> Optional[str]:
     """
     Find the device group name for a given device serial number.

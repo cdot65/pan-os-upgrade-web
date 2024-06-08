@@ -17,8 +17,8 @@ class DeviceRefresh:
     """
 
     def __init__(
-            self,
-            job_id: str,
+        self,
+        job_id: str,
     ):
         self.job_id = job_id
         self.logger = PanOsUpgradeLogger("pan-os-upgrade-inventory-sync")
