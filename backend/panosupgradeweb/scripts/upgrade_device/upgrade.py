@@ -54,8 +54,8 @@ class PanosUpgrade:
     """
 
     def __init__(
-            self,
-            job_id: str,
+        self,
+        job_id: str,
     ):
         self.job_id = job_id
         self.logger = PanOsUpgradeLogger("pan-os-upgrade-upgrade")
@@ -63,10 +63,10 @@ class PanosUpgrade:
         self.upgrade_devices = []
 
     def check_ha_compatibility(
-            self,
-            current_version: Tuple[int, int, int, int],
-            device: Dict,
-            target_version: Tuple[int, int, int, int],
+        self,
+        current_version: Tuple[int, int, int, int],
+        device: Dict,
+        target_version: Tuple[int, int, int, int],
     ) -> bool:
         """
         Check the compatibility of upgrading a firewall in an HA pair to a target version.
@@ -103,19 +103,19 @@ class PanosUpgrade:
             self.logger.log_task(
                 action="warning",
                 message=f"{device['db_device'].hostname}: Upgrading firewalls in an HA pair to a version that is more "
-                        f"than one major release apart may cause compatibility issues.",
+                f"than one major release apart may cause compatibility issues.",
             )
             return False
 
         # Check if the upgrade is within the same major version but the minor upgrade is more than one release apart
         elif (
-                target_version[0] == current_version[0]
-                and target_version[1] - current_version[1] > 1
+            target_version[0] == current_version[0]
+            and target_version[1] - current_version[1] > 1
         ):
             self.logger.log_task(
                 action="warning",
                 message=f"{device['db_device'].hostname}: Upgrading firewalls in an HA pair to a version that is more "
-                        f"than one minor release apart may cause compatibility issues.",
+                f"than one minor release apart may cause compatibility issues.",
             )
             return False
 
@@ -124,8 +124,8 @@ class PanosUpgrade:
             self.logger.log_task(
                 action="warning",
                 message=f"{device['db_device'].hostname}: Upgrading firewalls in an HA pair to a version that spans "
-                        f"more than one major release or increases the minor version beyond the first in the next "
-                        f"major release may cause compatibility issues.",
+                f"more than one major release or increases the minor version beyond the first in the next "
+                f"major release may cause compatibility issues.",
             )
             return False
 
@@ -137,10 +137,10 @@ class PanosUpgrade:
         return True
 
     def compare_versions(
-            self,
-            local_version_sliced: Tuple[int, int, int, int],
-            device: Dict,
-            peer_version_sliced: Tuple[int, int, int, int],
+        self,
+        local_version_sliced: Tuple[int, int, int, int],
+        device: Dict,
+        peer_version_sliced: Tuple[int, int, int, int],
     ) -> str:
         """
         Compare two version tuples and determine their relative order.
@@ -184,10 +184,10 @@ class PanosUpgrade:
             return "equal"
 
     def determine_upgrade(
-            self,
-            device: Dict,
-            current_version: Tuple[int, int, int, int],
-            target_version: Tuple[int, int, int, int],
+        self,
+        device: Dict,
+        current_version: Tuple[int, int, int, int],
+        target_version: Tuple[int, int, int, int],
     ) -> bool:
         """
         Determine if a firewall requires an upgrade based on the current and target versions.
@@ -252,8 +252,8 @@ class PanosUpgrade:
             return False
 
     def get_ha_status(
-            self,
-            device: Dict,
+        self,
+        device: Dict,
     ) -> Optional[dict]:
         """
         Retrieve the deployment information and HA status of a firewall device.
@@ -304,7 +304,6 @@ class PanosUpgrade:
 
         # Check if HA details are available
         if deployment_type[1]:
-
             # Flatten the XML to a dictionary if HA details are available
             ha_details = flatten_xml_to_dict(element=deployment_type[1])
 
@@ -326,11 +325,10 @@ class PanosUpgrade:
             return None
 
     def create_list_of_upgrade_devices(
-            self,
-            device_uuid: str,
-            profile_uuid: str,
+        self,
+        device_uuid: str,
+        profile_uuid: str,
     ) -> None:
-
         device = Device.objects.get(uuid=device_uuid)
         profile = Profile.objects.get(uuid=profile_uuid)
 
@@ -406,13 +404,13 @@ class PanosUpgrade:
                 self.logger.log_task(
                     action="report",
                     message=f"{self.upgrade_devices[0]['db_device'].hostname}: HA peer firewall added to the upgrade "
-                            f"list.",
+                    f"list.",
                 )
 
     def run_assurance(
-            self,
-            device: Device,
-            operation_type: str,
+        self,
+        device: Device,
+        operation_type: str,
     ) -> any:
         """
         Run assurance checks or snapshots on a firewall device.
@@ -507,8 +505,8 @@ class PanosUpgrade:
 
     @staticmethod
     def software_available_check(
-            device: Dict,
-            target_version: str,
+        device: Dict,
+        target_version: str,
     ) -> Optional[Dict]:
         """
         Check if a software update to the target version is available and compatible.
@@ -569,8 +567,8 @@ class PanosUpgrade:
 
     @staticmethod
     def software_download(
-            device: Dict,
-            target_version: str,
+        device: Dict,
+        target_version: str,
     ) -> bool:
         """
         Download the target software version to the firewall device.
@@ -623,8 +621,8 @@ class PanosUpgrade:
             time.sleep(30)
 
     def suspend_ha_device(
-            self,
-            device: Dict,
+        self,
+        device: Dict,
     ) -> bool:
         """
         Suspend the active device in a high-availability (HA) pair.
@@ -668,8 +666,8 @@ class PanosUpgrade:
 
             # Check if the suspension was successful
             if (
-                    response_message["result"]
-                    == "Successfully changed HA state to suspended"
+                response_message["result"]
+                == "Successfully changed HA state to suspended"
             ):
                 self.logger.log_task(
                     action="success",
@@ -694,9 +692,9 @@ class PanosUpgrade:
             return False
 
     def upgrade_active_devices(
-            self,
-            dry_run: bool,
-            target_version: str,
+        self,
+        dry_run: bool,
+        target_version: str,
     ) -> None:
         for each in self.upgrade_devices:
             if each["db_device"].local_state in ["active", "active-primary"]:
