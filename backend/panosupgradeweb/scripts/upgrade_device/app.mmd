@@ -1,6 +1,6 @@
 graph TD
     A[Start] --> B{Operation Type}
-    B -->|Upgrade| C[run_panos_upgrade]
+    B -->|Upgrade| C[run_upgrade_device]
     C --> D[Parse command-line arguments]
     D --> E[Configure logging level]
     E --> F[Create a new Job entry]

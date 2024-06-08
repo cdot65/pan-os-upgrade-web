@@ -1,7 +1,6 @@
 <!-- upgrade-list.component.html -->
 <div class="upgrade-list-container">
     <main
-        focusOnNavigation
         aria-label="Upgrade list"
         id="upgrade-list"
         class="upgrade-list"
@@ -170,7 +169,7 @@
                                     }}
                                 </li>
                             </ul>
-                            @if (checkDeviceEligibility(deviceId) == false) {
+                            @if (!checkDeviceEligibility(deviceId)) {
                                 <div class="warning-message">
                                     This is the primary firewall in an HA pair,
                                     its upgrade will only be performed through

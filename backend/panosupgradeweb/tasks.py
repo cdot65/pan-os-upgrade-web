@@ -14,7 +14,7 @@ from panosupgradeweb.models import Job
 from panosupgradeweb.scripts import (
     run_inventory_sync,
     run_device_refresh,
-    run_panos_upgrade,
+    run_upgrade_device,
 )
 
 from celery.exceptions import WorkerTerminate
@@ -167,7 +167,7 @@ def execute_upgrade_device_task(
         job.save()
 
         # Run the PAN-OS upgrade script
-        job_status = run_panos_upgrade(
+        job_status = run_upgrade_device(
             author_id=author_id,
             device_uuid=device_uuid,
             dry_run=dry_run,
