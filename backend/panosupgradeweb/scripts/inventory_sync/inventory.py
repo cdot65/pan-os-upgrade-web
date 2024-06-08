@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 # Palo Alto Networks SDK imports
 from panos.panorama import Panorama
@@ -125,60 +125,3 @@ class InventorySync:
             device_group_mappings.append(entry_dict)
 
         return device_group_mappings
-
-    @staticmethod
-    def find_devicegroup_by_serial(
-            data: List[Dict],
-            serial: str,
-    ) -> Optional[str]:
-        """
-        Find the device group name for a given device serial number.
-
-        This function iterates through a list of dictionaries representing device groups and their associated devices.
-        It searches for a device with the specified serial number and returns the name of the device group if found.
-
-        Args:
-            data (List[Dict]): A list of dictionaries containing device group information and associated devices.
-                               Each dictionary should have the following structure:
-                               {
-                                   "@name": "device_group_name",
-                                   "devices": [
-                                       {
-                                           "serial": "device_serial_number",
-                                           ...
-                                       },
-                                       ...
-                                   ],
-                                   ...
-                               }
-            serial (str): The serial number of the device to search for.
-
-        Returns: Optional[str]: The name of the device group if the device with the specified serial number is found,
-        None otherwise.
-
-        Mermaid Workflow:
-            ```mermaid
-            graph TD
-                A[Start] --> B{Iterate through data}
-                B --> C{Device group has "devices" key?}
-                C -->|Yes| D{Iterate through devices}
-                C -->|No| B
-                D --> E{Device serial matches target serial?}
-                E -->|Yes| F[Return device group name]
-                E -->|No| D
-                D --> B
-                B --> G{All device groups checked?}
-                G -->|Yes| H[Return None]
-                G -->|No| B
-            ```
-        """
-        for entry in data:
-            # Check if the device group has a "devices" key
-            if "devices" in entry:
-                for device in entry["devices"]:
-                    # Check if the device serial matches the target serial
-                    if device["serial"] == serial:
-                        return entry["@name"]
-
-        # Return None if the device is not found in any device group
-        return None
