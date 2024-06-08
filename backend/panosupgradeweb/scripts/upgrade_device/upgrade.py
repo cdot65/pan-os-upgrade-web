@@ -1,5 +1,5 @@
 import time
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 # Celery error handling
 from celery.exceptions import WorkerLostError
@@ -40,7 +40,6 @@ class PanosUpgrade:
         compare_versions: Compare two version strings and determine their relative order.
         determine_upgrade: Determine if a firewall requires an upgrade based on the current and target versions.
         get_ha_status: Retrieve the deployment information and HA status of a firewall device.
-        handle_firewall_ha: Handle the upgrade process for a firewall device in an HA configuration.
         parse_version: Parse a version string into its major, minor, maintenance, and hotfix components.
         perform_snapshot: Perform a snapshot of the network state information for a given device.
         each: Prepare the upgrade devices by creating device and firewall objects.
@@ -60,6 +59,8 @@ class PanosUpgrade:
         self.job_id = job_id
         self.logger = PanOsUpgradeLogger("pan-os-upgrade-upgrade")
         self.logger.set_job_id(job_id)
+        self.max_retries = 3
+        self.retry_interval = 60
         self.upgrade_devices = []
 
     def check_ha_compatibility(
@@ -464,10 +465,6 @@ class PanosUpgrade:
         # Setup Firewall client
         proxy_firewall = FirewallProxy(device["pan_device"])
         checks_firewall = CheckFirewall(proxy_firewall)
-        self.logger.log_task(
-            action="report",
-            message=f"{device['db_device'].hostname}: Running assurance on firewall {checks_firewall}",
-        )
 
         if operation_type == "state_snapshot":
             actions = {
@@ -483,39 +480,9 @@ class PanosUpgrade:
             # Validate each type of action
             for action in actions.keys():
                 if action not in AssuranceOptions.STATE_SNAPSHOTS.keys():
-                    self.logger.log_task(
-                        action="error",
-                        message=f"{device['db_device'].hostname}: Invalid action for state snapshot: {action}",
-                    )
-                    return
+                    return None
 
-            # Take snapshots
-            try:
-                self.logger.log_task(
-                    action="start",
-                    message=f"{device['db_device'].hostname}: Performing snapshots.",
-                )
-                results = checks_firewall.run_snapshots(snapshots_config=actions)
-                self.logger.log_task(
-                    action="report",
-                    message=f"{device['db_device'].hostname}: Snapshot results {results}",
-                )
-
-            except Exception as e:
-                self.logger.log_task(
-                    action="error",
-                    message=f"{device['db_device'].hostname}: Error running snapshots: {e}",
-                )
-                return
-
-        else:
-            self.logger.log_task(
-                action="error",
-                message=f"{device['db_device'].hostname}: Invalid operation type: {operation_type}",
-            )
-            return
-
-        return results
+            return checks_firewall.run_snapshots(snapshots_config=actions)
 
     @staticmethod
     def software_available_check(
@@ -581,7 +548,7 @@ class PanosUpgrade:
 
     @staticmethod
     def software_download(
-        device: Dict,
+        device: Union[Firewall, Panorama],
         target_version: str,
     ) -> bool:
         """
@@ -592,7 +559,7 @@ class PanosUpgrade:
         It logs the progress and status of the download operation.
 
         Args:
-            device (Dict): A dictionary containing information about the firewall device.
+            device (Union[Firewall, Panorama]): The firewall or Panorama device object.
             target_version (str): The target software version to be downloaded.
 
         Returns:
@@ -603,35 +570,36 @@ class PanosUpgrade:
             graph TD
                 A[Start] --> B{Is target version already downloaded?}
                 B -->|Yes| C[Log success and return True]
-                B -->|No| D{Is target version not downloaded or in downloading state?}
-                D -->|Yes| E[Log version not found and start download]
-                D -->|No| F[Log error and exit]
-                E --> G[Initiate download]
-                G --> H{Download successful?}
-                H -->|Yes| I[Log success and return True]
-                H -->|No| J{Download in progress?}
-                J -->|Yes| K[Log download progress]
-                J -->|No| L[Log download failure and return False]
-                K --> M{Download complete?}
-                M -->|Yes| I
-                M -->|No| K
+                B -->|No| D[Initiate download]
+                D --> E{Download successful?}
+                E -->|Yes| F[Log success and return True]
+                E -->|No| G{Download in progress?}
+                G -->|Yes| H[Log download progress and wait]
+                G -->|No| I[return False]
+                H --> J{Download complete?}
+                J -->|Yes| F
+                J -->|No| H
             ```
         """
 
         try:
-            device["pan_device"].software.download(target_version)
+            # Initiate the download of the target software version
+            device.software.download(target_version)
         except PanDeviceXapiError:
+            # return False if the download fails to initiate
             return False
 
         while True:
-            device["pan_device"].software.info()
-            dl_status = device["pan_device"].software.versions[target_version][
-                "downloaded"
-            ]
+            # Refresh the software information on the device
+            device.software.info()
+
+            # Check the download status of the target version
+            dl_status = device.software.versions[target_version]["downloaded"]
 
             if dl_status is True:
                 return True
 
+            # Wait for 30 seconds before checking the download status again
             time.sleep(30)
 
     def suspend_ha_device(
