@@ -119,69 +119,98 @@ def main(
     # Perform the upgrade process for the passive, active-secondary, or standalone devices
     try:
         for i, each in enumerate(upgrade.upgrade_devices):
-            # Parse the current version into major, minor, maintenance, and hotfix parts
-            current_version_sliced = parse_version(
-                version=each["db_device"].sw_version,
-            )
-
-            # Log the current version sliced object representing the target firewall PAN-OS version
-            upgrade.logger.log_task(
-                action="report",
-                message=f"{each['db_device'].hostname}: Current version sliced: {current_version_sliced}",
-            )
-
-            # Parse the target version into major, minor, maintenance, and hotfix parts
-            target_version_sliced = parse_version(
-                version=target_version,
-            )
-
-            # Log the target version sliced object representing the target PAN-OS version
-            upgrade.logger.log_task(
-                action="report",
-                message=f"{each['db_device'].hostname}: Target version sliced: {target_version_sliced}",
-            )
-
-            # Initialize with default values
-            max_retries = 3
-            retry_interval = 60
-
-            # Re-fetch the HA status to get the latest state
-            ha_details = upgrade.get_ha_status(device=each)
-
-            # Skip the upgrade process for devices that are suspended
-            if each["db_device"].local_state in ["suspended"]:
-                # Log the message to the console
-                upgrade.logger.log_task(
-                    action="report",
-                    message=f"{each['db_device'].hostname}: Device is suspended. Skipping upgrade.",
-                )
-
-                # Remove the device from the upgrade list
-                upgrade.upgrade_devices.pop(i)
-
-                # Raise an exception to skip the upgrade process
-                return "errored"
+            # Set the number of retries and wait time from the profile for downloading the base image
+            retry_count = each["profile"].max_download_tries
+            wait_time = each["profile"].download_retry_interval
+            peer_version_sliced = None
 
             # Target the passive, active-secondary, or standalone devices for the upgrade process
             if (
                 each["db_device"].local_state in ["passive", "active-secondary"]
                 or not each["db_device"].ha_enabled
             ):
-                # If the device is part of an HA pair, parse the peer PAN-OS version
-                if each["db_device"].ha_enabled:
-                    # Parse the peer PAN-OS version into major, minor, maintenance, and hotfix parts
-                    peer_version_sliced = parse_version(
-                        version=ha_details["result"]["group"]["peer-info"]["build-rel"],
-                    )
-
-                # Check to see if the firewall is ready to upgrade to target version
+                # This section uses the `show_highavailability_state()` method to retrieve the deployment type
+                # and HA details of the specified firewall device.
                 try:
-                    # Log the start of the PAN-OS upgrade process
+                    ha_details = upgrade.get_ha_status(device=each)
+
+                    # Skip the upgrade process for devices that are suspended
+                    if each["db_device"].local_state in ["suspended"]:
+                        # Log the message to the console
+                        upgrade.logger.log_task(
+                            action="report",
+                            message=f"{each['db_device'].hostname}: Target device is in a HA suspended state, "
+                            "skipping upgrade.",
+                        )
+
+                        # Remove the device from the upgrade list
+                        upgrade.upgrade_devices.pop(i)
+
+                        # Raise an exception to skip the upgrade process
+                        return "errored"
+
+                # General exception handling
+                except Exception as e:
                     upgrade.logger.log_task(
-                        action="report",
-                        message=f"{each['db_device'].hostname}: Checking to see if a PAN-OS upgrade is available.",
+                        action="error",
+                        message=f"Error determining the HA status of the firewall: {str(e)}",
+                    )
+                    return "errored"
+
+                # This section takes a version string in the format "major.minor[.maintenance[-h|-c|-b]hotfix][.xfr]"
+                # and returns a tuple of four integers representing the major, minor, maintenance, and hotfix parts
+                # of the version. It handles various version formats and validates the input to ensure it follows
+                # the expected format.
+                try:
+                    # Parse the device's current version string into its major, minor, maintenance, and hotfix.
+                    current_version_sliced = parse_version(
+                        version=each["db_device"].sw_version,
                     )
 
+                    # Parse the targeted version string into its major, minor, maintenance, and hotfix.
+                    target_version_sliced = parse_version(
+                        version=target_version,
+                    )
+
+                    # If the device is part of an HA pair, parse the peer PAN-OS version
+                    if each["db_device"].ha_enabled:
+                        # Parse the targeted version string into its major, minor, maintenance, and hotfix.
+                        peer_version_sliced = parse_version(
+                            version=ha_details["result"]["group"]["peer-info"][
+                                "build-rel"
+                            ],
+                        )
+
+                        # Log the target version sliced object representing the target PAN-OS version
+                        upgrade.logger.log_task(
+                            action="report",
+                            message=f"{each['db_device'].hostname}: Device is currently running "
+                            f"{current_version_sliced} and the targeted PAN-OS upgrade version is "
+                            f"{target_version_sliced}. Peer firewall is running {peer_version_sliced}.",
+                        )
+
+                    else:
+                        # Log the target version sliced object representing the target PAN-OS version
+                        upgrade.logger.log_task(
+                            action="report",
+                            message=f"{each['db_device'].hostname}: Device is currently running "
+                            f"{current_version_sliced} and the targeted PAN-OS upgrade version is "
+                            f"{target_version_sliced}. No peer firewall, no need to determine its version.",
+                        )
+
+                # General exception handling
+                except Exception as e:
+                    upgrade.logger.log_task(
+                        action="error",
+                        message=f"Error parsing the current and/or targeted upgrade version of PAN-OS: {str(e)}",
+                    )
+                    return "errored"
+
+                # This section compares the current version of a firewall with the target version to determine
+                # if an upgrade is necessary. If an upgrade is required, it logs the appropriate message.
+                # If no upgrade is required or a downgrade attempt is detected, it logs the corresponding
+                # messages and exits the upgrade workflow.
+                try:
                     # Check if the specified version is older than the current version
                     upgrade_required = upgrade.determine_upgrade(
                         current_version=current_version_sliced,
@@ -193,10 +222,23 @@ def main(
                     if not upgrade_required:
                         upgrade.logger.log_task(
                             action="error",
-                            message=f"{each['db_device'].hostname}: Not ready for upgrade to {target_version}.",
+                            message=f"{each['db_device'].hostname}: It was determined that this device is not "
+                            f"suitable to kick off an upgrade workflow to version {target_version}.",
                         )
                         return "errored"
 
+                # General exception handling
+                except Exception as e:
+                    upgrade.logger.log_task(
+                        action="error",
+                        message=f"Error determining if the device is ready to be upgraded to PAN-OS version "
+                        f"{target_version}: {str(e)}",
+                    )
+                    return "errored"
+
+                # This section compares the current version and target version of a firewall in an HA pair
+                # to determine if the upgrade is compatible.
+                try:
                     # Check if the upgrade is compatible with the HA setup
                     if each["db_device"].ha_enabled:
                         # Perform HA compatibility check for the target version
@@ -219,25 +261,19 @@ def main(
                             # Return an error status
                             return "errored"
 
-                # General exception handling for celery task
-                except WorkerLostError as exc:
+                # General exception handling
+                except Exception as e:
                     upgrade.logger.log_task(
                         action="error",
-                        message=f"{each['db_device'].hostname}: Worker lost: {exc}",
+                        message=f"Error determining if the device is ready to be upgraded to PAN-OS version "
+                        f"{target_version}: {str(e)}",
                     )
                     return "errored"
 
-                # General exception handling for upgrade evaluation process
-                except Exception as exc:
-                    upgrade.logger.log_task(
-                        action="error",
-                        message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
-                    )
-                    return "errored"
-
-                # Check if the software update is available and, if so, download the base/target versions
+                # This section issues a request on the remote device to pull down the latest version of software from
+                # the customer service portal.
                 try:
-                    # Check if a software update is available for the firewall
+                    # Check if a software update is available for the device
                     available_versions = upgrade.software_available_check(
                         device=each,
                         target_version=target_version,
@@ -251,250 +287,286 @@ def main(
                         )
                         return "errored"
 
-                    # Check if the base image for the target version is already downloaded
-                    if available_versions:
-                        # Set the number of retries and wait time for downloading the base image
-                        retry_count = each["profile"].max_download_tries
-                        wait_time = each["profile"].download_retry_interval
+                # General exception handling
+                except Exception as e:
+                    upgrade.logger.log_task(
+                        action="error",
+                        message=f"Error determining if the PAN-OS version is available for download"
+                        f"{target_version}: {str(e)}",
+                    )
+                    return "errored"
 
-                        # Create a base version key for the target version
-                        base_version_key = (
-                            f"{target_version_sliced[0]}.{target_version_sliced[1]}.0"
-                        )
+                # The section determines if the targeted PAN-OS version's base image is on the device already,
+                # if not it will initiate a download of the base image.
+                try:
+                    # Create a base version key for the target version
+                    base_version_key = (
+                        f"{target_version_sliced[0]}.{target_version_sliced[1]}.0"
+                    )
 
-                        # Log the message to the console
-                        upgrade.logger.log_task(
-                            action="success",
-                            message=f"{each['db_device'].hostname}: Checking if base image {base_version_key} is available",
-                        )
+                    # Log the message to the console
+                    upgrade.logger.log_task(
+                        action="success",
+                        message=f"{each['db_device'].hostname}: Checking to see if {target_version}'s base image "
+                        f"{base_version_key} is available",
+                    )
 
-                        # Check if the base image is not downloaded
-                        if not each["pan_device"].software.versions[base_version_key][
-                            "downloaded"
-                        ]:
-                            # If the "downloaded" key is not set to "downloading"
-                            if (
-                                each["pan_device"].software.versions[base_version_key][
-                                    "downloaded"
-                                ]
-                                != "downloading"
-                            ):
-                                # Special log if the device is in HA mode:
-                                if each["db_device"].ha_enabled:
-                                    # Log the message to the console
-                                    upgrade.logger.log_task(
-                                        action="start",
-                                        message=f"{each['db_device'].hostname}: Downloading base image {base_version_key} "
-                                        "for target version {target_version}, will sync to HA peer.",
-                                    )
-
-                                # Non-HA log message for standalone devices
-                                else:
-                                    # Log the message to the console
-                                    upgrade.logger.log_task(
-                                        action="start",
-                                        message=f"{each['db_device'].hostname}: Downloading base image {base_version_key} "
-                                        "for target version {target_version}.",
-                                    )
-
-                                # Retry loop for downloading the base image
-                                for attempt in range(retry_count):
-                                    # Download the base image for the target version
-                                    downloaded = PanosUpgrade.software_download(
-                                        target_version=base_version_key,
-                                    )
-
-                                    # Break out of while loop if download was successful
-                                    if downloaded:
-                                        # Log the download success message
-                                        upgrade.logger.log_task(
-                                            action="success",
-                                            message=f"{each['db_device'].hostname}: Base image {base_version_key} "
-                                            "downloaded for target version {target_version}.",
-                                        )
-
-                                        # Log the waiting message
-                                        upgrade.logger.log_task(
-                                            action="success",
-                                            message=f"{each['db_device'].hostname}: Waiting {wait_time} seconds to let "
-                                            f"the base image {base_version_key} load into the software manager "
-                                            f"before downloading {target_version}.",
-                                        )
-
-                                        # Wait for the base image to load into the software manager
-                                        time.sleep(wait_time)
-
-                                        break
-
-                                    # Retry downloading the base image if it failed
-                                    elif not downloaded:
-                                        # Log the download failure and wait before retrying
-                                        if attempt < retry_count - 1:
-                                            upgrade.logger.log_task(
-                                                action="error",
-                                                message=f"{each['db_device'].hostname}: Failed to download base image "
-                                                f"{base_version_key} for target version {target_version}. "
-                                                f"Retrying after {wait_time} seconds.",
-                                            )
-                                            time.sleep(wait_time)
-
-                                        # Return "errored" if the download failed after multiple attempts
-                                        else:
-                                            return "errored"
-
+                    # Check if the base image is not downloaded
+                    if not each["pan_device"].software.versions[base_version_key][
+                        "downloaded"
+                    ]:
+                        # If the "downloaded" key is not set to "downloading"
+                        if (
+                            each["pan_device"].software.versions[base_version_key][
+                                "downloaded"
+                            ]
+                            != "downloading"
+                        ):
+                            # Special log if the device is in HA mode:
+                            if each["db_device"].ha_enabled:
                                 # Log the message to the console
                                 upgrade.logger.log_task(
-                                    action="success",
-                                    message=f"{each['db_device'].hostname}: Base image {base_version_key} is on the device",
+                                    action="start",
+                                    message=f"{each['db_device'].hostname}: Downloading base image {base_version_key} "
+                                    "for target version {target_version}, will sync to HA peer.",
                                 )
 
-                            # If the status is "downloading", then we can deduce that multiple executions are being
-                            # performed, so we should return an "errored" to prevent conflicts
+                            # Non-HA log message for standalone devices
                             else:
                                 # Log the message to the console
                                 upgrade.logger.log_task(
-                                    action="error",
-                                    message=f"{each['db_device'].hostname}: Base image {base_version_key} is already "
-                                    f"downloading, assuming that there are multiple upgrade executions taking "
-                                    f"place. Skipping upgrade.",
+                                    action="start",
+                                    message=f"{each['db_device'].hostname}: Downloading base image {base_version_key} "
+                                    "for target version {target_version}.",
                                 )
 
-                                # Return "errored" to prevent conflicts
-                                return "errored"
+                            # Retry loop for downloading the base image
+                            for attempt in range(retry_count):
+                                # Log the message to the console
+                                upgrade.logger.log_task(
+                                    action="success",
+                                    message=f"{each['db_device'].hostname}: Downloading PAN-OS version "
+                                    f"{base_version_key} on the device",
+                                )
 
-                        # Since the base image is already downloaded, simply log message to console
+                                # Download the base image for the target version
+                                downloaded = PanosUpgrade.software_download(
+                                    device=each["pan_device"],
+                                    target_version=base_version_key,
+                                )
+
+                                # Break out of while loop if download was successful
+                                if downloaded:
+                                    # Log the download success message
+                                    upgrade.logger.log_task(
+                                        action="success",
+                                        message=f"{each['db_device'].hostname}: Base image {base_version_key} "
+                                        f"downloaded for target version {target_version}.",
+                                    )
+
+                                    # Log the waiting message
+                                    upgrade.logger.log_task(
+                                        action="success",
+                                        message=f"{each['db_device'].hostname}: Waiting {wait_time} seconds to let "
+                                        f"the base image {base_version_key} load into the software manager "
+                                        f"before downloading {target_version}.",
+                                    )
+
+                                    # Wait for the base image to load into the software manager
+                                    time.sleep(wait_time)
+
+                                    break
+
+                                # Retry downloading the base image if it failed
+                                elif not downloaded:
+                                    # Log the download failure and wait before retrying
+                                    if attempt < retry_count - 1:
+                                        upgrade.logger.log_task(
+                                            action="error",
+                                            message=f"{each['db_device'].hostname}: Failed to download base image "
+                                            f"{base_version_key} for target version {target_version}. "
+                                            f"Retrying after {wait_time} seconds.",
+                                        )
+                                        time.sleep(wait_time)
+
+                                    # Return "errored" if the download failed after multiple attempts
+                                    else:
+                                        return "errored"
+
+                        # If the status is "downloading", then we can deduce that multiple executions are being
+                        # performed, so we should return an "errored" to prevent conflicts
                         else:
                             # Log the message to the console
                             upgrade.logger.log_task(
-                                action="success",
-                                message=f"{each['db_device'].hostname}: Base image {base_version_key} is already downloaded",
+                                action="error",
+                                message=f"{each['db_device'].hostname}: Base image {base_version_key} is already "
+                                f"downloading, assuming that there are multiple upgrade executions taking "
+                                f"place. Skipping upgrade.",
                             )
 
+                            # Return "errored" to prevent conflicts
+                            return "errored"
+
+                    # Since the base image is already downloaded, simply log message to console
+                    else:
                         # Log the message to the console
                         upgrade.logger.log_task(
                             action="success",
-                            message=f"{each['db_device'].hostname}: Checking if target image {target_version} is available.",
+                            message=f"{each['db_device'].hostname}: Base image {base_version_key} was found to be "
+                            f"already downloaded on the local device, so we are skipping the download process.",
                         )
 
-                        # Check if the target image is not downloaded or in downloading state
-                        if not each["pan_device"].software.versions[target_version][
-                            "downloaded"
-                        ]:
-                            # If the "downloaded" key is not set to "downloading"
-                            if (
-                                each["pan_device"].software.versions[target_version][
-                                    "downloaded"
-                                ]
-                                != "downloading"
-                            ):
-                                # Special log if the device is in HA mode:
-                                if each["db_device"].ha_enabled:
-                                    # Log the message to the console
-                                    upgrade.logger.log_task(
-                                        action="start",
-                                        message=f"{each['db_device'].hostname}: Downloading target image {target_version}, "
-                                        "will sync to HA peer.",
-                                    )
+                # General exception handling
+                except Exception as e:
+                    upgrade.logger.log_task(
+                        action="error",
+                        message=f"Error downloading the base image: {str(e)} "
+                        f"{target_version}: {str(e)}",
+                    )
 
-                                # Non-HA log message for standalone devices
-                                else:
-                                    # Log the message to the console
-                                    upgrade.logger.log_task(
-                                        action="start",
-                                        message=f"{each['db_device'].hostname}: Downloading target image {target_version}.",
-                                    )
+                # The section determines if the targeted PAN-OS version's image is on the device already,
+                # if not it will initiate a download of the target image.
+                try:
+                    # Log the message to the console
+                    upgrade.logger.log_task(
+                        action="success",
+                        message=f"{each['db_device'].hostname}: Checking to see if the target image {target_version} "
+                        "is available.",
+                    )
 
-                                # Retry loop for downloading the target image
-                                for attempt in range(retry_count):
-                                    # Download the target image
-                                    downloaded = PanosUpgrade.software_download(
-                                        target_version=target_version,
-                                    )
-
-                                    # Break out of while loop if download was successful
-                                    if downloaded:
-                                        # Log the download success message
-                                        upgrade.logger.log_task(
-                                            action="success",
-                                            message=f"{each['db_device'].hostname}: Target image {target_version} is on "
-                                            "the device.",
-                                        )
-
-                                        # Log the waiting message
-                                        upgrade.logger.log_task(
-                                            action="success",
-                                            message=f"{each['db_device'].hostname}: Waiting {wait_time} seconds to let the "
-                                            "target image load into the software manager before proceeding.",
-                                        )
-
-                                        # Wait for the base image to load into the software manager
-                                        time.sleep(wait_time)
-
-                                        break
-
-                                    # Retry downloading the target image if it failed
-                                    elif not downloaded:
-                                        # Log the download failure and wait before retrying
-                                        if attempt < retry_count - 1:
-                                            upgrade.logger.log_task(
-                                                action="error",
-                                                message=f"{each['db_device'].hostname}: Failed to download target image "
-                                                f"{target_version}. Retrying after {wait_time} seconds.",
-                                            )
-                                            time.sleep(wait_time)
-
-                                        # Return "errored" if the download failed after multiple attempts
-                                        else:
-                                            return "errored"
-
+                    # Check if the target image is not downloaded or in downloading state
+                    if not each["pan_device"].software.versions[target_version][
+                        "downloaded"
+                    ]:
+                        # If the "downloaded" key is not set to "downloading"
+                        if (
+                            each["pan_device"].software.versions[target_version][
+                                "downloaded"
+                            ]
+                            != "downloading"
+                        ):
+                            # Special log if the device is in HA mode:
+                            if each["db_device"].ha_enabled:
                                 # Log the message to the console
                                 upgrade.logger.log_task(
-                                    action="success",
-                                    message=f"{each['db_device'].hostname}: Target image {target_version} is on the device",
+                                    action="start",
+                                    message=f"{each['db_device'].hostname}: Downloading target image {target_version}, "
+                                    "will sync to HA peer.",
                                 )
 
-                            # If the status is "downloading", then we can deduce that multiple executions are being
-                            # performed, so we should return an "errored" to prevent conflicts
+                            # Non-HA log message for standalone devices
                             else:
                                 # Log the message to the console
                                 upgrade.logger.log_task(
-                                    action="error",
-                                    message=f"{each['db_device'].hostname}: Target image {target_version} is already "
-                                    f"downloading, assuming that there are multiple upgrade executions taking "
-                                    f"place. Skipping upgrade.",
+                                    action="start",
+                                    message=f"{each['db_device'].hostname}: Downloading target image {target_version}.",
                                 )
 
-                                # Return "errored" to prevent conflicts
-                                return "errored"
+                            # Retry loop for downloading the target image
+                            for attempt in range(retry_count):
+                                # Download the target image
+                                downloaded = PanosUpgrade.software_download(
+                                    device=each["pan_device"],
+                                    target_version=target_version,
+                                )
 
-                        # Since the target image is already downloaded, simply log message to console
-                        else:
+                                # Break out of while loop if download was successful
+                                if downloaded:
+                                    # Log the download success message
+                                    upgrade.logger.log_task(
+                                        action="success",
+                                        message=f"{each['db_device'].hostname}: Target image {target_version} is on "
+                                        "the device.",
+                                    )
+
+                                    # Log the waiting message
+                                    upgrade.logger.log_task(
+                                        action="success",
+                                        message=f"{each['db_device'].hostname}: Waiting {wait_time} seconds to let the "
+                                        "target image load into the software manager before proceeding.",
+                                    )
+
+                                    # Wait for the base image to load into the software manager
+                                    time.sleep(wait_time)
+
+                                    break
+
+                                # Retry downloading the target image if it failed
+                                elif not downloaded:
+                                    # Log the download failure and wait before retrying
+                                    if attempt < retry_count - 1:
+                                        upgrade.logger.log_task(
+                                            action="error",
+                                            message=f"{each['db_device'].hostname}: Failed to download target image "
+                                            f"{target_version}. Retrying after {wait_time} seconds.",
+                                        )
+                                        time.sleep(wait_time)
+
+                                    # Return "errored" if the download failed after multiple attempts
+                                    else:
+                                        return "errored"
+
                             # Log the message to the console
                             upgrade.logger.log_task(
                                 action="success",
+                                message=f"{each['db_device'].hostname}: Target image {target_version} is on the device",
+                            )
+
+                        # If the status is "downloading", then we can deduce that multiple executions are being
+                        # performed, so we should return an "errored" to prevent conflicts
+                        else:
+                            # Log the message to the console
+                            upgrade.logger.log_task(
+                                action="error",
                                 message=f"{each['db_device'].hostname}: Target image {target_version} is already "
-                                f"downloaded on the target firewall, skipping the process of downloading again.",
+                                f"downloading, assuming that there are multiple upgrade executions taking "
+                                f"place. Skipping upgrade.",
                             )
 
-                # General exception handling for celery task
-                except WorkerLostError as exc:
+                            # Return "errored" to prevent conflicts
+                            return "errored"
+
+                    # Since the target image is already downloaded, simply log message to console
+                    else:
+                        # Log the message to the console
+                        upgrade.logger.log_task(
+                            action="success",
+                            message=f"{each['db_device'].hostname}: Target image {target_version} is already "
+                            f"downloaded on the target firewall, skipping the process of downloading again.",
+                        )
+
+                # General exception handling
+                except Exception as e:
                     upgrade.logger.log_task(
                         action="error",
-                        message=f"{each['db_device'].hostname}: Worker lost: {exc}",
+                        message=f"Error occurred when downloading the targeted upgrade PAN-OS version "
+                        f"{target_version}: {str(e)}",
                     )
-                    return "errored"
 
-                # General exception handling for the software download process
-                except Exception as exc:
-                    upgrade.logger.log_task(
-                        action="error",
-                        message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
-                    )
-                    return "errored"
+                # Handle HA scenarios for devices that are part of an HA pair, where we check to see if the HA config
+                # has been successfully synced between the two firewalls. Next we compare the versions between the two
+                # firewall appliances
+                try:
+                    if each["db_device"].ha_enabled:
+                        # Create a placeholder object to determine whether the script should proceed with the
+                        # upgraded, based on the state of HA and PAN-OS version delta between primary and secondary
+                        # firewalls.
+                        proceed_with_upgrade = False
 
-                # Handle HA scenarios for devices that are part of an HA pair
-                if each["db_device"].ha_enabled:
-                    try:
+                        # If the current device is in suspended HA state
+                        if (
+                            ha_details["result"]["group"]["local-info"]["state"]
+                            == "suspended"
+                        ):
+                            # Log message to console
+                            upgrade.logger.log_task(
+                                action="report",
+                                message=f"{each['db_device'].hostname}: Target device is in a suspended HA state",
+                            )
+
+                            # Continue with upgrade process on the initial target device
+                            proceed_with_upgrade = True
+
                         # Wait for HA synchronization to complete
                         while (
                             ha_details["result"]["group"]["running-sync"]
@@ -504,12 +576,12 @@ def main(
                             attempt = 0
 
                             # HA synchronization process
-                            if attempt < max_retries:
+                            if attempt < each["profile"].max_snapshot_tries:
                                 # Log the attempt number
                                 upgrade.logger.log_task(
                                     action="search",
-                                    message=f"{each['db_device'].hostname}: Attempt {attempt + 1}/{max_retries} to get HA "
-                                    f"status.",
+                                    message=f"{each['db_device'].hostname}: Attempt "
+                                    f"{attempt + 1}/{each['profile'].max_snapshot_tries} to get HA status.",
                                 )
 
                                 # Check if the HA synchronization is complete
@@ -523,6 +595,8 @@ def main(
                                         message=f"{each['db_device'].hostname}: HA synchronization complete.",
                                     )
 
+                                    proceed_with_upgrade = True
+
                                     # break out of the loop
                                     break
 
@@ -535,7 +609,7 @@ def main(
                                     )
 
                                     # Wait for HA synchronization
-                                    time.sleep(retry_interval)
+                                    time.sleep(each["profile"].snapshot_retry_interval)
 
                                     # Increment the attempt number
                                     attempt += 1
@@ -546,7 +620,7 @@ def main(
                                 upgrade.logger.log_task(
                                     action="error",
                                     message=f"{each['db_device'].hostname}: HA synchronization failed after attempting "
-                                    f"for a total of {max_retries} attempts.",
+                                    f"for a total of {each['profile'].max_snapshot_tries} attempts.",
                                 )
 
                                 # Return an error status
@@ -559,134 +633,40 @@ def main(
                             peer_version_sliced=peer_version_sliced,
                         )
 
-                        # ipdb.set_trace()
-
                         # Log the version comparison result
                         upgrade.logger.log_task(
                             action="report",
                             message=f"{each['db_device'].hostname}: Peer version comparison: {version_comparison}",
                         )
 
-                        # If the firewall and its peer devices are running the same version
-                        if version_comparison == "equal":
-                            # If the current device is active or active-primary
-                            if (
-                                ha_details["result"]["group"]["local-info"]["state"]
-                                == "active"
-                                or ha_details["result"]["group"]["local-info"]["state"]
-                                == "active-primary"
-                            ):
-                                # Log message to console
-                                upgrade.logger.log_task(
-                                    action="search",
-                                    message=f"{each['db_device'].hostname}: Target device is active and peer is running "
-                                    f"the same version, skipping HA state suspension.",
-                                )
-
-                                # Skip the upgrade process for the active target device
-                                proceed_with_upgrade = False
-
-                            # If the current device is passive or active-secondary
-                            elif (
-                                ha_details["result"]["group"]["local-info"]["state"]
-                                == "passive"
-                                or ha_details["result"]["group"]["local-info"]["state"]
-                                == "active-secondary"
-                            ):
-                                # Suspend HA state of the target device
-                                if not dry_run:
-                                    # Log message to console
-                                    upgrade.logger.log_task(
-                                        action="start",
-                                        message=f"{each['db_device'].hostname}: Suspending HA state of passive or "
-                                        f"active-secondary",
-                                    )
-
-                                    # Suspend HA state of the passive device
-                                    upgrade.suspend_ha_device(device=each)
-
-                                    # Continue with upgrade process on the passive target device
-                                    proceed_with_upgrade = True
-
-                                # If we are running in Dry Run mode
-                                else:
-                                    # Log message to console
-                                    upgrade.logger.log_task(
-                                        action="skipped",
-                                        message=f"{each['db_device'].hostname}: Target device is passive, but we are in "
-                                        f"dry-run mode. Skipping HA state suspension.",
-                                    )
-
-                                    # Continue with upgrade process on the passive target device
-                                    proceed_with_upgrade = False
-
-                            # If the current device is in initial HA state
-                            elif (
-                                ha_details["result"]["group"]["local-info"]["state"]
-                                == "initial"
-                            ):
-                                # Log message to console
-                                upgrade.logger.log_task(
-                                    action="report",
-                                    message=f"{each['db_device'].hostname}: Target device is in initial HA state",
-                                )
-
-                                # Continue with upgrade process on the initial target device
-                                proceed_with_upgrade = False
-
-                            # If the current device is in suspended HA state
-                            elif (
-                                ha_details["result"]["group"]["local-info"]["state"]
-                                == "suspended"
-                            ):
-                                # Log message to console
-                                upgrade.logger.log_task(
-                                    action="report",
-                                    message=f"{each['db_device'].hostname}: Target device is in a suspended HA state",
-                                )
-
-                                # Continue with upgrade process on the initial target device
-                                proceed_with_upgrade = False
-
                         # If the firewall is running an older version than its peer devices
-                        elif version_comparison == "older":
-                            # Log message to console
-                            upgrade.logger.log_task(
-                                action="report",
-                                message=f"{each['db_device'].hostname}: Target device is on an older version",
-                            )
-
+                        if (
+                            version_comparison == "older"
+                            or version_comparison == "equal"
+                        ):
                             # Determine if we are running in Dry Run mode
-                            if dry_run:
+                            if not dry_run:
                                 # Log message to console
+                                upgrade.logger.log_task(
+                                    action="start",
+                                    message=f"{each['db_device'].hostname}: Suspending the HA state of device",
+                                )
+
+                                # Suspend HA state of the active device
+                                upgrade.suspend_ha_device(device=each)
+
+                                # Skip the upgrade process for the target device
+                                proceed_with_upgrade = True
+
+                            else:
                                 upgrade.logger.log_task(
                                     action="skipped",
                                     message=f"{each['db_device'].hostname}: Dry run mode enabled. Skipping HA state "
                                     f"suspension.",
                                 )
 
-                                # Skip the upgrade process for the target device
-                                proceed_with_upgrade = False
-
-                            # Non-Dry Run mode will perform our HA state suspension
-                            elif (
-                                ha_details["result"]["group"]["local-info"]["state"]
-                                == "active"
-                                or ha_details["result"]["group"]["local-info"]["state"]
-                                == "active-primary"
-                            ):
-                                # Suspend HA state of active or active-primary
-                                upgrade.logger.log_task(
-                                    action="start",
-                                    message=f"{each['db_device'].hostname}: Suspending the HA state of active or "
-                                    f"active-primary",
-                                )
-
-                                # Suspend HA state of the active device
-                                upgrade.suspend_ha_device(device=each)
-
                                 # Continue with upgrade process on the active target device
-                                proceed_with_upgrade = True
+                                proceed_with_upgrade = False
 
                         # If the firewall is running a newer version than its peer devices
                         elif version_comparison == "newer":
@@ -696,30 +676,16 @@ def main(
                                 message=f"{each['db_device'].hostname}: Target device is on a newer version",
                             )
 
-                            # Continue with upgrade process on the passive target device
-                            proceed_with_upgrade = True
+                            # Passive device is running a newer version than the active peer
+                            proceed_with_upgrade = False
 
-                    # General exception handling for celery task
-                    except WorkerLostError as exc:
-                        # Log the error message
-                        upgrade.logger.log_task(
-                            action="error",
-                            message=f"{each['db_device'].hostname}: Worker lost: {exc}",
-                        )
-
-                        # Return an error status
-                        return "errored"
-
-                    # General exception handling for HA scenarios
-                    except Exception as exc:
-                        # Log the error message
-                        upgrade.logger.log_task(
-                            action="error",
-                            message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
-                        )
-
-                        # Return an error status
-                        return "errored"
+                # General exception handling
+                except Exception as e:
+                    upgrade.logger.log_task(
+                        action="error",
+                        message=f"Error occurred when downloading the targeted upgrade PAN-OS version "
+                        f"{target_version}: {str(e)}",
+                    )
 
                 # Snapshot the firewall device before the upgrade process
                 try:
@@ -791,190 +757,23 @@ def main(
                     # Remove the device from the upgrade list
                     upgrade.upgrade_devices.pop(i)
 
-                # General exception handling for celery task
-                except WorkerLostError as exc:
+                # General exception handling
+                except Exception as e:
                     upgrade.logger.log_task(
                         action="error",
-                        message=f"{each['db_device'].hostname}: Worker lost: {exc}",
+                        message=f"Error occurred when downloading the targeted upgrade PAN-OS version "
+                        f"{target_version}: {str(e)}",
                     )
-                    return "errored"
-
-                # General exception handling for pre-upgrade snapshot process
-                except Exception as exc:
-                    upgrade.logger.log_task(
-                        action="error",
-                        message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
-                    )
-                    return "errored"
 
             # TODO: Readiness Checks
+            # TODO: Upgrade
+            # TODO: Post Upgrade Snapshots
+            # TODO: PDF Report Generation
+            # TODO: Active Firewall Upgrades
 
     except Exception as exc:
         upgrade.logger.log_task(
             action="error",
             message=f"Generated an exception when upgrading the list of passive/secondary devices: {exc}",
-        )
-        return "errored"
-
-    # Perform the upgrade process for the active or active-primary devices
-    try:
-        for i, each in enumerate(upgrade.upgrade_devices):
-            if each["db_device"].local_state in ["active", "active-primary"]:
-                # Check to see if the firewall is ready to upgrade to target version
-                try:
-                    upgrade.logger.log_task(
-                        action="report",
-                        message=f"{each['db_device'].hostname}: Checking to see if a PAN-OS upgrade is available.",
-                    )
-
-                    update_available = upgrade.software_available_check(
-                        device=each,
-                        target_version=target_version,
-                    )
-
-                    # Gracefully exit if the firewall is not ready for an upgrade to target version
-                    if not update_available:
-                        upgrade.logger.log_task(
-                            action="error",
-                            message=f"{each['db_device'].hostname}: Not ready for upgrade to {target_version}.",
-                        )
-                        return "errored"
-
-                # General exception handling for celery task
-                except WorkerLostError as exc:
-                    upgrade.logger.log_task(
-                        action="error",
-                        message=f"{each['db_device'].hostname}: Worker lost: {exc}",
-                    )
-                    return "errored"
-
-                # General exception handling for upgrade evaluation process
-                except Exception as exc:
-                    upgrade.logger.log_task(
-                        action="error",
-                        message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
-                    )
-                    return "errored"
-
-                # Determine if the firewall is part of an HA pair and handle HA scenarios
-                try:
-                    if each["db_device"].ha_enabled:
-                        proceed_with_upgrade = upgrade.handle_firewall_ha(
-                            device=each,
-                            dry_run=dry_run,
-                        )
-
-                        # Gracefully exit the execution if the firewall is not ready for an upgrade to target version
-                        if not proceed_with_upgrade:
-                            upgrade.logger.log_task(
-                                action="error",
-                                message=f"{each['db_device'].hostname}: Switching control to the peer firewall for upgrade",
-                            )
-                            return "errored"
-
-                # General exception handling for celery task
-                except WorkerLostError as exc:
-                    upgrade.logger.log_task(
-                        action="error",
-                        message=f"{each['db_device'].hostname}: Worker lost: {exc}",
-                    )
-                    return "errored"
-
-                # General exception handling for HA scenarios
-                except Exception as exc:
-                    upgrade.logger.log_task(
-                        action="error",
-                        message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
-                    )
-                    return "errored"
-
-                # Make sure the target version is downloaded to the firewall(s)
-                try:
-                    upgrade.logger.log_task(
-                        action="start",
-                        message=f"{each['db_device'].hostname}: Performing test to see if {target_version} is already "
-                        f"downloaded.",
-                    )
-
-                    image_downloaded = PanosUpgrade.software_download(
-                        target_version=target_version,
-                    )
-
-                    if each["db_device"].ha_enabled and image_downloaded:
-                        upgrade.logger.log_task(
-                            action="success",
-                            message=f"{each['db_device'].hostname}: {target_version} has been downloaded and synced to HA "
-                            f"peer.",
-                        )
-                    elif image_downloaded:
-                        upgrade.logger.log_task(
-                            action="success",
-                            message=f"{each['db_device'].hostname}: version {target_version} has been downloaded.",
-                        )
-                    else:
-                        upgrade.logger.log_task(
-                            action="error",
-                            message=f"{each['db_device'].hostname}: Image not downloaded, exiting.",
-                        )
-                        return "errored"
-
-                # General exception handling for celery task
-                except WorkerLostError as exc:
-                    upgrade.logger.log_task(
-                        action="error",
-                        message=f"{each['db_device'].hostname}: Worker lost: {exc}",
-                    )
-                    return "errored"
-
-                # General exception handling for software download process
-                except Exception as exc:
-                    upgrade.logger.log_task(
-                        action="error",
-                        message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
-                    )
-                    return "errored"
-
-                # Perform the pre-upgrade snapshot
-                try:
-                    pre_snapshot = upgrade.perform_snapshot(device=each)
-
-                    upgrade.logger.log_task(
-                        action="report",
-                        message=f"{each['db_device'].hostname}: Pre-upgrade snapshot {pre_snapshot}",
-                    )
-
-                    upgrade.upgrade_devices.pop(i)
-
-                # General exception handling for celery task
-                except WorkerLostError as exc:
-                    upgrade.logger.log_task(
-                        action="error",
-                        message=f"{each['db_device'].hostname}: Worker lost: {exc}",
-                    )
-                    return "errored"
-
-                # General exception handling for pre-upgrade snapshot process
-                except Exception as exc:
-                    upgrade.logger.log_task(
-                        action="error",
-                        message=f"{each['db_device'].hostname}: Generated an exception: {exc}",
-                    )
-                    return "errored"
-
-            # Skip the upgrade process for devices that are suspended
-            elif each["db_device"].local_state in ["suspended"]:
-                upgrade.logger.log_task(
-                    action="report",
-                    message=f"{each['db_device'].hostname}: Device is suspended. Skipping upgrade.",
-                )
-                upgrade.upgrade_devices.pop(i)
-                raise
-
-        return "completed"
-
-    except Exception as exc:
-        upgrade.logger.log_task(
-            action="error",
-            message=f"Generated an exception when upgrading the list of active/primary devices: {exc}",
         )
         return "errored"
