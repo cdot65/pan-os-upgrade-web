@@ -61,7 +61,7 @@ def get_emoji(
     return emoji_map.get(action, "")
 
 
-class UpgradeLogger(logging.Logger):
+class PanOsUpgradeLogger(logging.Logger):
     """
     A custom logger class for logging upgrade-related messages.
 
