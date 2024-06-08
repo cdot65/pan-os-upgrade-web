@@ -1,5 +1,5 @@
 import re
-from typing import Tuple, List
+from typing import Tuple
 
 
 def parse_version(
@@ -110,4 +110,3 @@ def parse_version(
         hotfix = int(hotfix_str)
 
     return major, minor, maintenance, hotfix
-
