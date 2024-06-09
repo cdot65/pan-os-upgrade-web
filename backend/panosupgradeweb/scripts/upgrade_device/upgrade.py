@@ -422,8 +422,8 @@ class PanosUpgrade:
                     f"list.",
                 )
 
+    @staticmethod
     def run_assurance(
-        self,
         device: Device,
         operation_type: str,
     ) -> any:
@@ -477,12 +477,15 @@ class PanosUpgrade:
                 "session_stats": device["profile"].session_stats_snapshot,
             }
 
-            # Validate each type of action
-            for action in actions.keys():
+            # Create a list of action names where the corresponding value is True
+            enabled_actions = [action for action, enabled in actions.items() if enabled]
+
+            # Validate each enabled action
+            for action in enabled_actions:
                 if action not in AssuranceOptions.STATE_SNAPSHOTS.keys():
                     return None
 
-            return checks_firewall.run_snapshots(snapshots_config=actions)
+            return checks_firewall.run_snapshots(snapshots_config=enabled_actions)
 
     @staticmethod
     def software_available_check(
