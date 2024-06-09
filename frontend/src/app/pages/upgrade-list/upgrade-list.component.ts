@@ -100,9 +100,6 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         return false;
     }
 
-    getDevice(deviceId: string): Device | undefined {
-        return this.devices.find((d) => d.uuid === deviceId);
-    }
 
     getDeviceHaProperties(deviceId: string): {
         ha_enabled: boolean;
@@ -133,10 +130,6 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         return device ? device.hostname : "";
     }
 
-    getDeviceSwVersion(deviceId: string): string | null {
-        const device = this.devices.find((d) => d.uuid === deviceId);
-        return device ? device.sw_version : null;
-    }
 
     getDevices(): void {
         this.inventoryService
@@ -161,10 +154,6 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
             );
     }
 
-    getProfileName(profileId: string): string {
-        const profile = this.profiles.find((p) => p.uuid === profileId);
-        return profile ? profile.name : "";
-    }
 
     getProfiles(): void {
         this.profileService
@@ -185,11 +174,6 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
                     );
                 },
             );
-    }
-
-    isDeviceHaEnabled(deviceId: string): boolean {
-        const device = this.devices.find((d) => d.uuid === deviceId);
-        return !!device?.peer_device_id;
     }
 
     ngOnDestroy(): void {
@@ -257,12 +241,6 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         }
     }
 
-    resetForm() {
-        this.step = 0;
-        this.upgradeForm.reset();
-        this.upgradeJobs = [];
-    }
-
     startPollingJobStatus(jobId: string): void {
         const pollingSubject = new Subject<void>();
         this.pollingSubscriptions[jobId] = pollingSubject;
@@ -289,10 +267,6 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
             this.pollingSubscriptions[jobId].complete();
             delete this.pollingSubscriptions[jobId];
         }
-    }
-
-    trackByJobId(index: number, job: UpgradeJob): string {
-        return job.job;
     }
 
     viewJobDetails(jobId: string): void {
