@@ -1,8 +1,6 @@
 # backend/panosupgradeweb/scripts/panos_upgrade/app.py
 import time
 
-from celery.exceptions import WorkerLostError
-
 from panosupgradeweb.models import Device
 from panosupgradeweb.scripts.logger import PanOsUpgradeLogger
 from panosupgradeweb.scripts.utilities import parse_version
@@ -328,7 +326,7 @@ def main(
                                 upgrade.logger.log_task(
                                     action="start",
                                     message=f"{each['db_device'].hostname}: Downloading base image {base_version_key} "
-                                    "for target version {target_version}, will sync to HA peer.",
+                                    f"for target version {target_version}, will sync to HA peer.",
                                 )
 
                             # Non-HA log message for standalone devices
@@ -337,7 +335,7 @@ def main(
                                 upgrade.logger.log_task(
                                     action="start",
                                     message=f"{each['db_device'].hostname}: Downloading base image {base_version_key} "
-                                    "for target version {target_version}.",
+                                    f"for target version {target_version}.",
                                 )
 
                             # Retry loop for downloading the base image
