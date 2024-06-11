@@ -12,7 +12,6 @@ from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
-from rest_framework.serializers import ValidationError
 from rest_framework.views import APIView
 
 # directory object imports
@@ -21,6 +20,7 @@ from .models import (
     Device,
     Job,
     Profile,
+    Snapshot,
 )
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
@@ -32,6 +32,7 @@ from .serializers import (
     JobSerializer,
     JobLogEntrySerializer,
     ProfileSerializer,
+    SnapshotSerializer,
     UserSerializer,
 )
 from .tasks import (
@@ -273,6 +274,43 @@ class DeviceViewSet(viewsets.ModelViewSet):
                 )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SnapshotViewSet(viewsets.ViewSet):
+    def list_by_job(self, request, job_id=None):
+        if job_id:
+            snapshots = Snapshot.objects.filter(job__task_id=job_id)
+            serializer = SnapshotSerializer(snapshots, many=True)
+            return Response(serializer.data)
+        else:
+            return Response(
+                {"error": "Missing job ID."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+    def list_by_device(self, request, device_id=None):
+        if device_id:
+            snapshots = Snapshot.objects.filter(device__uuid=device_id)
+            serializer = SnapshotSerializer(snapshots, many=True)
+            return Response(serializer.data)
+        else:
+            return Response(
+                {"error": "Missing device ID."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+    def retrieve_with_details(self, request, snapshot_id=None):
+        if snapshot_id:
+            try:
+                snapshot = Snapshot.objects.get(id=snapshot_id)
+                serializer = SnapshotSerializer(snapshot)
+                return Response(serializer.data)
+            except Snapshot.DoesNotExist:
+                return Response(
+                    {"error": "Snapshot not found."}, status=status.HTTP_404_NOT_FOUND
+                )
+        else:
+            return Response(
+                {"error": "Missing snapshot ID."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class DeviceTypeViewSet(viewsets.ModelViewSet):
