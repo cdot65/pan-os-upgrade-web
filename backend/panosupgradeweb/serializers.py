@@ -453,19 +453,28 @@ class ProfileSerializer(serializers.ModelSerializer):
 class ContentVersionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContentVersion
-        fields = "__all__"
+        exclude = (
+            "id",
+            "snapshot",
+        )
 
 
 class LicenseSerializer(serializers.ModelSerializer):
     class Meta:
         model = License
-        fields = "__all__"
+        exclude = (
+            "id",
+            "snapshot",
+        )
 
 
 class NetworkInterfaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = NetworkInterface
-        fields = "__all__"
+        exclude = (
+            "id",
+            "snapshot",
+        )
 
 
 class SnapshotSerializer(serializers.ModelSerializer):
@@ -475,4 +484,13 @@ class SnapshotSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Snapshot
-        fields = "__all__"
+        fields = (
+            "uuid",
+            "created_at",
+            "snapshot_type",
+            "job",
+            "device",
+            "content_versions",
+            "licenses",
+            "network_interfaces",
+        )
