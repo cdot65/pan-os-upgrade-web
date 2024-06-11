@@ -373,6 +373,15 @@ class Snapshot(models.Model):
         Device, on_delete=models.CASCADE, related_name="snapshots"
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    snapshot_type = models.CharField(
+        max_length=20,
+        choices=(
+            ("pre_upgrade", "Pre-Upgrade"),
+            ("post_upgrade", "Post-Upgrade"),
+        ),
+        default="pre_upgrade",
+        verbose_name="Snapshot Type",
+    )
 
 
 class ContentVersion(models.Model):
