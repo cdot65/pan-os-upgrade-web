@@ -4,11 +4,15 @@ from dj_rest_auth.serializers import TokenSerializer
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from .models import (
+    ContentVersion,
     Device,
     DeviceType,
     Job,
     JobLogEntry,
+    License,
+    NetworkInterface,
     Profile,
+    Snapshot,
 )
 
 
@@ -444,3 +448,31 @@ class ProfileSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation["authentication"] = self.get_authentication(instance)
         return representation
+
+
+class ContentVersionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContentVersion
+        fields = "__all__"
+
+
+class LicenseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = License
+        fields = "__all__"
+
+
+class NetworkInterfaceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NetworkInterface
+        fields = "__all__"
+
+
+class SnapshotSerializer(serializers.ModelSerializer):
+    content_versions = ContentVersionSerializer(many=True, read_only=True)
+    licenses = LicenseSerializer(many=True, read_only=True)
+    network_interfaces = NetworkInterfaceSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Snapshot
+        fields = "__all__"
