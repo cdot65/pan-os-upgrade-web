@@ -2,9 +2,9 @@
 
 # django imports
 from django.contrib.auth import get_user_model
-from django.http import JsonResponse, Http404
-from django.db.models.functions import Lower, Replace
 from django.db.models import Value as V
+from django.db.models.functions import Lower, Replace
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
 # django rest framework imports
@@ -47,7 +47,8 @@ class DeviceExistsView(APIView):
     A view that returns the existence of an inventory item by name as a boolean.
     """
 
-    def get(self, request, format=None):
+    @staticmethod
+    def get(request):
         raw_inventory_hostname = request.GET.get("hostname", None)
         if raw_inventory_hostname is not None:
             formatted_inventory_hostname = (
@@ -277,40 +278,45 @@ class DeviceViewSet(viewsets.ModelViewSet):
 
 
 class SnapshotViewSet(viewsets.ViewSet):
+    @staticmethod
+    def list(request):
+        snapshots = Snapshot.objects.all()
+        serializer = SnapshotSerializer(snapshots, many=True)
+        return Response(serializer.data)
+
+    @staticmethod
+    def retrieve(request, pk=None):
+        try:
+            snapshot = Snapshot.objects.get(pk=pk)
+            serializer = SnapshotSerializer(snapshot)
+            return Response(serializer.data)
+        except Snapshot.DoesNotExist:
+            return Response(
+                {"error": "Snapshot not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+    @staticmethod
+    def retrieve_with_details(request, pk=None):
+        try:
+            snapshot = Snapshot.objects.get(pk=pk)
+            serializer = SnapshotSerializer(snapshot)
+            return Response(serializer.data)
+        except Snapshot.DoesNotExist:
+            return Response(
+                {"error": "Snapshot not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(detail=False, methods=["get"], url_path="job/(?P<job_id>[^/.]+)")
     def list_by_job(self, request, job_id=None):
-        if job_id:
-            snapshots = Snapshot.objects.filter(job__task_id=job_id)
-            serializer = SnapshotSerializer(snapshots, many=True)
-            return Response(serializer.data)
-        else:
-            return Response(
-                {"error": "Missing job ID."}, status=status.HTTP_400_BAD_REQUEST
-            )
+        snapshots = Snapshot.objects.filter(job__task_id=job_id)
+        serializer = SnapshotSerializer(snapshots, many=True)
+        return Response(serializer.data)
 
+    @action(detail=False, methods=["get"], url_path="device/(?P<device_id>[^/.]+)")
     def list_by_device(self, request, device_id=None):
-        if device_id:
-            snapshots = Snapshot.objects.filter(device__uuid=device_id)
-            serializer = SnapshotSerializer(snapshots, many=True)
-            return Response(serializer.data)
-        else:
-            return Response(
-                {"error": "Missing device ID."}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-    def retrieve_with_details(self, request, snapshot_id=None):
-        if snapshot_id:
-            try:
-                snapshot = Snapshot.objects.get(id=snapshot_id)
-                serializer = SnapshotSerializer(snapshot)
-                return Response(serializer.data)
-            except Snapshot.DoesNotExist:
-                return Response(
-                    {"error": "Snapshot not found."}, status=status.HTTP_404_NOT_FOUND
-                )
-        else:
-            return Response(
-                {"error": "Missing snapshot ID."}, status=status.HTTP_400_BAD_REQUEST
-            )
+        snapshots = Snapshot.objects.filter(device__uuid=device_id)
+        serializer = SnapshotSerializer(snapshots, many=True)
+        return Response(serializer.data)
 
 
 class DeviceTypeViewSet(viewsets.ModelViewSet):
@@ -341,7 +347,7 @@ class JobViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def retrieve(self, request, pk=None, format=None):
+    def retrieve(self, request, pk=None, **kwargs):
         instance = self.get_object()
         response_data = {
             "task_id": instance.task_id,
@@ -357,14 +363,15 @@ class JobViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def logs(self, request, pk=None):
-        job = self.get_object()
+        job = self.get_queryset().get(pk=pk)
         log_entries = job.log_entries.all()
         serializer = JobLogEntrySerializer(log_entries, many=True)
         return Response(serializer.data)
 
 
 class JobLogViewSet(viewsets.ViewSet):
-    def list(self, request, job_id):
+    @staticmethod
+    def list(request, job_id):
         job = get_object_or_404(Job, task_id=job_id)
         log_entries = job.log_entries.all()
 
