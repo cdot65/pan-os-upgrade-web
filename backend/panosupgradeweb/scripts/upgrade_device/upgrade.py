@@ -15,7 +15,15 @@ from pan_os_upgrade.components.utilities import flatten_xml_to_dict
 from pan_os_upgrade.components.assurance import AssuranceOptions
 
 # pan-os-upgrade-web imports
-from panosupgradeweb.models import Device, Profile
+from panosupgradeweb.models import (
+    ContentVersion,
+    Device,
+    Job,
+    License,
+    NetworkInterface,
+    Profile,
+    Snapshot,
+)
 from panosupgradeweb.scripts.logger import PanOsUpgradeLogger
 
 
@@ -485,8 +493,121 @@ class PanosUpgrade:
             # Flatten the XML to a dictionary if HA details are available
             self.ha_details = flatten_xml_to_dict(element=deployment_type[1])
 
-    @staticmethod
+    # def perform_readiness_checks(
+    #     file_path: str,
+    #     firewall: Firewall,
+    #     hostname: str,
+    #     settings_file_path: Path,
+    # ) -> None:
+    #     """
+    #     Conducts a set of predefined readiness checks on a specified Palo Alto Networks Firewall to verify its
+    #     preparedness for an upgrade operation.
+    #
+    #     This function systematically executes a series of checks on the specified firewall, evaluating various
+    #     aspects such as configuration status, licensing validity, software version compatibility, and more, to
+    #     ascertain its readiness for an upgrade. The outcomes of these checks are meticulously compiled into a
+    #     detailed JSON report, which is then saved to the specified file path. The scope of checks performed can
+    #     be tailored through configurations in the `settings.yaml` file, providing the flexibility to adapt the
+    #     checks to specific operational needs or preferences.
+    #
+    #     Parameters
+    #     ----------
+    #     firewall : Firewall
+    #         An instance of the Firewall class, properly initialized with necessary authentication details and
+    #         network connectivity to the target firewall device.
+    #     hostname : str
+    #         A string representing the hostname or IP address of the firewall, utilized for logging and
+    #         identification purposes within the process.
+    #     file_path : str
+    #         The designated file path where the JSON-formatted report summarizing the results of the readiness
+    #         checks will be stored. The function ensures the existence of the specified directory, creating it
+    #         if necessary.
+    #
+    #     Raises
+    #     ------
+    #     IOError
+    #         Signals an issue with writing the readiness report to the specified file path, potentially due to
+    #         file access restrictions or insufficient disk space, warranting further investigation.
+    #
+    #     Examples
+    #     --------
+    #     Executing readiness checks for a firewall and saving the results:
+    #         >>> firewall_instance = Firewall(hostname='192.168.1.1', api_username='admin', api_password='admin')
+    #         >>> perform_readiness_checks(firewall_instance, 'firewall1', '/path/to/firewall1_readiness_report.json')
+    #         # This command initiates the readiness checks on the specified firewall and saves the generated report
+    #         # to the given file path.
+    #
+    #     Notes
+    #     -----
+    #     - The execution of readiness checks is a pivotal preliminary step in the upgrade process, designed to
+    #       uncover and address potential impediments, thereby facilitating a seamless and successful upgrade.
+    #     - The set of checks to be conducted can be customized via the `settings.yaml` file. If this file is
+    #       present and contains specific configurations under the `readiness_checks.customize` key, those
+    #       configurations will dictate the checks to be performed. In the absence of such custom configurations,
+    #       a default set of checks, determined by the `enabled_by_default` attribute within the AssuranceOptions
+    #       class, will be applied.
+    #     """
+    #
+    #     # Load settings if the file exists
+    #     if settings_file_path.exists():
+    #         with open(settings_file_path, "r") as file:
+    #             settings = yaml.safe_load(file)
+    #
+    #         # Determine readiness checks to perform based on settings
+    #         if settings.get("readiness_checks", {}).get("customize", False):
+    #             # Extract checks where value is True
+    #             selected_checks = [
+    #                 check
+    #                 for check, enabled in settings.get("readiness_checks", {})
+    #                 .get("checks", {})
+    #                 .items()
+    #                 if enabled
+    #             ]
+    #         else:
+    #             # Select checks based on 'enabled_by_default' attribute from AssuranceOptions class
+    #             selected_checks = [
+    #                 check
+    #                 for check, attrs in AssuranceOptions.READINESS_CHECKS.items()
+    #                 if attrs.get("enabled_by_default", False)
+    #             ]
+    #     else:
+    #         # Select checks based on 'enabled_by_default' attribute from AssuranceOptions class
+    #         selected_checks = [
+    #             check
+    #             for check, attrs in AssuranceOptions.READINESS_CHECKS.items()
+    #             if attrs.get("enabled_by_default", False)
+    #         ]
+    #
+    #
+    #     readiness_check = run_assurance(
+    #         actions=selected_checks,
+    #         firewall=firewall,
+    #         hostname=hostname,
+    #         operation_type="readiness_check",
+    #     )
+    #
+    #     # Check if a readiness check was successfully created
+    #     if isinstance(readiness_check, ReadinessCheckReport):
+    #         logging.info(
+    #             f"{get_emoji(action='success')} {hostname}: Readiness Checks completed"
+    #         )
+    #         readiness_check_report_json = readiness_check.model_dump_json(indent=4)
+    #         logging.debug(
+    #             f"{get_emoji(action='save')} {hostname}: Readiness Check Report: {readiness_check_report_json}"
+    #         )
+    #
+    #         ensure_directory_exists(file_path=file_path)
+    #
+    #         with open(file_path, "w") as file:
+    #             file.write(readiness_check_report_json)
+    #
+    #     else:
+    #         logging.error(
+    #             f"{get_emoji(action='error')} {hostname}: Failed to create readiness check"
+    #         )
+
     def run_assurance(
+        self,
         device: Dict,
         operation_type: str,
     ) -> any:
@@ -551,7 +672,92 @@ class PanosUpgrade:
                 if action not in AssuranceOptions.STATE_SNAPSHOTS.keys():
                     return None
 
-            return checks_firewall.run_snapshots(snapshots_config=enabled_actions)
+            # Run the snapshots using CheckFirewall
+            self.logger.log_task(
+                action="working",
+                message=f"{device['db_device'].hostname}: Running snapshots using CheckFirewall",
+            )
+            snapshot_results = checks_firewall.run_snapshots(
+                snapshots_config=enabled_actions
+            )
+
+            if snapshot_results:
+                try:
+                    # Retrieve the Job object using the job_id
+                    job = Job.objects.get(task_id=self.job_id)
+
+                    # Create a new Snapshot instance and associate it with the job and device
+                    snapshot = Snapshot.objects.create(
+                        job=job,
+                        device=device["db_device"],
+                    )
+
+                    # Create a new ContentVersion instance if the content version is available
+                    if "content_version" in snapshot_results:
+                        ContentVersion.objects.create(
+                            snapshot=snapshot,
+                            version=snapshot_results["content_version"]["version"],
+                        )
+
+                    # Create License instances for each license in the snapshot results
+                    if "license" in snapshot_results:
+                        for license_name, license_data in snapshot_results[
+                            "license"
+                        ].items():
+                            base_license_name = license_data.get(
+                                "base-license-name", ""
+                            )  # Use an empty string as default if the field is missing
+                            License.objects.create(
+                                snapshot=snapshot,
+                                feature=license_data["feature"],
+                                description=license_data["description"],
+                                serial=license_data["serial"],
+                                issued=license_data["issued"],
+                                expires=license_data["expires"],
+                                expired=license_data["expired"],
+                                base_license_name=base_license_name,
+                                authcode=license_data["authcode"],
+                                custom=license_data.get("custom"),
+                            )
+
+                    # Create NetworkInterface instances for each network interface in the snapshot results
+                    if "nics" in snapshot_results:
+                        for nic_name, nic_status in snapshot_results["nics"].items():
+                            NetworkInterface.objects.create(
+                                snapshot=snapshot,
+                                name=nic_name,
+                                status=nic_status,
+                            )
+
+                    self.logger.log_task(
+                        action="success",
+                        message=f"{device['db_device'].hostname}: Snapshot creation completed successfully",
+                    )
+                    return snapshot_results
+
+                except Job.DoesNotExist:
+                    # Log an error message
+                    self.logger.log_task(
+                        action="error",
+                        message=f"{device['db_device'].hostname}: Job with ID {self.job_id} does not exist",
+                    )
+
+                    # Return None to indicate that the snapshot creation failed
+                    return None
+
+                except Exception as e:
+                    # Log the error message
+                    self.logger.log_task(
+                        action="error",
+                        message=f"{device['db_device'].hostname}: Error creating snapshot: {str(e)}",
+                    )
+
+                    # Return None to indicate that the snapshot creation failed
+                    return None
+
+            else:
+                # Log the error and return None
+                return None
 
     @staticmethod
     def software_available_check(
