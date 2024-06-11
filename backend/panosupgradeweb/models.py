@@ -368,6 +368,7 @@ class Profile(models.Model):
 
 
 class Snapshot(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="snapshots")
     device = models.ForeignKey(
         Device, on_delete=models.CASCADE, related_name="snapshots"
@@ -385,8 +386,8 @@ class Snapshot(models.Model):
 
 
 class ContentVersion(models.Model):
-    snapshot = models.OneToOneField(
-        Snapshot, on_delete=models.CASCADE, related_name="content_version"
+    snapshot = models.ForeignKey(
+        Snapshot, on_delete=models.CASCADE, related_name="content_versions"
     )
     version = models.CharField(max_length=100)
 
