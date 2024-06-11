@@ -690,6 +690,7 @@ class PanosUpgrade:
                     snapshot = Snapshot.objects.create(
                         job=job,
                         device=device["db_device"],
+                        snapshot_type="pre_upgrade",
                     )
 
                     # Create a new ContentVersion instance if the content version is available
