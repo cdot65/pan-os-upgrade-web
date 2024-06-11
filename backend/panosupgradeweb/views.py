@@ -287,7 +287,7 @@ class SnapshotViewSet(viewsets.ViewSet):
     @staticmethod
     def retrieve(request, pk=None):
         try:
-            snapshot = Snapshot.objects.get(pk=pk)
+            snapshot = Snapshot.objects.get(uuid=pk)
             serializer = SnapshotSerializer(snapshot)
             return Response(serializer.data)
         except Snapshot.DoesNotExist:
@@ -298,7 +298,7 @@ class SnapshotViewSet(viewsets.ViewSet):
     @staticmethod
     def retrieve_with_details(request, pk=None):
         try:
-            snapshot = Snapshot.objects.get(pk=pk)
+            snapshot = Snapshot.objects.get(uuid=pk)
             serializer = SnapshotSerializer(snapshot)
             return Response(serializer.data)
         except Snapshot.DoesNotExist:
