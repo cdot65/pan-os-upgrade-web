@@ -10,7 +10,7 @@ from .views import (
     ProfileViewSet,
     UserViewSet,
     UserProfileView,
-    JobLogViewSet,
+    SnapshotViewSet,
 )
 
 router = SimpleRouter()
@@ -95,6 +95,21 @@ urlpatterns = [
         "jobs/<str:pk>/logs/",
         JobViewSet.as_view({"get": "logs"}),
         name="job-logs",
+    ),
+    path(
+        "snapshots/<int:snapshot_id>/details/",
+        SnapshotViewSet.as_view({"get": "retrieve_with_details"}),
+        name="snapshot-details",
+    ),
+    path(
+        "snapshots/job/<str:job_id>/",
+        SnapshotViewSet.as_view({"get": "list_by_job"}),
+        name="snapshots-by-job",
+    ),
+    path(
+        "snapshots/device/<str:device_id>/",
+        SnapshotViewSet.as_view({"get": "list_by_device"}),
+        name="snapshots-by-device",
     ),
 ]
 
