@@ -579,7 +579,6 @@ def main(
     # firewall appliances
     try:
         if targeted_device["db_device"].ha_enabled:
-
             # If the current device is in suspended HA state
             if (
                 upgrade_job.ha_details["result"]["group"]["local-info"]["state"]
@@ -684,9 +683,6 @@ def main(
                         f"suspension.",
                     )
 
-                    # Return "errored", gracefully exiting the upgrade's execution
-                    return "errored"
-
             # If the firewall is running a newer version than its peer devices
             elif version_comparison == "newer":
                 # Log message to console
@@ -708,7 +704,6 @@ def main(
 
     # Snapshot the firewall device before the upgrade process
     try:
-
         # Log the start of the snapshot process
         upgrade_job.logger.log_task(
             action="start",
@@ -777,7 +772,6 @@ def main(
             message=f"Error occurred when performing the snapshot of the network state of device: {str(e)} ",
         )
 
-    # TODO: Readiness Checks
     # TODO: Upgrade
     # TODO: Post Upgrade Snapshots
     # TODO: PDF Report Generation
