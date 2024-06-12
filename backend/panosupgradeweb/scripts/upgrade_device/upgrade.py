@@ -610,7 +610,7 @@ class PanosUpgrade:
         self,
         device: Dict,
         operation_type: str,
-    ) -> any:
+    ) -> bool:
         """
         Run assurance checks or snapshots on a firewall device.
 
@@ -626,9 +626,7 @@ class PanosUpgrade:
                 - "state_snapshot": Take snapshots of various firewall states.
 
         Returns:
-            any: The results of the assurance operation, depending on the operation_type:
-                - "state_snapshot": Returns a dictionary containing the snapshot results.
-                - Other operation types: Returns None.
+            bool: True if operation succeeded, False otherwise.
 
         Raises:
             None
@@ -670,7 +668,7 @@ class PanosUpgrade:
             # Validate each enabled action
             for action in enabled_actions:
                 if action not in AssuranceOptions.STATE_SNAPSHOTS.keys():
-                    return None
+                    return False
 
             # Run the snapshots using CheckFirewall
             self.logger.log_task(
@@ -734,7 +732,6 @@ class PanosUpgrade:
                         action="success",
                         message=f"{device['db_device'].hostname}: Snapshot creation completed successfully",
                     )
-                    return snapshot_results
 
                 except Job.DoesNotExist:
                     # Log an error message
@@ -744,7 +741,7 @@ class PanosUpgrade:
                     )
 
                     # Return None to indicate that the snapshot creation failed
-                    return None
+                    return False
 
                 except Exception as e:
                     # Log the error message
@@ -754,11 +751,11 @@ class PanosUpgrade:
                     )
 
                     # Return None to indicate that the snapshot creation failed
-                    return None
+                    return False
 
             else:
                 # Log the error and return None
-                return None
+                return False
 
     @staticmethod
     def software_available_check(
