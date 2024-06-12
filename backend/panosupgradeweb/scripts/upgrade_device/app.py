@@ -719,7 +719,7 @@ def main(
             # Make a snapshot attempt
             try:
                 # Execute the snapshot operation
-                pre_snapshot = upgrade_job.run_assurance(
+                pre_snapshot_success = upgrade_job.run_assurance(
                     device=targeted_device,
                     operation_type="state_snapshot",
                 )
