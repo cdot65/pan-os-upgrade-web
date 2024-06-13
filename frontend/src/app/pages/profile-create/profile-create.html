@@ -93,40 +93,40 @@
                     <div class="form-field">
                         <div formGroupName="checks">
                             <!-- Checkbox for checking if active support is available -->
-                            <mat-checkbox formControlName="active_support_check"
+                            <mat-checkbox formControlName="active_support"
                                 >Check if active support is
                                 available</mat-checkbox
                             >
 
                             <!-- Checkbox for checking if a given ARP entry is available in the ARP table -->
                             <mat-checkbox
-                                formControlName="arp_entry_exist_check"
+                                formControlName="arp_entry_exist"
                                 >Check if a given ARP entry is available in the
                                 ARP table</mat-checkbox
                             >
 
                             <!-- Checkbox for checking if there are pending changes on the device -->
                             <mat-checkbox
-                                formControlName="candidate_config_check"
+                                formControlName="candidate_config"
                                 >Check if there are pending changes on device
                             </mat-checkbox>
 
                             <!-- Checkbox for checking if the certificates' keys meet minimum size requirements -->
                             <mat-checkbox
-                                formControlName="certificates_requirements_check"
+                                formControlName="certificates_requirements"
                                 >Check if the certificates' keys meet minimum
                                 size requirements</mat-checkbox
                             >
 
                             <!-- Checkbox for checking if running the latest content version -->
                             <mat-checkbox
-                                formControlName="content_version_check"
+                                formControlName="content_version"
                                 >Running Latest Content Version</mat-checkbox
                             >
 
                             <!-- Checkbox for checking if any Dynamic Update job is scheduled to run within the specified time window -->
                             <mat-checkbox
-                                formControlName="dynamic_updates_check"
+                                formControlName="dynamic_updates"
                                 >Check if any Dynamic Update job is scheduled to
                                 run within the specified time
                                 window</mat-checkbox
@@ -134,56 +134,56 @@
 
                             <!-- Checkbox for checking if there are no expired licenses -->
                             <mat-checkbox
-                                formControlName="expired_licenses_check"
+                                formControlName="expired_licenses"
                                 >No Expired Licenses</mat-checkbox
                             >
 
                             <!-- Checkbox for checking if there is enough space on the `/opt/panrepo` volume for PAN-OS image -->
                             <mat-checkbox
-                                formControlName="free_disk_space_check"
+                                formControlName="free_disk_space"
                                 >Check if there is enough space on the
                                 `/opt/panrepo` volume for PAN-OS
                                 image</mat-checkbox
                             >
 
                             <!-- Checkbox for checking the HA pair status from the perspective of the current device -->
-                            <mat-checkbox formControlName="ha_check"
+                            <mat-checkbox formControlName="ha"
                                 >Check HA pair status from the perspective of
                                 the current device
                             </mat-checkbox>
 
                             <!-- Checkbox for checking if a given IPsec tunnel is in active state -->
                             <mat-checkbox
-                                formControlName="ip_sec_tunnel_status_check"
+                                formControlName="ip_sec_tunnel_status"
                                 >Check if a given IPsec tunnel is in active
                                 state</mat-checkbox
                             >
 
                             <!-- Checkbox for checking for any job with status different than FIN -->
-                            <mat-checkbox formControlName="jobs_check"
+                            <mat-checkbox formControlName="jobs"
                                 >Check for any job with status different than
                                 FIN</mat-checkbox
                             >
 
                             <!-- Checkbox for checking if NTP is synchronized -->
-                            <mat-checkbox formControlName="ntp_sync_check"
+                            <mat-checkbox formControlName="ntp_sync"
                                 >Check if NTP is synchronized</mat-checkbox
                             >
 
                             <!-- Checkbox for checking connectivity with the Panorama appliance -->
-                            <mat-checkbox formControlName="panorama_check"
+                            <mat-checkbox formControlName="panorama"
                                 >Check connectivity with the Panorama appliance
                             </mat-checkbox>
 
                             <!-- Checkbox for checking if the clock is synchronized between dataplane and management plane -->
                             <mat-checkbox
-                                formControlName="planes_clock_sync_check"
+                                formControlName="planes_clock_sync"
                                 >Check if the clock is synchronized between
                                 dataplane and management plane</mat-checkbox
                             >
 
                             <!-- Checkbox for checking if a critical session is present in the sessions table -->
-                            <mat-checkbox formControlName="session_exist_check"
+                            <mat-checkbox formControlName="session_exist"
                                 >Check if a critical session is present in the
                                 sessions table</mat-checkbox
                             >
