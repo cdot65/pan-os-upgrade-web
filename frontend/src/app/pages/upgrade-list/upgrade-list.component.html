@@ -74,112 +74,110 @@
                     <mat-radio-group formControlName="dry_run">
                         <mat-radio-button [value]="true">True</mat-radio-button>
                         <mat-radio-button [value]="false"
-                            >False</mat-radio-button
+                        >False
+                        </mat-radio-button
                         >
                     </mat-radio-group>
                 </div>
             </div>
 
-            <mat-divider></mat-divider>
+        </form>
 
-            <h3>Selected Devices</h3>
-            <div class="selected-devices">
-                @for (
-                    deviceId of upgradeForm.get("devices")?.value;
-                    track deviceId
-                ) {
-                    <mat-card class="device-card">
-                        <mat-card-header class="table-header">
-                            <mat-card-title>{{
+        <mat-divider></mat-divider>
+
+        <h3>Selected Devices</h3>
+        <div class="selected-devices">
+            @for (deviceId of upgradeForm.get("devices")?.value;
+                track deviceId) {
+                <mat-card class="device-card">
+                    <mat-card-header class="table-header">
+                        <mat-card-title>{{
                                 getDeviceHostname(deviceId)
-                            }}</mat-card-title>
-                        </mat-card-header>
-                        <mat-card-content>
-                            <!-- container for the upgrade status. -->
-                            @if (upgradeJobs.length > 0) {
-                                @for (job of upgradeJobs; track job) {
-                                    @if (
-                                        job.hostname ===
-                                        getDeviceHostname(deviceId)
-                                    ) {
-                                        <div>
-                                            <ul>
-                                                <li>Job ID: {{ job.job }}</li>
-                                                <li>
-                                                    Status:
-                                                    {{ jobStatuses[job.job] }}
-                                                </li>
-                                            </ul>
-                                            <div class="refresh-progress">
-                                                @if (
-                                                    jobStatuses[job.job] ===
-                                                        "completed" ||
-                                                    jobStatuses[job.job] ===
-                                                        "skipped"
-                                                ) {
-                                                    <mat-icon
-                                                        >check_circle</mat-icon
-                                                    >
-                                                } @else if (
-                                                    jobStatuses[job.job] ===
-                                                    "errored"
-                                                ) {
-                                                    <mat-icon
-                                                        >error_outline</mat-icon
-                                                    >
-                                                } @else {
-                                                    <mat-progress-bar
-                                                        mode="buffer"
-                                                    ></mat-progress-bar>
-                                                }
-                                            </div>
-                                            <div class="button-container">
-                                                <button
-                                                    mat-raised-button
-                                                    color="accent"
-                                                    (click)="
+                            }}
+                        </mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <!-- container for the upgrade status. -->
+                        @if (upgradeJobs.length > 0) {
+                            @for (job of upgradeJobs; track job) {
+                                @if (job.hostname ===
+                                getDeviceHostname(deviceId)) {
+                                    <div>
+                                        <ul>
+                                            <li>Job ID: {{ job.job }}</li>
+                                            <li>
+                                                Status:
+                                                {{ jobStatuses[job.job] }}
+                                            </li>
+                                        </ul>
+                                        <div class="refresh-progress">
+                                            @if (jobStatuses[job.job] ===
+                                            "completed" ||
+                                            jobStatuses[job.job] ===
+                                            "skipped") {
+                                                <mat-icon
+                                                >check_circle
+                                                </mat-icon
+                                                >
+                                            } @else if (jobStatuses[job.job] ===
+                                            "errored") {
+                                                <mat-icon
+                                                >error_outline
+                                                </mat-icon
+                                                >
+                                            } @else {
+                                                <mat-progress-bar
+                                                    mode="buffer"
+                                                ></mat-progress-bar>
+                                            }
+                                        </div>
+                                        <div class="button-container">
+                                            <button
+                                                mat-raised-button
+                                                color="accent"
+                                                (click)="
                                                         viewJobDetails(job.job)
                                                     "
+                                            >
+                                                <mat-icon
+                                                >description
+                                                </mat-icon
                                                 >
-                                                    <mat-icon
-                                                        >description</mat-icon
-                                                    >
-                                                    View Job Details
-                                                </button>
-                                            </div>
+                                                View Job Details
+                                            </button>
                                         </div>
-                                    }
+                                    </div>
                                 }
                             }
-                            <mat-divider></mat-divider>
-                            <h4>High Availability</h4>
-                            <ul>
-                                <li>
-                                    Local State:
-                                    {{
-                                        getDeviceHaProperties(deviceId)
-                                            .local_state
-                                    }}
-                                </li>
-                                <li>
-                                    Peer State:
-                                    {{
-                                        getDeviceHaProperties(deviceId)
-                                            .peer_state
-                                    }}
-                                </li>
-                            </ul>
-                            @if (!checkDeviceEligibility(deviceId)) {
-                                <div class="warning-message">
-                                    This is the primary firewall in an HA pair,
-                                    its upgrade will only be performed through
-                                    the HA peer's upgrade job.
-                                </div>
-                            }
-                        </mat-card-content>
-                    </mat-card>
-                }
-            </div>
-        </form>
+                        }
+                        <mat-divider></mat-divider>
+                        <h4>High Availability</h4>
+                        <ul>
+                            <li>
+                                Local State:
+                                {{
+                                    getDeviceHaProperties(deviceId)
+                                        .local_state
+                                }}
+                            </li>
+                            <li>
+                                Peer State:
+                                {{
+                                    getDeviceHaProperties(deviceId)
+                                        .peer_state
+                                }}
+                            </li>
+                        </ul>
+                        @if (!checkDeviceEligibility(deviceId)) {
+                            <div class="warning-message">
+                                This is the primary firewall in an HA pair,
+                                its upgrade will only be performed through
+                                the HA peer's upgrade job.
+                            </div>
+                        }
+                    </mat-card-content>
+                </mat-card>
+            }
+        </div>
     </main>
 </div>

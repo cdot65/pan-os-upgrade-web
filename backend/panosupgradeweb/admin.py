@@ -1,10 +1,8 @@
 from django.contrib import admin
-from .models import (
-    Device,
-    DeviceType,
-    Job,
-    Profile,
-)
+from .models.devices import Device, DeviceType
+from .models.jobs import Job, JobLogEntry
+from .models.profiles import Profile
+from .models.snapshots import Snapshot, ContentVersion, License, NetworkInterface
 
 
 class DeviceAdmin(admin.ModelAdmin):
@@ -60,6 +58,17 @@ class JobAdmin(admin.ModelAdmin):
     search_fields = ("job_type", "author")
 
 
+class JobLogEntryAdmin(admin.ModelAdmin):
+    list_display = (
+        "job",
+        "timestamp",
+        "severity_level",
+        "message",
+    )
+    list_filter = ("job", "severity_level")
+    search_fields = ("job__task_id", "message")
+
+
 class ProfileAdmin(admin.ModelAdmin):
     list_display = (
         "name",
@@ -70,7 +79,55 @@ class ProfileAdmin(admin.ModelAdmin):
     search_fields = ("name", "uuid", "description")
 
 
+class SnapshotAdmin(admin.ModelAdmin):
+    list_display = (
+        "uuid",
+        "job",
+        "device",
+        "created_at",
+        "snapshot_type",
+    )
+    list_filter = ("job", "device", "snapshot_type")
+    search_fields = ("uuid", "job__task_id", "device__hostname")
+
+
+class ContentVersionAdmin(admin.ModelAdmin):
+    list_display = (
+        "snapshot",
+        "version",
+    )
+    search_fields = ("snapshot__uuid", "version")
+
+
+class LicenseAdmin(admin.ModelAdmin):
+    list_display = (
+        "snapshot",
+        "feature",
+        "serial",
+        "issued",
+        "expires",
+        "expired",
+    )
+    list_filter = ("expired",)
+    search_fields = ("snapshot__uuid", "feature", "serial")
+
+
+class NetworkInterfaceAdmin(admin.ModelAdmin):
+    list_display = (
+        "snapshot",
+        "name",
+        "status",
+    )
+    list_filter = ("status",)
+    search_fields = ("snapshot__uuid", "name")
+
+
 admin.site.register(Device, DeviceAdmin)
 admin.site.register(DeviceType, DeviceTypeAdmin)
 admin.site.register(Job, JobAdmin)
+admin.site.register(JobLogEntry, JobLogEntryAdmin)
 admin.site.register(Profile, ProfileAdmin)
+admin.site.register(Snapshot, SnapshotAdmin)
+admin.site.register(ContentVersion, ContentVersionAdmin)
+admin.site.register(License, LicenseAdmin)
+admin.site.register(NetworkInterface, NetworkInterfaceAdmin)

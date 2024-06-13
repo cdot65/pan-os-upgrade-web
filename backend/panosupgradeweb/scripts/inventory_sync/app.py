@@ -3,7 +3,10 @@ from panos.firewall import Firewall
 from panos.panorama import Panorama
 
 from panosupgradeweb.scripts.logger import PanOsUpgradeLogger
-from panosupgradeweb.scripts.utilities import find_devicegroup_by_serial, flatten_xml_to_dict
+from panosupgradeweb.scripts.utilities import (
+    find_devicegroup_by_serial,
+    flatten_xml_to_dict,
+)
 
 # import our Django models
 from panosupgradeweb.models import (
