@@ -10,7 +10,7 @@ from .views import (
     ProfileViewSet,
     UserViewSet,
     UserProfileView,
-    JobLogViewSet,
+    SnapshotViewSet,
 )
 
 router = SimpleRouter()
@@ -36,6 +36,12 @@ router.register(
     "users",
     UserViewSet,
     basename="users",
+)
+
+router.register(
+    "snapshots",
+    SnapshotViewSet,
+    basename="snapshots",
 )
 
 urlpatterns = [
@@ -90,11 +96,6 @@ urlpatterns = [
         "inventory/exists",
         DeviceExistsView.as_view(),
         name="inventory_exists",
-    ),
-    path(
-        "jobs/<str:pk>/logs/",
-        JobViewSet.as_view({"get": "logs"}),
-        name="job-logs",
     ),
 ]
 

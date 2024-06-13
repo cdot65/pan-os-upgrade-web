@@ -62,9 +62,5 @@ backend/.env
 backend/staticfiles/
 backend/media/profile_images/**
 backend/panosupgradeweb/migrations/**
+backend/panosupgradeweb/scripts/upgrade_device/run_local.py.example
 backend/packages/*.whl
-**.ai
-llm.md
-
-saute/
-.vscode/settings.json

@@ -6,7 +6,7 @@ from panosupgradeweb.models import Job, JobLogEntry
 
 
 def get_emoji(
-        action: str,
+    action: str,
 ) -> str:
     """
     Maps specific action keywords to their corresponding emoji symbols for enhanced log and user interface messages.
