@@ -738,7 +738,7 @@ def main(
                     # Log the snapshot success message
                     upgrade_job.logger.log_task(
                         action="save",
-                        message=f"{targeted_device['db_device'].hostname}: Snapshot successfully created.",
+                        message=f"{targeted_device['db_device'].hostname}: Pre Upgrade snapshot successfully created.",
                     )
 
             # Catch specific and general exceptions
@@ -851,7 +851,7 @@ def main(
             # Log the message to the console
             upgrade_job.logger.log_task(
                 action="error",
-                message=f"{targeted_device['db_device'].hostname}: Snapshot failed to complete successfully, "
+                message=f"{targeted_device['db_device'].hostname}: Readiness checks failed to complete successfully, "
                 f"halting the upgrade to {targeted_device['db_device'].sw_version}.",
             )
 
@@ -859,10 +859,10 @@ def main(
             return "errored"
 
         else:
-            # Log the snapshot success message
+            # Log the readiness checks success message
             upgrade_job.logger.log_task(
                 action="save",
-                message=f"{targeted_device['db_device'].hostname}: Snapshot successfully created.",
+                message=f"{targeted_device['db_device'].hostname}: Readiness checks successfully completed.",
             )
 
     # General exception handling
@@ -873,6 +873,81 @@ def main(
         )
 
     # TODO: Upgrade
-    # TODO: Post Upgrade Snapshots
+
+    # Snapshot the firewall device after the upgrade process
+    try:
+        # Log the start of the snapshot process
+        upgrade_job.logger.log_task(
+            action="start",
+            message=f"{targeted_device['db_device'].hostname}: Performing snapshot of network state information.",
+        )
+
+        # Attempt to take the pre-upgrade snapshot
+        attempt = 0
+        while attempt < upgrade_job.max_retries and upgrade_job.post_snapshot is None:
+            # Make a snapshot attempt
+            try:
+                # Execute the snapshot operation
+                upgrade_job.run_assurance(
+                    device=targeted_device,
+                    operation_type="state_snapshot",
+                    snapshot_type="post_upgrade",
+                )
+
+                # Gracefully exit if the firewall does not require an upgrade to target version
+                if upgrade_job.stop_upgrade_workflow:
+                    # Log the message to the console
+                    upgrade_job.logger.log_task(
+                        action="error",
+                        message=f"{targeted_device['db_device'].hostname}: Snapshot failed to complete successfully, "
+                        f"halting the upgrade to {targeted_device['db_device'].sw_version}.",
+                    )
+
+                    # Return an error status
+                    return "errored"
+
+                else:
+                    # Log the snapshot success message
+                    upgrade_job.logger.log_task(
+                        action="save",
+                        message=f"{targeted_device['db_device'].hostname}: Post Upgrade snapshot successfully created.",
+                    )
+
+            # Catch specific and general exceptions
+            except (AttributeError, IOError, Exception) as error:
+                # Log the snapshot error message
+                upgrade_job.logger.log_task(
+                    action="error",
+                    message=f"{targeted_device['db_device'].hostname}: Snapshot attempt failed with error: {error}. "
+                    f"Retrying after {upgrade_job.retry_interval} seconds.",
+                )
+                upgrade_job.logger.log_task(
+                    action="working",
+                    message=f"{targeted_device['db_device'].hostname}: Waiting for {upgrade_job.retry_interval} seconds"
+                    f" before retrying snapshot.",
+                )
+
+                # Wait before retrying the snapshot
+                time.sleep(upgrade_job.retry_interval)
+
+                # Increment the snapshot attempt number
+                attempt += 1
+
+        # If the post-upgrade snapshot fails after multiple attempts
+        if upgrade_job.post_snapshot is None:
+            # Log the snapshot error message
+            upgrade_job.logger.log_task(
+                action="error",
+                message=f"{targeted_device['db_device'].hostname}: Failed to create snapshot after trying a total of "
+                f"{upgrade_job.max_retries} attempts.",
+            )
+
+    # General exception handling
+    except Exception as e:
+        upgrade_job.logger.log_task(
+            action="error",
+            message=f"Error occurred when performing the snapshot of the network state of device: {str(e)} ",
+        )
+
     # TODO: PDF Report Generation
     # TODO: Active Firewall Upgrades
