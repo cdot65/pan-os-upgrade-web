@@ -245,14 +245,14 @@ def main(
     # messages and exits the upgrade workflow.
     try:
         # Check if the specified version is older than the current version
-        upgrade_required = upgrade_job.determine_upgrade(
+        upgrade_job.determine_upgrade(
             current_version=upgrade_job.version_local_parsed,
             hostname=targeted_device["db_device"].hostname,
             target_version=upgrade_job.version_target_parsed,
         )
 
         # Gracefully exit if the firewall does not require an upgrade to target version
-        if not upgrade_required:
+        if not upgrade_job.upgrade_required:
             upgrade_job.logger.log_task(
                 action="error",
                 message=f"{targeted_device['db_device'].hostname}: It was determined that this device is not "
@@ -275,14 +275,14 @@ def main(
         # Check if the upgrade is compatible with the HA setup
         if targeted_device["db_device"].ha_enabled:
             # Perform HA compatibility check for the target version
-            upgrade_compatible = upgrade_job.check_ha_compatibility(
+            upgrade_job.check_ha_compatibility(
                 current_version=upgrade_job.version_local_parsed,
                 hostname=targeted_device["db_device"].hostname,
                 target_version=upgrade_job.version_target_parsed,
             )
 
             # Gracefully exit if the firewall does not require an upgrade to target version
-            if not upgrade_compatible:
+            if upgrade_job.stop_upgrade_workflow:
                 # Log the message to the console
                 upgrade_job.logger.log_task(
                     action="error",
@@ -307,13 +307,13 @@ def main(
     # the customer service portal.
     try:
         # Check if a software update is available for the device
-        available_versions = upgrade_job.software_available_check(
+        version_available = upgrade_job.software_available_check(
             device=targeted_device["pan_device"],
             target_version=target_version,
         )
 
         # Gracefully exit if the target version is not available
-        if not available_versions:
+        if not version_available:
             upgrade_job.logger.log_task(
                 action="error",
                 message=f"{targeted_device['db_device'].hostname}: Target version {target_version} is not available.",
@@ -710,25 +710,36 @@ def main(
             message=f"{targeted_device['db_device'].hostname}: Performing snapshot of network state information.",
         )
 
-        # Initialize the pre-upgrade snapshot
-        attempt = 0
-        pre_snapshot = None
-
         # Attempt to take the pre-upgrade snapshot
-        while attempt < upgrade_job.max_retries and pre_snapshot is None:
+        attempt = 0
+        while attempt < upgrade_job.max_retries and upgrade_job.pre_snapshot is None:
             # Make a snapshot attempt
             try:
                 # Execute the snapshot operation
-                pre_snapshot_success = upgrade_job.run_assurance(
+                upgrade_job.run_assurance(
                     device=targeted_device,
                     operation_type="state_snapshot",
+                    snapshot_type="pre_upgrade",
                 )
 
-                # Log the snapshot success message
-                upgrade_job.logger.log_task(
-                    action="save",
-                    message=f"{targeted_device['db_device'].hostname}: Snapshot successfully created.",
-                )
+                # Gracefully exit if the firewall does not require an upgrade to target version
+                if upgrade_job.stop_upgrade_workflow:
+                    # Log the message to the console
+                    upgrade_job.logger.log_task(
+                        action="error",
+                        message=f"{targeted_device['db_device'].hostname}: Snapshot failed to complete successfully, "
+                        f"halting the upgrade to {targeted_device['db_device'].sw_version}.",
+                    )
+
+                    # Return an error status
+                    return "errored"
+
+                else:
+                    # Log the snapshot success message
+                    upgrade_job.logger.log_task(
+                        action="save",
+                        message=f"{targeted_device['db_device'].hostname}: Snapshot successfully created.",
+                    )
 
             # Catch specific and general exceptions
             except (AttributeError, IOError, Exception) as error:
@@ -751,19 +762,13 @@ def main(
                 attempt += 1
 
         # If the pre-upgrade snapshot fails after multiple attempts
-        if pre_snapshot is None:
+        if upgrade_job.pre_snapshot is None:
             # Log the snapshot error message
             upgrade_job.logger.log_task(
                 action="error",
                 message=f"{targeted_device['db_device'].hostname}: Failed to create snapshot after trying a total of "
                 f"{upgrade_job.max_retries} attempts.",
             )
-
-        # Log the pre-upgrade snapshot message
-        upgrade_job.logger.log_task(
-            action="report",
-            message=f"{targeted_device['db_device'].hostname}: Pre-upgrade snapshot {pre_snapshot}",
-        )
 
     # General exception handling
     except Exception as e:
