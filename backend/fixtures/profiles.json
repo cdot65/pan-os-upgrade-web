@@ -2,7 +2,6 @@
     {
         "fields": {
             "active_support": true,
-            "arp_entry_exist": false,
             "arp_table_snapshot": false,
             "candidate_config": true,
             "certificates_requirements": false,
@@ -17,7 +16,6 @@
             "free_disk_space": true,
             "ha": true,
             "install_retry_interval": 60,
-            "ip_sec_tunnel_status": true,
             "ip_sec_tunnels_snapshot": false,
             "jobs": false,
             "license_snapshot": true,
@@ -32,20 +30,16 @@
             "pan_username": "admin",
             "panorama": true,
             "planes_clock_sync": true,
-            "readiness_checks_location": "assurance/readiness_checks/",
             "reboot_retry_interval": 60,
             "routes_snapshot": false,
-            "session_exist": false,
             "session_stats_snapshot": false,
-            "snapshot_retry_interval": 60,
-            "snapshots_location": "assurance/snapshots/"
+            "snapshot_retry_interval": 60
         },
         "model": "panosupgradeweb.profile"
     },
     {
         "fields": {
             "active_support": true,
-            "arp_entry_exist": false,
             "arp_table_snapshot": false,
             "candidate_config": true,
             "certificates_requirements": false,
@@ -60,7 +54,6 @@
             "free_disk_space": true,
             "ha": true,
             "install_retry_interval": 60,
-            "ip_sec_tunnel_status": true,
             "ip_sec_tunnels_snapshot": false,
             "jobs": false,
             "license_snapshot": true,
@@ -75,13 +68,10 @@
             "pan_username": "officehours",
             "panorama": true,
             "planes_clock_sync": true,
-            "readiness_checks_location": "assurance/readiness_checks/",
             "reboot_retry_interval": 60,
             "routes_snapshot": false,
-            "session_exist": false,
             "session_stats_snapshot": false,
-            "snapshot_retry_interval": 60,
-            "snapshots_location": "assurance/snapshots/"
+            "snapshot_retry_interval": 60
         },
         "model": "panosupgradeweb.profile"
     }

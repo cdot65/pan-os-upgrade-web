@@ -304,7 +304,6 @@ class ProfileSerializer(serializers.ModelSerializer):
         return {
             "checks": {
                 "active_support": obj.active_support,
-                "arp_entry_exist": obj.arp_entry_exist,
                 "candidate_config": obj.candidate_config,
                 "certificates_requirements": obj.certificates_requirements,
                 "content_version": obj.content_version,
@@ -312,14 +311,11 @@ class ProfileSerializer(serializers.ModelSerializer):
                 "expired_licenses": obj.expired_licenses,
                 "free_disk_space": obj.free_disk_space,
                 "ha": obj.ha,
-                "ip_sec_tunnel_status": obj.ip_sec_tunnel_status,
                 "jobs": obj.jobs,
                 "ntp_sync": obj.ntp_sync,
                 "panorama": obj.panorama,
                 "planes_clock_sync": obj.planes_clock_sync,
-                "session_exist": obj.session_exist,
             },
-            "readiness_checks_location": obj.readiness_checks_location,
         }
 
     def get_reboot(self, obj):
@@ -330,7 +326,6 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_snapshots(self, obj):
         return {
-            "snapshots_location": obj.snapshots_location,
             "max_snapshot_tries": obj.max_snapshot_tries,
             "snapshot_retry_interval": obj.snapshot_retry_interval,
             "state": {
@@ -368,14 +363,8 @@ class ProfileSerializer(serializers.ModelSerializer):
                 "download_retry_interval": download_data.get("download_retry_interval"),
                 "max_install_attempts": install_data.get("max_install_attempts"),
                 "install_retry_interval": install_data.get("install_retry_interval"),
-                "readiness_checks_location": readiness_checks_data.get(
-                    "readiness_checks_location"
-                ),
                 "active_support": readiness_checks_data.get("checks", {}).get(
                     "active_support"
-                ),
-                "arp_entry_exist": readiness_checks_data.get("checks", {}).get(
-                    "arp_entry_exist"
                 ),
                 "candidate_config": readiness_checks_data.get("checks", {}).get(
                     "candidate_config"
@@ -396,21 +385,14 @@ class ProfileSerializer(serializers.ModelSerializer):
                     "free_disk_space"
                 ),
                 "ha": readiness_checks_data.get("checks", {}).get("ha"),
-                "ip_sec_tunnel_status": readiness_checks_data.get("checks", {}).get(
-                    "ip_sec_tunnel_status"
-                ),
                 "jobs": readiness_checks_data.get("checks", {}).get("jobs"),
                 "ntp_sync": readiness_checks_data.get("checks", {}).get("ntp_sync"),
                 "panorama": readiness_checks_data.get("checks", {}).get("panorama"),
                 "planes_clock_sync": readiness_checks_data.get("checks", {}).get(
                     "planes_clock_sync"
                 ),
-                "session_exist": readiness_checks_data.get("checks", {}).get(
-                    "session_exist"
-                ),
                 "max_reboot_tries": reboot_data.get("max_reboot_tries"),
                 "reboot_retry_interval": reboot_data.get("reboot_retry_interval"),
-                "snapshots_location": snapshots_data.get("snapshots_location"),
                 "max_snapshot_tries": snapshots_data.get("max_snapshot_tries"),
                 "snapshot_retry_interval": snapshots_data.get(
                     "snapshot_retry_interval"

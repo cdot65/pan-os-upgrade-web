@@ -18,7 +18,6 @@ export interface Profile {
     readiness_checks: {
         checks: {
             active_support: boolean;
-            arp_entry_exist: boolean;
             candidate_config: boolean;
             certificates_requirements: boolean;
             content_version: boolean;
@@ -26,21 +25,17 @@ export interface Profile {
             expired_licenses: boolean;
             free_disk_space: boolean;
             ha: boolean;
-            ip_sec_tunnel_status: boolean;
             jobs: boolean;
             ntp_sync: boolean;
             panorama: boolean;
             planes_clock_sync: boolean;
-            session_exist: boolean;
         };
-        readiness_checks_location: string;
     };
     reboot: {
         max_reboot_tries: number;
         reboot_retry_interval: number;
     };
     snapshots: {
-        snapshots_location: string;
         max_snapshot_tries: number;
         snapshot_retry_interval: number;
         state: {

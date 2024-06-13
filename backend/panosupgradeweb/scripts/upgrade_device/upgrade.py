@@ -774,7 +774,6 @@ class PanosUpgrade:
         if operation_type == "readiness_checks":
             actions = {
                 "active_support": device["profile"].active_support,
-                "arp_entry_exist": device["profile"].arp_entry_exist,
                 "candidate_config": device["profile"].candidate_config,
                 "certificates_requirements": device[
                     "profile"
@@ -784,12 +783,10 @@ class PanosUpgrade:
                 "expired_licenses": device["profile"].expired_licenses,
                 "free_disk_space": device["profile"].free_disk_space,
                 "ha": device["profile"].ha,
-                "ip_sec_tunnel_status": device["profile"].ip_sec_tunnel_status,
                 "jobs": device["profile"].jobs,
                 "ntp_sync": device["profile"].ntp_sync,
                 "panorama": device["profile"].panorama,
                 "planes_clock_sync": device["profile"].planes_clock_sync,
-                "session_exist": device["profile"].session_exist,
             }
             for action in actions:
                 if action not in AssuranceOptions.READINESS_CHECKS.keys():

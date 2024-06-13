@@ -98,13 +98,6 @@
                                 available</mat-checkbox
                             >
 
-                            <!-- Checkbox for checking if a given ARP entry is available in the ARP table -->
-                            <mat-checkbox
-                                formControlName="arp_entry_exist"
-                                >Check if a given ARP entry is available in the
-                                ARP table</mat-checkbox
-                            >
-
                             <!-- Checkbox for checking if there are pending changes on the device -->
                             <mat-checkbox
                                 formControlName="candidate_config"
@@ -152,13 +145,6 @@
                                 the current device
                             </mat-checkbox>
 
-                            <!-- Checkbox for checking if a given IPsec tunnel is in active state -->
-                            <mat-checkbox
-                                formControlName="ip_sec_tunnel_status"
-                                >Check if a given IPsec tunnel is in active
-                                state</mat-checkbox
-                            >
-
                             <!-- Checkbox for checking for any job with status different than FIN -->
                             <mat-checkbox formControlName="jobs"
                                 >Check for any job with status different than
@@ -182,22 +168,8 @@
                                 dataplane and management plane</mat-checkbox
                             >
 
-                            <!-- Checkbox for checking if a critical session is present in the sessions table -->
-                            <mat-checkbox formControlName="session_exist"
-                                >Check if a critical session is present in the
-                                sessions table</mat-checkbox
-                            >
                         </div>
 
-                        <!-- Form field for entering the readiness checks location -->
-                        <mat-form-field>
-                            <mat-label>Readiness Checks Location</mat-label>
-                            <input
-                                matInput
-                                id="readiness_checks_location"
-                                formControlName="readiness_checks_location"
-                            />
-                        </mat-form-field>
                     </div>
                 </div>
 
@@ -207,15 +179,6 @@
                     <h3>Snapshots</h3>
 
                     <div class="form-field">
-                        <!-- Form field for entering the snapshots location -->
-                        <mat-form-field>
-                            <mat-label>Snapshots Location</mat-label>
-                            <input
-                                matInput
-                                id="snapshots_location"
-                                formControlName="snapshots_location"
-                            />
-                        </mat-form-field>
 
                         <!-- Form field for entering the maximum number of snapshot tries -->
                         <mat-form-field>
