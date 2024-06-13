@@ -8,9 +8,6 @@ class Profile(models.Model):
     active_support = models.BooleanField(
         verbose_name="Active Support Check",
     )
-    arp_entry_exist = models.BooleanField(
-        verbose_name="ARP Entry Exist Check",
-    )
     arp_table_snapshot = models.BooleanField(
         verbose_name="ARP Table Snapshot",
     )
@@ -54,9 +51,6 @@ class Profile(models.Model):
     )
     install_retry_interval = models.IntegerField(
         verbose_name="Install Retry Interval",
-    )
-    ip_sec_tunnel_status = models.BooleanField(
-        verbose_name="IPSec Tunnel Status Check",
     )
     ip_sec_tunnels_snapshot = models.BooleanField(
         verbose_name="IPSec Tunnels Snapshot",
@@ -104,28 +98,17 @@ class Profile(models.Model):
     planes_clock_sync = models.BooleanField(
         verbose_name="Planes Clock Sync Check",
     )
-    readiness_checks_location = models.CharField(
-        max_length=255,
-        verbose_name="Readiness Checks Location",
-    )
     reboot_retry_interval = models.IntegerField(
         verbose_name="Reboot Retry Interval",
     )
     routes_snapshot = models.BooleanField(
         verbose_name="Routes Snapshot",
     )
-    session_exist = models.BooleanField(
-        verbose_name="Session Exist Check",
-    )
     session_stats_snapshot = models.BooleanField(
         verbose_name="Session Stats Snapshot",
     )
     snapshot_retry_interval = models.IntegerField(
         verbose_name="Snapshot Retry Interval",
-    )
-    snapshots_location = models.CharField(
-        max_length=255,
-        verbose_name="Snapshots Location",
     )
     uuid = models.UUIDField(
         primary_key=True,

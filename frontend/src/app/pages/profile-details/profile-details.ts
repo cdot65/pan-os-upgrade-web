@@ -83,7 +83,6 @@ export class ProfileDetailsComponent implements OnInit, OnDestroy {
             readiness_checks: this.formBuilder.group({
                 checks: this.formBuilder.group({
                     active_support: [true],
-                    arp_entry_exist: [false],
                     candidate_config: [true],
                     certificates_requirements: [false],
                     content_version: [true],
@@ -91,21 +90,17 @@ export class ProfileDetailsComponent implements OnInit, OnDestroy {
                     expired_licenses: [true],
                     free_disk_space: [true],
                     ha: [true],
-                    ip_sec_tunnel_status: [true],
                     jobs: [false],
                     ntp_sync: [false],
                     panorama: [true],
                     planes_clock_sync: [true],
-                    session_exist: [false],
                 }),
-                readiness_checks_location: ["assurance/readiness_checks/"],
             }),
             reboot: this.formBuilder.group({
                 max_reboot_tries: [33],
                 reboot_retry_interval: [66],
             }),
             snapshots: this.formBuilder.group({
-                snapshots_location: ["assurance/snapshots/"],
                 max_snapshot_tries: [33],
                 snapshot_retry_interval: [66],
                 state: this.formBuilder.group({
