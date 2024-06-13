@@ -303,21 +303,21 @@ class ProfileSerializer(serializers.ModelSerializer):
     def get_readiness_checks(self, obj):
         return {
             "checks": {
-                "active_support_check": obj.active_support_check,
-                "arp_entry_exist_check": obj.arp_entry_exist_check,
-                "candidate_config_check": obj.candidate_config_check,
-                "certificates_requirements_check": obj.certificates_requirements_check,
-                "content_version_check": obj.content_version_check,
-                "dynamic_updates_check": obj.dynamic_updates_check,
-                "expired_licenses_check": obj.expired_licenses_check,
-                "free_disk_space_check": obj.free_disk_space_check,
-                "ha_check": obj.ha_check,
-                "ip_sec_tunnel_status_check": obj.ip_sec_tunnel_status_check,
-                "jobs_check": obj.jobs_check,
-                "ntp_sync_check": obj.ntp_sync_check,
-                "panorama_check": obj.panorama_check,
-                "planes_clock_sync_check": obj.planes_clock_sync_check,
-                "session_exist_check": obj.session_exist_check,
+                "active_support": obj.active_support,
+                "arp_entry_exist": obj.arp_entry_exist,
+                "candidate_config": obj.candidate_config,
+                "certificates_requirements": obj.certificates_requirements,
+                "content_version": obj.content_version,
+                "dynamic_updates": obj.dynamic_updates,
+                "expired_licenses": obj.expired_licenses,
+                "free_disk_space": obj.free_disk_space,
+                "ha": obj.ha,
+                "ip_sec_tunnel_status": obj.ip_sec_tunnel_status,
+                "jobs": obj.jobs,
+                "ntp_sync": obj.ntp_sync,
+                "panorama": obj.panorama,
+                "planes_clock_sync": obj.planes_clock_sync,
+                "session_exist": obj.session_exist,
             },
             "readiness_checks_location": obj.readiness_checks_location,
         }
@@ -371,46 +371,42 @@ class ProfileSerializer(serializers.ModelSerializer):
                 "readiness_checks_location": readiness_checks_data.get(
                     "readiness_checks_location"
                 ),
-                "active_support_check": readiness_checks_data.get("checks", {}).get(
-                    "active_support_check"
+                "active_support": readiness_checks_data.get("checks", {}).get(
+                    "active_support"
                 ),
-                "arp_entry_exist_check": readiness_checks_data.get("checks", {}).get(
-                    "arp_entry_exist_check"
+                "arp_entry_exist": readiness_checks_data.get("checks", {}).get(
+                    "arp_entry_exist"
                 ),
-                "candidate_config_check": readiness_checks_data.get("checks", {}).get(
-                    "candidate_config_check"
+                "candidate_config": readiness_checks_data.get("checks", {}).get(
+                    "candidate_config"
                 ),
-                "certificates_requirements_check": readiness_checks_data.get(
+                "certificates_requirements": readiness_checks_data.get(
                     "checks", {}
-                ).get("certificates_requirements_check"),
-                "content_version_check": readiness_checks_data.get("checks", {}).get(
-                    "content_version_check"
+                ).get("certificates_requirements"),
+                "content_version": readiness_checks_data.get("checks", {}).get(
+                    "content_version"
                 ),
-                "dynamic_updates_check": readiness_checks_data.get("checks", {}).get(
-                    "dynamic_updates_check"
+                "dynamic_updates": readiness_checks_data.get("checks", {}).get(
+                    "dynamic_updates"
                 ),
-                "expired_licenses_check": readiness_checks_data.get("checks", {}).get(
-                    "expired_licenses_check"
+                "expired_licenses": readiness_checks_data.get("checks", {}).get(
+                    "expired_licenses"
                 ),
-                "free_disk_space_check": readiness_checks_data.get("checks", {}).get(
-                    "free_disk_space_check"
+                "free_disk_space": readiness_checks_data.get("checks", {}).get(
+                    "free_disk_space"
                 ),
-                "ha_check": readiness_checks_data.get("checks", {}).get("ha_check"),
-                "ip_sec_tunnel_status_check": readiness_checks_data.get(
-                    "checks", {}
-                ).get("ip_sec_tunnel_status_check"),
-                "jobs_check": readiness_checks_data.get("checks", {}).get("jobs_check"),
-                "ntp_sync_check": readiness_checks_data.get("checks", {}).get(
-                    "ntp_sync_check"
+                "ha": readiness_checks_data.get("checks", {}).get("ha"),
+                "ip_sec_tunnel_status": readiness_checks_data.get("checks", {}).get(
+                    "ip_sec_tunnel_status"
                 ),
-                "panorama_check": readiness_checks_data.get("checks", {}).get(
-                    "panorama_check"
+                "jobs": readiness_checks_data.get("checks", {}).get("jobs"),
+                "ntp_sync": readiness_checks_data.get("checks", {}).get("ntp_sync"),
+                "panorama": readiness_checks_data.get("checks", {}).get("panorama"),
+                "planes_clock_sync": readiness_checks_data.get("checks", {}).get(
+                    "planes_clock_sync"
                 ),
-                "planes_clock_sync_check": readiness_checks_data.get("checks", {}).get(
-                    "planes_clock_sync_check"
-                ),
-                "session_exist_check": readiness_checks_data.get("checks", {}).get(
-                    "session_exist_check"
+                "session_exist": readiness_checks_data.get("checks", {}).get(
+                    "session_exist"
                 ),
                 "max_reboot_tries": reboot_data.get("max_reboot_tries"),
                 "reboot_retry_interval": reboot_data.get("reboot_retry_interval"),

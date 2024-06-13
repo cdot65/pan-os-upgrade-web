@@ -83,6 +83,7 @@ class PanosUpgrade:
         self.post_snapshot = None
         self.pre_snapshot = None
         self.primary_device = None
+        self.readiness_checks = None
         self.retry_interval = 60
         self.secondary_device = None
         self.stop_upgrade_workflow = False
@@ -506,10 +507,8 @@ class PanosUpgrade:
             self.ha_details = flatten_xml_to_dict(element=deployment_type[1])
 
     # def perform_readiness_checks(
-    #     file_path: str,
     #     firewall: Firewall,
     #     hostname: str,
-    #     settings_file_path: Path,
     # ) -> None:
     #     """
     #     Conducts a set of predefined readiness checks on a specified Palo Alto Networks Firewall to verify its
@@ -622,7 +621,7 @@ class PanosUpgrade:
         self,
         device: Dict,
         operation_type: str,
-        snapshot_type: str,
+        snapshot_type: str = None,
     ) -> None:
         """
         Run assurance checks or snapshots on a firewall device.
@@ -664,8 +663,9 @@ class PanosUpgrade:
         """
 
         # Setup Firewall client
-        proxy_firewall = FirewallProxy(device["pan_device"])
-        checks_firewall = CheckFirewall(proxy_firewall)
+        checks_firewall = CheckFirewall(
+            FirewallProxy(device["pan_device"]),
+        )
 
         if operation_type == "state_snapshot":
             actions = {
@@ -770,6 +770,84 @@ class PanosUpgrade:
                     action="error",
                     message=f"{device['db_device'].hostname}: Error creating snapshot",
                 )
+
+        if operation_type == "readiness_checks":
+            actions = {
+                "active_support": device["profile"].active_support,
+                "arp_entry_exist": device["profile"].arp_entry_exist,
+                "candidate_config": device["profile"].candidate_config,
+                "certificates_requirements": device[
+                    "profile"
+                ].certificates_requirements,
+                "content_version": device["profile"].content_version,
+                "dynamic_updates": device["profile"].dynamic_updates,
+                "expired_licenses": device["profile"].expired_licenses,
+                "free_disk_space": device["profile"].free_disk_space,
+                "ha": device["profile"].ha,
+                "ip_sec_tunnel_status": device["profile"].ip_sec_tunnel_status,
+                "jobs": device["profile"].jobs,
+                "ntp_sync": device["profile"].ntp_sync,
+                "panorama": device["profile"].panorama,
+                "planes_clock_sync": device["profile"].planes_clock_sync,
+                "session_exist": device["profile"].session_exist,
+            }
+            for action in actions:
+                if action not in AssuranceOptions.READINESS_CHECKS.keys():
+                    self.logger.log_task(
+                        action="report",
+                        message=f"{device['db_device'].hostname}: Invalid action for readiness check: {action}",
+                    )
+
+            # Create a list of action names where the corresponding value is True
+            enabled_actions = [action for action, enabled in actions.items() if enabled]
+
+            # Run the snapshots using CheckFirewall
+            self.logger.log_task(
+                action="working",
+                message=f"{device['db_device'].hostname}: Begin running the readiness checks declared in the profile",
+            )
+
+            result = checks_firewall.run_readiness_checks(
+                checks_configuration=enabled_actions
+            )
+
+            self.readiness_checks = True
+
+            for (
+                test_name,
+                test_info,
+            ) in AssuranceOptions.READINESS_CHECKS.items():
+                test_result = result.get(
+                    test_name, {"state": False, "reason": "Skipped Readiness Check"}
+                )
+
+                # Use .get() with a default value for 'reason' to avoid KeyError
+                reason = test_result.get("reason", "No reason provided")
+                log_message = f'{reason}: {test_info["description"]}'
+
+                if test_result["state"]:
+                    self.logger.log_task(
+                        action="success",
+                        message=f"{device['db_device'].hostname}: Passed Readiness Check: {test_info['description']}",
+                    )
+                else:
+                    if test_info["log_level"] == "error":
+                        if test_info["exit_on_failure"]:
+                            # Log the error message
+                            self.logger.log_task(
+                                action="error",
+                                message=f"{device['db_device'].hostname}: {log_message}, halting upgrade workflow.",
+                            )
+
+                            # Set the value of self.stop_upgrade_workflow to halt the upgrade workflow
+                            self.stop_upgrade_workflow = True
+
+                        else:
+                            # Log the error message
+                            self.logger.log_task(
+                                action="error",
+                                message=f"{device['db_device'].hostname}: {log_message}",
+                            )
 
     @staticmethod
     def software_available_check(
