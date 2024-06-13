@@ -777,6 +777,101 @@ def main(
             message=f"Error occurred when performing the snapshot of the network state of device: {str(e)} ",
         )
 
+    # Perform readiness checks on the firewall device before the upgrade process
+    try:
+        # Log the start of the readiness check process
+        upgrade_job.logger.log_task(
+            action="start",
+            message=f"{targeted_device['db_device'].hostname}: Performing readiness checks on the device.",
+        )
+
+        # Attempt to take the pre-upgrade snapshot
+        attempt = 0
+        while (
+            attempt < upgrade_job.max_retries and upgrade_job.readiness_checks is None
+        ):
+            # Perform a Readiness Checks attempt
+            try:
+                # Execute the snapshot operation
+                upgrade_job.run_assurance(
+                    device=targeted_device,
+                    operation_type="readiness_checks",
+                )
+
+                # Gracefully exit if the firewall does not require an upgrade to target version
+                if upgrade_job.readiness_checks is None:
+                    # Log the message to the console
+                    upgrade_job.logger.log_task(
+                        action="error",
+                        message=f"{targeted_device['db_device'].hostname}: Readiness Checks failed to complete "
+                        f"successfully, halting the upgrade to {targeted_device['db_device'].sw_version}.",
+                    )
+
+                    # Return an error status
+                    return "errored"
+
+                else:
+                    # Log the snapshot success message
+                    upgrade_job.logger.log_task(
+                        action="save",
+                        message=f"{targeted_device['db_device'].hostname}: Readiness checks successfully completed.",
+                    )
+
+            # Catch specific and general exceptions
+            except (AttributeError, IOError, Exception) as error:
+                # Log the snapshot error message
+                upgrade_job.logger.log_task(
+                    action="error",
+                    message=f"{targeted_device['db_device'].hostname}: Readiness Checks attempt failed with error: "
+                    f"{error}. Retrying after {upgrade_job.retry_interval} seconds.",
+                )
+                upgrade_job.logger.log_task(
+                    action="working",
+                    message=f"{targeted_device['db_device'].hostname}: Waiting for {upgrade_job.retry_interval} seconds"
+                    f" before retrying readiness checks.",
+                )
+
+                # Wait before retrying the snapshot
+                time.sleep(upgrade_job.retry_interval)
+
+                # Increment the snapshot attempt number
+                attempt += 1
+
+        # If the pre-upgrade readiness checks fails after multiple attempts
+        if upgrade_job.readiness_checks is None:
+            # Log the snapshot error message
+            upgrade_job.logger.log_task(
+                action="error",
+                message=f"{targeted_device['db_device'].hostname}: Failed to perform readiness checks after trying a "
+                f"total of {upgrade_job.max_retries} attempts.",
+            )
+
+        # Gracefully exit if the firewall does not require an upgrade to target version
+        if upgrade_job.stop_upgrade_workflow:
+            # Log the message to the console
+            upgrade_job.logger.log_task(
+                action="error",
+                message=f"{targeted_device['db_device'].hostname}: Snapshot failed to complete successfully, "
+                f"halting the upgrade to {targeted_device['db_device'].sw_version}.",
+            )
+
+            # Return an error status
+            return "errored"
+
+        else:
+            # Log the snapshot success message
+            upgrade_job.logger.log_task(
+                action="save",
+                message=f"{targeted_device['db_device'].hostname}: Snapshot successfully created.",
+            )
+
+    # General exception handling
+    except Exception as e:
+        upgrade_job.logger.log_task(
+            action="error",
+            message=f"Error occurred when performing the readiness checks of the network state of device: {str(e)} ",
+        )
+
     # TODO: Upgrade
     # TODO: Post Upgrade Snapshots
     # TODO: PDF Report Generation
