@@ -75,18 +75,22 @@ class PanosUpgrade:
         self,
         job_id: str,
     ):
+        self.ha_details = None
         self.job_id = job_id
         self.logger = PanOsUpgradeLogger("pan-os-upgrade-upgrade")
         self.logger.set_job_id(job_id)
         self.max_retries = 3
-        self.retry_interval = 60
+        self.post_snapshot = None
+        self.pre_snapshot = None
         self.primary_device = None
+        self.retry_interval = 60
         self.secondary_device = None
+        self.stop_upgrade_workflow = False
         self.standalone_device = None
-        self.ha_details = None
         self.version_local_parsed = None
         self.version_peer_parsed = None
         self.version_target_parsed = None
+        self.upgrade_required = False
 
     def assign_device(self, device_dict):
         """
@@ -269,7 +273,7 @@ class PanosUpgrade:
         current_version: Tuple[int, int, int, int],
         hostname: str,
         target_version: Tuple[int, int, int, int],
-    ) -> bool:
+    ) -> None:
         """
         Check the compatibility of upgrading a firewall in an HA pair to a target version.
 
@@ -288,7 +292,7 @@ class PanosUpgrade:
             (major, minor, patch, build).
 
         Returns:
-            bool: True if the upgrade
+            None
         Mermaid Workflow:
             ```mermaid
             graph TD
@@ -308,7 +312,9 @@ class PanosUpgrade:
                 message=f"{hostname}: Upgrading firewalls in an HA pair to a version that is more "
                 f"than one major release apart may cause compatibility issues.",
             )
-            return False
+
+            # Update the value of `self.stop_upgrade_workflow` to halt the upgrade process
+            self.stop_upgrade_workflow = True
 
         # Check if the upgrade is within the same major version but the minor upgrade is more than one release apart
         elif (
@@ -320,7 +326,9 @@ class PanosUpgrade:
                 message=f"{hostname}: Upgrading firewalls in an HA pair to a version that is more "
                 f"than one minor release apart may cause compatibility issues.",
             )
-            return False
+
+            # Update the value of `self.stop_upgrade_workflow` to halt the upgrade process
+            self.stop_upgrade_workflow = True
 
         # Check if the upgrade spans exactly one major version but also increases the minor version
         elif target_version[0] - current_version[0] == 1 and target_version[1] > 0:
@@ -330,14 +338,15 @@ class PanosUpgrade:
                 f"more than one major release or increases the minor version beyond the first in the next "
                 f"major release may cause compatibility issues.",
             )
-            return False
+
+            # Update the value of `self.stop_upgrade_workflow` to halt the upgrade process
+            self.stop_upgrade_workflow = True
 
         # Log compatibility check success
         self.logger.log_task(
             action="success",
             message=f"{hostname}: The target version is compatible with the current version.",
         )
-        return True
 
     def compare_versions(
         self,
@@ -391,7 +400,7 @@ class PanosUpgrade:
         hostname: str,
         current_version: Tuple[int, int, int, int],
         target_version: Tuple[int, int, int, int],
-    ) -> bool:
+    ) -> None:
         """
         Determine if a firewall requires an upgrade based on the current and target versions.
 
@@ -438,7 +447,8 @@ class PanosUpgrade:
                 action="start",
                 message=f"{hostname}: Upgrade required from {current_version} to {target_version}",
             )
-            return True
+            self.upgrade_required = True
+
         else:
             # Log no upgrade required or downgrade attempt detected message
             self.logger.log_task(
@@ -450,7 +460,9 @@ class PanosUpgrade:
                 action="stop",
                 message=f"{hostname}: Halting upgrade.",
             )
-            return False
+
+            # ensure self.upgrade_required = False
+            self.upgrade_required = False
 
     def get_ha_status(
         self,
@@ -610,7 +622,8 @@ class PanosUpgrade:
         self,
         device: Dict,
         operation_type: str,
-    ) -> bool:
+        snapshot_type: str,
+    ) -> None:
         """
         Run assurance checks or snapshots on a firewall device.
 
@@ -624,9 +637,12 @@ class PanosUpgrade:
                 - "profile": An instance of the FirewallProfile class containing snapshot settings.
             operation_type (str): The type of assurance operation to perform. Valid values are:
                 - "state_snapshot": Take snapshots of various firewall states.
+            snapshot_type (str): The type of snapshot operation to perform. Valid values are:
+                - "pre_upgrade": Take snapshots of various pre-upgrade operations.
+                - "post_upgrade": Take snapshots of various post-upgrade operations.
 
         Returns:
-            bool: True if operation succeeded, False otherwise.
+            None
 
         Raises:
             None
@@ -665,19 +681,20 @@ class PanosUpgrade:
             # Create a list of action names where the corresponding value is True
             enabled_actions = [action for action, enabled in actions.items() if enabled]
 
-            # Validate each enabled action
-            for action in enabled_actions:
-                if action not in AssuranceOptions.STATE_SNAPSHOTS.keys():
-                    return False
-
             # Run the snapshots using CheckFirewall
             self.logger.log_task(
                 action="working",
                 message=f"{device['db_device'].hostname}: Running snapshots using CheckFirewall",
             )
+
             snapshot_results = checks_firewall.run_snapshots(
                 snapshots_config=enabled_actions
             )
+
+            if snapshot_type == "pre_upgrade":
+                self.pre_snapshot = snapshot_results
+            else:
+                self.post_snapshot = snapshot_results
 
             if snapshot_results:
                 try:
@@ -688,7 +705,7 @@ class PanosUpgrade:
                     snapshot = Snapshot.objects.create(
                         job=job,
                         device=device["db_device"],
-                        snapshot_type="pre_upgrade",
+                        snapshot_type=snapshot_type,
                     )
 
                     # Create a new ContentVersion instance if the content version is available
@@ -740,9 +757,6 @@ class PanosUpgrade:
                         message=f"{device['db_device'].hostname}: Job with ID {self.job_id} does not exist",
                     )
 
-                    # Return None to indicate that the snapshot creation failed
-                    return False
-
                 except Exception as e:
                     # Log the error message
                     self.logger.log_task(
@@ -750,18 +764,18 @@ class PanosUpgrade:
                         message=f"{device['db_device'].hostname}: Error creating snapshot: {str(e)}",
                     )
 
-                    # Return None to indicate that the snapshot creation failed
-                    return False
-
             else:
-                # Log the error and return None
-                return False
+                # Log the error message
+                self.logger.log_task(
+                    action="error",
+                    message=f"{device['db_device'].hostname}: Error creating snapshot",
+                )
 
     @staticmethod
     def software_available_check(
         device: Union[Firewall, Panorama],
         target_version: str,
-    ) -> Optional[Dict]:
+    ) -> bool:
         """
         Check if a software update to the target version is available and compatible.
 
@@ -779,7 +793,7 @@ class PanosUpgrade:
             target_version (str): The target software version to check for availability and compatibility.
 
         Returns:
-            Optional[Dict]: A dictionary containing the available software versions if the
+            bool
         Mermaid Workflow:
             ```mermaid
             graph TD
@@ -816,7 +830,7 @@ class PanosUpgrade:
 
         # Check if the target version is available
         if target_version in available_versions:
-            return available_versions
+            return True
 
     @staticmethod
     def software_download(
