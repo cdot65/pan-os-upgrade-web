@@ -54,21 +54,25 @@ class PanosUpgrade:
         on its local state.
         - assign_upgrade_devices(self, device_uuid: str, profile_uuid: str) -> None: Assign the devices to be upgraded
         to the appropriate attributes based on their HA status.
-        - check_ha_compatibility(self, current_version: Tuple, hostname: str, target_version: Tuple) -> bool: Check the
+        - check_ha_compatibility(self, current_version: Tuple, hostname: str, target_version: Tuple) -> None: Check the
         compatibility of upgrading a firewall in an HA pair to a target version.
         - compare_versions(self, local_version_sliced: Tuple, hostname: str, peer_version_sliced: Tuple) -> str: Compare
         two version tuples and determine their relative order.
-        - determine_upgrade(self, hostname: str, current_version: Tuple, target_version: Tuple) -> bool: Determine if a
+        - determine_upgrade(self, hostname: str, current_version: Tuple, target_version: Tuple) -> None: Determine if a
         firewall requires an upgrade based on the current and target versions.
-        - get_ha_status(self, device: Firewall) -> Optional[Dict]: Retrieve the deployment information and HA status of
+        - get_ha_status(self, device: Firewall) -> None: Retrieve the deployment information and HA status of
         a firewall device.
-        - run_assurance(self, device: Dict, operation_type: str) -> Any: Run assurance checks or snapshots on a firewall
-        device.
-        - software_available_check(self, device: Union[Firewall, Panorama], target_version: str) -> Optional[Dict]:
+        - perform_readiness_checks(self, device: Dict) -> str: Perform readiness checks on a firewall device before the
+        upgrade process.
+        - run_assurance(self, device: Dict, operation_type: str, snapshot_type: str = None) -> None: Run assurance checks
+        or snapshots on a firewall device.
+        - software_available_check(self, device: Union[Firewall, Panorama], target_version: str) -> bool:
         Check if a software update to the target version is available and compatible.
         - software_download(self, device: Union[Firewall, Panorama], target_version: str) -> bool: Download the target
         software version to the firewall device.
         - suspend_ha_device(self, device: Dict) -> bool: Suspend the active device in a high-availability (HA) pair.
+        - take_snapshot(self, device: Dict, snapshot_type: str) -> str: Take a snapshot of the network state information
+        for a firewall device.
     """
 
     def __init__(
@@ -93,7 +97,10 @@ class PanosUpgrade:
         self.version_target_parsed = None
         self.upgrade_required = False
 
-    def assign_device(self, device_dict):
+    def assign_device(
+        self,
+        device_dict,
+    ):
         """
         Assign a device dictionary to the appropriate attribute based on its local state.
 
@@ -284,25 +291,30 @@ class PanosUpgrade:
         - If the upgrade is within the same major version but the minor upgrade is more than one release apart
         - If the upgrade spans exactly one major version but also increases the minor version
 
+        If any of these scenarios are encountered, a warning message is logged, and the `self.stop_upgrade_workflow`
+        flag is set to True to halt the upgrade process.
+
         Args:
             self: The instance of the class containing this method.
             current_version (Tuple[int, int, int, int]): The current version of the firewall in the format
-            (major, minor, patch, build).
+                (major, minor, patch, build).
             hostname (str): The hostname of the firewall device.
             target_version (Tuple[int, int, int, int]): The target version for the upgrade in the format
-            (major, minor, patch, build).
+                (major, minor, patch, build).
 
         Returns:
             None
+
         Mermaid Workflow:
             ```mermaid
             graph TD
                 A[Start] --> B{Major upgrade more than one release apart?}
-                B -->|Yes| C[Log warning and return False]
+                B -->|Yes| C[Log warning, set stop_upgrade_workflow to True]
                 B -->|No| D{Within same major version and minor upgrade more than one release apart?}
-                D -->|Yes| E[Log warning and return False]
+                D -->|Yes| E[Log warning, set stop_upgrade_workflow to True]
                 D -->|No| F{Spans exactly one major version and increases minor version?}
-                F -->|Yes| G[Log warning and            F -->|No| H[Log compatibility check success and return True]
+                F -->|Yes| G[Log warning, set stop_upgrade_workflow to True]
+                F -->|No| H[Log compatibility check success]
             ```
         """
 
@@ -406,10 +418,12 @@ class PanosUpgrade:
         Determine if a firewall requires an upgrade based on the current and target versions.
 
         This function compares the current version of a firewall with the target version to determine
-        if an upgrade is necessary. It logs the current and target versions and checks if the current
-        version is less than the target version. If an upgrade is required, it logs the appropriate
-        message and returns True. If no upgrade is required or a downgrade attempt is detected, it
-        logs the corresponding messages, halts the upgrade, and returns False.
+        if an upgrade is necessary. An upgrade is required when the current version is less than the
+        target version. It logs the current and target versions and checks if the current version is
+        less than the target version. If an upgrade is required, it logs the appropriate message and
+        sets `self.upgrade_required` to True. If no upgrade is required or a downgrade attempt is
+        detected, it logs the corresponding messages, halts the upgrade, and sets
+        `self.upgrade_required` to False.
 
         Args:
             hostname (str): The hostname of the firewall device.
@@ -417,8 +431,6 @@ class PanosUpgrade:
                 in the format (major, minor, patch, maintenance).
             target_version (Tuple[int, int, int, int]): The target version for the upgrade as a tuple
                 in the format (major, minor, patch, maintenance).
-        Returns:
-            bool: True if an upgrade is required, False otherwise.
 
         Mermaid Workflow:
             ```mermaid
@@ -427,8 +439,9 @@ class PanosUpgrade:
                 B --> C{Is current version less than target version?}
                 C -->|Yes| D[Log upgrade required message]
                 C -->|No| E[Log no upgrade required or downgrade attempt detected]
-                D --> F[Return True]
-                E --> G[Log halting upgrade mes            G --> H[Return False]
+                D --> F[Set self.upgrade_required to True]
+                E --> G[Log halting upgrade message]
+                G --> H[Set self.upgrade_required to False]
             ```
         """
 
@@ -506,116 +519,129 @@ class PanosUpgrade:
             # Flatten the XML to a dictionary if HA details are available
             self.ha_details = flatten_xml_to_dict(element=deployment_type[1])
 
-    # def perform_readiness_checks(
-    #     firewall: Firewall,
-    #     hostname: str,
-    # ) -> None:
-    #     """
-    #     Conducts a set of predefined readiness checks on a specified Palo Alto Networks Firewall to verify its
-    #     preparedness for an upgrade operation.
-    #
-    #     This function systematically executes a series of checks on the specified firewall, evaluating various
-    #     aspects such as configuration status, licensing validity, software version compatibility, and more, to
-    #     ascertain its readiness for an upgrade. The outcomes of these checks are meticulously compiled into a
-    #     detailed JSON report, which is then saved to the specified file path. The scope of checks performed can
-    #     be tailored through configurations in the `settings.yaml` file, providing the flexibility to adapt the
-    #     checks to specific operational needs or preferences.
-    #
-    #     Parameters
-    #     ----------
-    #     firewall : Firewall
-    #         An instance of the Firewall class, properly initialized with necessary authentication details and
-    #         network connectivity to the target firewall device.
-    #     hostname : str
-    #         A string representing the hostname or IP address of the firewall, utilized for logging and
-    #         identification purposes within the process.
-    #     file_path : str
-    #         The designated file path where the JSON-formatted report summarizing the results of the readiness
-    #         checks will be stored. The function ensures the existence of the specified directory, creating it
-    #         if necessary.
-    #
-    #     Raises
-    #     ------
-    #     IOError
-    #         Signals an issue with writing the readiness report to the specified file path, potentially due to
-    #         file access restrictions or insufficient disk space, warranting further investigation.
-    #
-    #     Examples
-    #     --------
-    #     Executing readiness checks for a firewall and saving the results:
-    #         >>> firewall_instance = Firewall(hostname='192.168.1.1', api_username='admin', api_password='admin')
-    #         >>> perform_readiness_checks(firewall_instance, 'firewall1', '/path/to/firewall1_readiness_report.json')
-    #         # This command initiates the readiness checks on the specified firewall and saves the generated report
-    #         # to the given file path.
-    #
-    #     Notes
-    #     -----
-    #     - The execution of readiness checks is a pivotal preliminary step in the upgrade process, designed to
-    #       uncover and address potential impediments, thereby facilitating a seamless and successful upgrade.
-    #     - The set of checks to be conducted can be customized via the `settings.yaml` file. If this file is
-    #       present and contains specific configurations under the `readiness_checks.customize` key, those
-    #       configurations will dictate the checks to be performed. In the absence of such custom configurations,
-    #       a default set of checks, determined by the `enabled_by_default` attribute within the AssuranceOptions
-    #       class, will be applied.
-    #     """
-    #
-    #     # Load settings if the file exists
-    #     if settings_file_path.exists():
-    #         with open(settings_file_path, "r") as file:
-    #             settings = yaml.safe_load(file)
-    #
-    #         # Determine readiness checks to perform based on settings
-    #         if settings.get("readiness_checks", {}).get("customize", False):
-    #             # Extract checks where value is True
-    #             selected_checks = [
-    #                 check
-    #                 for check, enabled in settings.get("readiness_checks", {})
-    #                 .get("checks", {})
-    #                 .items()
-    #                 if enabled
-    #             ]
-    #         else:
-    #             # Select checks based on 'enabled_by_default' attribute from AssuranceOptions class
-    #             selected_checks = [
-    #                 check
-    #                 for check, attrs in AssuranceOptions.READINESS_CHECKS.items()
-    #                 if attrs.get("enabled_by_default", False)
-    #             ]
-    #     else:
-    #         # Select checks based on 'enabled_by_default' attribute from AssuranceOptions class
-    #         selected_checks = [
-    #             check
-    #             for check, attrs in AssuranceOptions.READINESS_CHECKS.items()
-    #             if attrs.get("enabled_by_default", False)
-    #         ]
-    #
-    #
-    #     readiness_check = run_assurance(
-    #         actions=selected_checks,
-    #         firewall=firewall,
-    #         hostname=hostname,
-    #         operation_type="readiness_check",
-    #     )
-    #
-    #     # Check if a readiness check was successfully created
-    #     if isinstance(readiness_check, ReadinessCheckReport):
-    #         logging.info(
-    #             f"{get_emoji(action='success')} {hostname}: Readiness Checks completed"
-    #         )
-    #         readiness_check_report_json = readiness_check.model_dump_json(indent=4)
-    #         logging.debug(
-    #             f"{get_emoji(action='save')} {hostname}: Readiness Check Report: {readiness_check_report_json}"
-    #         )
-    #
-    #         ensure_directory_exists(file_path=file_path)
-    #
-    #         with open(file_path, "w") as file:
-    #             file.write(readiness_check_report_json)
-    #
-    #     else:
-    #         logging.error(
-    #             f"{get_emoji(action='error')} {hostname}: Failed to create readiness check"
-    #         )
+    def perform_readiness_checks(
+        self,
+        device: Dict,
+    ) -> str:
+        """
+        Perform readiness checks on a firewall device before the upgrade process.
+
+        This function executes readiness checks on a firewall device to ensure it is ready for an upgrade.
+        It attempts to run the readiness checks operation multiple times, with a specified retry interval,
+        until the checks are successfully completed or the maximum number of retries is reached.
+
+        If the readiness checks fail to complete successfully, the function logs an error message and returns
+        an "errored" status. If the firewall does not require an upgrade to the target version, the function
+        also logs an error message and returns an "errored" status.
+
+        Args:
+            device (Dict): A dictionary containing information about the firewall device.
+
+        Returns:
+            str: The status of the readiness checks operation ("completed", "skipped", or "errored").
+
+        Mermaid Workflow:
+            ```mermaid
+            graph TD
+                A[Start] --> B{Readiness checks completed successfully?}
+                B -->|Yes| C[Log success message and return "completed"]
+                B -->|No| D{Max retries reached?}
+                D -->|Yes| E[Log error message and return "errored"]
+                D -->|No| F[Perform readiness checks attempt]
+                F --> G{Readiness checks failed?}
+                G -->|Yes| H[Log error message and wait for retry interval]
+                H --> D
+                G -->|No| I{Firewall requires upgrade?}
+                I -->|Yes| B
+                I -->|No| J[Log error message and return "errored"]
+            ```
+        """
+
+        # Log the start of the readiness check process
+        self.logger.log_task(
+            action="start",
+            message=f"{device['db_device'].hostname}: Performing readiness checks on the device.",
+        )
+
+        # Attempt to perform readiness checks
+        attempt = 0
+        while attempt < self.max_retries and self.readiness_checks is None:
+            # Perform a Readiness Checks attempt
+            try:
+                # Execute the readiness checks operation
+                self.run_assurance(
+                    device=device,
+                    operation_type="readiness_checks",
+                )
+
+                # Gracefully exit if the firewall does not require an upgrade to target version
+                if self.readiness_checks is None:
+                    # Log the message to the console
+                    self.logger.log_task(
+                        action="error",
+                        message=f"{device['db_device'].hostname}: Readiness Checks failed to complete "
+                        f"successfully, halting the upgrade to {device['db_device'].sw_version}.",
+                    )
+
+                    # Return an error status
+                    return "errored"
+
+                else:
+                    # Log the readiness checks success message
+                    self.logger.log_task(
+                        action="save",
+                        message=f"{device['db_device'].hostname}: Readiness checks successfully completed.",
+                    )
+
+            # Catch specific and general exceptions
+            except (AttributeError, IOError, Exception) as error:
+                # Log the readiness checks error message
+                self.logger.log_task(
+                    action="error",
+                    message=f"{device['db_device'].hostname}: Readiness Checks attempt failed with error: "
+                    f"{error}. Retrying after {self.retry_interval} seconds.",
+                )
+                self.logger.log_task(
+                    action="working",
+                    message=f"{device['db_device'].hostname}: Waiting for {self.retry_interval} seconds"
+                    f" before retrying readiness checks.",
+                )
+
+                # Wait before retrying the readiness checks
+                time.sleep(self.retry_interval)
+
+                # Increment the readiness checks attempt number
+                attempt += 1
+
+        # If the readiness checks fail after multiple attempts
+        if self.readiness_checks is None:
+            # Log the readiness checks error message
+            self.logger.log_task(
+                action="error",
+                message=f"{device['db_device'].hostname}: Failed to perform readiness checks after trying a "
+                f"total of {self.max_retries} attempts.",
+            )
+
+        # Gracefully exit if the firewall does not require an upgrade to target version
+        if self.stop_upgrade_workflow:
+            # Log the message to the console
+            self.logger.log_task(
+                action="error",
+                message=f"{device['db_device'].hostname}: Readiness checks failed to complete successfully, "
+                f"halting the upgrade to {device['db_device'].sw_version}.",
+            )
+
+            # Return an error status
+            return "errored"
+
+        else:
+            # Log the readiness checks success message
+            self.logger.log_task(
+                action="save",
+                message=f"{device['db_device'].hostname}: Readiness checks successfully completed.",
+            )
+
+        return "completed"
 
     def run_assurance(
         self,
@@ -634,11 +660,14 @@ class PanosUpgrade:
                 The dictionary should include the following keys:
                 - "pan_device": An instance of the PanDevice class representing the firewall.
                 - "profile": An instance of the FirewallProfile class containing snapshot settings.
+                - "db_device": An instance of the Device model representing the firewall in the database.
             operation_type (str): The type of assurance operation to perform. Valid values are:
                 - "state_snapshot": Take snapshots of various firewall states.
-            snapshot_type (str): The type of snapshot operation to perform. Valid values are:
+                - "readiness_checks": Perform readiness checks on the firewall.
+            snapshot_type (str, optional): The type of snapshot operation to perform. Valid values are:
                 - "pre_upgrade": Take snapshots of various pre-upgrade operations.
                 - "post_upgrade": Take snapshots of various post-upgrade operations.
+                Defaults to None.
 
         Returns:
             None
@@ -652,13 +681,20 @@ class PanosUpgrade:
                 A[Start] --> B{operation_type?}
                 B -->|state_snapshot| C[Set up FirewallProxy and CheckFirewall]
                 C --> D[Get enabled snapshot actions from device profile]
-                D --> E[Validate snapshot actions]
-                E -->|Invalid action| F[Log error and return None]
-                E -->|Valid actions| G[Run snapshots using CheckFirewall]
-                G --> H{Snapshots successful?}
-                H -->|No| I[Log error and return None]
-                H -->|Yes| J[Log snapshot results and return results]
-                B -->|Other| K[Log error and return None]
+                D --> E[Run snapshots using CheckFirewall]
+                E --> F{Snapshots successful?}
+                F -->|No| G[Log error and return None]
+                F -->|Yes| H[Create Snapshot, ContentVersion, License, and NetworkInterface instances]
+                H --> I[Log snapshot results and return None]
+                B -->|readiness_checks| J[Set up FirewallProxy and CheckFirewall]
+                J --> K[Get enabled readiness check actions from device profile]
+                K --> L[Run readiness checks using CheckFirewall]
+                L --> M{Readiness checks passed?}
+                M -->|No| N{exit_on_failure?}
+                N -->|Yes| O[Log error, set stop_upgrade_workflow, and return None]
+                N -->|No| P[Log error and continue]
+                M -->|Yes| Q[Log success and continue]
+                B -->|Other| R[Log error and return None]
             ```
         """
 
@@ -1035,3 +1071,123 @@ class PanosUpgrade:
                 message=f"{device['db_device'].hostname}: Error suspending target device HA state: {e}",
             )
             return False
+
+    def take_snapshot(
+        self,
+        device: Dict,
+        snapshot_type: str,
+    ) -> str:
+        """
+        Take a snapshot of the network state information for a firewall device.
+
+        This function attempts to take a snapshot of the network state information for a firewall device.
+        It retries the snapshot operation up to a maximum number of attempts specified by `self.max_retries`.
+        If the snapshot is successful, it returns "completed". If the snapshot fails after multiple attempts,
+        it returns "errored". If the firewall does not require an upgrade to the target version, it returns "skipped".
+
+        Args:
+            device (Dict): A dictionary containing information about the firewall device.
+            snapshot_type (str): The type of snapshot operation to perform. Valid values are:
+                - "pre": Take snapshots of various pre-upgrade operations.
+                - "post": Take snapshots of various post-upgrade operations.
+
+        Returns:
+            str: The status of the snapshot operation ("completed", "skipped", or "errored").
+
+        Raises:
+            AttributeError: If an attribute is missing or invalid during the snapshot operation.
+            IOError: If an I/O error occurs during the snapshot operation.
+            Exception: If any other exception occurs during the snapshot operation.
+
+        Mermaid Workflow:
+            ```mermaid
+            graph TD
+                A[Start] --> B[Log start of snapshot process]
+                B --> C{Attempt snapshot}
+                C -->|Success| D{Firewall requires upgrade?}
+                D -->|No| E[Log snapshot failed, halt upgrade]
+                E --> F[Return "errored"]
+                D -->|Yes| G[Log snapshot success]
+                G --> H[Return "completed"]
+                C -->|Failure| I{Max retries reached?}
+                I -->|No| J[Log snapshot error]
+                J --> K[Wait for retry interval]
+                K --> C
+                I -->|Yes| L[Log snapshot failure after max retries]
+                L --> M[Return "errored"]
+            ```
+        """
+
+        # Log the start of the snapshot process
+        self.logger.log_task(
+            action="start",
+            message=f"{device['db_device'].hostname}: Performing snapshot of network state information.",
+        )
+
+        # Attempt to take the snapshot
+        attempt = 0
+        snapshot_successful = False
+        while attempt < self.max_retries and not snapshot_successful:
+            # Make a snapshot attempt
+            try:
+                # Execute the snapshot operation
+                self.run_assurance(
+                    device=device,
+                    operation_type="state_snapshot",
+                    snapshot_type=snapshot_type,
+                )
+
+                # Gracefully exit if the firewall does not require an upgrade to target version
+                if self.stop_upgrade_workflow:
+                    # Log the message to the console
+                    self.logger.log_task(
+                        action="error",
+                        message=f"{device['db_device'].hostname}: Snapshot failed to complete successfully, "
+                        f"halting the upgrade to {device['db_device'].sw_version}.",
+                    )
+
+                    # Return an error status
+                    return "errored"
+
+                else:
+                    # Log the snapshot success message
+                    self.logger.log_task(
+                        action="save",
+                        message=f"{device['db_device'].hostname}: {snapshot_type.capitalize()} Upgrade snapshot "
+                        "successfully created.",
+                    )
+
+                    # Set the snapshot_successful flag to True
+                    snapshot_successful = True
+
+            # Catch specific and general exceptions
+            except (AttributeError, IOError, Exception) as error:
+                # Log the snapshot error message
+                self.logger.log_task(
+                    action="error",
+                    message=f"{device['db_device'].hostname}: Snapshot attempt failed with error: {error}. "
+                    f"Retrying after {self.retry_interval} seconds.",
+                )
+                self.logger.log_task(
+                    action="working",
+                    message=f"{device['db_device'].hostname}: Waiting for {self.retry_interval} seconds"
+                    f" before retrying snapshot.",
+                )
+
+                # Wait before retrying the snapshot
+                time.sleep(self.retry_interval)
+
+                # Increment the snapshot attempt number
+                attempt += 1
+
+        # If the snapshot fails after multiple attempts
+        if not snapshot_successful:
+            # Log the snapshot error message
+            self.logger.log_task(
+                action="error",
+                message=f"{device['db_device'].hostname}: Failed to create snapshot after trying a total of "
+                f"{self.max_retries} attempts.",
+            )
+            return "errored"
+
+        return "completed"
