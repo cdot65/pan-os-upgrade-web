@@ -17,30 +17,25 @@ export interface Profile {
     name: string;
     readiness_checks: {
         checks: {
-            active_support_check: boolean;
-            arp_entry_exist_check: boolean;
-            candidate_config_check: boolean;
-            certificates_requirements_check: boolean;
-            content_version_check: boolean;
-            dynamic_updates_check: boolean;
-            expired_licenses_check: boolean;
-            free_disk_space_check: boolean;
-            ha_check: boolean;
-            ip_sec_tunnel_status_check: boolean;
-            jobs_check: boolean;
-            ntp_sync_check: boolean;
-            panorama_check: boolean;
-            planes_clock_sync_check: boolean;
-            session_exist_check: boolean;
+            active_support: boolean;
+            candidate_config: boolean;
+            certificates_requirements: boolean;
+            content_version: boolean;
+            dynamic_updates: boolean;
+            expired_licenses: boolean;
+            free_disk_space: boolean;
+            ha: boolean;
+            jobs: boolean;
+            ntp_sync: boolean;
+            panorama: boolean;
+            planes_clock_sync: boolean;
         };
-        readiness_checks_location: string;
     };
     reboot: {
         max_reboot_tries: number;
         reboot_retry_interval: number;
     };
     snapshots: {
-        snapshots_location: string;
         max_snapshot_tries: number;
         snapshot_retry_interval: number;
         state: {
