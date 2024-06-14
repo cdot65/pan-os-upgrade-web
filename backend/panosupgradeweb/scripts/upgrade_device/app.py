@@ -23,7 +23,8 @@ def main(
 
     This function orchestrates the PAN-OS upgrade process for a firewall device. It checks the device's HA status,
     prepares the upgrade devices list, performs compatibility checks, downloads the required software versions,
-    handles HA scenarios, and performs pre-upgrade snapshots.
+    handles HA scenarios, performs pre-upgrade snapshots, upgrades the devices, performs post-upgrade snapshots,
+    and generates PDF reports.
 
     Args:
         author_id (int): The ID of the author initiating the upgrade job.
@@ -61,11 +62,16 @@ def main(
             R --> S[Perform pre-upgrade snapshot]
             S --> T{Device suspended?}
             T -->|Yes| U[Skip upgrade]
-            T -->|No| V[Return "completed"]
+            T -->|No| V[Perform upgrade]
+            V --> W[Perform post-upgrade snapshot]
+            W --> X[Generate PDF report]
+            X --> Y[Return "completed"]
         ```
     """
 
-    # Create a new instance of the PanosUpgrade class
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Create a new instance of the PanosUpgrade class
+    # ------------------------------------------------------------------------------------------------------------------
     upgrade_job = PanosUpgrade(job_id)
 
     # Log the start of the PAN-OS upgrade process
@@ -75,8 +81,11 @@ def main(
         f"Using the profile {profile_uuid} to upgrade PAN-OS to {target_version}",
     )
 
-    # Check if the device is the primary device in an HA pair, and if so, skip the upgrade
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Check if the target device is the primary device in an HA pair, and if so, skip the upgrade
+    # ------------------------------------------------------------------------------------------------------------------
     try:
+        # Retrieve database object for target device
         targeted_device = Device.objects.get(uuid=device_uuid)
 
         # Check if the device is the active/primary device in an HA pair, and if so, skip the upgrade
@@ -94,33 +103,43 @@ def main(
             # Skip the upgrade process for the primary device in an HA pair
             return "skipped"
 
-    # Gracefully exit if the device is not found in the database
     except Exception as e:
         # Log the error message if the device is not found in the database
         upgrade_job.logger.log_task(
             action="error",
             message=f"Error checking HA status of firewall devices: {str(e)}",
         )
+        return "errored"
 
-    # This function retrieves the device and profile objects based on the provided UUIDs and assigns the role of
-    # the devices to the class object (primary / secondary / standalone). It handles both Panorama-managed and
-    # standalone firewalls. If the device is in an HA pair, it also adds the peer firewall to the upgrade list.
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Assign devices to either primary, secondary, or standalone; set latter two to `targeted_device`
+    # ------------------------------------------------------------------------------------------------------------------
     try:
+        # Perform assignment of devices
         upgrade_job.assign_upgrade_devices(
             device_uuid=device_uuid,
             profile_uuid=profile_uuid,
         )
 
-    except Exception as e:
-        upgrade_job.logger.log_task(
-            action="error",
-            message=f"Error preparing upgrade devices: {str(e)}",
+        # Assign secondary and standalone devices to `targeted_device` to reference as first device to upgrade
+        targeted_device = (
+            upgrade_job.secondary_device
+            if upgrade_job.secondary_device
+            else upgrade_job.standalone_device
         )
 
-    # This section targets the secondary firewall, if it exists, and will gracefully exit the upgrade workflow if it
-    # should be within a 'suspended' state, then skip the upgrade workflow.
-    if upgrade_job.secondary_device is not None:
-        try:
+    except Exception as e:
+        # Log the error of determining the HA status of the target device
+        upgrade_job.logger.log_task(
+            action="error",
+            message=f"Error assigning selected device(s) to a role as either primary, active, or standalone: {str(e)}",
+        )
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Target device and will gracefully exit the upgrade workflow if it should be within a 'suspended' state
+    # ------------------------------------------------------------------------------------------------------------------
+    try:
+        if upgrade_job.secondary_device is not None:
             # Target the secondary devices within an HA pair and refresh the HA state using the
             # `show_highavailability_state()` method
             upgrade_job.get_ha_status(device=upgrade_job.secondary_device["pan_device"])
@@ -177,24 +196,19 @@ def main(
                 # Raise an exception to skip the upgrade process
                 return "errored"
 
-        # General exception handling
-        except Exception as e:
-            upgrade_job.logger.log_task(
-                action="error",
-                message=f"Error determining the HA status of the secondary firewall: {str(e)}",
-            )
-            return "errored"
+    except Exception as e:
+        # Log the error of determining the HA status of the target device
+        upgrade_job.logger.log_task(
+            action="error",
+            message=f"{upgrade_job.secondary_device['pan_device']}: Error determining the HA status of the target "
+            f"device: {str(e)}",
+        )
+        return "errored"
 
-    # Set the target_device to be either the secondary or standalone device
-    targeted_device = (
-        upgrade_job.secondary_device
-        if upgrade_job.secondary_device
-        else upgrade_job.standalone_device
-    )
-
-    # This section takes a version string in the format "major.minor[.maintenance[-h|-c|-b]hotfix][.xfr]"
-    # and returns a tuple of four integers representing the major, minor, maintenance, and hotfix parts
-    # of the version.
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Target device returns a tuple of four integers representing the major, minor, maintenance, and hotfix
+    # parts of the version.
+    # ------------------------------------------------------------------------------------------------------------------
     try:
         # Parse the targeted version string into its major, minor, maintenance, and hotfix.
         upgrade_job.version_target_parsed = parse_version(version=target_version)
@@ -231,18 +245,18 @@ def main(
                 f"{upgrade_job.version_target_parsed}. Device is not in an HA pair.",
             )
 
-    # General exception handling
     except Exception as e:
+        # Log the error of parsing PAN-OS versions
         upgrade_job.logger.log_task(
             action="error",
-            message=f"Error parsing the current and/or targeted upgrade version of PAN-OS: {str(e)}",
+            message=f"{targeted_device['db_device'].hostname}: Error parsing the current and/or targeted upgrade "
+            f"version of PAN-OS: {str(e)}",
         )
         return "errored"
 
-    # This section compares the current version of a firewall with the target version to determine
-    # if an upgrade is necessary. If an upgrade is required, it logs the appropriate message.
-    # If no upgrade is required or a downgrade attempt is detected, it logs the corresponding
-    # messages and exits the upgrade workflow.
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Target device compares current and target version to determine if an upgrade is necessary.
+    # ------------------------------------------------------------------------------------------------------------------
     try:
         # Check if the specified version is older than the current version
         upgrade_job.determine_upgrade(
@@ -260,17 +274,19 @@ def main(
             )
             return "errored"
 
-    # General exception handling
     except Exception as e:
+        # Log the error of checking if upgrade to targeted version is required
         upgrade_job.logger.log_task(
             action="error",
-            message=f"Error determining if the device is ready to be upgraded to PAN-OS version "
-            f"{target_version}: {str(e)}",
+            message=f"{targeted_device['db_device'].hostname}: Error determining if the device is ready to be upgraded "
+            f"to PAN-OS version {target_version}: {str(e)}",
         )
         return "errored"
 
-    # This section compares the current version and target version of a firewall in an HA pair
-    # to determine if the upgrade is compatible.
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Target device compares current and target version of devices in an HA pair, determine if the
+    # upgrade is compatible
+    # ------------------------------------------------------------------------------------------------------------------
     try:
         # Check if the upgrade is compatible with the HA setup
         if targeted_device["db_device"].ha_enabled:
@@ -294,17 +310,18 @@ def main(
                 # Return an error status
                 return "errored"
 
-    # General exception handling
     except Exception as e:
+        # Log the error of checking if targeted version compatible with HA upgrade
         upgrade_job.logger.log_task(
             action="error",
-            message=f"Error determining if the devices in an HA pair are compatible for the target PAN-OS version "
-            f"{target_version}: {str(e)}",
+            message=f"{targeted_device['db_device'].hostname}: Error determining if the devices in an HA pair are "
+            f"compatible for the target PAN-OS version {target_version}: {str(e)}",
         )
         return "errored"
 
-    # This section issues a request on the remote device to pull down the latest version of software from
-    # the customer service portal.
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Target device issues a request to pull down the latest version of software from CSP
+    # ------------------------------------------------------------------------------------------------------------------
     try:
         # Check if a software update is available for the device
         version_available = upgrade_job.software_available_check(
@@ -320,17 +337,18 @@ def main(
             )
             return "errored"
 
-    # General exception handling
     except Exception as e:
+        # Log the error of checking if targeted version is available in CSP
         upgrade_job.logger.log_task(
             action="error",
-            message=f"Error determining if the PAN-OS version is available for download"
-            f"{target_version}: {str(e)}",
+            message=f"{targeted_device['db_device'].hostname}: Error determining if the PAN-OS version is available for"
+            f" download {target_version}: {str(e)}",
         )
         return "errored"
 
-    # The section determines if the targeted PAN-OS version's base image is on the device already,
-    # if not it will initiate a download of the base image.
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Target device determination if the targeted version's base image is on the device already, else download
+    # ------------------------------------------------------------------------------------------------------------------
     try:
         # Create a base version key for the target version
         base_version_key = f"{upgrade_job.version_target_parsed[0]}.{upgrade_job.version_target_parsed[1]}.0"
@@ -447,16 +465,17 @@ def main(
                 f"already downloaded on the local device, so we are skipping the download process.",
             )
 
-    # General exception handling
     except Exception as e:
+        # Log the error of checking if or downloading the targeted version's base image on the device already
         upgrade_job.logger.log_task(
             action="error",
-            message=f"Error downloading the base image: {str(e)} "
-            f"{target_version}: {str(e)}",
+            message=f"{targeted_device['db_device'].hostname}: Error downloading the base image: {str(e)} ",
         )
+        return "errored"
 
-    # The section determines if the targeted PAN-OS version's image is on the device already,
-    # if not it will initiate a download of the target image.
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Target device determination if the targeted version's image is on the device already, else download
+    # ------------------------------------------------------------------------------------------------------------------
     try:
         # Log the message to the console
         upgrade_job.logger.log_task(
@@ -465,7 +484,7 @@ def main(
             "is available.",
         )
 
-        # Check if the target image is not downloaded or in downloading state
+        # Target device determination if the targeted version's image is on the device already, else download
         if not targeted_device["pan_device"].software.versions[target_version][
             "downloaded"
         ]:
@@ -566,20 +585,21 @@ def main(
                 f"downloaded on the target firewall, skipping the process of downloading again.",
             )
 
-    # General exception handling
     except Exception as e:
+        # Log the error of checking if or downloading the targeted version's image on the device already
         upgrade_job.logger.log_task(
             action="error",
-            message=f"Error occurred when downloading the targeted upgrade PAN-OS version "
-            f"{target_version}: {str(e)}",
+            message=f"{targeted_device['db_device'].hostname}: Error occurred when downloading the targeted upgrade "
+            f"PAN-OS version {target_version}: {str(e)}",
         )
+        return "errored"
 
-    # Handle HA scenarios for devices that are part of an HA pair, where we check to see if the HA config
-    # has been successfully synced between the two firewalls. Next we compare the versions between the two
-    # firewall appliances
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: HA pair checks to see if the config has been successfully synced between the two firewalls
+    # ------------------------------------------------------------------------------------------------------------------
     try:
         if targeted_device["db_device"].ha_enabled:
-            # If the current device is in suspended HA state
+            # If the secondary device is in suspended HA state
             if (
                 upgrade_job.ha_details["result"]["group"]["local-info"]["state"]
                 == "suspended"
@@ -663,7 +683,7 @@ def main(
                 message=f"{targeted_device['db_device'].hostname}: Peer version comparison: {version_comparison}",
             )
 
-            # If the firewall is running an older version than its peer devices
+            # If the targeted_device is running an older version than its peer devices
             if version_comparison == "older" or version_comparison == "equal":
                 # Determine if we are running in Dry Run mode
                 if not dry_run:
@@ -683,7 +703,7 @@ def main(
                         f"suspension.",
                     )
 
-            # If the firewall is running a newer version than its peer devices
+            # If the targeted_device is running a newer version than its peer devices
             elif version_comparison == "newer":
                 # Log message to console
                 upgrade_job.logger.log_task(
@@ -694,90 +714,210 @@ def main(
                 # Return "errored", gracefully exiting the upgrade's execution
                 return "errored"
 
-    # General exception handling
     except Exception as e:
+        # Log the error of the HA pair configuration sync check failing before upgrade
         upgrade_job.logger.log_task(
             action="error",
-            message=f"Error occurred when validating the HA status of device: {str(e)} "
-            f"{target_version}: {str(e)}",
+            message=f"{targeted_device['db_device'].hostname}: Error occurred when validating the HA status of device: "
+            f"{str(e)}",
         )
+        return "errored"
 
-    # Snapshot the firewall device before the upgrade process
+    # --------------------------------------------------------------------------------------------------------------
+    # Workflow: Target device readiness checks
+    # --------------------------------------------------------------------------------------------------------------
     try:
-        # Log the start of the snapshot process
+        # Log the start of the readiness check process on target device
         upgrade_job.logger.log_task(
             action="start",
-            message=f"{targeted_device['db_device'].hostname}: Performing snapshot of network state information.",
+            message=f"{targeted_device['db_device'].hostname}: Performing readiness checks on the device,",
         )
 
-        # Attempt to take the pre-upgrade snapshot
-        attempt = 0
-        while attempt < upgrade_job.max_retries and upgrade_job.pre_snapshot is None:
-            # Make a snapshot attempt
-            try:
-                # Execute the snapshot operation
-                upgrade_job.run_assurance(
-                    device=targeted_device,
-                    operation_type="state_snapshot",
-                    snapshot_type="pre_upgrade",
-                )
+        # Perform readiness checks on the target device before the upgrade process
+        result = upgrade_job.perform_readiness_checks(
+            targeted_device,
+        )
 
-                # Gracefully exit if the firewall does not require an upgrade to target version
-                if upgrade_job.stop_upgrade_workflow:
-                    # Log the message to the console
-                    upgrade_job.logger.log_task(
-                        action="error",
-                        message=f"{targeted_device['db_device'].hostname}: Snapshot failed to complete successfully, "
-                        f"halting the upgrade to {targeted_device['db_device'].sw_version}.",
-                    )
+        # Safely exit the script should the readiness checks of the primary device fail
+        if result == "errored":
+            return "errored"
 
-                    # Return an error status
-                    return "errored"
-
-                else:
-                    # Log the snapshot success message
-                    upgrade_job.logger.log_task(
-                        action="save",
-                        message=f"{targeted_device['db_device'].hostname}: Snapshot successfully created.",
-                    )
-
-            # Catch specific and general exceptions
-            except (AttributeError, IOError, Exception) as error:
-                # Log the snapshot error message
-                upgrade_job.logger.log_task(
-                    action="error",
-                    message=f"{targeted_device['db_device'].hostname}: Snapshot attempt failed with error: {error}. "
-                    f"Retrying after {upgrade_job.retry_interval} seconds.",
-                )
-                upgrade_job.logger.log_task(
-                    action="working",
-                    message=f"{targeted_device['db_device'].hostname}: Waiting for {upgrade_job.retry_interval} seconds"
-                    f" before retrying snapshot.",
-                )
-
-                # Wait before retrying the snapshot
-                time.sleep(upgrade_job.retry_interval)
-
-                # Increment the snapshot attempt number
-                attempt += 1
-
-        # If the pre-upgrade snapshot fails after multiple attempts
-        if upgrade_job.pre_snapshot is None:
-            # Log the snapshot error message
-            upgrade_job.logger.log_task(
-                action="error",
-                message=f"{targeted_device['db_device'].hostname}: Failed to create snapshot after trying a total of "
-                f"{upgrade_job.max_retries} attempts.",
-            )
-
-    # General exception handling
     except Exception as e:
+        # Log the error of the target device's readiness checks failing before upgrade
         upgrade_job.logger.log_task(
             action="error",
-            message=f"Error occurred when performing the snapshot of the network state of device: {str(e)} ",
+            message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the "
+            f"readiness checks of the device: {str(e)} ",
+        )
+        return "errored"
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Target device snapshot before the upgrade process
+    # ------------------------------------------------------------------------------------------------------------------
+    try:
+        # Log the start of the snapshot process on target device before the upgrade
+        upgrade_job.logger.log_task(
+            action="start",
+            message=f"{targeted_device['db_device'].hostname}: Performing snapshot of network state "
+            "information before the upgrade.",
         )
 
-    # TODO: Upgrade
-    # TODO: Post Upgrade Snapshots
+        # Snapshot the target device before the upgrade process
+        result = upgrade_job.take_snapshot(
+            targeted_device,
+            "pre",
+        )
+
+        # Safely exit the script should the snapshot of the target device fail before the upgrade process
+        if result == "errored":
+            return "errored"
+
+    except Exception as e:
+        # Log the error of the target device's snapshot failing before upgrade
+        upgrade_job.logger.log_task(
+            action="error",
+            message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the "
+            f"snapshot of the network state of device: {str(e)} ",
+        )
+        return "errored"
+
+    # TODO: Target Device Upgrade
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Target device snapshot after the upgrade process
+    # ------------------------------------------------------------------------------------------------------------------
+    try:
+        # Log the start of the snapshot process on target device after the upgrade
+        upgrade_job.logger.log_task(
+            action="start",
+            message=f"{targeted_device['db_device'].hostname}: Performing snapshot of network state "
+            "information after the upgrade.",
+        )
+
+        # Snapshot the target device after the upgrade process
+        result = upgrade_job.take_snapshot(
+            targeted_device,
+            "post",
+        )
+
+        # Safely exit the script should the snapshot of the target device fail after the upgrade process
+        if result == "errored":
+            return "errored"
+
+    except Exception as e:
+        # Log the error of the snapshot on target device after the upgrade
+        upgrade_job.logger.log_task(
+            action="error",
+            message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the snapshot "
+            f"of the network state of device: {str(e)} ",
+        )
+        return "errored"
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Target device PDF report generation on pre/post upgrade diff
+    # ------------------------------------------------------------------------------------------------------------------
     # TODO: PDF Report Generation
-    # TODO: Active Firewall Upgrades
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Exit the upgrade workflow if there is no primary_device attribute
+    # ------------------------------------------------------------------------------------------------------------------
+    if not upgrade_job.primary_device:
+        return "completed"
+
+    # --------------------------------------------------------------------------------------------------------------
+    # Workflow: Primary device readiness checks
+    # --------------------------------------------------------------------------------------------------------------
+    try:
+        # Log the start of the readiness check process on primary device
+        upgrade_job.logger.log_task(
+            action="start",
+            message=f"{upgrade_job.primary_device['db_device'].hostname}: Performing readiness checks on the device,",
+        )
+
+        # Perform readiness checks on the primary firewall device before the upgrade process
+        result = upgrade_job.perform_readiness_checks(
+            upgrade_job.primary_device,
+        )
+
+        # Safely exit the script should the readiness checks of the primary device fail
+        if result == "errored":
+            return "errored"
+
+    except Exception as e:
+        # Log the error of the primary device's readiness checks failing before upgrade
+        upgrade_job.logger.log_task(
+            action="error",
+            message=f"{upgrade_job.primary_device['db_device'].hostname}: Error occurred when performing the "
+            f"readiness checks: {str(e)} ",
+        )
+        return "errored"
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Primary device snapshot before the upgrade process
+    # ------------------------------------------------------------------------------------------------------------------
+    try:
+        # Log the start of the snapshot process on primary device before the upgrade
+        upgrade_job.logger.log_task(
+            action="start",
+            message=f"{upgrade_job.primary_device['db_device'].hostname}: Performing snapshot of network state "
+            "information before the upgrade.",
+        )
+
+        # Snapshot the primary firewall device before the upgrade process
+        result = upgrade_job.take_snapshot(
+            upgrade_job.primary_device,
+            "pre",
+        )
+
+        # Safely exit the script should the snapshot of the primary device fail before the upgrade process
+        if result == "errored":
+            return "errored"
+
+    except Exception as e:
+        # Log the error of the primary device's snapshot failing before upgrade
+        upgrade_job.logger.log_task(
+            action="error",
+            message=f"{upgrade_job.primary_device['db_device'].hostname}: Error occurred when performing the "
+            f"snapshot of the network state of device: {str(e)} ",
+        )
+        return "errored"
+
+    # --------------------------------------------------------------------------------------------------------------
+    # Workflow: Primary device upgrade
+    # --------------------------------------------------------------------------------------------------------------
+    # TODO: Primary Firewall Upgrade
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Primary device snapshot after the upgrade process
+    # ------------------------------------------------------------------------------------------------------------------
+    try:
+        # Log the start of the snapshot process on primary device after the upgrade
+        upgrade_job.logger.log_task(
+            action="start",
+            message=f"{upgrade_job.primary_device['db_device'].hostname}: Performing snapshot of network state "
+            "information after the upgrade.",
+        )
+
+        # Snapshot the primary device after the upgrade process
+        result = upgrade_job.take_snapshot(
+            upgrade_job.primary_device,
+            "post",
+        )
+
+        # Safely exit the script should the snapshot of the primary device fail after the upgrade process
+        if result == "errored":
+            return "errored"
+
+    except Exception as e:
+        # Log the error of the snapshot on target device after the upgrade
+        upgrade_job.logger.log_task(
+            action="error",
+            message=f"{upgrade_job.primary_device['db_device'].hostname}: Error occurred when performing the snapshot "
+            f"of the network state of device: {str(e)} ",
+        )
+        return "errored"
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Primary device PDF report generation on pre/post upgrade diff
+    # ------------------------------------------------------------------------------------------------------------------
+    # TODO: PDF Report Generation

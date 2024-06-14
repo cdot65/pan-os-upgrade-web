@@ -5,19 +5,16 @@ from django.db import models
 
 
 class Profile(models.Model):
-    active_support_check = models.BooleanField(
+    active_support = models.BooleanField(
         verbose_name="Active Support Check",
-    )
-    arp_entry_exist_check = models.BooleanField(
-        verbose_name="ARP Entry Exist Check",
     )
     arp_table_snapshot = models.BooleanField(
         verbose_name="ARP Table Snapshot",
     )
-    candidate_config_check = models.BooleanField(
+    candidate_config = models.BooleanField(
         verbose_name="Candidate Config Check",
     )
-    certificates_requirements_check = models.BooleanField(
+    certificates_requirements = models.BooleanField(
         verbose_name="Certificates Requirements Check",
     )
     command_timeout = models.IntegerField(
@@ -26,7 +23,7 @@ class Profile(models.Model):
     connection_timeout = models.IntegerField(
         verbose_name="Connection Timeout",
     )
-    content_version_check = models.BooleanField(
+    content_version = models.BooleanField(
         verbose_name="Content Version Check",
     )
     content_version_snapshot = models.BooleanField(
@@ -40,28 +37,25 @@ class Profile(models.Model):
     download_retry_interval = models.IntegerField(
         verbose_name="Download Retry Interval",
     )
-    dynamic_updates_check = models.BooleanField(
+    dynamic_updates = models.BooleanField(
         verbose_name="Dynamic Updates Check",
     )
-    expired_licenses_check = models.BooleanField(
+    expired_licenses = models.BooleanField(
         verbose_name="Expired Licenses Check",
     )
-    free_disk_space_check = models.BooleanField(
+    free_disk_space = models.BooleanField(
         verbose_name="Free Disk Space Check",
     )
-    ha_check = models.BooleanField(
+    ha = models.BooleanField(
         verbose_name="HA Check",
     )
     install_retry_interval = models.IntegerField(
         verbose_name="Install Retry Interval",
     )
-    ip_sec_tunnel_status_check = models.BooleanField(
-        verbose_name="IPSec Tunnel Status Check",
-    )
     ip_sec_tunnels_snapshot = models.BooleanField(
         verbose_name="IPSec Tunnels Snapshot",
     )
-    jobs_check = models.BooleanField(
+    jobs = models.BooleanField(
         verbose_name="Jobs Check",
     )
     license_snapshot = models.BooleanField(
@@ -87,7 +81,7 @@ class Profile(models.Model):
     nics_snapshot = models.BooleanField(
         verbose_name="NICs Snapshot",
     )
-    ntp_sync_check = models.BooleanField(
+    ntp_sync = models.BooleanField(
         verbose_name="NTP Sync Check",
     )
     pan_password = models.CharField(
@@ -98,15 +92,11 @@ class Profile(models.Model):
         max_length=255,
         verbose_name="PAN Username",
     )
-    panorama_check = models.BooleanField(
+    panorama = models.BooleanField(
         verbose_name="Panorama Check",
     )
-    planes_clock_sync_check = models.BooleanField(
+    planes_clock_sync = models.BooleanField(
         verbose_name="Planes Clock Sync Check",
-    )
-    readiness_checks_location = models.CharField(
-        max_length=255,
-        verbose_name="Readiness Checks Location",
     )
     reboot_retry_interval = models.IntegerField(
         verbose_name="Reboot Retry Interval",
@@ -114,18 +104,11 @@ class Profile(models.Model):
     routes_snapshot = models.BooleanField(
         verbose_name="Routes Snapshot",
     )
-    session_exist_check = models.BooleanField(
-        verbose_name="Session Exist Check",
-    )
     session_stats_snapshot = models.BooleanField(
         verbose_name="Session Stats Snapshot",
     )
     snapshot_retry_interval = models.IntegerField(
         verbose_name="Snapshot Retry Interval",
-    )
-    snapshots_location = models.CharField(
-        max_length=255,
-        verbose_name="Snapshots Location",
     )
     uuid = models.UUIDField(
         primary_key=True,
