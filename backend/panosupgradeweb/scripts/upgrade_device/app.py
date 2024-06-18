@@ -5,7 +5,6 @@ from panosupgradeweb.models import Device
 from panosupgradeweb.scripts.logger import PanOsUpgradeLogger
 from panosupgradeweb.scripts.utilities import parse_version
 from .upgrade import PanosUpgrade
-from celery.exceptions import WorkerTerminate
 
 # Create an instance of the custom logger
 job_logger = PanOsUpgradeLogger("pan-os-upgrade-upgrade")
