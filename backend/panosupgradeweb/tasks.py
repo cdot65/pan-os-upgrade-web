@@ -17,7 +17,7 @@ from panosupgradeweb.scripts import (
     run_upgrade_device,
 )
 
-from celery.exceptions import WorkerTerminate
+from celery.exceptions import Ignore, WorkerTerminate
 
 # ----------------------------------------------------------------------------
 # Configure logging
@@ -178,11 +178,16 @@ def execute_upgrade_device_task(
 
         if job_status == "errored":
             job.job_status = "errored"
-            raise WorkerTerminate()
         elif job_status == "skipped":
             job.job_status = "skipped"
         else:
             job.job_status = "completed"
+
+    except WorkerTerminate as e:
+        job.job_status = "errored"
+        logging.debug(f"Job ID: {job.pk}\nError: {e}")
+        logging.error(f"Exception Type: {type(e).__name__}")
+        logging.error(f"Traceback: {traceback.format_exc()}")
 
     except Exception as e:
         job.job_status = "errored"
