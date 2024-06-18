@@ -1,10 +1,18 @@
 import time
+from http.client import RemoteDisconnected
 from typing import Dict, Optional, Tuple, Union
+from celery.exceptions import WorkerTerminate
 
 # Palo Alto Networks SDK imports
 from panos.firewall import Firewall
 from panos.panorama import Panorama
-from panos.errors import PanDeviceXapiError
+from panos.errors import (
+    PanDeviceXapiError,
+    PanXapiError,
+    PanConnectionTimeout,
+    PanURLError,
+)
+
 
 # Palo Alto Networks Assurance imports
 from panos_upgrade_assurance.check_firewall import CheckFirewall
@@ -38,8 +46,6 @@ class PanosUpgrade:
     Attributes:
         job_id (str): The ID of the job associated with the upgrade.
         logger (PanOsUpgradeLogger): An instance of the UpgradeLogger class for logging upgrade-related messages.
-        max_retries (int): The maximum number of retries for certain operations.
-        retry_interval (int): The interval (in seconds) between retries.
         primary_device (Dict): A dictionary containing information about the primary device in an HA pair.
         secondary_device (Dict): A dictionary containing information about the secondary device in an HA pair.
         standalone_device (Dict): A dictionary containing information about a standalone device.
@@ -64,8 +70,8 @@ class PanosUpgrade:
         a firewall device.
         - perform_readiness_checks(self, device: Dict) -> str: Perform readiness checks on a firewall device before the
         upgrade process.
-        - run_assurance(self, device: Dict, operation_type: str, snapshot_type: str = None) -> None: Run assurance checks
-        or snapshots on a firewall device.
+        - run_assurance(self, device: Dict, operation_type: str, snapshot_type: str = None) -> None: Run assurance
+        checks or snapshots on a firewall device.
         - software_available_check(self, device: Union[Firewall, Panorama], target_version: str) -> bool:
         Check if a software update to the target version is available and compatible.
         - software_download(self, device: Union[Firewall, Panorama], target_version: str) -> bool: Download the target
@@ -78,28 +84,41 @@ class PanosUpgrade:
     def __init__(
         self,
         job_id: str,
+        profile_uuid: str,
     ):
         self.ha_details = None
-        self.job_id = job_id
+        self.job_id: str = job_id
         self.logger = PanOsUpgradeLogger("pan-os-upgrade-upgrade")
         self.logger.set_job_id(job_id)
-        self.max_retries = 3
         self.post_snapshot = None
         self.pre_snapshot = None
+        self.profile_uuid = profile_uuid
+        self.profile = {
+            "authentication": {},
+            "checks": {},
+            "download": {},
+            "install": {},
+            "reboot": {},
+            "snapshots": {},
+            "timeout": {},
+        }
         self.primary_device = None
-        self.readiness_checks = None
-        self.retry_interval = 60
         self.secondary_device = None
-        self.stop_upgrade_workflow = False
+        self.set_profile_settings()
+        self.readiness_checks_succeeded: bool = False
+        self.snapshot_attempt: int = 0
+        self.snapshot_succeeded: bool = False
         self.standalone_device = None
-        self.version_local_parsed = None
-        self.version_peer_parsed = None
-        self.version_target_parsed = None
-        self.upgrade_required = False
+        self.stop_upgrade_workflow: bool = False
+        self.version_local_parsed: tuple = ()
+        self.version_peer_parsed: tuple = ()
+        self.version_target_parsed: tuple = ()
+        self.upgrade_required: bool = False
+        self.upgrade_succeeded: bool = False
 
     def assign_device(
         self,
-        device_dict,
+        device_dict: Dict,
     ):
         """
         Assign a device dictionary to the appropriate attribute based on its local state.
@@ -216,8 +235,8 @@ class PanosUpgrade:
             if each.panorama_managed:
                 firewall = Firewall(
                     serial=each.serial,
-                    api_username=profile.pan_username,
-                    api_password=profile.pan_password,
+                    api_username=self.profile["authentication"]["pan_username"],
+                    api_password=self.profile["authentication"]["pan_password"],
                 )
                 pan = Panorama(
                     hostname=(
@@ -225,15 +244,15 @@ class PanosUpgrade:
                         if each.panorama_ipv4_address
                         else each.ipv6_address
                     ),
-                    api_username=profile.pan_username,
-                    api_password=profile.pan_password,
+                    api_username=self.profile["authentication"]["pan_username"],
+                    api_password=self.profile["authentication"]["pan_password"],
                 )
                 pan.add(firewall)
             else:
                 firewall = Firewall(
                     hostname=each.ipv4_address,
-                    username=profile.pan_username,
-                    password=profile.pan_password,
+                    username=self.profile["authentication"]["pan_username"],
+                    password=self.profile["authentication"]["pan_password"],
                 )
 
             # Create a dictionary containing the device, job ID, firewall object, and profile
@@ -251,7 +270,9 @@ class PanosUpgrade:
             # Check if the device is in an HA pair
             if each.ha_enabled:
                 # Get the HA status of the device and assign it to the appropriate attribute
-                assigned_as = self.assign_device(device_dict=device_dict)
+                assigned_as = self.assign_device(
+                    device_dict=device_dict,
+                )
 
                 if assigned_as == "primary":
                     self.primary_device = device_dict
@@ -458,7 +479,7 @@ class PanosUpgrade:
         if current_version < target_version:
             # Log upgrade required message if the current version is less than the target version
             self.logger.log_task(
-                action="start",
+                action="report",
                 message=f"{hostname}: Upgrade required from {current_version} to {target_version}",
             )
             self.upgrade_required = True
@@ -522,7 +543,7 @@ class PanosUpgrade:
     def perform_readiness_checks(
         self,
         device: Dict,
-    ) -> str:
+    ) -> None:
         """
         Perform readiness checks on a firewall device before the upgrade process.
 
@@ -530,118 +551,252 @@ class PanosUpgrade:
         It attempts to run the readiness checks operation multiple times, with a specified retry interval,
         until the checks are successfully completed or the maximum number of retries is reached.
 
-        If the readiness checks fail to complete successfully, the function logs an error message and returns
-        an "errored" status. If the firewall does not require an upgrade to the target version, the function
-        also logs an error message and returns an "errored" status.
+        If a readiness check fails and its 'exit_on_failure' attribute is set to True, the function logs an
+        error message using the check's description and returns an "errored" status. If a readiness check fails
+        but its 'exit_on_failure' attribute is set to False, the function logs a warning message and continues
+        with the execution.
 
         Args:
             device (Dict): A dictionary containing information about the firewall device.
 
         Returns:
-            str: The status of the readiness checks operation ("completed", "skipped", or "errored").
-
-        Mermaid Workflow:
-            ```mermaid
-            graph TD
-                A[Start] --> B{Readiness checks completed successfully?}
-                B -->|Yes| C[Log success message and return "completed"]
-                B -->|No| D{Max retries reached?}
-                D -->|Yes| E[Log error message and return "errored"]
-                D -->|No| F[Perform readiness checks attempt]
-                F --> G{Readiness checks failed?}
-                G -->|Yes| H[Log error message and wait for retry interval]
-                H --> D
-                G -->|No| I{Firewall requires upgrade?}
-                I -->|Yes| B
-                I -->|No| J[Log error message and return "errored"]
-            ```
+            None
         """
 
-        # Log the start of the readiness check process
-        self.logger.log_task(
-            action="start",
-            message=f"{device['db_device'].hostname}: Performing readiness checks on the device.",
-        )
-
         # Attempt to perform readiness checks
-        attempt = 0
-        while attempt < self.max_retries and self.readiness_checks is None:
-            # Perform a Readiness Checks attempt
-            try:
-                # Execute the readiness checks operation
-                self.run_assurance(
-                    device=device,
-                    operation_type="readiness_checks",
-                )
+        self.readiness_checks_succeeded = False
 
-                # Gracefully exit if the firewall does not require an upgrade to target version
-                if self.readiness_checks is None:
-                    # Log the message to the console
-                    self.logger.log_task(
-                        action="error",
-                        message=f"{device['db_device'].hostname}: Readiness Checks failed to complete "
-                        f"successfully, halting the upgrade to {device['db_device'].sw_version}.",
-                    )
+        # Perform a Readiness Checks attempt
+        try:
+            # Execute the readiness checks operation
+            self.run_assurance(
+                device=device,
+                operation_type="readiness_checks",
+            )
 
-                    # Return an error status
-                    return "errored"
-
-                else:
-                    # Log the readiness checks success message
-                    self.logger.log_task(
-                        action="save",
-                        message=f"{device['db_device'].hostname}: Readiness checks successfully completed.",
-                    )
-
-            # Catch specific and general exceptions
-            except (AttributeError, IOError, Exception) as error:
-                # Log the readiness checks error message
-                self.logger.log_task(
-                    action="error",
-                    message=f"{device['db_device'].hostname}: Readiness Checks attempt failed with error: "
-                    f"{error}. Retrying after {self.retry_interval} seconds.",
-                )
-                self.logger.log_task(
-                    action="working",
-                    message=f"{device['db_device'].hostname}: Waiting for {self.retry_interval} seconds"
-                    f" before retrying readiness checks.",
-                )
-
-                # Wait before retrying the readiness checks
-                time.sleep(self.retry_interval)
-
-                # Increment the readiness checks attempt number
-                attempt += 1
-
-        # If the readiness checks fail after multiple attempts
-        if self.readiness_checks is None:
+        # Catch specific and general exceptions
+        except (AttributeError, IOError, Exception) as error:
             # Log the readiness checks error message
             self.logger.log_task(
                 action="error",
-                message=f"{device['db_device'].hostname}: Failed to perform readiness checks after trying a "
-                f"total of {self.max_retries} attempts.",
+                message=f"{device['db_device'].hostname}: Readiness Checks attempt failed with error: {error}.",
             )
 
-        # Gracefully exit if the firewall does not require an upgrade to target version
-        if self.stop_upgrade_workflow:
-            # Log the message to the console
+        # If the readiness checks fail
+        if not self.readiness_checks_succeeded:
+            # Log the readiness checks error message
             self.logger.log_task(
                 action="error",
-                message=f"{device['db_device'].hostname}: Readiness checks failed to complete successfully, "
-                f"halting the upgrade to {device['db_device'].sw_version}.",
+                message=f"{device['db_device'].hostname}: Failed to perform readiness checks.",
             )
+            # Set self.readiness_checks_succeeded to False to indicate failure
+            self.readiness_checks_succeeded = False
 
-            # Return an error status
-            return "errored"
-
+        # If the readiness checks succeeded
         else:
             # Log the readiness checks success message
             self.logger.log_task(
-                action="save",
+                action="success",
                 message=f"{device['db_device'].hostname}: Readiness checks successfully completed.",
             )
 
-        return "completed"
+    def perform_reboot(
+        self,
+        device: Dict,
+        target_version: str,
+    ) -> None:
+        """
+        Initiates a reboot on a specified device (Firewall or Panorama) and verifies it boots up with the desired
+        PAN-OS version.
+        This function is critical in completing the upgrade process, ensuring that the device is running the expected
+        software version
+        post-reboot. It also supports High Availability (HA) configurations, checking for the HA pair's synchronization
+        and functional status after the reboot.
+
+        The process sends a reboot command to the device, waits for it to go offline and come back online, and then
+        checks if the rebooted PAN-OS version matches the target version. For devices in an HA setup, additional steps
+        are taken to verify the HA status and synchronization between the HA peers post-reboot.
+
+        Parameters
+        ----------
+        device : Device
+            The dict object representing either a PanDevice and its database object, with necessary connectivity details
+        target_version : str
+            The PAN-OS version that the device should be running after the reboot.
+
+        Raises
+        ------
+        SystemExit
+            If the device fails to reboot to the specified PAN-OS version after a set number of retries, or if HA
+            synchronization is not achieved post-reboot, the script will terminate with an error.
+        """
+
+        rebooted = False
+        attempt = 0
+
+        # Log the readiness checks success message
+        self.logger.log_task(
+            action="start",
+            message=f"{device['db_device'].hostname}: Rebooting the device.",
+        )
+
+        # Initiate reboot
+        device["pan_device"].op(
+            "<request><restart><system/></restart></request>",
+            cmd_xml=False,
+        )
+
+        # Wait for the target device reboot process to initiate before checking status
+        time.sleep(60)
+
+        while not rebooted and attempt < self.profile["reboot"]["maximum_attempts"]:
+            try:
+                # Refresh system information to check if the device is back online
+                device["pan_device"].refresh_system_info()
+
+                # Log the readiness checks success message
+                self.logger.log_task(
+                    action="report",
+                    message=f"{device['db_device'].hostname}: Current device version: {device['pan_device'].version}.",
+                )
+
+                # Check if the device has rebooted to the target version
+                if device["pan_device"].version == target_version:
+                    # Log the successful upgrade/reboot
+                    self.logger.log_task(
+                        action="success",
+                        message=f"{device['db_device'].hostname}: Device upgraded to {target_version} and rebooted "
+                        f"successfully.",
+                    )
+
+                    rebooted = True
+
+                else:
+                    # Log the successful upgrade/reboot
+                    self.logger.log_task(
+                        action="error",
+                        message=f"{device['db_device'].hostname}: Device rebooted but not to {target_version}.",
+                    )
+
+                    self.stop_upgrade_workflow = True
+
+            except (
+                PanXapiError,
+                PanConnectionTimeout,
+                PanURLError,
+                RemoteDisconnected,
+            ) as e:
+                # Log that we are going to retry in a certain amount of time
+                self.logger.log_task(
+                    action="start",
+                    message=f"{device['db_device'].hostname}: Retry attempt {attempt + 1} due to error: {e}.",
+                )
+
+                attempt += 1
+                time.sleep(self.profile["reboot"]["retry_interval"])
+
+        if not rebooted:
+            # Log that we are going to retry in a certain amount of time
+            self.logger.log_task(
+                action="error",
+                message=f"{device['db_device'].hostname}: Failed to reboot to the target version after "
+                f"{self.profile['reboot']['max_retries']} attempts.",
+            )
+            self.stop_upgrade_workflow = True
+
+    def perform_upgrade(
+        self,
+        device: Dict,
+        target_version: str,
+    ) -> str:
+        """
+        Conducts the upgrade process for a Palo Alto Networks device to a specified version. This function handles
+        downloading the necessary software version and executing the upgrade command. It is designed to work in both
+        standalone and High Availability (HA) configurations, ensuring proper upgrade procedures are followed in each
+        scenario.
+
+        This function attempts the upgrade process up to a maximum number of retries defined in the settings file or
+        default settings. If the software manager is busy, it waits for a specified interval before retrying.
+        The function sets a boolean indicating the success or failure of the installation process.
+
+        Parameters
+        ----------
+        device : Dict
+            The device object representing the target Firewall or Panorama to be upgraded.
+        target_version : str
+            The target PAN-OS version to upgrade the device to.
+
+        Returns
+        -------
+        str
+            The status of the upgrade process ("completed", "errored").
+        """
+
+        # Log message to console about starting the upgrade process
+        self.logger.log_task(
+            action="working",
+            message=f"{device['db_device'].hostname}: Beginning PAN-OS upgrade",
+        )
+
+        # Initialize with default values
+        attempt: int = 0
+
+        while attempt < self.profile["upgrade"]["maximum_attempts"]:
+            try:
+                self.logger.log_task(
+                    action="working",
+                    message=f"{device['db_device'].hostname}: Attempting upgrade to version {target_version} (Attempt "
+                    f"{attempt + 1} of {self.profile['upgrade']['maximum_attempts']}).",
+                )
+
+                install_job = device["pan_device"].software.install(
+                    target_version,
+                    sync=True,
+                )
+
+                if install_job["success"]:
+                    self.logger.log_task(
+                        action="working",
+                        message=f"{device['db_device'].hostname}: Upgrade completed successfully.",
+                    )
+
+                    # Mark installation as successful
+                    self.upgrade_succeeded = True
+
+                    # Return "completed" status to indicate successful upgrade
+                    return "completed"
+
+                else:
+                    attempt += 1
+                    if attempt < self.profile["upgrade"]["maximum_attempts"]:
+                        self.logger.log_task(
+                            action="working",
+                            message=f"{device['db_device'].hostname}: Retrying in "
+                            f"{self.profile['upgrade']['retry_interval']} seconds.",
+                        )
+                        time.sleep(self.profile["upgrade"]["retry_interval"])
+
+            # Log any errors that occur during HA state suspension
+            except Exception as e:
+                self.logger.log_task(
+                    action="error",
+                    message=f"{device['db_device'].hostname}: Error suspending target device HA state: {e}",
+                )
+
+                # Set self.stop_upgrade_workflow to True
+                self.stop_upgrade_workflow = True
+
+                # Return "errored" status to indicate upgrade failure
+                return "errored"
+
+        # If the upgrade fails after max_retries
+        if not self.upgrade_succeeded:
+            self.logger.log_task(
+                action="working",
+                message=f"{device['db_device'].hostname}: Upgrade failed after "
+                f"{self.profile['upgrade']['maximum_attempts']} attempts.",
+            )
+            return "errored"
 
     def run_assurance(
         self,
@@ -660,42 +815,15 @@ class PanosUpgrade:
                 The dictionary should include the following keys:
                 - "pan_device": An instance of the PanDevice class representing the firewall.
                 - "profile": An instance of the FirewallProfile class containing snapshot settings.
-                - "db_device": An instance of the Device model representing the firewall in the database.
             operation_type (str): The type of assurance operation to perform. Valid values are:
                 - "state_snapshot": Take snapshots of various firewall states.
-                - "readiness_checks": Perform readiness checks on the firewall.
-            snapshot_type (str, optional): The type of snapshot operation to perform. Valid values are:
+                - "readiness_checks": Perform readiness checks on the firewall device.
+            snapshot_type (str): The type of snapshot operation to perform. Valid values are:
                 - "pre_upgrade": Take snapshots of various pre-upgrade operations.
                 - "post_upgrade": Take snapshots of various post-upgrade operations.
-                Defaults to None.
 
         Returns:
             None
-
-        Raises:
-            None
-
-        Mermaid Workflow:
-            ```mermaid
-            graph TD
-                A[Start] --> B{operation_type?}
-                B -->|state_snapshot| C[Set up FirewallProxy and CheckFirewall]
-                C --> D[Get enabled snapshot actions from device profile]
-                D --> E[Run snapshots using CheckFirewall]
-                E --> F{Snapshots successful?}
-                F -->|No| G[Log error and return None]
-                F -->|Yes| H[Create Snapshot, ContentVersion, License, and NetworkInterface instances]
-                H --> I[Log snapshot results and return None]
-                B -->|readiness_checks| J[Set up FirewallProxy and CheckFirewall]
-                J --> K[Get enabled readiness check actions from device profile]
-                K --> L[Run readiness checks using CheckFirewall]
-                L --> M{Readiness checks passed?}
-                M -->|No| N{exit_on_failure?}
-                N -->|Yes| O[Log error, set stop_upgrade_workflow, and return None]
-                N -->|No| P[Log error and continue]
-                M -->|Yes| Q[Log success and continue]
-                B -->|Other| R[Log error and return None]
-            ```
         """
 
         # Setup Firewall client
@@ -704,187 +832,302 @@ class PanosUpgrade:
         )
 
         if operation_type == "state_snapshot":
-            actions = {
-                "arp_table": device["profile"].arp_table_snapshot,
-                "content_version": device["profile"].content_version_snapshot,
-                "ip_sec_tunnels": device["profile"].ip_sec_tunnels_snapshot,
-                "license": device["profile"].license_snapshot,
-                "nics": device["profile"].nics_snapshot,
-                "routes": device["profile"].routes_snapshot,
-                "session_stats": device["profile"].session_stats_snapshot,
-            }
+            try:
+                actions = {
+                    "arp_table": device["profile"].arp_table_snapshot,
+                    "content_version": device["profile"].content_version_snapshot,
+                    "ip_sec_tunnels": device["profile"].ip_sec_tunnels_snapshot,
+                    "license": device["profile"].license_snapshot,
+                    "nics": device["profile"].nics_snapshot,
+                    "routes": device["profile"].routes_snapshot,
+                    "session_stats": device["profile"].session_stats_snapshot,
+                }
 
-            # Create a list of action names where the corresponding value is True
-            enabled_actions = [action for action, enabled in actions.items() if enabled]
+                # Create a list of action names where the corresponding value is True
+                enabled_actions = [
+                    action for action, enabled in actions.items() if enabled
+                ]
 
-            # Run the snapshots using CheckFirewall
-            self.logger.log_task(
-                action="working",
-                message=f"{device['db_device'].hostname}: Running snapshots using CheckFirewall",
-            )
+                snapshot_results = checks_firewall.run_snapshots(
+                    snapshots_config=enabled_actions
+                )
 
-            snapshot_results = checks_firewall.run_snapshots(
-                snapshots_config=enabled_actions
-            )
+                if snapshot_type == "pre_upgrade":
+                    self.pre_snapshot = snapshot_results
+                else:
+                    self.post_snapshot = snapshot_results
 
-            if snapshot_type == "pre_upgrade":
-                self.pre_snapshot = snapshot_results
-            else:
-                self.post_snapshot = snapshot_results
+                if snapshot_results:
+                    try:
+                        # Retrieve the Job object using the job_id
+                        job = Job.objects.get(task_id=self.job_id)
 
-            if snapshot_results:
-                try:
-                    # Retrieve the Job object using the job_id
-                    job = Job.objects.get(task_id=self.job_id)
-
-                    # Create a new Snapshot instance and associate it with the job and device
-                    snapshot = Snapshot.objects.create(
-                        job=job,
-                        device=device["db_device"],
-                        snapshot_type=snapshot_type,
-                    )
-
-                    # Create a new ContentVersion instance if the content version is available
-                    if "content_version" in snapshot_results:
-                        ContentVersion.objects.create(
-                            snapshot=snapshot,
-                            version=snapshot_results["content_version"]["version"],
+                        # Create a new Snapshot instance and associate it with the job and device
+                        snapshot = Snapshot.objects.create(
+                            job=job,
+                            device=device["db_device"],
+                            snapshot_type=snapshot_type,
                         )
 
-                    # Create License instances for each license in the snapshot results
-                    if "license" in snapshot_results:
-                        for license_name, license_data in snapshot_results[
-                            "license"
-                        ].items():
-                            base_license_name = license_data.get(
-                                "base-license-name", ""
-                            )  # Use an empty string as default if the field is missing
-                            License.objects.create(
+                        # Create a new ContentVersion instance if the content version is available
+                        if "content_version" in snapshot_results:
+                            ContentVersion.objects.create(
                                 snapshot=snapshot,
-                                feature=license_data["feature"],
-                                description=license_data["description"],
-                                serial=license_data["serial"],
-                                issued=license_data["issued"],
-                                expires=license_data["expires"],
-                                expired=license_data["expired"],
-                                base_license_name=base_license_name,
-                                authcode=license_data["authcode"],
-                                custom=license_data.get("custom"),
+                                version=snapshot_results["content_version"]["version"],
                             )
 
-                    # Create NetworkInterface instances for each network interface in the snapshot results
-                    if "nics" in snapshot_results:
-                        for nic_name, nic_status in snapshot_results["nics"].items():
-                            NetworkInterface.objects.create(
-                                snapshot=snapshot,
-                                name=nic_name,
-                                status=nic_status,
-                            )
+                        # Create License instances for each license in the snapshot results
+                        if "license" in snapshot_results:
+                            for license_name, license_data in snapshot_results[
+                                "license"
+                            ].items():
+                                base_license_name = license_data.get(
+                                    "base-license-name", ""
+                                )  # Use an empty string as default if the field is missing
+                                License.objects.create(
+                                    snapshot=snapshot,
+                                    feature=license_data["feature"],
+                                    description=license_data["description"],
+                                    serial=license_data["serial"],
+                                    issued=license_data["issued"],
+                                    expires=license_data["expires"],
+                                    expired=license_data["expired"],
+                                    base_license_name=base_license_name,
+                                    authcode=license_data["authcode"],
+                                    custom=license_data.get("custom"),
+                                )
 
-                    self.logger.log_task(
-                        action="success",
-                        message=f"{device['db_device'].hostname}: Snapshot creation completed successfully",
-                    )
+                        # Create NetworkInterface instances for each network interface in the snapshot results
+                        if "nics" in snapshot_results:
+                            for nic_name, nic_status in snapshot_results[
+                                "nics"
+                            ].items():
+                                NetworkInterface.objects.create(
+                                    snapshot=snapshot,
+                                    name=nic_name,
+                                    status=nic_status,
+                                )
 
-                except Job.DoesNotExist:
-                    # Log an error message
-                    self.logger.log_task(
-                        action="error",
-                        message=f"{device['db_device'].hostname}: Job with ID {self.job_id} does not exist",
-                    )
+                        self.logger.log_task(
+                            action="success",
+                            message=f"{device['db_device'].hostname}: Snapshot creation completed successfully",
+                        )
 
-                except Exception as e:
+                        self.snapshot_succeeded = True
+
+                    except Exception as e:
+                        # Log the error message
+                        self.logger.log_task(
+                            action="error",
+                            message=f"{device['db_device'].hostname}: Error creating snapshot: {str(e)}",
+                        )
+
+                        # Set the value of self.stop_upgrade_workflow to halt the upgrade workflow
+                        self.snapshot_succeeded = False
+
+                else:
                     # Log the error message
                     self.logger.log_task(
                         action="error",
-                        message=f"{device['db_device'].hostname}: Error creating snapshot: {str(e)}",
+                        message=f"{device['db_device'].hostname}: Error creating snapshot",
                     )
 
-            else:
-                # Log the error message
+                    # Set the value of self.stop_upgrade_workflow to halt the upgrade workflow
+                    self.snapshot_succeeded = False
+
+            except Exception as e:
                 self.logger.log_task(
                     action="error",
-                    message=f"{device['db_device'].hostname}: Error creating snapshot",
+                    message=f"{device['db_device'].hostname}: An error occurred during readiness checks: {str(e)}",
                 )
+                self.readiness_checks_succeeded = False
 
         if operation_type == "readiness_checks":
-            actions = {
-                "active_support": device["profile"].active_support,
-                "candidate_config": device["profile"].candidate_config,
-                "certificates_requirements": device[
-                    "profile"
-                ].certificates_requirements,
-                "content_version": device["profile"].content_version,
-                "dynamic_updates": device["profile"].dynamic_updates,
-                "expired_licenses": device["profile"].expired_licenses,
-                "free_disk_space": device["profile"].free_disk_space,
-                "ha": device["profile"].ha,
-                "jobs": device["profile"].jobs,
-                "ntp_sync": device["profile"].ntp_sync,
-                "panorama": device["profile"].panorama,
-                "planes_clock_sync": device["profile"].planes_clock_sync,
-            }
-            for action in actions:
-                if action not in AssuranceOptions.READINESS_CHECKS.keys():
-                    self.logger.log_task(
-                        action="report",
-                        message=f"{device['db_device'].hostname}: Invalid action for readiness check: {action}",
-                    )
+            try:
+                actions = {
+                    "active_support": device["profile"].active_support,
+                    "candidate_config": device["profile"].candidate_config,
+                    "certificates_requirements": device[
+                        "profile"
+                    ].certificates_requirements,
+                    "content_version": device["profile"].content_version,
+                    "dynamic_updates": device["profile"].dynamic_updates,
+                    "expired_licenses": device["profile"].expired_licenses,
+                    "free_disk_space": device["profile"].free_disk_space,
+                    "ha": device["profile"].ha,
+                    "jobs": device["profile"].jobs,
+                    "ntp_sync": device["profile"].ntp_sync,
+                    "panorama": device["profile"].panorama,
+                    "planes_clock_sync": device["profile"].planes_clock_sync,
+                }
+                for action in actions:
+                    if action not in AssuranceOptions.READINESS_CHECKS.keys():
+                        self.logger.log_task(
+                            action="report",
+                            message=f"{device['db_device'].hostname}: Invalid action for readiness check: {action}",
+                        )
 
-            # Create a list of action names where the corresponding value is True
-            enabled_actions = [action for action, enabled in actions.items() if enabled]
+                # Create a list of action names where the corresponding value is True
+                enabled_actions = [
+                    action for action, enabled in actions.items() if enabled
+                ]
 
-            # Run the snapshots using CheckFirewall
-            self.logger.log_task(
-                action="working",
-                message=f"{device['db_device'].hostname}: Begin running the readiness checks declared in the profile",
-            )
-
-            result = checks_firewall.run_readiness_checks(
-                checks_configuration=enabled_actions
-            )
-
-            self.readiness_checks = True
-
-            for (
-                test_name,
-                test_info,
-            ) in AssuranceOptions.READINESS_CHECKS.items():
-                test_result = result.get(
-                    test_name, {"state": False, "reason": "Skipped Readiness Check"}
+                # Run the snapshots using CheckFirewall
+                self.logger.log_task(
+                    action="start",
+                    message=f"{device['db_device'].hostname}: Begin running the readiness checks",
                 )
 
-                # Use .get() with a default value for 'reason' to avoid KeyError
-                reason = test_result.get("reason", "No reason provided")
-                log_message = f'{reason}: {test_info["description"]}'
+                result = checks_firewall.run_readiness_checks(
+                    checks_configuration=enabled_actions
+                )
 
-                if test_result["state"]:
-                    self.logger.log_task(
-                        action="success",
-                        message=f"{device['db_device'].hostname}: Passed Readiness Check: {test_info['description']}",
+                self.readiness_checks_succeeded = True
+
+                for (
+                    test_name,
+                    test_info,
+                ) in AssuranceOptions.READINESS_CHECKS.items():
+                    test_result = result.get(
+                        test_name, {"state": False, "reason": "Skipped Readiness Check"}
                     )
-                else:
-                    if test_info["log_level"] == "error":
-                        if test_info["exit_on_failure"]:
+
+                    if test_result["state"]:
+                        self.logger.log_task(
+                            action="success",
+                            message=f"{device['db_device'].hostname}: Passed Readiness Check: {test_info['description']}",
+                        )
+                    else:
+                        reason = test_result["reason"]
+                        log_message = f'{reason}: {test_info["description"]}'
+
+                        if reason == "Skipped Readiness Check":
+                            # Log the skipped message
+                            self.logger.log_task(
+                                action="skipped",
+                                message=f"{device['db_device'].hostname}: {log_message}, but continuing with the execution",
+                            )
+                        elif test_info["exit_on_failure"]:
                             # Log the error message
                             self.logger.log_task(
                                 action="error",
                                 message=f"{device['db_device'].hostname}: {log_message}, halting upgrade workflow.",
                             )
 
-                            # Set the value of self.stop_upgrade_workflow to halt the upgrade workflow
-                            self.stop_upgrade_workflow = True
-
+                            # Set the value of self.readiness_checks_succeeded to False
+                            self.readiness_checks_succeeded = False
                         else:
-                            # Log the error message
+                            # Log the warning message
                             self.logger.log_task(
-                                action="error",
-                                message=f"{device['db_device'].hostname}: {log_message}",
+                                action="warning",
+                                message=f"{device['db_device'].hostname}: {log_message}, but continuing with the "
+                                f"execution",
                             )
 
-    @staticmethod
+            except Exception as e:
+                self.logger.log_task(
+                    action="error",
+                    message=f"{device['db_device'].hostname}: An error occurred during readiness checks: {str(e)}",
+                )
+                self.readiness_checks_succeeded = False
+
+    def set_profile_settings(self):
+        """
+        Set the profile settings based on the provided profile UUID.
+
+        This function retrieves the profile object based on the given profile UUID and sets various attributes
+        of the profile, including authentication, image download, image install, reboot, timeout, readiness checks,
+        and snapshots. If the profile is not found, it raises a Profile.DoesNotExist exception.
+
+        Mermaid Workflow:
+            ```mermaid
+            graph TD
+                A[Start] --> B{Profile exists?}
+                B -->|Yes| C[Retrieve profile object]
+                C --> D[Set authentication attributes]
+                D --> E[Set image download attributes]
+                E --> F[Set image install attributes]
+                F --> G[Set reboot attributes]
+                G --> H[Set timeout attributes]
+                H --> I[Set readiness checks]
+                I --> J[Set snapshot attributes]
+                J --> K[Set snapshot state]
+                K --> L[Log success message]
+                L --> M[End]
+                B -->|No| N[Log error message]
+                N --> O[Raise Profile.DoesNotExist exception]
+                O --> M
+            ```
+        """
+        try:
+            # Retrieve the profile object based on the provided profile UUID
+            profile = Profile.objects.get(uuid=self.profile_uuid)
+
+            # Set up authentication attributes
+            self.profile["authentication"]["pan_username"] = profile.pan_username
+            self.profile["authentication"]["pan_password"] = profile.pan_password
+
+            # Set up image download attributes
+            self.profile["download"]["maximum_attempts"] = profile.max_download_tries
+            self.profile["download"]["retry_interval"] = profile.download_retry_interval
+
+            # Set up image install attributes
+            self.profile["install"]["maximum_attempts"] = profile.max_install_attempts
+            self.profile["install"]["retry_interval"] = profile.install_retry_interval
+
+            # Set up reboot attributes
+            self.profile["reboot"]["maximum_attempts"] = profile.max_reboot_tries
+            self.profile["reboot"]["retry_interval"] = profile.reboot_retry_interval
+
+            # Set up timeout attributes
+            self.profile["timeout"]["command_timeout"] = profile.command_timeout
+            self.profile["timeout"]["connection_timeout"] = profile.connection_timeout
+
+            # Set up readiness checks
+            self.profile["checks"]["active_support"] = profile.active_support
+            self.profile["checks"]["candidate_config"] = profile.candidate_config
+            self.profile["checks"]["certificates"] = profile.certificates_requirements
+            self.profile["checks"]["content_version"] = profile.content_version
+            self.profile["checks"]["dynamic_updates"] = profile.dynamic_updates
+            self.profile["checks"]["expired_licenses"] = profile.expired_licenses
+            self.profile["checks"]["free_disk_space"] = profile.free_disk_space
+            self.profile["checks"]["ha"] = profile.ha
+            self.profile["checks"]["jobs"] = profile.jobs
+            self.profile["checks"]["ntp_sync"] = profile.ntp_sync
+            self.profile["checks"]["panorama"] = profile.panorama
+            self.profile["checks"]["planes_clock_sync"] = profile.planes_clock_sync
+
+            # Set up snapshot attributes
+            self.profile["snapshots"]["maximum_attempts"] = profile.max_snapshot_tries
+            self.profile["snapshots"][
+                "retry_interval"
+            ] = profile.snapshot_retry_interval
+
+            # Set up snapshots
+            self.profile["snapshots"]["arp_table"] = profile.arp_table_snapshot
+            self.profile["snapshots"]["content"] = profile.content_version_snapshot
+            self.profile["snapshots"]["ipsec"] = profile.ip_sec_tunnels_snapshot
+            self.profile["snapshots"]["license"] = profile.license_snapshot
+            self.profile["snapshots"]["nics"] = profile.nics_snapshot
+            self.profile["snapshots"]["routes"] = profile.routes_snapshot
+            self.profile["snapshots"]["sessions"] = profile.session_stats_snapshot
+
+            # Log message upon completion
+            self.logger.log_task(
+                action="success",
+                message=f"Profile settings retrieved and set for profile UUID: {self.profile_uuid}",
+            )
+
+        except Profile.DoesNotExist:
+            self.logger.log_task(
+                action="error",
+                message=f"Profile with UUID {self.profile_uuid} does not exist",
+            )
+            raise
+
     def software_available_check(
-        device: Union[Firewall, Panorama],
+        self,
+        device: Dict,
         target_version: str,
     ) -> bool:
         """
@@ -936,11 +1179,15 @@ class PanosUpgrade:
         """
 
         # Retrieve available versions of PAN-OS
-        device.software.check()
-        available_versions = device.software.versions
+        device["pan_device"].software.check()
+        available_versions = device["pan_device"].software.versions
 
         # Check if the target version is available
         if target_version in available_versions:
+            self.logger.log_task(
+                action="report",
+                message=f"{device['db_device'].hostname}: {target_version} found in list of available versions.",
+            )
             return True
 
     @staticmethod
@@ -1076,7 +1323,7 @@ class PanosUpgrade:
         self,
         device: Dict,
         snapshot_type: str,
-    ) -> str:
+    ) -> None:
         """
         Take a snapshot of the network state information for a firewall device.
 
@@ -1121,13 +1368,17 @@ class PanosUpgrade:
         # Log the start of the snapshot process
         self.logger.log_task(
             action="start",
-            message=f"{device['db_device'].hostname}: Performing snapshot of network state information.",
+            message=f"{device['db_device'].hostname}: Performing snapshot of network state information {snapshot_type}-"
+            "upgrade.",
         )
 
         # Attempt to take the snapshot
-        attempt = 0
-        snapshot_successful = False
-        while attempt < self.max_retries and not snapshot_successful:
+        self.snapshot_attempt = 0
+        self.snapshot_succeeded = False
+        while (
+            self.snapshot_attempt < self.profile["snapshots"]["retry_interval"]
+            and not self.snapshot_succeeded
+        ):
             # Make a snapshot attempt
             try:
                 # Execute the snapshot operation
@@ -1137,57 +1388,22 @@ class PanosUpgrade:
                     snapshot_type=snapshot_type,
                 )
 
-                # Gracefully exit if the firewall does not require an upgrade to target version
-                if self.stop_upgrade_workflow:
-                    # Log the message to the console
-                    self.logger.log_task(
-                        action="error",
-                        message=f"{device['db_device'].hostname}: Snapshot failed to complete successfully, "
-                        f"halting the upgrade to {device['db_device'].sw_version}.",
-                    )
-
-                    # Return an error status
-                    return "errored"
-
-                else:
-                    # Log the snapshot success message
-                    self.logger.log_task(
-                        action="save",
-                        message=f"{device['db_device'].hostname}: {snapshot_type.capitalize()} Upgrade snapshot "
-                        "successfully created.",
-                    )
-
-                    # Set the snapshot_successful flag to True
-                    snapshot_successful = True
-
             # Catch specific and general exceptions
             except (AttributeError, IOError, Exception) as error:
                 # Log the snapshot error message
                 self.logger.log_task(
                     action="error",
                     message=f"{device['db_device'].hostname}: Snapshot attempt failed with error: {error}. "
-                    f"Retrying after {self.retry_interval} seconds.",
+                    f"Retrying after {self.profile['snapshots']['retry_interval']} seconds.",
                 )
                 self.logger.log_task(
                     action="working",
-                    message=f"{device['db_device'].hostname}: Waiting for {self.retry_interval} seconds"
-                    f" before retrying snapshot.",
+                    message=f"{device['db_device'].hostname}: Waiting for {self.profile['snapshots']['retry_interval']}"
+                    f" seconds before retrying snapshot.",
                 )
 
                 # Wait before retrying the snapshot
-                time.sleep(self.retry_interval)
+                time.sleep(self.profile["snapshots"]["retry_interval"])
 
                 # Increment the snapshot attempt number
-                attempt += 1
-
-        # If the snapshot fails after multiple attempts
-        if not snapshot_successful:
-            # Log the snapshot error message
-            self.logger.log_task(
-                action="error",
-                message=f"{device['db_device'].hostname}: Failed to create snapshot after trying a total of "
-                f"{self.max_retries} attempts.",
-            )
-            return "errored"
-
-        return "completed"
+                self.snapshot_attempt += 1
