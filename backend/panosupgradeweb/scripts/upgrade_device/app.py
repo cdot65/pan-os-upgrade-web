@@ -72,7 +72,10 @@ def main(
     # ------------------------------------------------------------------------------------------------------------------
     # Workflow: Create a new instance of the PanosUpgrade class
     # ------------------------------------------------------------------------------------------------------------------
-    upgrade_job = PanosUpgrade(job_id)
+    upgrade_job = PanosUpgrade(
+        job_id=job_id,
+        profile_uuid=profile_uuid,
+    )
 
     # Log the start of the PAN-OS upgrade process
     upgrade_job.logger.log_task(
@@ -325,7 +328,7 @@ def main(
     try:
         # Check if a software update is available for the device
         version_available = upgrade_job.software_available_check(
-            device=targeted_device["pan_device"],
+            device=targeted_device,
             target_version=target_version,
         )
 
@@ -355,7 +358,7 @@ def main(
 
         # Log the message to the console
         upgrade_job.logger.log_task(
-            action="success",
+            action="search",
             message=f"{targeted_device['db_device'].hostname}: Checking to see if {target_version}'s base image "
             f"{base_version_key} is available",
         )
@@ -390,10 +393,12 @@ def main(
                     )
 
                 # Retry loop for downloading the base image
-                for attempt in range(upgrade_job.max_retries):
+                for attempt in range(
+                    upgrade_job.profile["download"]["maximum_attempts"]
+                ):
                     # Log the message to the console
                     upgrade_job.logger.log_task(
-                        action="success",
+                        action="start",
                         message=f"{targeted_device['db_device'].hostname}: Downloading PAN-OS version "
                         f"{base_version_key} on the device",
                     )
@@ -415,28 +420,33 @@ def main(
 
                         # Log the waiting message
                         upgrade_job.logger.log_task(
-                            action="success",
-                            message=f"{targeted_device['db_device'].hostname}: Waiting {upgrade_job.retry_interval} "
-                            f"seconds to let the base image {base_version_key} load into the software manager "
-                            f"before downloading {target_version}.",
+                            action="working",
+                            message=f"{targeted_device['db_device'].hostname}: Waiting "
+                            f"{upgrade_job.profile['download']['retry_interval']} seconds to let the base image "
+                            f"{base_version_key} load into the software manager before downloading {target_version}.",
                         )
 
                         # Wait for the base image to load into the software manager
-                        time.sleep(upgrade_job.retry_interval)
+                        time.sleep(upgrade_job.profile["download"]["retry_interval"])
 
                         break
 
                     # Retry downloading the base image if it failed
                     elif not downloaded:
                         # Log the download failure and wait before retrying
-                        if attempt < upgrade_job.max_retries - 1:
+                        if (
+                            attempt
+                            < upgrade_job.profile["download"]["maximum_attempts"] - 1
+                        ):
                             upgrade_job.logger.log_task(
                                 action="error",
                                 message=f"{targeted_device['db_device'].hostname}: Failed to download base image "
                                 f"{base_version_key} for target version {target_version}. "
-                                f"Retrying after {upgrade_job.retry_interval} seconds.",
+                                f"Retrying after {upgrade_job.profile['download']['retry_interval']} seconds.",
                             )
-                            time.sleep(upgrade_job.retry_interval)
+                            time.sleep(
+                                upgrade_job.profile["download"]["retry_interval"]
+                            )
 
                         # Return "errored" if the download failed after multiple attempts
                         else:
@@ -460,7 +470,7 @@ def main(
         else:
             # Log the message to the console
             upgrade_job.logger.log_task(
-                action="success",
+                action="report",
                 message=f"{targeted_device['db_device'].hostname}: Base image {base_version_key} was found to be "
                 f"already downloaded on the local device, so we are skipping the download process.",
             )
@@ -479,7 +489,7 @@ def main(
     try:
         # Log the message to the console
         upgrade_job.logger.log_task(
-            action="success",
+            action="search",
             message=f"{targeted_device['db_device'].hostname}: Checking to see if the target image {target_version} "
             "is available.",
         )
@@ -513,7 +523,9 @@ def main(
                     )
 
                 # Retry loop for downloading the target image
-                for attempt in range(upgrade_job.max_retries):
+                for attempt in range(
+                    upgrade_job.profile["download"]["maximum_attempts"]
+                ):
                     # Download the target image
                     downloaded = PanosUpgrade.software_download(
                         device=targeted_device["pan_device"],
@@ -532,25 +544,32 @@ def main(
                         # Log the waiting message
                         upgrade_job.logger.log_task(
                             action="success",
-                            message=f"{targeted_device['db_device'].hostname}: Waiting {upgrade_job.retry_interval} "
-                            "seconds to let the target image load into the software manager before proceeding.",
+                            message=f"{targeted_device['db_device'].hostname}: Waiting "
+                            f"{upgrade_job.profile['download']['retry_interval']} seconds to let the target image load "
+                            f"into the software manager before proceeding.",
                         )
 
                         # Wait for the base image to load into the software manager
-                        time.sleep(upgrade_job.retry_interval)
+                        time.sleep(upgrade_job.profile["download"]["retry_interval"])
 
                         break
 
                     # Retry downloading the target image if it failed
                     elif not downloaded:
                         # Log the download failure and wait before retrying
-                        if attempt < upgrade_job.max_retries - 1:
+                        if (
+                            attempt
+                            < upgrade_job.profile["download"]["maximum_attempts"] - 1
+                        ):
                             upgrade_job.logger.log_task(
                                 action="error",
                                 message=f"{targeted_device['db_device'].hostname}: Failed to download target image "
-                                f"{target_version}. Retrying after {upgrade_job.retry_interval} seconds.",
+                                f"{target_version}. Retrying after {upgrade_job.profile['download']['retry_interval']} "
+                                f"seconds.",
                             )
-                            time.sleep(upgrade_job.retry_interval)
+                            time.sleep(
+                                upgrade_job.profile["download"]["retry_interval"]
+                            )
 
                         # Return "errored" if the download failed after multiple attempts
                         else:
@@ -622,12 +641,12 @@ def main(
                 attempt = 0
 
                 # HA synchronization process
-                if attempt < targeted_device["profile"].max_snapshot_tries:
+                if attempt < upgrade_job.profile["snapshots"]["maximum_attempts"]:
                     # Log the attempt number
                     upgrade_job.logger.log_task(
                         action="search",
                         message=f"{targeted_device['db_device'].hostname}: Attempt "
-                        f"{attempt + 1}/{targeted_device['profile'].max_snapshot_tries} to get HA status.",
+                        f"{attempt + 1}/{upgrade_job.profile['snapshots']['maximum_attempts']} to get HA status.",
                     )
 
                     # Check if the HA synchronization is complete
@@ -653,7 +672,7 @@ def main(
                         )
 
                         # Wait for HA synchronization
-                        time.sleep(targeted_device["profile"].snapshot_retry_interval)
+                        time.sleep(upgrade_job.profile["snapshots"]["retry_interval"])
 
                         # Increment the attempt number
                         attempt += 1
@@ -664,7 +683,7 @@ def main(
                     upgrade_job.logger.log_task(
                         action="error",
                         message=f"{targeted_device['db_device'].hostname}: HA synchronization failed after attempting "
-                        f"for a total of {targeted_device['profile'].max_snapshot_tries} attempts.",
+                        f"for a total of {upgrade_job.profile['snapshots']['maximum_attempts']} attempts.",
                     )
 
                     # Return an error status
@@ -683,28 +702,8 @@ def main(
                 message=f"{targeted_device['db_device'].hostname}: Peer version comparison: {version_comparison}",
             )
 
-            # If the targeted_device is running an older version than its peer devices
-            if version_comparison == "older" or version_comparison == "equal":
-                # Determine if we are running in Dry Run mode
-                if not dry_run:
-                    # Log message to console
-                    upgrade_job.logger.log_task(
-                        action="start",
-                        message=f"{targeted_device['db_device'].hostname}: Suspending the HA state of device",
-                    )
-
-                    # Suspend HA state of the active device
-                    upgrade_job.suspend_ha_device(device=targeted_device)
-
-                else:
-                    upgrade_job.logger.log_task(
-                        action="skipped",
-                        message=f"{targeted_device['db_device'].hostname}: Dry run mode enabled. Skipping HA state "
-                        f"suspension.",
-                    )
-
             # If the targeted_device is running a newer version than its peer devices
-            elif version_comparison == "newer":
+            if version_comparison == "newer":
                 # Log message to console
                 upgrade_job.logger.log_task(
                     action="report",
@@ -727,19 +726,10 @@ def main(
     # Workflow: Target device readiness checks
     # --------------------------------------------------------------------------------------------------------------
     try:
-        # Log the start of the readiness check process on target device
-        upgrade_job.logger.log_task(
-            action="start",
-            message=f"{targeted_device['db_device'].hostname}: Performing readiness checks on the device,",
+        upgrade_job.perform_readiness_checks(
+            device=targeted_device,
         )
-
-        # Perform readiness checks on the target device before the upgrade process
-        result = upgrade_job.perform_readiness_checks(
-            targeted_device,
-        )
-
-        # Safely exit the script should the readiness checks of the primary device fail
-        if result == "errored":
+        if not upgrade_job.readiness_checks_succeeded:
             return "errored"
 
     except Exception as e:
@@ -755,21 +745,20 @@ def main(
     # Workflow: Target device snapshot before the upgrade process
     # ------------------------------------------------------------------------------------------------------------------
     try:
-        # Log the start of the snapshot process on target device before the upgrade
-        upgrade_job.logger.log_task(
-            action="start",
-            message=f"{targeted_device['db_device'].hostname}: Performing snapshot of network state "
-            "information before the upgrade.",
-        )
-
         # Snapshot the target device before the upgrade process
-        result = upgrade_job.take_snapshot(
-            targeted_device,
-            "pre",
+        upgrade_job.take_snapshot(
+            device=targeted_device,
+            snapshot_type="pre",
         )
 
         # Safely exit the script should the snapshot of the target device fail before the upgrade process
-        if result == "errored":
+        if not upgrade_job.snapshot_succeeded:
+            # Log the message to the console
+            upgrade_job.logger.log_task(
+                action="error",
+                message=f"{targeted_device['db_device'].hostname}: Snapshot failed to complete successfully before the "
+                f"upgrade initiated.",
+            )
             return "errored"
 
     except Exception as e:
@@ -781,37 +770,143 @@ def main(
         )
         return "errored"
 
-    # TODO: Target Device Upgrade
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Target device HA suspension
+    # ------------------------------------------------------------------------------------------------------------------
+    try:
+        if not dry_run:
+            # Log message to console
+            upgrade_job.logger.log_task(
+                action="start",
+                message=f"{targeted_device['db_device'].hostname}: Suspending the HA state of device",
+            )
+
+            # Suspend HA state of the active device
+            upgrade_job.suspend_ha_device(
+                device=targeted_device,
+            )
+
+        else:
+            upgrade_job.logger.log_task(
+                action="skipped",
+                message=f"{targeted_device['db_device'].hostname}: Dry run mode enabled. Skipping HA state "
+                f"suspension.",
+            )
+
+    except Exception as e:
+        # Log the error of the target device's upgrade
+        upgrade_job.logger.log_task(
+            action="error",
+            message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the "
+            f"HA suspension of the device: {str(e)} ",
+        )
+        return "errored"
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Target device upgrade process
+    # ------------------------------------------------------------------------------------------------------------------
+    try:
+        if not dry_run:
+            # Log the error of the target device's upgrade
+            upgrade_job.logger.log_task(
+                action="start",
+                message=f"{targeted_device['db_device'].hostname}: Dry run disabled, beginning the upgrade workflow.",
+            )
+            # Perform upgrade of the target device
+            upgrade_status = upgrade_job.perform_upgrade(
+                device=targeted_device,
+                target_version=target_version,
+            )
+
+            # Gracefully exit if the target device fails its upgrade to target version
+            if upgrade_job.stop_upgrade_workflow:
+                # Log the message to the console
+                upgrade_job.logger.log_task(
+                    action="error",
+                    message=f"{targeted_device['db_device'].hostname}: Upgrade to {target_version} failed, "
+                    f"status: {upgrade_status}.",
+                )
+
+                # Return an error status
+                return "errored"
+
+    except Exception as e:
+        # Log the error of the target device's upgrade
+        upgrade_job.logger.log_task(
+            action="error",
+            message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the "
+            f"upgrade of the device: {str(e)} ",
+        )
+        return "errored"
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Target device reboot process
+    # ------------------------------------------------------------------------------------------------------------------
+    if not dry_run:
+        try:
+            # Perform reboot of the upgraded target device
+            upgrade_job.perform_reboot(
+                device=targeted_device,
+                target_version=target_version,
+            )
+
+            # Gracefully exit if the target device fails its reboot
+            if upgrade_job.stop_upgrade_workflow:
+                # Log the message to the console
+                upgrade_job.logger.log_task(
+                    action="error",
+                    message=f"{targeted_device['db_device'].hostname}: Request to reboot the device failed.",
+                )
+
+                # Return an error status
+                return "errored"
+
+        except Exception as e:
+            # Log the error of the target device's reboot
+            upgrade_job.logger.log_task(
+                action="error",
+                message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the "
+                f"reboot of the device: {str(e)} ",
+            )
+            return "errored"
 
     # ------------------------------------------------------------------------------------------------------------------
     # Workflow: Target device snapshot after the upgrade process
     # ------------------------------------------------------------------------------------------------------------------
-    try:
-        # Log the start of the snapshot process on target device after the upgrade
-        upgrade_job.logger.log_task(
-            action="start",
-            message=f"{targeted_device['db_device'].hostname}: Performing snapshot of network state "
-            "information after the upgrade.",
-        )
+    if not dry_run:
+        try:
+            # Wait for the device to become ready for the post upgrade snapshot
+            upgrade_job.logger.log_task(
+                action="start",
+                message=f"{targeted_device['db_device'].hostname}: Waiting for the device to become ready for the post "
+                "upgrade snapshot.",
+            )
+            time.sleep(120)
 
-        # Snapshot the target device after the upgrade process
-        result = upgrade_job.take_snapshot(
-            targeted_device,
-            "post",
-        )
+            # Snapshot the target device after the upgrade process
+            upgrade_job.take_snapshot(
+                device=targeted_device,
+                snapshot_type="post",
+            )
 
-        # Safely exit the script should the snapshot of the target device fail after the upgrade process
-        if result == "errored":
+            # Safely exit the script should the snapshot of the target device fail after the upgrade process
+            if not upgrade_job.snapshot_succeeded:
+                # Log the message to the console
+                upgrade_job.logger.log_task(
+                    action="error",
+                    message=f"{targeted_device['db_device'].hostname}: Snapshot failed to complete "
+                    f"successfully after the upgrade completed.",
+                )
+                return "errored"
+
+        except Exception as e:
+            # Log the error of the snapshot on target device after the upgrade
+            upgrade_job.logger.log_task(
+                action="error",
+                message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the snapshot "
+                f"of the network state of device: {str(e)} ",
+            )
             return "errored"
-
-    except Exception as e:
-        # Log the error of the snapshot on target device after the upgrade
-        upgrade_job.logger.log_task(
-            action="error",
-            message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the snapshot "
-            f"of the network state of device: {str(e)} ",
-        )
-        return "errored"
 
     # ------------------------------------------------------------------------------------------------------------------
     # Workflow: Target device PDF report generation on pre/post upgrade diff
@@ -827,20 +922,14 @@ def main(
     # --------------------------------------------------------------------------------------------------------------
     # Workflow: Primary device readiness checks
     # --------------------------------------------------------------------------------------------------------------
+    # Perform readiness checks on the primary device before the upgrade process
     try:
-        # Log the start of the readiness check process on primary device
-        upgrade_job.logger.log_task(
-            action="start",
-            message=f"{upgrade_job.primary_device['db_device'].hostname}: Performing readiness checks on the device,",
+        upgrade_job.perform_readiness_checks(
+            device=upgrade_job.primary_device,
         )
 
-        # Perform readiness checks on the primary firewall device before the upgrade process
-        result = upgrade_job.perform_readiness_checks(
-            upgrade_job.primary_device,
-        )
-
-        # Safely exit the script should the readiness checks of the primary device fail
-        if result == "errored":
+        # Attempt to perform readiness checks
+        if not upgrade_job.readiness_checks_succeeded:
             return "errored"
 
     except Exception as e:
@@ -848,29 +937,28 @@ def main(
         upgrade_job.logger.log_task(
             action="error",
             message=f"{upgrade_job.primary_device['db_device'].hostname}: Error occurred when performing the "
-            f"readiness checks: {str(e)} ",
+            f"readiness checks of the device: {str(e)} ",
         )
         return "errored"
 
     # ------------------------------------------------------------------------------------------------------------------
     # Workflow: Primary device snapshot before the upgrade process
     # ------------------------------------------------------------------------------------------------------------------
+    # Snapshot the primary firewall device before the upgrade process
     try:
-        # Log the start of the snapshot process on primary device before the upgrade
-        upgrade_job.logger.log_task(
-            action="start",
-            message=f"{upgrade_job.primary_device['db_device'].hostname}: Performing snapshot of network state "
-            "information before the upgrade.",
-        )
-
-        # Snapshot the primary firewall device before the upgrade process
-        result = upgrade_job.take_snapshot(
-            upgrade_job.primary_device,
-            "pre",
+        upgrade_job.take_snapshot(
+            device=upgrade_job.primary_device,
+            snapshot_type="pre",
         )
 
         # Safely exit the script should the snapshot of the primary device fail before the upgrade process
-        if result == "errored":
+        if not upgrade_job.snapshot_succeeded:
+            # Log the message to the console
+            upgrade_job.logger.log_task(
+                action="error",
+                message=f"{upgrade_job.primary_device['db_device'].hostname}: Snapshot failed to complete "
+                f"successfully before the upgrade initiated.",
+            )
             return "errored"
 
     except Exception as e:
@@ -885,39 +973,112 @@ def main(
     # --------------------------------------------------------------------------------------------------------------
     # Workflow: Primary device upgrade
     # --------------------------------------------------------------------------------------------------------------
-    # TODO: Primary Firewall Upgrade
+    if not dry_run:
+        try:
+            # Perform upgrade of the primary device
+            upgrade_status = upgrade_job.perform_upgrade(
+                device=upgrade_job.primary_device,
+                target_version=target_version,
+            )
+
+            # Gracefully exit if the primary device fails its upgrade to target version
+            if upgrade_job.stop_upgrade_workflow:
+                # Log the message to the console
+                upgrade_job.logger.log_task(
+                    action="error",
+                    message=f"{upgrade_job.primary_device['db_device'].hostname}: Upgrade to {target_version} failed, "
+                    f"status: {upgrade_status}.",
+                )
+
+                # Return an error status
+                return "errored"
+
+        except Exception as e:
+            # Log the error of the target device's upgrade
+            upgrade_job.logger.log_task(
+                action="error",
+                message=f"{upgrade_job.primary_device['db_device'].hostname}: Error occurred when performing the "
+                f"upgrade of the device: {str(e)} ",
+            )
+            return "errored"
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Primary device reboot process
+    # ------------------------------------------------------------------------------------------------------------------
+    if not dry_run:
+        try:
+            # Perform reboot of the upgraded primary device
+            upgrade_job.perform_reboot(
+                device=upgrade_job.primary_device,
+                target_version=target_version,
+            )
+
+            # Gracefully exit if the primary device fails its reboot
+            if upgrade_job.stop_upgrade_workflow:
+                # Log the message to the console
+                upgrade_job.logger.log_task(
+                    action="error",
+                    message=f"{upgrade_job.primary_device['db_device'].hostname}: Request to reboot the device failed.",
+                )
+
+                # Return an error status
+                return "errored"
+
+        except Exception as e:
+            # Log the error of the target device's reboot
+            upgrade_job.logger.log_task(
+                action="error",
+                message=f"{upgrade_job.primary_device['db_device'].hostname}: Error occurred when performing the "
+                f"reboot of the device: {str(e)} ",
+            )
+            return "errored"
 
     # ------------------------------------------------------------------------------------------------------------------
     # Workflow: Primary device snapshot after the upgrade process
     # ------------------------------------------------------------------------------------------------------------------
-    try:
-        # Log the start of the snapshot process on primary device after the upgrade
-        upgrade_job.logger.log_task(
-            action="start",
-            message=f"{upgrade_job.primary_device['db_device'].hostname}: Performing snapshot of network state "
-            "information after the upgrade.",
-        )
+    if not dry_run:
+        try:
+            # Wait for the device to become ready for the post upgrade snapshot
+            upgrade_job.logger.log_task(
+                action="start",
+                message=f"{upgrade_job.primary_device['db_device'].hostname}: Waiting for the device to become ready "
+                f"for the post upgrade snapshot.",
+            )
+            time.sleep(120)
 
-        # Snapshot the primary device after the upgrade process
-        result = upgrade_job.take_snapshot(
-            upgrade_job.primary_device,
-            "post",
-        )
+            # Log the start of the snapshot process on target device after the upgrade
+            upgrade_job.logger.log_task(
+                action="start",
+                message=f"{upgrade_job.primary_device['db_device'].hostname}: Performing snapshot of network state "
+                "information after the upgrade.",
+            )
 
-        # Safely exit the script should the snapshot of the primary device fail after the upgrade process
-        if result == "errored":
+            # Snapshot the primary device after the upgrade process
+            upgrade_job.take_snapshot(
+                device=upgrade_job.primary_device,
+                snapshot_type="post",
+            )
+
+            # Safely exit the script should the snapshot of the target device fail before the upgrade process
+            if not upgrade_job.snapshot_succeeded:
+                # Log the message to the console
+                upgrade_job.logger.log_task(
+                    action="error",
+                    message=f"{upgrade_job.primary_device['db_device'].hostname}: Snapshot failed to complete "
+                    f"successfully after the upgrade was completed.",
+                )
+                return "errored"
+
+        except Exception as e:
+            # Log the error of the snapshot on target device after the upgrade
+            upgrade_job.logger.log_task(
+                action="error",
+                message=f"{upgrade_job.primary_device['db_device'].hostname}: Error occurred when performing the "
+                f"snapshot of the network state of device: {str(e)} ",
+            )
             return "errored"
 
-    except Exception as e:
-        # Log the error of the snapshot on target device after the upgrade
-        upgrade_job.logger.log_task(
-            action="error",
-            message=f"{upgrade_job.primary_device['db_device'].hostname}: Error occurred when performing the snapshot "
-            f"of the network state of device: {str(e)} ",
-        )
-        return "errored"
-
     # ------------------------------------------------------------------------------------------------------------------
-    # Workflow: Primary device PDF report generation on pre/post upgrade diff
+    # Workflow: Target device PDF report generation on pre/post upgrade diff
     # ------------------------------------------------------------------------------------------------------------------
     # TODO: PDF Report Generation
