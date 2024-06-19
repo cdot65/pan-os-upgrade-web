@@ -7,6 +7,7 @@ from celery.exceptions import WorkerTerminate
 from panos.firewall import Firewall
 from panos.panorama import Panorama
 from panos.errors import (
+    PanDeviceError,
     PanDeviceXapiError,
     PanXapiError,
     PanConnectionTimeout,
@@ -741,17 +742,34 @@ class PanosUpgrade:
         # Initialize with default values
         attempt: int = 0
 
-        while attempt < self.profile["upgrade"]["maximum_attempts"]:
+        # Log message to console about starting the upgrade process
+        self.logger.log_task(
+            action="working",
+            message=f"{device['db_device'].hostname}: Attempt number {attempt + 1}, with a maximum attempts of "
+            f"{self.profile['install']['maximum_attempts']}",
+        )
+
+        while attempt < self.profile["install"]["maximum_attempts"]:
             try:
                 self.logger.log_task(
                     action="working",
                     message=f"{device['db_device'].hostname}: Attempting upgrade to version {target_version} (Attempt "
-                    f"{attempt + 1} of {self.profile['upgrade']['maximum_attempts']}).",
+                    f"{attempt + 1} of {self.profile['install']['maximum_attempts']}).",
+                )
+
+                self.logger.log_task(
+                    action="working",
+                    message=f"{device['db_device'].hostname}: Calling device['pan_device'].software.install()",
                 )
 
                 install_job = device["pan_device"].software.install(
                     target_version,
                     sync=True,
+                )
+
+                self.logger.log_task(
+                    action="working",
+                    message=f"{device['db_device'].hostname}: Install job status: {install_job}",
                 )
 
                 if install_job["success"]:
@@ -765,22 +783,34 @@ class PanosUpgrade:
 
                     # Return "completed" status to indicate successful upgrade
                     return "completed"
-
                 else:
                     attempt += 1
-                    if attempt < self.profile["upgrade"]["maximum_attempts"]:
+                    if attempt < self.profile["install"]["maximum_attempts"]:
                         self.logger.log_task(
                             action="working",
                             message=f"{device['db_device'].hostname}: Retrying in "
-                            f"{self.profile['upgrade']['retry_interval']} seconds.",
+                            f"{self.profile['install']['retry_interval']} seconds.",
                         )
-                        time.sleep(self.profile["upgrade"]["retry_interval"])
+                        time.sleep(self.profile["install"]["retry_interval"])
 
-            # Log any errors that occur during HA state suspension
+            # Log specific exceptions that occur during the upgrade process
+            except (PanDeviceError, PanXapiError) as e:
+                self.logger.log_task(
+                    action="error",
+                    message=f"{device['db_device'].hostname}: Error upgrading device: {str(e)}",
+                )
+
+                # Set self.stop_upgrade_workflow to True
+                self.stop_upgrade_workflow = True
+
+                # Return "errored" status to indicate upgrade failure
+                return "errored"
+
+            # Log any other exceptions that occur during the upgrade process
             except Exception as e:
                 self.logger.log_task(
                     action="error",
-                    message=f"{device['db_device'].hostname}: Error suspending target device HA state: {e}",
+                    message=f"{device['db_device'].hostname}: Unexpected error upgrading device: {str(e)}",
                 )
 
                 # Set self.stop_upgrade_workflow to True
@@ -794,7 +824,7 @@ class PanosUpgrade:
             self.logger.log_task(
                 action="working",
                 message=f"{device['db_device'].hostname}: Upgrade failed after "
-                f"{self.profile['upgrade']['maximum_attempts']} attempts.",
+                f"{self.profile['install']['maximum_attempts']} attempts.",
             )
             return "errored"
 
