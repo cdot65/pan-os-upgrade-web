@@ -702,30 +702,8 @@ def main(
                 message=f"{targeted_device['db_device'].hostname}: Peer version comparison: {version_comparison}",
             )
 
-            # If the targeted_device is running an older version than its peer devices
-            if version_comparison == "older" or version_comparison == "equal":
-                # Determine if we are running in Dry Run mode
-                if not dry_run:
-                    # Log message to console
-                    upgrade_job.logger.log_task(
-                        action="start",
-                        message=f"{targeted_device['db_device'].hostname}: Suspending the HA state of device",
-                    )
-
-                    # Suspend HA state of the active device
-                    upgrade_job.suspend_ha_device(
-                        device=targeted_device,
-                    )
-
-                else:
-                    upgrade_job.logger.log_task(
-                        action="skipped",
-                        message=f"{targeted_device['db_device'].hostname}: Dry run mode enabled. Skipping HA state "
-                        f"suspension.",
-                    )
-
             # If the targeted_device is running a newer version than its peer devices
-            elif version_comparison == "newer":
+            if version_comparison == "newer":
                 # Log message to console
                 upgrade_job.logger.log_task(
                     action="report",
@@ -793,10 +771,47 @@ def main(
         return "errored"
 
     # ------------------------------------------------------------------------------------------------------------------
+    # Workflow: Target device HA suspension
+    # ------------------------------------------------------------------------------------------------------------------
+    try:
+        if not dry_run:
+            # Log message to console
+            upgrade_job.logger.log_task(
+                action="start",
+                message=f"{targeted_device['db_device'].hostname}: Suspending the HA state of device",
+            )
+
+            # Suspend HA state of the active device
+            upgrade_job.suspend_ha_device(
+                device=targeted_device,
+            )
+
+        else:
+            upgrade_job.logger.log_task(
+                action="skipped",
+                message=f"{targeted_device['db_device'].hostname}: Dry run mode enabled. Skipping HA state "
+                f"suspension.",
+            )
+
+    except Exception as e:
+        # Log the error of the target device's upgrade
+        upgrade_job.logger.log_task(
+            action="error",
+            message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the "
+            f"HA suspension of the device: {str(e)} ",
+        )
+        return "errored"
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Workflow: Target device upgrade process
     # ------------------------------------------------------------------------------------------------------------------
     try:
         if not dry_run:
+            # Log the error of the target device's upgrade
+            upgrade_job.logger.log_task(
+                action="start",
+                message=f"{targeted_device['db_device'].hostname}: Dry run disabled, beginning the upgrade workflow.",
+            )
             # Perform upgrade of the target device
             upgrade_status = upgrade_job.perform_upgrade(
                 device=targeted_device,
