@@ -282,6 +282,26 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         }
     }
 
+    syncVersionsFromDevice(): void {
+        const selectedDevices = this.upgradeForm.get("devices")?.value;
+        if (selectedDevices && selectedDevices.length > 0) {
+            // For now, we'll just use the first selected device
+            const deviceId = selectedDevices[0];
+            // For now, we'll just show a snackbar message
+            this.snackBar.open(
+                `Syncing versions from device ${this.getDeviceHostname(deviceId)}. This feature is not yet implemented.`,
+                "Close",
+                { duration: 5000 },
+            );
+        } else {
+            this.snackBar.open(
+                "Please select at least one device before syncing versions.",
+                "Close",
+                { duration: 3000 },
+            );
+        }
+    }
+
     viewJobDetails(jobId: string): void {
         const url = this.router.serializeUrl(
             this.router.createUrlTree(["/jobs", jobId]),
