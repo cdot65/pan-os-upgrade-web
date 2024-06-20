@@ -64,9 +64,6 @@
                                 @for (version of target_versions; track version) {
                                     <mat-option [value]="version.version">
                                         {{ version.version }}
-                                        @if (version.end_of_life_date) {
-                                            <span>(EOL: {{ version.end_of_life_date }})</span>
-                                        }
                                     </mat-option>
                                 }
                             </mat-select>
@@ -79,7 +76,7 @@
                             color="primary"
                             type="button"
                             (click)="syncVersionsFromDevice()"
-                            [disabled]="!upgradeForm.get('devices')?.value?.length"
+                            [disabled]="!upgradeForm.get('devices')?.value || !upgradeForm.get('profile')?.value || (syncVersions$ | async)"
                         >
                             <mat-icon>sync</mat-icon>
                             Sync Versions
