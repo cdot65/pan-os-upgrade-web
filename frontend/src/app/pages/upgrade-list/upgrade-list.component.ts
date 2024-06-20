@@ -2,9 +2,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
-import { Subject, timer } from "rxjs";
+import { Observable, Subject, timer } from "rxjs";
 import { UpgradeJob, UpgradeResponse } from "../../shared/interfaces/upgrade-response.interface";
-
 import { ComponentPageTitle } from "../page-title/page-title";
 import { Device } from "../../shared/interfaces/device.interface";
 import { Footer } from "src/app/shared/footer/footer";
@@ -27,6 +26,7 @@ import { Router } from "@angular/router";
 import { UpgradeForm } from "../../shared/interfaces/upgrade-form.interface";
 import { UpgradeService } from "../../shared/services/upgrade.service";
 import { takeUntil } from "rxjs/operators";
+import { AsyncPipe } from "@angular/common";
 
 @Component({
     selector: "app-upgrade-list",
@@ -34,6 +34,7 @@ import { takeUntil } from "rxjs/operators";
     styleUrls: ["./upgrade-list.component.scss"],
     standalone: true,
     imports: [
+        AsyncPipe,
         Footer,
         MatDividerModule,
         MatFormFieldModule,
@@ -56,6 +57,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
     profiles: Profile[] = [];
     step = 0;
     // target_versions: string[] = ["10.1.3", "10.2.9-h1", "11.1.1-h1"];
+    syncVersions$: Observable<boolean>;
     target_versions: PanosVersion[] = [];
     upgradeForm: FormGroup;
     upgradeJobs: UpgradeJob[] = [];
@@ -64,7 +66,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
     constructor(
         private inventoryService: InventoryService,
         private profileService: ProfileService,
-        private upgradeService: UpgradeService,
+        public upgradeService: UpgradeService,
         private jobService: JobService,
         private router: Router,
         private snackBar: MatSnackBar,
@@ -78,6 +80,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
             target_version: ["", Validators.required],
             scheduledAt: [""],
         });
+        this.syncVersions$ = this.upgradeService.syncVersions$;
     }
 
     checkDeviceEligibility(deviceId: string): boolean {
@@ -148,7 +151,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
 
     getPanosVersions(): void {
         this.upgradeService
-            .getPANOSVersions()
+            .getPanosVersions()
             .pipe(takeUntil(this.destroy$))
             .subscribe(
                 (versions: PanosVersion[]) => {
@@ -198,6 +201,14 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         this.getDevices();
         this.getProfiles();
         this.getPanosVersions();
+
+        this.upgradeService.syncVersions$
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((isSyncing) => {
+                if (!isSyncing) {
+                    this.getPanosVersions();
+                }
+            });
     }
 
     onUpgradeClick(): void {
@@ -284,18 +295,33 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
 
     syncVersionsFromDevice(): void {
         const selectedDevices = this.upgradeForm.get("devices")?.value;
-        if (selectedDevices && selectedDevices.length > 0) {
-            // For now, we'll just use the first selected device
+        const selectedProfile = this.upgradeForm.get("profile")?.value;
+        if (selectedDevices && selectedDevices.length > 0 && selectedProfile) {
             const deviceId = selectedDevices[0];
-            // For now, we'll just show a snackbar message
-            this.snackBar.open(
-                `Syncing versions from device ${this.getDeviceHostname(deviceId)}. This feature is not yet implemented.`,
-                "Close",
-                { duration: 5000 },
-            );
+            this.upgradeService
+                .syncPanosVersions(deviceId, selectedProfile)
+                .pipe(takeUntil(this.destroy$))
+                .subscribe(
+                    (versions: PanosVersion[]) => {
+                        this.target_versions = versions;
+                        this.snackBar.open(
+                            `PAN-OS versions synced successfully for device ${this.getDeviceHostname(deviceId)}.`,
+                            "Close",
+                            { duration: 5000 },
+                        );
+                    },
+                    (error) => {
+                        console.error("Error syncing PAN-OS versions:", error);
+                        this.snackBar.open(
+                            "Failed to sync PAN-OS versions. Please try again.",
+                            "Close",
+                            { duration: 3000 },
+                        );
+                    },
+                );
         } else {
             this.snackBar.open(
-                "Please select at least one device before syncing versions.",
+                "Please select at least one device and a profile before syncing versions.",
                 "Close",
                 { duration: 3000 },
             );
