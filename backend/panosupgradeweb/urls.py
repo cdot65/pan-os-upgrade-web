@@ -7,6 +7,7 @@ from .views import (
     DeviceTypeViewSet,
     DeviceViewSet,
     JobViewSet,
+    PanosVersionViewSet,
     ProfileViewSet,
     UserViewSet,
     UserProfileView,
@@ -24,6 +25,12 @@ router.register(
     "jobs",
     JobViewSet,
     basename="jobs",
+)
+
+router.register(
+    "panos-versions",
+    PanosVersionViewSet,
+    basename="panos-versions",
 )
 
 router.register(
