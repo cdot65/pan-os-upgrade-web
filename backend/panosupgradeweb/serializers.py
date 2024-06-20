@@ -11,6 +11,7 @@ from .models import (
     JobLogEntry,
     License,
     NetworkInterface,
+    PanosVersion,
     Profile,
     Snapshot,
 )
@@ -472,3 +473,15 @@ class SnapshotSerializer(serializers.ModelSerializer):
             "licenses",
             "network_interfaces",
         )
+
+
+class PanosVersionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PanosVersion
+        fields = [
+            "id",
+            "version",
+            "release_date",
+            "end_of_life_date",
+            "notes",
+        ]
