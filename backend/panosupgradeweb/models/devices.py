@@ -188,32 +188,38 @@ class PanosVersion(models.Model):
         unique=True,
         validators=[
             RegexValidator(
-                regex=r'^\d+\.\d+\.\d+(-h\d+)?$',
-                message='Version must be in the format X.Y.Z or X.Y.Z-hN',
+                regex=r"^\d+\.\d+\.\d+(-h\d+)?$",
+                message="Version must be in the format X.Y.Z or X.Y.Z-hN",
             ),
         ],
         verbose_name="PAN-OS Version",
     )
-    release_date = models.DateField(
+    filename = models.CharField(max_length=100, verbose_name="Filename")
+    size = models.CharField(max_length=20, verbose_name="Size")
+    size_kb = models.CharField(max_length=20, verbose_name="Size (KB)")
+    released_on = models.CharField(max_length=100, verbose_name="Released On")
+    release_notes = models.URLField(max_length=512, verbose_name="Release Notes URL")
+    downloaded = models.BooleanField(default=False, verbose_name="Downloaded")
+    current = models.BooleanField(default=False, verbose_name="Current")
+    latest = models.BooleanField(default=False, verbose_name="Latest")
+    uploaded = models.BooleanField(default=False, verbose_name="Uploaded")
+    sha256 = models.CharField(
+        max_length=100,
+        verbose_name="SHA256 Hash",
         null=True,
         blank=True,
-        verbose_name="Release Date",
     )
-    end_of_life_date = models.DateField(
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
         null=True,
-        blank=True,
-        verbose_name="End of Life Date",
-    )
-    notes = models.TextField(
-        blank=True,
-        verbose_name="Notes",
+        verbose_name="Author",
     )
 
     def __str__(self):
         return self.version
 
     class Meta:
-        ordering = ['-version']
+        ordering = ["-version"]
         verbose_name = "PAN-OS Version"
         verbose_name_plural = "PAN-OS Versions"
-
