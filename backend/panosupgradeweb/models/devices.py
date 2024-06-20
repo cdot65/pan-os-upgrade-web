@@ -2,6 +2,7 @@
 
 import uuid
 from django.conf import settings
+from django.core.validators import RegexValidator
 from django.db import models
 
 
@@ -179,3 +180,40 @@ class Device(models.Model):
 
     def __getitem__(self, key):
         return getattr(self, key)
+
+
+class PanosVersion(models.Model):
+    version = models.CharField(
+        max_length=20,
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex=r'^\d+\.\d+\.\d+(-h\d+)?$',
+                message='Version must be in the format X.Y.Z or X.Y.Z-hN',
+            ),
+        ],
+        verbose_name="PAN-OS Version",
+    )
+    release_date = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Release Date",
+    )
+    end_of_life_date = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="End of Life Date",
+    )
+    notes = models.TextField(
+        blank=True,
+        verbose_name="Notes",
+    )
+
+    def __str__(self):
+        return self.version
+
+    class Meta:
+        ordering = ['-version']
+        verbose_name = "PAN-OS Version"
+        verbose_name_plural = "PAN-OS Versions"
+
