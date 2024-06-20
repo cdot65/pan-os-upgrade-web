@@ -20,6 +20,7 @@ import { CancelUpgradeResponse } from "../interfaces/cancel-upgrade-response.int
 import { CookieService } from "ngx-cookie-service";
 import { Injectable } from "@angular/core";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { PanosVersion } from "../interfaces/panos-version.interface";
 import { UpgradeForm } from "../interfaces/upgrade-form.interface";
 import { UpgradeHistory } from "../interfaces/upgrade-history.interface";
 import { UpgradeResponse } from "../interfaces/upgrade-response.interface";
@@ -31,6 +32,7 @@ import { environment } from "../../../environments/environment.prod";
 })
 export class UpgradeService {
     private apiUrl = environment.apiUrl;
+    private apiEndpointPanosVersions = `${this.apiUrl}/api/v1/panos-versions/`;
     private apiEndpointUpgrade = `${this.apiUrl}/api/v1/inventory/upgrade/`;
     private apiEndpointUpgradeCancel = `${this.apiEndpointUpgrade}/cancel/`;
     private apiEndpointUpgradeStatus = `${this.apiEndpointUpgrade}/status/`;
@@ -50,6 +52,35 @@ export class UpgradeService {
     private getAuthHeaders(): HttpHeaders {
         const authToken = this.cookieService.get("auth_token");
         return new HttpHeaders().set("Authorization", `Token ${authToken}`);
+    }
+
+    /**
+     * Retrieves the list of available PAN-OS versions.
+     *
+     * @returns An Observable that emits a PANOSVersionList object.
+     */
+    getPANOSVersions(): Observable<PanosVersion[]> {
+        return this.http
+            .get<PanosVersion[]>(this.apiEndpointPanosVersions, {
+                headers: this.getAuthHeaders(),
+            })
+            .pipe(
+                retryWhen((errors) =>
+                    errors.pipe(
+                        mergeMap((error: HttpErrorResponse, i) => {
+                            const retryAttempt = i + 1;
+                            if (retryAttempt <= 3 && this.shouldRetry(error)) {
+                                const delayTime =
+                                    Math.pow(2, retryAttempt) * 1000;
+                                return timer(delayTime);
+                            } else {
+                                return throwError(() => error);
+                            }
+                        }),
+                    ),
+                ),
+                catchError(this.handleError.bind(this)),
+            );
     }
 
     /**
