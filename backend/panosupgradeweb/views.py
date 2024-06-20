@@ -448,13 +448,17 @@ class PanosVersionViewSet(viewsets.ModelViewSet):
         if version_param is not None:
             queryset = queryset.filter(version=version_param)
 
+        # Check if there are any entries in the queryset
+        if not queryset.exists():
+            return queryset  # Return empty queryset if no entries
+
         # Custom version parsing function
         def parse_panos_version(version_string):
             match = re.match(r"(\d+)\.(\d+)\.(\d+)(?:-h(\d+))?", version_string)
             if not match:
-                return (0, 0, 0, 0)  # Default for unparseable versions
+                return 0, 0, 0, 0  # Default for unparseable versions
             major, minor, patch, hotfix = match.groups()
-            return (int(major), int(minor), int(patch), int(hotfix or 0))
+            return int(major), int(minor), int(patch), int(hotfix or 0)
 
         # Custom sorting function
         def version_key(obj):
