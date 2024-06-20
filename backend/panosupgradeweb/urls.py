@@ -95,6 +95,11 @@ urlpatterns = [
         name="panorama-platforms",
     ),
     path(
+        "panos-versions/sync/",
+        PanosVersionViewSet.as_view({"post": "sync_versions"}),
+        name="panos-versions-sync",
+    ),
+    path(
         "user-profile/",
         UserProfileView.as_view(),
         name="user_profile",
