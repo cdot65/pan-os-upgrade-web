@@ -61,8 +61,11 @@
                         <mat-label>Target Version</mat-label>
                         <mat-select formControlName="target_version">
                             @for (version of target_versions; track version) {
-                                <mat-option [value]="version">
-                                    {{ version }}
+                                <mat-option [value]="version.version">
+                                    {{ version.version }}
+                                    @if (version.end_of_life_date) {
+                                        <span>(EOL: {{ version.end_of_life_date }})</span>
+                                    }
                                 </mat-option>
                             }
                         </mat-select>
