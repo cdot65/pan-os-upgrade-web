@@ -1,17 +1,9 @@
+/* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
-import {
-    FormBuilder,
-    FormGroup,
-    FormsModule,
-    ReactiveFormsModule,
-    Validators,
-} from "@angular/forms";
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Subject, timer } from "rxjs";
-import {
-    UpgradeJob,
-    UpgradeResponse,
-} from "../../shared/interfaces/upgrade-response.interface";
+import { UpgradeJob, UpgradeResponse } from "../../shared/interfaces/upgrade-response.interface";
 
 import { ComponentPageTitle } from "../page-title/page-title";
 import { Device } from "../../shared/interfaces/device.interface";
@@ -28,6 +20,7 @@ import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { MatRadioModule } from "@angular/material/radio";
 import { MatSelectModule } from "@angular/material/select";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { PanosVersion } from "../../shared/interfaces/panos-version.interface";
 import { Profile } from "../../shared/interfaces/profile.interface";
 import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
@@ -62,7 +55,8 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
     pollingSubscriptions: { [jobId: string]: Subject<void> } = {};
     profiles: Profile[] = [];
     step = 0;
-    target_versions: string[] = ["10.1.3", "10.2.9-h1", "11.1.1-h1"];
+    // target_versions: string[] = ["10.1.3", "10.2.9-h1", "11.1.1-h1"];
+    target_versions: PanosVersion[] = [];
     upgradeForm: FormGroup;
     upgradeJobs: UpgradeJob[] = [];
     private destroy$ = new Subject<void>();
@@ -100,7 +94,6 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         return false;
     }
 
-
     getDeviceHaProperties(deviceId: string): {
         ha_enabled: boolean;
         local_state: string | null;
@@ -130,7 +123,6 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         return device ? device.hostname : "";
     }
 
-
     getDevices(): void {
         this.inventoryService
             .getDevices()
@@ -154,6 +146,26 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
             );
     }
 
+    getPanosVersions(): void {
+        this.upgradeService
+            .getPANOSVersions()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (versions: PanosVersion[]) => {
+                    this.target_versions = versions;
+                },
+                (error) => {
+                    console.error("Error fetching PAN-OS versions:", error);
+                    this.snackBar.open(
+                        "Failed to fetch PAN-OS versions. Please try again.",
+                        "Close",
+                        {
+                            duration: 3000,
+                        },
+                    );
+                },
+            );
+    }
 
     getProfiles(): void {
         this.profileService
@@ -185,6 +197,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         this._componentPageTitle.title = "Upgrade List";
         this.getDevices();
         this.getProfiles();
+        this.getPanosVersions();
     }
 
     onUpgradeClick(): void {
