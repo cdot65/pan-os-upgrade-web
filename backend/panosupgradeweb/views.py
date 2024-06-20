@@ -19,6 +19,7 @@ from .models import (
     DeviceType,
     Device,
     Job,
+    PanosVersion,
     Profile,
     Snapshot,
 )
@@ -31,6 +32,7 @@ from .serializers import (
     InventorySyncSerializer,
     JobSerializer,
     JobLogEntrySerializer,
+    PanosVersionSerializer,
     ProfileSerializer,
     SnapshotSerializer,
     UserSerializer,
@@ -384,6 +386,19 @@ class JobLogViewSet(viewsets.ViewSet):
             for log in log_entries
         ]
         return Response(data)
+
+
+class PanosVersionViewSet(viewsets.ModelViewSet):
+    queryset = PanosVersion.objects.all()
+    serializer_class = PanosVersionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = PanosVersion.objects.all()
+        version = self.request.query_params.get("version", None)
+        if version is not None:
+            queryset = queryset.filter(version=version)
+        return queryset
 
 
 class ProfileViewSet(viewsets.ModelViewSet):
