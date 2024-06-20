@@ -7,6 +7,7 @@ from .views import (
     DeviceTypeViewSet,
     DeviceViewSet,
     JobViewSet,
+    PanosVersionViewSet,
     ProfileViewSet,
     UserViewSet,
     UserProfileView,
@@ -24,6 +25,12 @@ router.register(
     "jobs",
     JobViewSet,
     basename="jobs",
+)
+
+router.register(
+    "panos-versions",
+    PanosVersionViewSet,
+    basename="panos-versions",
 )
 
 router.register(
@@ -86,6 +93,11 @@ urlpatterns = [
         DeviceTypeViewSet.as_view({"get": "list"}),
         {"device_type": "Panorama"},
         name="panorama-platforms",
+    ),
+    path(
+        "panos-versions/sync/",
+        PanosVersionViewSet.as_view({"post": "sync_versions"}),
+        name="panos-versions-sync",
     ),
     path(
         "user-profile/",
