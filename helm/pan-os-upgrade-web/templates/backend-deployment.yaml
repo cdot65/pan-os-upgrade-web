@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "pan-os-upgrade-web.fullname" . }}-backend
+  labels:
+    {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+spec:
+  replicas: {{ .Values.backend.replicas }}
+  selector:
+    matchLabels:
+      {{- include "pan-os-upgrade-web.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: backend
+  template:
+    metadata:
+      labels:
+        {{- include "pan-os-upgrade-web.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: backend
+    spec:
+      containers:
+      - name: backend
+        image: {{ .Values.backend.image }}
+        command: ["/bin/sh"]
+        args: ["-c", "./start.sh"]
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: {{ include "pan-os-upgrade-web.fullname" . }}-backend-config

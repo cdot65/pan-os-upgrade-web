@@ -1,0 +1,48 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pan-os-upgrade-web.fullname" . }}-backend
+spec:
+  selector:
+    app: {{ include "pan-os-upgrade-web.name" . }}
+    component: backend
+  ports:
+  - port: 8000
+    targetPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pan-os-upgrade-web.fullname" . }}-frontend
+spec:
+  selector:
+    app: {{ include "pan-os-upgrade-web.name" . }}
+    component: frontend
+  ports:
+  - port: 80
+    targetPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pan-os-upgrade-web.fullname" . }}-postgres
+spec:
+  selector:
+    app: {{ include "pan-os-upgrade-web.name" . }}
+    component: postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pan-os-upgrade-web.fullname" . }}-redis
+spec:
+  selector:
+    app: {{ include "pan-os-upgrade-web.name" . }}
+    component: redis
+  ports:
+  - port: 6379
+    targetPort: 6379
