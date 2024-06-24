@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "pan-os-upgrade-web.fullname" . }}-postgres
+  labels:
+    {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
+    app.kubernetes.io/component: database
+spec:
+  serviceName: {{ include "pan-os-upgrade-web.fullname" . }}-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "pan-os-upgrade-web.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: database
+  template:
+    metadata:
+      labels:
+        {{- include "pan-os-upgrade-web.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: database
+    spec:
+      containers:
+      - name: postgres
+        image: {{ .Values.postgres.image }}
+        ports:
+        - containerPort: 5432
+        envFrom:
+        - configMapRef:
+            name: {{ include "pan-os-upgrade-web.fullname" . }}-postgres-config
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: {{ .Values.postgres.storage }}

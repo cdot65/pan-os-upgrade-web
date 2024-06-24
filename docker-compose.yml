@@ -4,6 +4,7 @@ services:
         build:
             context: ./backend
             dockerfile: Dockerfile
+        image: ghcr.io/cdot65/pan-os-upgrade-web-backend:1.0.0-beta
         command: ./start.sh
         volumes:
             - ./backend:/code
@@ -18,6 +19,7 @@ services:
         build:
             context: ./frontend
             dockerfile: Dockerfile
+        image: ghcr.io/cdot65/pan-os-upgrade-web-frontend:1.0.0-beta
         ports:
             - "8080:80"
         depends_on:
@@ -43,6 +45,7 @@ services:
         build:
             context: ./backend
             dockerfile: Dockerfile
+        image: ghcr.io/cdot65/pan-os-upgrade-web-worker:1.0.0-beta
         command: celery -A django_project worker -l debug
         deploy:
             replicas: 2

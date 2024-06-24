@@ -1,0 +1,7 @@
+apiVersion: v2
+name: pan-os-upgrade-web
+description: A Helm chart for deploying pan-os-upgrade-web
+type: application
+version: 0.1.0
+appVersion: "1.0.0-beta"
+icon: https://raw.githubusercontent.com/cdot65/pan-os-upgrade-web/main/frontend/src/assets/img/pan-trans.svg
