@@ -5,19 +5,20 @@ backend:
     DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,*"
     DJANGO_DEBUG: "False"
     DJANGO_SECRET_KEY: "qKJ9h-ph4VY7zJIQnnRuvR-MARWs-b2tOdRtJZpeXfc"
-    CELERY_BROKER_URL: "redis://{{ .Release.Name }}-redis:6379/0"
-    CELERY_RESULT_BACKEND: "redis://{{ .Release.Name }}-redis:6379/0"
     DJANGO_SUPERUSER_PASSWORD: "paloalto123"
     DJANGO_SUPERUSER_USERNAME: "admin"
-    DATABASE_URL: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@{{ .Release.Name }}-postgres:5432/$(POSTGRES_DB)"
+    CELERY_BROKER_URL: "redis://$(REDIS_HOST):6379/0"
+    CELERY_RESULT_BACKEND: "redis://$(REDIS_HOST):6379/0"
+    DATABASE_URL: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)"
 
 frontend:
   replicas: 1
   image: ghcr.io/cdot65/pan-os-upgrade-web-frontend:1.0.0-beta
-
-worker:
-  replicas: 2
-  image: ghcr.io/cdot65/pan-os-upgrade-web-worker:1.0.0-beta
+  service:
+    type: NodePort
+    port: 80
+    targetPort: 80  # Change this to 80
+    nodePort: 32080
 
 postgres:
   image: postgres:14
@@ -29,3 +30,7 @@ postgres:
 
 redis:
   image: redis:7.0.5-alpine
+
+worker:
+  replicas: 2
+  image: ghcr.io/cdot65/pan-os-upgrade-web-worker:1.0.0-beta
