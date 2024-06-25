@@ -2,7 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "pan-os-upgrade-web.fullname" . }}-worker
-  namespace: {{ include "pan-os-upgrade-web.namespace" . }}
+  labels:
+    {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
 spec:
   replicas: {{ .Values.worker.replicas }}
   selector:
@@ -16,21 +18,23 @@ spec:
         app.kubernetes.io/component: worker
     spec:
       containers:
-      - name: worker
-        image: {{ .Values.worker.image }}
-        command: ["celery", "-A", "django_project", "worker", "-l", "debug"]
-        env:
-        {{- range $key, $value := .Values.backend.env }}
-        - name: {{ $key }}
-          value: {{ $value | quote }}
-        {{- end }}
-        - name: POSTGRES_HOST
-          value: "{{ include "pan-os-upgrade-web.fullname" . }}-postgres"
-        - name: POSTGRES_PORT
-          value: {{ .Values.postgres.port | quote }}
-        - name: POSTGRES_DB
-          value: {{ .Values.postgres.database }}
-        - name: POSTGRES_USER
-          value: {{ .Values.postgres.username }}
-        - name: POSTGRES_PASSWORD
-          value: {{ .Values.postgres.password }}
+        - name: worker
+          image: {{ .Values.worker.image }}
+          command: ["celery", "-A", "django_project", "worker", "-l", "debug"]
+          env:
+            - name: POSTGRES_HOST
+              value: {{ include "pan-os-upgrade-web.fullname" . }}-postgres
+            - name: POSTGRES_USER
+              value: {{ .Values.postgres.username | quote }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgres.password | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.postgres.database | quote }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.postgres.port | quote }}
+            - name: REDIS_HOST
+              value: {{ include "pan-os-upgrade-web.fullname" . }}-redis
+            {{- range $key, $value := .Values.backend.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
