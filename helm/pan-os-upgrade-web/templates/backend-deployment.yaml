@@ -2,7 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "pan-os-upgrade-web.fullname" . }}-backend
-  namespace: {{ include "pan-os-upgrade-web.namespace" . }}
+  labels:
+    {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
 spec:
   replicas: {{ .Values.backend.replicas }}
   selector:
@@ -14,24 +16,31 @@ spec:
       labels:
         {{- include "pan-os-upgrade-web.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: backend
+      annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
     spec:
       containers:
-      - name: backend
-        image: {{ .Values.backend.image }}
-        ports:
-        - containerPort: 8000
-        env:
-        {{- range $key, $value := .Values.backend.env }}
-        - name: {{ $key }}
-          value: {{ $value | quote }}
-        {{- end }}
-        - name: POSTGRES_HOST
-          value: "{{ include "pan-os-upgrade-web.fullname" . }}-postgres"
-        - name: POSTGRES_PORT
-          value: {{ .Values.postgres.port | quote }}
-        - name: POSTGRES_DB
-          value: {{ .Values.postgres.database }}
-        - name: POSTGRES_USER
-          value: {{ .Values.postgres.username }}
-        - name: POSTGRES_PASSWORD
-          value: {{ .Values.postgres.password }}
+        - name: backend
+          image: {{ .Values.backend.image }}
+          command: ["/bin/sh"]
+          args: ["-c", "./start.sh"]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: POSTGRES_HOST
+              value: {{ include "pan-os-upgrade-web.fullname" . }}-postgres
+            - name: POSTGRES_USER
+              value: {{ .Values.postgres.username | quote }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgres.password | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.postgres.database | quote }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.postgres.port | quote }}
+            - name: REDIS_HOST
+              value: {{ include "pan-os-upgrade-web.fullname" . }}-redis
+            {{- range $key, $value := .Values.backend.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
