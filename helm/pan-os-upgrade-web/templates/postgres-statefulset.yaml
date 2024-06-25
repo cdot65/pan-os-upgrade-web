@@ -23,9 +23,13 @@ spec:
         image: {{ .Values.postgres.image }}
         ports:
         - containerPort: 5432
-        envFrom:
-        - configMapRef:
-            name: {{ include "pan-os-upgrade-web.fullname" . }}-postgres-config
+        env:
+        - name: POSTGRES_DB
+          value: {{ .Values.postgres.database }}
+        - name: POSTGRES_USER
+          value: {{ .Values.postgres.username }}
+        - name: POSTGRES_PASSWORD
+          value: {{ .Values.postgres.password }}
         volumeMounts:
         - name: data
           mountPath: /var/lib/postgresql/data

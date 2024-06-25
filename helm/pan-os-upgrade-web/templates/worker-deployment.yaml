@@ -2,9 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "pan-os-upgrade-web.fullname" . }}-worker
-  labels:
-    {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
-    app.kubernetes.io/component: worker
+  namespace: {{ include "pan-os-upgrade-web.namespace" . }}
 spec:
   replicas: {{ .Values.worker.replicas }}
   selector:
@@ -21,6 +19,18 @@ spec:
       - name: worker
         image: {{ .Values.worker.image }}
         command: ["celery", "-A", "django_project", "worker", "-l", "debug"]
-        envFrom:
-        - configMapRef:
-            name: {{ include "pan-os-upgrade-web.fullname" . }}-backend-config
+        env:
+        {{- range $key, $value := .Values.backend.env }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+        {{- end }}
+        - name: POSTGRES_HOST
+          value: "{{ include "pan-os-upgrade-web.fullname" . }}-postgres"
+        - name: POSTGRES_PORT
+          value: {{ .Values.postgres.port | quote }}
+        - name: POSTGRES_DB
+          value: {{ .Values.postgres.database }}
+        - name: POSTGRES_USER
+          value: {{ .Values.postgres.username }}
+        - name: POSTGRES_PASSWORD
+          value: {{ .Values.postgres.password }}
