@@ -3,10 +3,13 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "pan-os-upgrade-web.fullname" . }}-backend
+  labels:
+    {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
 spec:
   selector:
-    app: {{ include "pan-os-upgrade-web.name" . }}
-    component: backend
+    {{- include "pan-os-upgrade-web.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
   ports:
   - port: 8000
     targetPort: 8000
@@ -15,22 +18,34 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "pan-os-upgrade-web.fullname" . }}-frontend
+  labels:
+    {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
 spec:
-  selector:
-    app: {{ include "pan-os-upgrade-web.name" . }}
-    component: frontend
+  type: {{ .Values.frontend.service.type }}
   ports:
-  - port: 80
-    targetPort: 80
+    - port: {{ .Values.frontend.service.port }}
+      targetPort: {{ .Values.frontend.service.targetPort }}
+      {{- if and (eq .Values.frontend.service.type "NodePort") .Values.frontend.service.nodePort }}
+      nodePort: {{ .Values.frontend.service.nodePort }}
+      {{- end }}
+      protocol: TCP
+      name: http-frontend
+  selector:
+    {{- include "pan-os-upgrade-web.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "pan-os-upgrade-web.fullname" . }}-postgres
+  labels:
+    {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
+    app.kubernetes.io/component: database
 spec:
   selector:
-    app: {{ include "pan-os-upgrade-web.name" . }}
-    component: postgres
+    {{- include "pan-os-upgrade-web.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: database
   ports:
   - port: 5432
     targetPort: 5432
@@ -39,10 +54,13 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "pan-os-upgrade-web.fullname" . }}-redis
+  labels:
+    {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cache
 spec:
   selector:
-    app: {{ include "pan-os-upgrade-web.name" . }}
-    component: redis
+    {{- include "pan-os-upgrade-web.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: cache
   ports:
   - port: 6379
     targetPort: 6379
