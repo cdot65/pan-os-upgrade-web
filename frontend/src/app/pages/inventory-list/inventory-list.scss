@@ -18,8 +18,8 @@
         // Style the links inside the sidenav:
         a {
             color: mat.get-color-from-palette(
-                $primary,
-                default-contrast
+                    $primary,
+                    default-contrast
             ); // Ensure text contrast
 
             &:hover,
@@ -147,5 +147,17 @@
         .edit-button {
             margin-left: 10px;
         }
+    }
+
+    .chart-container {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .chart-container h3 {
+        margin-bottom: 10px;
     }
 }
