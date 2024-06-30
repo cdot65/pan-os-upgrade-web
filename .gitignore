@@ -64,3 +64,5 @@ backend/media/profile_images/**
 backend/panosupgradeweb/migrations/**
 backend/panosupgradeweb/scripts/upgrade_device/run_local.py.example
 backend/packages/*.whl
+/frontend/package-lock.json
+/helm/pan-os-upgrade-web/pan-os-upgrade-web-0.1.0.tgz
