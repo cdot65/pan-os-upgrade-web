@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "pan-os-upgrade-web.fullname" . }}-backend
+  name: {{ include "pan-os-upgrade-web.name" . }}-backend
   labels:
     {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
     app.kubernetes.io/component: backend
@@ -29,7 +29,7 @@ spec:
             - containerPort: 8000
           env:
             - name: POSTGRES_HOST
-              value: {{ include "pan-os-upgrade-web.fullname" . }}-postgres
+              value: {{ include "pan-os-upgrade-web.name" . }}-postgres
             - name: POSTGRES_USER
               value: {{ .Values.postgres.username | quote }}
             - name: POSTGRES_PASSWORD
@@ -39,7 +39,7 @@ spec:
             - name: POSTGRES_PORT
               value: {{ .Values.postgres.port | quote }}
             - name: REDIS_HOST
-              value: {{ include "pan-os-upgrade-web.fullname" . }}-redis
+              value: {{ include "pan-os-upgrade-web.name" . }}-redis
             {{- range $key, $value := .Values.backend.env }}
             - name: {{ $key }}
               value: {{ $value | quote }}

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "pan-os-upgrade-web.fullname" . }}-frontend
+  name: {{ include "pan-os-upgrade-web.name" . }}-frontend
   labels:
     {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
     app.kubernetes.io/component: frontend
@@ -26,6 +26,6 @@ spec:
             - containerPort: {{ .Values.frontend.service.targetPort }}
           env:
             - name: API_URL
-              value: "http://{{ include "pan-os-upgrade-web.fullname" . }}-backend:8000"
-            - name: BACKEND_URL
-              value: "http://{{ include "pan-os-upgrade-web.fullname" . }}-backend:8000"
+              value: "http://{{ include "pan-os-upgrade-web.name" . }}-backend:8000"
+            - name: BACKEND_PORT
+              value: {{ .Values.frontend.env.BACKEND_PORT | quote }}

@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "pan-os-upgrade-web.fullname" . }}-redis
+  name: {{ include "pan-os-upgrade-web.name" . }}-redis
   labels:
     {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
     app.kubernetes.io/component: cache
 spec:
-  serviceName: {{ include "pan-os-upgrade-web.fullname" . }}-redis
+  serviceName: {{ include "pan-os-upgrade-web.name" . }}-redis
   replicas: 1
   selector:
     matchLabels:

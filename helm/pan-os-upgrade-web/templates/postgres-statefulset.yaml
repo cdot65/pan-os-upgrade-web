@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "pan-os-upgrade-web.fullname" . }}-postgres
+  name: {{ include "pan-os-upgrade-web.name" . }}-postgres
   labels:
     {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
     app.kubernetes.io/component: database
 spec:
-  serviceName: {{ include "pan-os-upgrade-web.fullname" . }}-postgres
+  serviceName: {{ include "pan-os-upgrade-web.name" . }}-postgres
   replicas: 1
   selector:
     matchLabels:

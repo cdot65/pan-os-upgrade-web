@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ include "pan-os-upgrade-web.fullname" . }}-backend-config
-data:
-  POSTGRES_HOST: {{ .Values.backend.env.POSTGRES_HOST | quote }}
-  REDIS_HOST: {{ .Values.backend.env.REDIS_HOST | quote }}
