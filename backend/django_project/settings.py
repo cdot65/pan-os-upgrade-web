@@ -222,9 +222,6 @@ SPECTACULAR_SETTINGS = {
 # custom auth model
 AUTH_USER_MODEL = "accounts.CustomUser"
 
-# celery broker
-CELERY_BROKER_URL = "redis://redis:6379/0"
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

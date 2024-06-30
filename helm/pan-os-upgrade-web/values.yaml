@@ -7,17 +7,19 @@ backend:
     DJANGO_SECRET_KEY: "qKJ9h-ph4VY7zJIQnnRuvR-MARWs-b2tOdRtJZpeXfc"
     DJANGO_SUPERUSER_PASSWORD: "paloalto123"
     DJANGO_SUPERUSER_USERNAME: "admin"
-    CELERY_BROKER_URL: "redis://$(REDIS_HOST):6379/0"
-    CELERY_RESULT_BACKEND: "redis://$(REDIS_HOST):6379/0"
-    DATABASE_URL: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)"
+  service:
+    nodePort: 32081
 
 frontend:
   replicas: 1
   image: ghcr.io/cdot65/pan-os-upgrade-web-frontend:1.0.0-beta
+  env:
+    API_URL: "http://pan-os-upgrade-web-backend:8000"
+    BACKEND_PORT: "8000"
   service:
     type: NodePort
     port: 80
-    targetPort: 80  # Change this to 80
+    targetPort: 80
     nodePort: 32080
 
 postgres:
