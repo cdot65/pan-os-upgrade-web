@@ -15,7 +15,7 @@
             >
                 <mat-icon class="sidenav-icon">home</mat-icon>
                 @if (sidenavStateService.isExpanded()) {
-                <span class="sidenav-text">Home</span>
+                    <span class="sidenav-text">Home</span>
                 }
             </a>
 
@@ -52,6 +52,20 @@
                 <mat-icon class="sidenav-icon">work</mat-icon>
                 @if (sidenavStateService.isExpanded()) {
                 <span class="sidenav-text">Jobs</span>
+                }
+            </a>
+
+            <mat-divider class="sidenav-divider"></mat-divider>
+
+            <a
+                mat-list-item
+                routerLink="/documentation"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{exact: true}"
+            >
+                <mat-icon class="sidenav-icon">book</mat-icon>
+                @if (sidenavStateService.isExpanded()) {
+                    <span class="sidenav-text">Documentation</span>
                 }
             </a>
 
