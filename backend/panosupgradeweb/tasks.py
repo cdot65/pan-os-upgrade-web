@@ -14,11 +14,10 @@ from panosupgradeweb.models import Job
 from panosupgradeweb.scripts import (
     run_inventory_sync,
     run_device_refresh,
-    run_panos_version_sync,
     run_upgrade_device,
 )
 
-from celery.exceptions import WorkerTerminate
+from celery.exceptions import Ignore, WorkerTerminate
 
 # ----------------------------------------------------------------------------
 # Configure logging
@@ -131,58 +130,6 @@ def execute_refresh_device_task(
     except Exception as e:
         job.job_status = "errored"
         logging.debug(f"Job ID: {job.pk}\nError: {e}")
-        logging.error(f"Exception Type: {type(e).__name__}")
-        logging.error(f"Traceback: {traceback.format_exc()}")
-        raise WorkerTerminate()
-
-    finally:
-        job.save()
-
-
-# ----------------------------------------------------------------------------
-# PAN-OS Version Sync Task
-# ----------------------------------------------------------------------------
-@shared_task(bind=True)
-def execute_panos_version_sync(
-    self,
-    device_uuid,
-    profile_uuid,
-    author_id,
-):
-    logging.debug("PAN-OS version sync task started!")
-    author = User.objects.get(id=author_id)
-    logging.debug(f"Author: {author}")
-
-    job = Job.objects.create(
-        author=author,
-        job_status="pending",
-        job_type="panos_version_sync",
-        task_id=self.request.id,
-    )
-    logging.debug(f"Job ID: {job.pk}")
-
-    try:
-        job.job_status = "running"
-        job.save()
-
-        job_status = run_panos_version_sync(
-            author_id=author_id,
-            device_uuid=device_uuid,
-            job_id=job.task_id,
-            profile_uuid=profile_uuid,
-        )
-
-        if job_status == "errored":
-            job.job_status = "errored"
-            raise WorkerTerminate()
-        elif job_status == "skipped":
-            job.job_status = "skipped"
-        else:
-            job.job_status = "completed"
-
-    except Exception as e:
-        job.job_status = "errored"
-        logging.error(f"{job.pk}\nError: {e}")
         logging.error(f"Exception Type: {type(e).__name__}")
         logging.error(f"Traceback: {traceback.format_exc()}")
         raise WorkerTerminate()

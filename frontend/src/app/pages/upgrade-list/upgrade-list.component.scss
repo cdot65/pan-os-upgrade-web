@@ -25,8 +25,6 @@
         }
 
         button {
-            height: 50px;
-
             mat-icon {
                 margin-right: 5px;
             }
@@ -38,6 +36,28 @@
         }
     }
 
+    .refresh-progress {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    .refresh-header {
+        outline: none;
+        // padding: 24px 8px;
+        font-size: 20px;
+        text-align: center;
+        color: accent;
+    }
+
+    .refresh-error {
+        outline: none;
+        // padding: 24px 8px;
+        font-size: 20px;
+        text-align: center;
+        color: red;
+    }
 
     .selected-devices {
         display: grid;
@@ -65,57 +85,17 @@
     }
 
     .upgrade-form-grid {
-        .form-fields-container {
-            display: flex;
-            flex-wrap: nowrap;
-            align-items: center;
-            gap: 20px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
 
-            .form-field {
-                flex: 1;
-                min-width: 0;
-
-                mat-form-field {
-                    width: 100%;
-                }
-
-                &.sync-button {
-                    flex: 0 0 auto;
-
-                    button {
-                        height: 50px;
-                        line-height: 56px;
-                        padding: 0 16px;
-                        white-space: nowrap;
-                    }
-                }
-            }
+        @media screen and (min-width: 1200px) {
+            grid-template-columns: repeat(3, 1fr);
         }
-    }
 
-    @media screen and (max-width: 1200px) {
-        .upgrade-form-grid {
-            .form-fields-container {
-                flex-wrap: wrap;
-
-                .form-field {
-                    flex: 1 1 calc(50% - 10px);
-
-                    &.sync-button {
-                        flex: 0 0 100%;
-                        margin-top: 10px;
-                    }
-                }
-            }
-        }
-    }
-
-    @media screen and (max-width: 600px) {
-        .upgrade-form-grid {
-            .form-fields-container {
-                .form-field {
-                    flex: 1 1 100%;
-                }
+        .form-field {
+            mat-form-field {
+                width: 100%;
             }
         }
     }

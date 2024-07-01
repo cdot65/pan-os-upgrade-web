@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models.devices import Device, DeviceType, PanosVersion
+from .models.devices import Device, DeviceType
 from .models.jobs import Job, JobLogEntry
 from .models.profiles import Profile
 from .models.snapshots import Snapshot, ContentVersion, License, NetworkInterface
@@ -69,24 +69,6 @@ class JobLogEntryAdmin(admin.ModelAdmin):
     search_fields = ("job__task_id", "message")
 
 
-class PanosVersionAdmin(admin.ModelAdmin):
-    list_display = (
-        "version",
-        "filename",
-        "size",
-        "size_kb",
-        "released_on",
-        "downloaded",
-        "current",
-        "latest",
-        "uploaded",
-        "author",
-    )
-    list_filter = ("downloaded", "current", "latest", "uploaded")
-    search_fields = ("version", "filename", "sha256")
-    readonly_fields = ("sha256",)
-
-
 class ProfileAdmin(admin.ModelAdmin):
     list_display = (
         "name",
@@ -144,7 +126,6 @@ admin.site.register(Device, DeviceAdmin)
 admin.site.register(DeviceType, DeviceTypeAdmin)
 admin.site.register(Job, JobAdmin)
 admin.site.register(JobLogEntry, JobLogEntryAdmin)
-admin.site.register(PanosVersion, PanosVersionAdmin)
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Snapshot, SnapshotAdmin)
 admin.site.register(ContentVersion, ContentVersionAdmin)

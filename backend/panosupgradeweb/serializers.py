@@ -11,7 +11,6 @@ from .models import (
     JobLogEntry,
     License,
     NetworkInterface,
-    PanosVersion,
     Profile,
     Snapshot,
 )
@@ -473,28 +472,3 @@ class SnapshotSerializer(serializers.ModelSerializer):
             "licenses",
             "network_interfaces",
         )
-
-
-class PanosVersionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PanosVersion
-        fields = [
-            "id",
-            "version",
-            "filename",
-            "size",
-            "size_kb",
-            "released_on",
-            "release_notes",
-            "downloaded",
-            "current",
-            "latest",
-            "uploaded",
-            "sha256",
-        ]
-
-
-class PanosVersionSyncSerializer(serializers.Serializer):
-    author = serializers.IntegerField(required=True)
-    device = serializers.UUIDField(required=True)
-    profile = serializers.UUIDField(required=True)
