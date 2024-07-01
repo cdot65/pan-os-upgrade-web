@@ -46,6 +46,7 @@ export class ThemePicker implements OnInit, OnDestroy {
             displayName: "Redtail Light",
             name: "redtail-light",
             isDark: false,
+            isDefault: true,
         },
         {
             primary: "#395873",
@@ -53,7 +54,6 @@ export class ThemePicker implements OnInit, OnDestroy {
             displayName: "Redtail Dark",
             name: "redtail-dark",
             isDark: true,
-            isDefault: true,
         },
     ];
 
