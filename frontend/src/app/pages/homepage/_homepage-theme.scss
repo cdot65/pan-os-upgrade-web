@@ -29,6 +29,23 @@
             color: mat.get-color-from-palette($foreground, secondary-text);
         }
 
+        .app-homepage-row-column {
+
+            .chart-container {
+                margin-top: 20px;
+                margin-bottom: 20px;
+                background-color: mat.get-color-from-palette($foreground, 100);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .chart-container h3 {
+                margin-bottom: 10px;
+                color: mat.get-color-from-palette($foreground, secondary-text);
+            }
+        }
+
         .app-homepage-carousel-row h2 {
             color: mat.get-color-from-palette($foreground, secondary-text);
         }
@@ -56,8 +73,8 @@
         [carousel-item]:focus {
             .app-homepage-guides-card {
                 background: mat.get-color-from-palette(
-                    $background,
-                    focused-button
+                        $background,
+                        focused-button
                 );
             }
 
