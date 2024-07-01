@@ -133,7 +133,7 @@ $margin-promotion-sections-small: 15px;
 
 .app-homepage-guides {
     .app-homepage-guides-card-divider {
-        width: 30%;
+        width: 50%;
         height: 5px;
         margin: 15px auto;
     }
@@ -199,7 +199,7 @@ $margin-promotion-sections-small: 15px;
 .app-homepage-row-column {
     display: flex;
     flex-direction: column;
-    width: 32%;
+    width: 100%;
 
     & + & {
         margin-left: 2%;
@@ -235,7 +235,7 @@ $margin-promotion-sections-small: 15px;
     }
 
     .app-homepage-row-column {
-        width: 100%;
+        width: 50%;
 
         & + & {
             margin-left: 0;
@@ -256,3 +256,4 @@ $margin-promotion-sections-small: 15px;
         margin: $margin-promotion-sections-small 0;
     }
 }
+
