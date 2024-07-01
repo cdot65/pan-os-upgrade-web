@@ -1,8 +1,12 @@
 # backend/panosupgradeweb/views.py
 
+from packaging import version
+import re
+
 # django imports
 from django.contrib.auth import get_user_model
 from django.db.models import Value as V
+from django.db.models import Case, When
 from django.db.models.functions import Lower, Replace
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -19,6 +23,7 @@ from .models import (
     DeviceType,
     Device,
     Job,
+    PanosVersion,
     Profile,
     Snapshot,
 )
@@ -31,6 +36,8 @@ from .serializers import (
     InventorySyncSerializer,
     JobSerializer,
     JobLogEntrySerializer,
+    PanosVersionSerializer,
+    PanosVersionSyncSerializer,
     ProfileSerializer,
     SnapshotSerializer,
     UserSerializer,
@@ -38,6 +45,7 @@ from .serializers import (
 from .tasks import (
     execute_inventory_sync,
     execute_refresh_device_task,
+    execute_panos_version_sync,
     execute_upgrade_device_task,
 )
 
@@ -384,6 +392,88 @@ class JobLogViewSet(viewsets.ViewSet):
             for log in log_entries
         ]
         return Response(data)
+
+
+class PanosVersionViewSet(viewsets.ModelViewSet):
+    queryset = PanosVersion.objects.all()
+    serializer_class = PanosVersionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    @action(detail=False, methods=["post"], url_path="sync")
+    def sync_versions(self, request):
+        serializer = PanosVersionSyncSerializer(data=request.data)
+        if serializer.is_valid():
+            device_uuid = serializer.validated_data["device"]
+            profile_uuid = serializer.validated_data["profile"]
+            author_id = serializer.validated_data["author"]
+
+            try:
+                device = Device.objects.get(uuid=device_uuid)
+                profile = Profile.objects.get(uuid=profile_uuid)
+
+                print(f"Syncing PAN-OS versions for device {device.hostname}...")
+                print(f"Profile: {profile.name}")
+
+                # Trigger the Celery task for PAN-OS version sync and get the task ID
+                task = execute_panos_version_sync.delay(
+                    device_uuid,
+                    profile_uuid,
+                    author_id,
+                )
+
+                return Response(
+                    {"job_id": task.id},
+                    status=status.HTTP_200_OK,
+                )
+
+            except Device.DoesNotExist:
+                return Response(
+                    {"error": "Invalid device."}, status=status.HTTP_400_BAD_REQUEST
+                )
+            except Profile.DoesNotExist:
+                return Response(
+                    {"error": "Invalid profile."}, status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get_queryset(self):
+        queryset = PanosVersion.objects.all()
+        version_param = self.request.query_params.get("version", None)
+
+        if version_param is not None:
+            queryset = queryset.filter(version=version_param)
+
+        # Check if there are any entries in the queryset
+        if not queryset.exists():
+            return queryset  # Return empty queryset if no entries
+
+        # Custom version parsing function
+        def parse_panos_version(version_string):
+            match = re.match(r"(\d+)\.(\d+)\.(\d+)(?:-h(\d+))?", version_string)
+            if not match:
+                return 0, 0, 0, 0  # Default for unparseable versions
+            major, minor, patch, hotfix = match.groups()
+            return int(major), int(minor), int(patch), int(hotfix or 0)
+
+        # Custom sorting function
+        def version_key(obj):
+            return parse_panos_version(obj.version)
+
+        # Sort the queryset
+        sorted_queryset = sorted(queryset, key=version_key, reverse=True)
+
+        # Create a Case-When expression for ordering
+        case_order = Case(
+            *[When(pk=obj.pk, then=pos) for pos, obj in enumerate(sorted_queryset)]
+        )
+
+        # Apply the custom ordering to the queryset
+        return queryset.order_by(case_order)
 
 
 class ProfileViewSet(viewsets.ModelViewSet):

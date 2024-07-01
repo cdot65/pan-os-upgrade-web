@@ -29,46 +29,63 @@
             </div>
 
             <div class="upgrade-form-grid">
-                <!-- Form field for entering the profile name -->
-                <div class="form-field">
-                    <mat-form-field class="dropdown">
-                        <mat-label>Devices</mat-label>
-                        <mat-select formControlName="devices" multiple>
-                            @for (device of devices; track device) {
-                                <mat-option [value]="device.uuid">
-                                    {{ device.hostname }}
-                                </mat-option>
-                            }
-                        </mat-select>
-                    </mat-form-field>
-                </div>
+                <div class="form-fields-container">
+                    <!-- Form field for entering the profile name -->
+                    <div class="form-field">
+                        <mat-form-field class="dropdown">
+                            <mat-label>Devices</mat-label>
+                            <mat-select formControlName="devices" multiple>
+                                @for (device of devices; track device) {
+                                    <mat-option [value]="device.uuid">
+                                        {{ device.hostname }}
+                                    </mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
 
-                <div class="form-field">
-                    <mat-form-field class="dropdown">
-                        <mat-label>Profile</mat-label>
-                        <mat-select formControlName="profile">
-                            @for (profile of profiles; track profile) {
-                                <mat-option [value]="profile.uuid">
-                                    {{ profile.name }}
-                                </mat-option>
-                            }
-                        </mat-select>
-                    </mat-form-field>
-                </div>
+                    <div class="form-field">
+                        <mat-form-field class="dropdown">
+                            <mat-label>Profile</mat-label>
+                            <mat-select formControlName="profile">
+                                @for (profile of profiles; track profile) {
+                                    <mat-option [value]="profile.uuid">
+                                        {{ profile.name }}
+                                    </mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
 
-                <div class="form-field">
-                    <mat-form-field class="dropdown">
-                        <mat-label>Target Version</mat-label>
-                        <mat-select formControlName="target_version">
-                            @for (version of target_versions; track version) {
-                                <mat-option [value]="version">
-                                    {{ version }}
-                                </mat-option>
-                            }
-                        </mat-select>
-                    </mat-form-field>
-                </div>
+                    <div class="form-field">
+                        <mat-form-field class="dropdown">
+                            <mat-label>Target Version</mat-label>
+                            <mat-select formControlName="target_version">
+                                @for (version of target_versions; track version) {
+                                    <mat-option [value]="version.version">
+                                        {{ version.version }}
+                                    </mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
 
+                    <div class="form-field sync-button">
+                        <button
+                            mat-raised-button
+                            color="primary"
+                            type="button"
+                            (click)="syncVersionsFromDevice()"
+                            [disabled]="!upgradeForm.get('devices')?.value || !upgradeForm.get('profile')?.value || (syncVersions$ | async)"
+                        >
+                            <mat-icon>sync</mat-icon>
+                            Sync Versions
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div>
                 <div class="form-field">
                     <mat-label>Dry Run</mat-label>
                     <mat-radio-group formControlName="dry_run">
