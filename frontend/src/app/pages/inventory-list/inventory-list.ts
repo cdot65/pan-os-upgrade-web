@@ -15,7 +15,7 @@ import { MatSort, MatSortModule, Sort } from "@angular/material/sort";
 import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 import { forkJoin, Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
-import { Color, NgxChartsModule, ScaleType } from "@swimlane/ngx-charts";
+import { NgxChartsModule } from "@swimlane/ngx-charts";
 
 import { ComponentPageTitle } from "../page-title/page-title";
 import { CookieService } from "ngx-cookie-service";
@@ -89,26 +89,6 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
     private retryCount = 0;
     private destroy$ = new Subject<void>();
 
-    // Properties for the PAN-OS version chart
-    panOsVersionData: { name: string; value: number }[] = [];
-    view: [number, number] = [700, 400];
-    gradient = true;
-    legendPosition: string = "below";
-    colorScheme: Color = {
-        name: "custom",
-        selectable: true,
-        group: ScaleType.Ordinal,
-        domain: [
-            "#5AA454",
-            "#A10A28",
-            "#C7B42C",
-            "#AAAAAA",
-            "#4B0082",
-            "#FF7F50",
-            "#1E90FF",
-        ],
-    };
-
     @ViewChild(MatSort) sort: MatSort = new MatSort();
 
     constructor(
@@ -168,7 +148,6 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
                         this.inventoryItems,
                     );
                     this.dataSource.sort = this.sort;
-                    this.updatePanOsVersionChart();
                 },
                 (error) => {
                     console.error("Error fetching inventory items:", error);
@@ -579,33 +558,5 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
                         );
                 }
             });
-    }
-
-    onSelect(event: any): void {
-        console.log("Item clicked", JSON.parse(JSON.stringify(event)));
-    }
-
-    onActivate(event: any): void {
-        console.log("Activate", JSON.parse(JSON.stringify(event)));
-    }
-
-    onDeactivate(event: any): void {
-        console.log("Deactivate", JSON.parse(JSON.stringify(event)));
-    }
-
-    updatePanOsVersionChart(): void {
-        const versionCounts = new Map<string, number>();
-
-        this.inventoryItems.forEach((device) => {
-            if (device.sw_version) {
-                const count = versionCounts.get(device.sw_version) || 0;
-                versionCounts.set(device.sw_version, count + 1);
-            }
-        });
-
-        this.panOsVersionData = Array.from(versionCounts, ([name, value]) => ({
-            name,
-            value,
-        }));
     }
 }
