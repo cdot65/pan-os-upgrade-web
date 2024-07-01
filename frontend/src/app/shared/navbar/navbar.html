@@ -1,23 +1,23 @@
 <!-- TODO: figure out if the <nav> should go inside of a <header> element. -->
 <nav class="app-navbar-header" aria-label="Top Toolbar">
     @if (skipLinkHref) {
-    <div class="skip-link-wrapper" [class.cdk-visually-hidden]="skipLinkHidden">
-        <a
-            mat-raised-button
-            [href]="skipLinkHref"
-            (focus)="skipLinkHidden = false"
-            (blur)="skipLinkHidden = true"
-            color="accent"
-        >
-            Skip to main content
-        </a>
-    </div>
+        <div class="skip-link-wrapper" [class.cdk-visually-hidden]="skipLinkHidden">
+            <a
+                mat-raised-button
+                [href]="skipLinkHref"
+                (focus)="skipLinkHidden = false"
+                (blur)="skipLinkHidden = true"
+                color="accent"
+            >
+                Skip to main content
+            </a>
+        </div>
     }
     <a mat-button class="app-button" routerLink="/" aria-label="PAN-OS Upgrade">
         <img
             class="logo"
             matButtonIcon
-            src="../../../assets/img/homepage/pan-orange.svg"
+            src="../../../assets/img/site/pan-orange.svg"
             alt="angular"
             aria-hidden="true"
         />
@@ -26,23 +26,23 @@
     <div class="flex-spacer"></div>
     <theme-picker></theme-picker>
     @if (!hasAuthToken) {
-    <a
-        mat-button
-        class="app-button app-navbar-hide-small"
-        routerLink="/auth/login"
-    >
-        <mat-icon>login</mat-icon>
-        Login
-    </a>
+        <a
+            mat-button
+            class="app-button app-navbar-hide-small"
+            routerLink="/auth/login"
+        >
+            <mat-icon>login</mat-icon>
+            Login
+        </a>
     } @else {
-    <a
-        mat-button
-        class="app-button app-navbar-hide-small"
-        routerLink="/auth/login"
-        (click)="authService.logout()"
-    >
-        <mat-icon>logout</mat-icon>
-        Logout
-    </a>
+        <a
+            mat-button
+            class="app-button app-navbar-hide-small"
+            routerLink="/auth/login"
+            (click)="authService.logout()"
+        >
+            <mat-icon>logout</mat-icon>
+            Logout
+        </a>
     }
 </nav>
