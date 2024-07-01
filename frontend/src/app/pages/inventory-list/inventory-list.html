@@ -55,20 +55,6 @@
             </div>
         </div>
 
-        <!-- Add the PAN-OS Version Chart -->
-        <div class="chart-container">
-            <h3>PAN-OS Version Distribution</h3>
-            <ngx-charts-advanced-pie-chart
-                [view]="view"
-                [scheme]="colorScheme"
-                [results]="panOsVersionData"
-                [gradient]="gradient"
-                (select)="onSelect($event)"
-            >
-            </ngx-charts-advanced-pie-chart>
-        </div>
-
-
         <table
             mat-table
             [dataSource]="dataSource"
