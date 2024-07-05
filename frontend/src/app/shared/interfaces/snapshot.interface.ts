@@ -28,6 +28,7 @@ export interface Snapshot {
     snapshot_type: "pre" | "post";
     job: string;
     device: string;
+    device_hostname: string;
     content_versions: ContentVersion[];
     licenses: License[];
     network_interfaces: NetworkInterface[];
