@@ -1,0 +1,52 @@
+<div class="snapshot-list-container">
+    <form [formGroup]="form">
+        <mat-form-field>
+            <mat-label>Select Job ID</mat-label>
+            <mat-select formControlName="jobId">
+                @for (jobId of jobIds; track jobId) {
+                    <mat-option [value]="jobId">{{ jobId }}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+    </form>
+
+    @if (selectedSnapshot) {
+        <h2>Snapshot Details</h2>
+        <p>Snapshot Type: {{ selectedSnapshot.snapshot_type }}</p>
+        <p>Created At: {{ selectedSnapshot.created_at | date:'medium' }}</p>
+
+        <h3>Content Versions</h3>
+        <table mat-table [dataSource]="selectedSnapshot.content_versions" class="mat-elevation-z8">
+            <ng-container matColumnDef="version">
+                <th mat-header-cell *matHeaderCellDef>Version</th>
+                <td mat-cell *matCellDef="let version">{{ version.version }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="contentVersionColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: contentVersionColumns;"></tr>
+        </table>
+
+        <h3>Licenses</h3>
+        <table mat-table [dataSource]="selectedSnapshot.licenses" class="mat-elevation-z8">
+            @for (column of licenseColumns; track column) {
+                <ng-container [matColumnDef]="column">
+                    <th mat-header-cell *matHeaderCellDef>{{ column | titlecase }}</th>
+                    <td mat-cell *matCellDef="let license">{{ license[column] }}</td>
+                </ng-container>
+            }
+            <tr mat-header-row *matHeaderRowDef="licenseColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: licenseColumns;"></tr>
+        </table>
+
+        <h3>Network Interfaces</h3>
+        <table mat-table [dataSource]="selectedSnapshot.network_interfaces" class="mat-elevation-z8">
+            @for (column of networkInterfaceColumns; track column) {
+                <ng-container [matColumnDef]="column">
+                    <th mat-header-cell *matHeaderCellDef>{{ column | titlecase }}</th>
+                    <td mat-cell *matCellDef="let interface">{{ interface[column] }}</td>
+                </ng-container>
+            }
+            <tr mat-header-row *matHeaderRowDef="networkInterfaceColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: networkInterfaceColumns;"></tr>
+        </table>
+    }
+</div>
