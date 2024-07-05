@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+/* eslint-disable @typescript-eslint/naming-convention */
 // src/app/shared/services/upgrade.service.ts
 
 import {
@@ -14,13 +15,7 @@ import {
     HttpHeaders,
 } from "@angular/common/http";
 import { BehaviorSubject, Observable, throwError, timer } from "rxjs";
-import {
-    catchError,
-    mergeMap,
-    retryWhen,
-    switchMap,
-    tap,
-} from "rxjs/operators";
+import { catchError, map, mergeMap, retryWhen } from "rxjs/operators";
 import { CookieService } from "ngx-cookie-service";
 import { Injectable } from "@angular/core";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -181,20 +176,38 @@ export class UpgradeService {
     syncPanosVersions(
         deviceUuid: string,
         profileUuid: string,
-    ): Observable<PanosVersion[]> {
-        const url = `${this.apiEndpointPanosVersions}sync/`;
-        const payload = {
-            author: 1, // Replace with actual author ID
-            device: deviceUuid,
-            profile: profileUuid,
-        };
-
+    ): Observable<string | null> {
+        const author = this.cookieService.get("author");
         return this.http
-            .post(url, payload, { headers: this.getAuthHeaders() })
+            .post<{ job_id: string }>(
+                `${this.apiEndpointPanosVersions}sync/`,
+                {
+                    author: author,
+                    device: deviceUuid,
+                    profile: profileUuid,
+                },
+                { headers: this.getAuthHeaders() },
+            )
             .pipe(
-                tap(() => this.syncVersionsSubject.next(true)),
-                switchMap(() => this.getPanosVersions()),
-                tap(() => this.syncVersionsSubject.next(false)),
+                map((response) => response.job_id),
+                // Retry the request for server errors up to 3 times with an exponential backoff strategy
+                retryWhen((errors) =>
+                    errors.pipe(
+                        mergeMap((error: HttpErrorResponse, i) => {
+                            const retryAttempt = i + 1;
+                            if (retryAttempt <= 3 && this.shouldRetry(error)) {
+                                // Apply an exponential backoff strategy
+                                const delayTime =
+                                    Math.pow(2, retryAttempt) * 1000;
+                                return timer(delayTime);
+                            } else {
+                                // After 3 retries, throw error
+                                return throwError(() => error);
+                            }
+                        }),
+                    ),
+                ),
+                // Log an error message and return an empty array if the request fails
                 catchError(this.handleError.bind(this)),
             );
     }

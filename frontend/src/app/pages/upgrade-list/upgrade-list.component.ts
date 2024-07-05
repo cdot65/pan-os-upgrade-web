@@ -2,7 +2,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
-import { Observable, Subject, timer } from "rxjs";
+import { Observable, Subject, throwError, timer } from "rxjs";
+import { mergeMap, retryWhen, switchMap, takeUntil, takeWhile, tap } from "rxjs/operators";
 import { UpgradeJob, UpgradeResponse } from "../../shared/interfaces/upgrade-response.interface";
 import { ComponentPageTitle } from "../page-title/page-title";
 import { Device } from "../../shared/interfaces/device.interface";
@@ -25,8 +26,8 @@ import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
 import { UpgradeForm } from "../../shared/interfaces/upgrade-form.interface";
 import { UpgradeService } from "../../shared/services/upgrade.service";
-import { takeUntil } from "rxjs/operators";
 import { AsyncPipe } from "@angular/common";
+import { HttpErrorResponse } from "@angular/common/http";
 
 @Component({
     selector: "app-upgrade-list",
@@ -81,6 +82,37 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
             scheduledAt: [""],
         });
         this.syncVersions$ = this.upgradeService.syncVersions$;
+    }
+
+    private pollJobStatus(jobId: string): Observable<string> {
+        return timer(2000).pipe(
+            switchMap(() =>
+                timer(0, 2000).pipe(
+                    switchMap(() => this.jobService.getJobStatus(jobId)),
+                    tap((status) => {
+                        this.snackBar.open(
+                            `Job status for job ID ${jobId}: ${status}`,
+                            "Close",
+                            {
+                                duration: 5000,
+                                verticalPosition: "bottom",
+                            },
+                        );
+                    }),
+                    takeWhile(
+                        (status) =>
+                            status !== "completed" && status !== "errored",
+                        true,
+                    ),
+                    takeUntil(this.destroy$),
+                    takeUntil(timer(300000)), // 5 minutes timeout
+                ),
+            ),
+        );
+    }
+
+    private shouldRetry(error: HttpErrorResponse): boolean {
+        return error.status >= 500 || error.error instanceof ErrorEvent;
     }
 
     checkDeviceEligibility(deviceId: string): boolean {
@@ -300,15 +332,55 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
             const deviceId = selectedDevices[0];
             this.upgradeService
                 .syncPanosVersions(deviceId, selectedProfile)
-                .pipe(takeUntil(this.destroy$))
+                .pipe(
+                    takeUntil(this.destroy$),
+                    retryWhen((errors) =>
+                        errors.pipe(
+                            mergeMap((error, i) => {
+                                const retryAttempt = i + 1;
+                                if (
+                                    retryAttempt <= 3 &&
+                                    this.shouldRetry(error)
+                                ) {
+                                    return timer(
+                                        Math.pow(2, retryAttempt) * 1000,
+                                    );
+                                }
+                                return throwError(() => error);
+                            }),
+                        ),
+                    ),
+                    switchMap((jobId: string | null) => {
+                        if (jobId) {
+                            this.snackBar.open(
+                                `Sync job started with ID: ${jobId}`,
+                                "Close",
+                                { duration: 3000 },
+                            );
+                            return this.pollJobStatus(jobId);
+                        } else {
+                            return throwError(
+                                () => new Error("No job ID returned"),
+                            );
+                        }
+                    }),
+                )
                 .subscribe(
-                    (versions: PanosVersion[]) => {
-                        this.target_versions = versions;
-                        this.snackBar.open(
-                            `PAN-OS versions synced successfully for device ${this.getDeviceHostname(deviceId)}.`,
-                            "Close",
-                            { duration: 5000 },
-                        );
+                    (status: string) => {
+                        if (status === "completed") {
+                            this.getPanosVersions();
+                            this.snackBar.open(
+                                `PAN-OS versions synced successfully for device ${this.getDeviceHostname(deviceId)}.`,
+                                "Close",
+                                { duration: 5000 },
+                            );
+                        } else if (status === "errored") {
+                            this.snackBar.open(
+                                "Failed to sync PAN-OS versions. Please try again.",
+                                "Close",
+                                { duration: 3000 },
+                            );
+                        }
                     },
                     (error) => {
                         console.error("Error syncing PAN-OS versions:", error);
