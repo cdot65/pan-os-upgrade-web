@@ -460,6 +460,7 @@ class SnapshotSerializer(serializers.ModelSerializer):
     content_versions = ContentVersionSerializer(many=True, read_only=True)
     licenses = LicenseSerializer(many=True, read_only=True)
     network_interfaces = NetworkInterfaceSerializer(many=True, read_only=True)
+    device_hostname = serializers.CharField(source="device.hostname", read_only=True)
 
     class Meta:
         model = Snapshot
@@ -469,6 +470,7 @@ class SnapshotSerializer(serializers.ModelSerializer):
             "snapshot_type",
             "job",
             "device",
+            "device_hostname",
             "content_versions",
             "licenses",
             "network_interfaces",
