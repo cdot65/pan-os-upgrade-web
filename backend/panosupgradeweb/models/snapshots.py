@@ -10,7 +10,9 @@ class Snapshot(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="snapshots")
     device = models.ForeignKey(
-        Device, on_delete=models.CASCADE, related_name="snapshots"
+        Device,
+        on_delete=models.CASCADE,
+        related_name="snapshots",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     snapshot_type = models.CharField(
