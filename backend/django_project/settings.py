@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     # local
     "accounts.apps.AccountsConfig",
     "panosupgradeweb.apps.PanOsUpgradeWebConfig",
+    "django_extensions",
 ]
 
 MIDDLEWARE = [
