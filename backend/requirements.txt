@@ -12,6 +12,7 @@ Django==4.2.13
 django-allauth==0.48.0
 django-cache-url==3.4.4
 django-cors-headers==3.10.1
+django-extensions==3.2.3
 djangorestframework==3.14.0
 drf-spectacular==0.24.2
 environs==9.5.0
