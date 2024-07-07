@@ -8,9 +8,17 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatButtonModule } from "@angular/material/button";
 import { MatRadioModule } from "@angular/material/radio";
-import { NgxChartsModule } from "@swimlane/ngx-charts";
+import { Color, NgxChartsModule, ScaleType } from "@swimlane/ngx-charts";
 import { SnapshotService } from "../../shared/services/snapshot.service";
-import { ContentVersion, License, NetworkInterface, Snapshot } from "../../shared/interfaces/snapshot.interface";
+import {
+    ArpTableEntry,
+    ContentVersion,
+    License,
+    NetworkInterface,
+    Route,
+    SessionStats,
+    Snapshot,
+} from "../../shared/interfaces/snapshot.interface";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { MatIconModule } from "@angular/material/icon";
@@ -49,7 +57,67 @@ export class SnapshotListComponent implements OnInit, OnDestroy {
         "expired",
     ];
     networkInterfaceColumns: string[] = ["name", "status"];
+    arpTableColumns: string[] = [
+        "interface",
+        "ip",
+        "mac",
+        "port",
+        "status",
+        "ttl",
+    ];
+    routeColumns: string[] = [
+        "virtual_router",
+        "destination",
+        "nexthop",
+        "metric",
+        "flags",
+        "age",
+        "interface",
+        "route_table",
+    ];
+    // Chart data
+    sessionCountsData: any[] = [];
+    sessionRatesData: any[] = [];
+    timeoutData: any[] = [];
 
+    // Chart options
+    view: [number, number] = [700, 400];
+    showXAxis = true;
+    showYAxis = true;
+    gradient = false;
+    showLegend = true;
+    showXAxisLabel = true;
+    showYAxisLabel = true;
+    xAxisLabel = "Type";
+    yAxisLabel = "Value";
+
+    colorScheme: Color = {
+        name: "custom",
+        selectable: true,
+        group: ScaleType.Ordinal,
+        domain: [
+            "#04B3D9",
+            "#AE6321",
+            "#D96704",
+            "#248FA6",
+            "#84562F",
+            "#306773",
+            "#59422E",
+            "#283B40",
+            "#332A23",
+            "#2A3133",
+            "#D9D0C3",
+            "#C2DCF2",
+            "#FFE1B3",
+            "#A2D3FF",
+            "#FFCE80",
+            "#735D39",
+            "#303D48",
+            "#395873",
+            "#40382D",
+            "#A6B8C8",
+        ],
+    };
     private destroy$ = new Subject<void>();
 
     constructor(
@@ -131,7 +199,36 @@ export class SnapshotListComponent implements OnInit, OnDestroy {
                 network_interfaces: this.sortNetworkInterfaces(
                     snapshot.network_interfaces,
                 ),
+                arp_table_entries: this.sortArpTableEntries(
+                    snapshot.arp_table_entries,
+                ),
+                routes: this.sortRoutes(snapshot.routes),
             }));
+
+        if (this.filteredSnapshots.length > 0) {
+            this.prepareChartData(this.filteredSnapshots[0].session_stats[0]);
+        }
+    }
+
+    prepareChartData(stats: SessionStats) {
+        this.sessionCountsData = [
+            { name: "Active", value: stats.num_active },
+            { name: "TCP", value: stats.num_tcp },
+            { name: "UDP", value: stats.num_udp },
+            { name: "ICMP", value: stats.num_icmp },
+        ];
+
+        this.sessionRatesData = [
+            { name: "CPS", value: stats.cps },
+            { name: "PPS", value: stats.pps },
+            { name: "KBPS", value: stats.kbps },
+        ];
+
+        this.timeoutData = [
+            { name: "TCP", value: stats.tmo_tcp },
+            { name: "UDP", value: stats.tmo_udp },
+            { name: "ICMP", value: stats.tmo_icmp },
+        ];
     }
 
     sortContentVersions(versions: ContentVersion[]): ContentVersion[] {
@@ -144,5 +241,19 @@ export class SnapshotListComponent implements OnInit, OnDestroy {
 
     sortNetworkInterfaces(interfaces: NetworkInterface[]): NetworkInterface[] {
         return interfaces.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    sortArpTableEntries(entries: ArpTableEntry[]): ArpTableEntry[] {
+        return entries.sort((a, b) => a.ip.localeCompare(b.ip));
+    }
+
+    sortRoutes(routes: Route[]): Route[] {
+        return routes.sort((a, b) =>
+            a.destination.localeCompare(b.destination),
+        );
+    }
+
+    onSelect(event: any) {
+        console.log("Item clicked", JSON.parse(JSON.stringify(event)));
     }
 }
