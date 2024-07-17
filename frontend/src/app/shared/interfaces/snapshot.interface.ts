@@ -107,5 +107,5 @@ export interface Snapshot {
     network_interfaces: NetworkInterface[];
     arp_table_entries: ArpTableEntry[];
     routes: Route[];
-    session_stats: SessionStats[];
+    session_stats?: SessionStats[];
 }
