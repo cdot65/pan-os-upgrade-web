@@ -1,13 +1,14 @@
 /* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/naming-convention */
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Component, computed, DestroyRef, effect, inject, OnInit, signal } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { FormBuilder, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import { ReactiveFormsModule } from "@angular/forms";
 import { MatTableModule } from "@angular/material/table";
 import { MatSelectModule } from "@angular/material/select";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatButtonModule } from "@angular/material/button";
 import { MatRadioModule } from "@angular/material/radio";
+import { MatIconModule } from "@angular/material/icon";
 import { Color, NgxChartsModule, ScaleType } from "@swimlane/ngx-charts";
 import { SnapshotService } from "../../shared/services/snapshot.service";
 import {
@@ -19,9 +20,7 @@ import {
     SessionStats,
     Snapshot,
 } from "../../shared/interfaces/snapshot.interface";
-import { Subject } from "rxjs";
-import { takeUntil } from "rxjs/operators";
-import { MatIconModule } from "@angular/material/icon";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
     selector: "app-snapshot-list",
@@ -40,13 +39,40 @@ import { MatIconModule } from "@angular/material/icon";
     templateUrl: "./snapshot-list.component.html",
     styleUrls: ["./snapshot-list.component.scss"],
 })
-export class SnapshotListComponent implements OnInit, OnDestroy {
-    snapshots: Snapshot[] = [];
-    filteredSnapshots: Snapshot[] = [];
-    jobIds: string[] = [];
-    deviceUuids: string[] = [];
-    deviceHostnames: string[] = [];
-    form: FormGroup;
+export class SnapshotListComponent implements OnInit {
+    private snapshotService = inject(SnapshotService);
+    private destroyRef = inject(DestroyRef);
+
+    snapshots = signal<Snapshot[]>([]);
+    selectedJobId = signal<string | null>(null);
+    selectedDeviceHostname = signal<string | null>(null);
+    selectedSnapshotType = signal<"pre" | "post">("pre");
+
+    jobIds = computed(() => [...new Set(this.snapshots().map((s) => s.job))]);
+    deviceHostnames = computed(() => {
+        const jobId = this.selectedJobId();
+        return [
+            ...new Set(
+                this.snapshots()
+                    .filter((s) => !jobId || s.job === jobId)
+                    .map((s) => s.device_hostname),
+            ),
+        ];
+    });
+
+    filteredSnapshots = computed(() =>
+        this.snapshots()
+            .filter(
+                (snapshot) =>
+                    (!this.selectedJobId() ||
+                        snapshot.job === this.selectedJobId()) &&
+                    (!this.selectedDeviceHostname() ||
+                        snapshot.device_hostname ===
+                            this.selectedDeviceHostname()) &&
+                    snapshot.snapshot_type === this.selectedSnapshotType(),
+            )
+            .map(this.processSnapshot.bind(this)),
+    );
 
     contentVersionColumns: string[] = ["version"];
     licenseColumns: string[] = [
@@ -75,7 +101,8 @@ export class SnapshotListComponent implements OnInit, OnDestroy {
         "interface",
         "route_table",
     ];
-    // Chart data
+
+    // Chart data as regular properties
     sessionCountsData: any[] = [];
     sessionRatesData: any[] = [];
     timeoutData: any[] = [];
@@ -118,117 +145,67 @@ export class SnapshotListComponent implements OnInit, OnDestroy {
             "#A6B8C8",
         ],
     };
-    private destroy$ = new Subject<void>();
 
-    constructor(
-        private snapshotService: SnapshotService,
-        private fb: FormBuilder,
-    ) {
-        this.form = this.fb.group({
-            jobId: [""],
-            deviceHostname: [""],
-            snapshotType: ["pre"],
+    constructor() {
+        effect(() => {
+            console.log("Filtered Snapshots:", this.filteredSnapshots());
+            const firstSnapshot = this.filteredSnapshots()[0];
+            if (
+                firstSnapshot &&
+                firstSnapshot.session_stats &&
+                firstSnapshot.session_stats.length > 0
+            ) {
+                this.prepareChartData(firstSnapshot.session_stats[0]);
+            } else {
+                this.clearChartData();
+            }
         });
     }
 
     ngOnInit() {
         this.loadSnapshots();
-        this.form.valueChanges
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(() => this.filterSnapshots());
-    }
-
-    ngOnDestroy() {
-        this.destroy$.next();
-        this.destroy$.complete();
     }
 
     loadSnapshots() {
         this.snapshotService
             .getSnapshots()
-            .pipe(takeUntil(this.destroy$))
+            .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe(
                 (snapshots) => {
-                    this.snapshots = snapshots;
-                    this.jobIds = [...new Set(snapshots.map((s) => s.job))];
-                    this.deviceHostnames = [
-                        ...new Set(snapshots.map((s) => s.device_hostname)),
-                    ];
-                    this.filterSnapshots();
+                    this.snapshots.set(snapshots);
                 },
                 (error) => console.error("Error loading snapshots:", error),
             );
     }
 
-    loadSnapshotsByJobId(jobId: string) {
-        if (!jobId) {
-            return;
-        }
-        this.snapshotService
-            .getSnapshotsByJobId(jobId)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(
-                (snapshots) => {
-                    this.snapshots = snapshots;
-                    this.deviceHostnames = [
-                        ...new Set(snapshots.map((s) => s.device_hostname)),
-                    ];
-                    this.filterSnapshots();
-                },
-                (error) =>
-                    console.error("Error loading snapshots for job:", error),
-            );
+    updateSelectedJobId(jobId: string | null) {
+        this.selectedJobId.set(jobId);
+        this.selectedDeviceHostname.set(null);
     }
 
-    filterSnapshots() {
-        const { jobId, deviceHostname, snapshotType } = this.form.value;
-        this.filteredSnapshots = this.snapshots
-            .filter(
-                (snapshot) =>
-                    (!jobId || snapshot.job === jobId) &&
-                    (!deviceHostname ||
-                        snapshot.device_hostname === deviceHostname) &&
-                    (!snapshotType || snapshot.snapshot_type === snapshotType),
-            )
-            .map((snapshot) => ({
-                ...snapshot,
-                content_versions: this.sortContentVersions(
-                    snapshot.content_versions,
-                ),
-                licenses: this.sortLicenses(snapshot.licenses),
-                network_interfaces: this.sortNetworkInterfaces(
-                    snapshot.network_interfaces,
-                ),
-                arp_table_entries: this.sortArpTableEntries(
-                    snapshot.arp_table_entries,
-                ),
-                routes: this.sortRoutes(snapshot.routes),
-            }));
-
-        if (this.filteredSnapshots.length > 0) {
-            this.prepareChartData(this.filteredSnapshots[0].session_stats[0]);
-        }
+    updateSelectedDeviceHostname(hostname: string | null) {
+        this.selectedDeviceHostname.set(hostname);
     }
 
-    prepareChartData(stats: SessionStats) {
-        this.sessionCountsData = [
-            { name: "Active", value: stats.num_active },
-            { name: "TCP", value: stats.num_tcp },
-            { name: "UDP", value: stats.num_udp },
-            { name: "ICMP", value: stats.num_icmp },
-        ];
+    updateSelectedSnapshotType(type: "pre" | "post") {
+        this.selectedSnapshotType.set(type);
+    }
 
-        this.sessionRatesData = [
-            { name: "CPS", value: stats.cps },
-            { name: "PPS", value: stats.pps },
-            { name: "KBPS", value: stats.kbps },
-        ];
-
-        this.timeoutData = [
-            { name: "TCP", value: stats.tmo_tcp },
-            { name: "UDP", value: stats.tmo_udp },
-            { name: "ICMP", value: stats.tmo_icmp },
-        ];
+    private processSnapshot(snapshot: Snapshot): Snapshot {
+        return {
+            ...snapshot,
+            content_versions: this.sortContentVersions(
+                snapshot.content_versions,
+            ),
+            licenses: this.sortLicenses(snapshot.licenses),
+            network_interfaces: this.sortNetworkInterfaces(
+                snapshot.network_interfaces,
+            ),
+            arp_table_entries: this.sortArpTableEntries(
+                snapshot.arp_table_entries,
+            ),
+            routes: this.sortRoutes(snapshot.routes),
+        };
     }
 
     sortContentVersions(versions: ContentVersion[]): ContentVersion[] {
@@ -251,6 +228,38 @@ export class SnapshotListComponent implements OnInit, OnDestroy {
         return routes.sort((a, b) =>
             a.destination.localeCompare(b.destination),
         );
+    }
+
+    prepareChartData(stats: SessionStats | undefined) {
+        if (!stats) {
+            this.clearChartData();
+            return;
+        }
+
+        this.sessionCountsData = [
+            { name: "Active", value: stats.num_active || 0 },
+            { name: "TCP", value: stats.num_tcp || 0 },
+            { name: "UDP", value: stats.num_udp || 0 },
+            { name: "ICMP", value: stats.num_icmp || 0 },
+        ];
+
+        this.sessionRatesData = [
+            { name: "CPS", value: stats.cps || 0 },
+            { name: "PPS", value: stats.pps || 0 },
+            { name: "KBPS", value: stats.kbps || 0 },
+        ];
+
+        this.timeoutData = [
+            { name: "TCP", value: stats.tmo_tcp || 0 },
+            { name: "UDP", value: stats.tmo_udp || 0 },
+            { name: "ICMP", value: stats.tmo_icmp || 0 },
+        ];
+    }
+
+    clearChartData() {
+        this.sessionCountsData = [];
+        this.sessionRatesData = [];
+        this.timeoutData = [];
     }
 
     onSelect(event: any) {
