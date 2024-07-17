@@ -26,11 +26,10 @@ import { environment } from "../../../environments/environment";
     providedIn: "root",
 })
 export class AuthService {
-    // Define the API endpoints
+// Define the API endpointskube
     private apiUrl = environment.apiUrl;
-    private apiEndpointToken = this.apiUrl + environment.apiEndpointToken;
+    private apiEndpointToken = `${this.apiUrl}${environment.apiEndpointToken}`;
     private apiEndpointRegistration = `${this.apiUrl}/api/v1/dj-rest-auth/registration/`;
-    private apiEndpointUserProfile = `${this.apiUrl}/api/v1/dj-rest-auth/user/`;
 
     // Replace BehaviorSubject with signal
     private isLoggedIn = signal(false);

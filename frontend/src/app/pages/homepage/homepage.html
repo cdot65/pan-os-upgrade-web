@@ -16,7 +16,7 @@
                 mat-raised-button
                 class="app-button"
                 routerLink="/guide/getting-started"
-                >Get started</a
+            >Get started</a
             >
         </div>
     </div>
@@ -24,73 +24,118 @@
 
 <main class="homepage-promo">
     <div class="app-homepage-row docs-introduction">
+        <!-- Add the PAN-OS Version Chart -->
         <div class="app-homepage-row-column">
-            <h2>Customizable and Extensible</h2>
-            <p>
-                Tailor the execution to fit your unique network environments and
-                requirements.
-            </p>
-            <p>
-                Offers unparalleled flexibility for a variety of deployment
-                scenarios.
-            </p>
+            <div class="chart-container">
+                <h3>PAN-OS Version Distribution</h3>
+                <ngx-charts-advanced-pie-chart
+                    [view]="view"
+                    [scheme]="colorScheme"
+                    [results]="panOsVersionData"
+                    [gradient]="gradient"
+                    (select)="onSelect($event)"
+                >
+                </ngx-charts-advanced-pie-chart>
+            </div>
         </div>
+
+        <!-- Add the PAN-OS Version by Device Group -->
         <div class="app-homepage-row-column">
-            <h2>Automation of Routine Tasks</h2>
-            <p>
-                Reduce manual errors and save valuable time with automated
-                workflows.
-            </p>
-            <p>
-                Perform network snapshots, pre-upgrade checks, and configuration
-                backups.
-            </p>
+            <div class="chart-container">
+                <h3>PAN-OS Version by Device Group</h3>
+                <ngx-charts-bar-horizontal-2d
+                    [view]="swVersionChartView"
+                    [scheme]="colorScheme"
+                    [results]="swVersionByDeviceGroupData"
+                    [gradient]="gradient"
+                    [xAxis]="swVersionShowXAxis"
+                    [yAxis]="swVersionShowYAxis"
+                    [legend]="swVersionShowLegend"
+                    [showXAxisLabel]="swVersionShowXAxisLabel"
+                    [showYAxisLabel]="swVersionShowYAxisLabel"
+                    [xAxisLabel]="swVersionXAxisLabel"
+                    [yAxisLabel]="swVersionYAxisLabel"
+                    [legendTitle]="swVersionLegendTitle"
+                    (select)="onSelect($event)"
+                    (activate)="onActivate($event)"
+                    (deactivate)="onDeactivate($event)"
+                >
+                </ngx-charts-bar-horizontal-2d>
+            </div>
         </div>
-        <div class="app-homepage-row-column">
-            <h2>High Availability Workflows</h2>
-            <p>
-                Seamless upgrading of firewalls and Panorama appliances in HA
-                deployments.
-            </p>
-            <p>
-                Both Active / Passive and Active / Active configurations are
-                supported.
-            </p>
-        </div>
+
     </div>
 
     <mat-divider></mat-divider>
 
-    <div class="app-homepage-guides app-homepage-carousel-row">
-        <div class="homepage-header">
-            <h2>Guides</h2>
-
-            <a class="app-link" routerLink="/guides">
-                View all guides
-                <mat-icon>chevron_right</mat-icon>
-            </a>
+    <!-- Add the App-ID Version Chart -->
+    <div class="app-homepage-row docs-introduction">
+        <div class="app-homepage-row-column">
+            <div class="chart-container">
+                <h3>App-ID Version Distribution</h3>
+                <ngx-charts-advanced-pie-chart
+                    [view]="view"
+                    [scheme]="colorScheme"
+                    [results]="appIdVersionData"
+                    [gradient]="gradient"
+                    (select)="onSelect($event)"
+                >
+                </ngx-charts-advanced-pie-chart>
+            </div>
         </div>
-        <app-carousel [aria-label]="'Guides'">
-            @for (guide of guideItems.getAllItems(); track guide) {
-            <a
-                carousel-item
-                class="carousel-item app-homepage-guides-carousel-item"
-                routerLink="/guide/{{guide.id}}"
-            >
-                <mat-card class="app-homepage-guides-card">
-                    <mat-card-title>{{guide.name}}</mat-card-title>
-                    <div class="app-homepage-guides-card-divider"></div>
-                    <mat-card-content
-                        class="docs-component-category-list-card-summary"
-                    >
-                        {{guide.overview}}
-                    </mat-card-content>
-                </mat-card>
-            </a>
-            }
-        </app-carousel>
+
+        <!-- Add the App-ID Version by Device Group -->
+        <div class="app-homepage-row-column">
+            <div class="chart-container">
+                <h3>App-ID Version by Device Group</h3>
+                <ngx-charts-bar-horizontal-2d
+                    [view]="appVersionChartView"
+                    [scheme]="colorScheme"
+                    [results]="appVersionByDeviceGroupData"
+                    [gradient]="gradient"
+                    [xAxis]="appVersionShowXAxis"
+                    [yAxis]="appVersionShowYAxis"
+                    [legend]="appVersionShowLegend"
+                    [showXAxisLabel]="appVersionShowXAxisLabel"
+                    [showYAxisLabel]="appVersionShowYAxisLabel"
+                    [xAxisLabel]="appVersionXAxisLabel"
+                    [yAxisLabel]="appVersionYAxisLabel"
+                    [legendTitle]="appVersionLegendTitle"
+                    (select)="onSelect($event)"
+                    (activate)="onActivate($event)"
+                    (deactivate)="onDeactivate($event)"
+                >
+                </ngx-charts-bar-horizontal-2d>
+            </div>
+        </div>    </div>
+
+    <mat-divider></mat-divider>
+
+    <div class="app-homepage-row">
+        <div class="app-homepage-row-column">
+            <div class="chart-container">
+                <h3>Job Statistics</h3>
+                <ngx-charts-bar-horizontal-2d
+                    [view]="jobChartView"
+                    [scheme]="colorScheme"
+                    [results]="jobData"
+                    [gradient]="gradient"
+                    [xAxis]="jobShowXAxis"
+                    [yAxis]="jobShowYAxis"
+                    [legend]="jobShowLegend"
+                    [showXAxisLabel]="jobShowXAxisLabel"
+                    [showYAxisLabel]="jobShowYAxisLabel"
+                    [xAxisLabel]="jobXAxisLabel"
+                    [yAxisLabel]="jobYAxisLabel"
+                    [legendTitle]="jobLegendTitle"
+                    (select)="onSelect($event)"
+                    (activate)="onActivate($event)"
+                    (deactivate)="onDeactivate($event)"
+                >
+                </ngx-charts-bar-horizontal-2d>
+            </div>
+        </div>
     </div>
-    <div>
-        <youtube-player videoId="5gdwIni3t9A" placeholderImageQuality="high" />
-    </div>
+
+    <mat-divider></mat-divider>
 </main>

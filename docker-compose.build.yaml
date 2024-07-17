@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: ghcr.io/cdot65/pan-os-upgrade-web-backend:1.0.1-beta
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: ghcr.io/cdot65/pan-os-upgrade-web-frontend:1.0.1-beta
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: ghcr.io/cdot65/pan-os-upgrade-web-worker:1.0.1-beta

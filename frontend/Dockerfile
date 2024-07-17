@@ -17,3 +17,9 @@ COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
 # Add HEALTHCHECK instruction
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD curl --fail http://localhost/ || exit 1
+
+# Use environment variables directly
+ENV API_URL=http://pan-os-upgrade-web-backend:8000
+ENV BACKEND_PORT=8000
+
+CMD ["nginx", "-g", "daemon off;"]

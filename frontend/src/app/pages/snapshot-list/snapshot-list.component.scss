@@ -1,0 +1,31 @@
+.snapshot-list-container {
+    padding: 20px;
+
+    mat-form-field {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    h2, h3 {
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+
+    .sort-icon {
+        font-size: 18px;
+        height: 18px;
+        width: 18px;
+        vertical-align: middle;
+        margin-left: 5px;
+    }
+
+    th.mat-header-cell {
+        display: flex;
+        align-items: center;
+    }
+}

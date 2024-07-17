@@ -4,6 +4,7 @@ from dj_rest_auth.serializers import TokenSerializer
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from .models import (
+    ArpTableEntry,
     ContentVersion,
     Device,
     DeviceType,
@@ -11,7 +12,10 @@ from .models import (
     JobLogEntry,
     License,
     NetworkInterface,
+    PanosVersion,
     Profile,
+    Route,
+    SessionStats,
     Snapshot,
 )
 
@@ -455,10 +459,41 @@ class NetworkInterfaceSerializer(serializers.ModelSerializer):
         )
 
 
+class ArpTableEntrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ArpTableEntry
+        exclude = (
+            "id",
+            "snapshot",
+        )
+
+
+class RouteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Route
+        exclude = (
+            "id",
+            "snapshot",
+        )
+
+
+class SessionStatsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SessionStats
+        exclude = (
+            "id",
+            "snapshot",
+        )
+
+
 class SnapshotSerializer(serializers.ModelSerializer):
     content_versions = ContentVersionSerializer(many=True, read_only=True)
     licenses = LicenseSerializer(many=True, read_only=True)
     network_interfaces = NetworkInterfaceSerializer(many=True, read_only=True)
+    arp_table_entries = ArpTableEntrySerializer(many=True, read_only=True)
+    routes = RouteSerializer(many=True, read_only=True)
+    session_stats = SessionStatsSerializer(many=True, read_only=True)
+    device_hostname = serializers.CharField(source="device.hostname", read_only=True)
 
     class Meta:
         model = Snapshot
@@ -468,7 +503,36 @@ class SnapshotSerializer(serializers.ModelSerializer):
             "snapshot_type",
             "job",
             "device",
+            "device_hostname",
             "content_versions",
             "licenses",
             "network_interfaces",
+            "arp_table_entries",
+            "routes",
+            "session_stats",
         )
+
+
+class PanosVersionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PanosVersion
+        fields = [
+            "id",
+            "version",
+            "filename",
+            "size",
+            "size_kb",
+            "released_on",
+            "release_notes",
+            "downloaded",
+            "current",
+            "latest",
+            "uploaded",
+            "sha256",
+        ]
+
+
+class PanosVersionSyncSerializer(serializers.Serializer):
+    author = serializers.IntegerField(required=True)
+    device = serializers.UUIDField(required=True)
+    profile = serializers.UUIDField(required=True)

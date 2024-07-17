@@ -25,13 +25,16 @@ from pan_os_upgrade.components.assurance import AssuranceOptions
 
 # pan-os-upgrade-web imports
 from panosupgradeweb.models import (
+    ArpTableEntry,
     ContentVersion,
     Device,
     Job,
     License,
     NetworkInterface,
     Profile,
+    Route,
     Snapshot,
+    SessionStats,
 )
 from panosupgradeweb.scripts.logger import PanOsUpgradeLogger
 
@@ -252,8 +255,8 @@ class PanosUpgrade:
             else:
                 firewall = Firewall(
                     hostname=each.ipv4_address,
-                    username=self.profile["authentication"]["pan_username"],
-                    password=self.profile["authentication"]["pan_password"],
+                    api_username=self.profile["authentication"]["pan_username"],
+                    api_password=self.profile["authentication"]["pan_password"],
                 )
 
             # Create a dictionary containing the device, job ID, firewall object, and profile
@@ -938,8 +941,102 @@ class PanosUpgrade:
                                     status=nic_status,
                                 )
 
+                        # Create ArpTableEntry instances for each ARP table entry in the snapshot results
+                        if "arp_table" in snapshot_results:
+                            for arp_entry in snapshot_results["arp_table"].values():
+                                ArpTableEntry.objects.create(
+                                    snapshot=snapshot,
+                                    interface=arp_entry["interface"],
+                                    ip=arp_entry["ip"],
+                                    mac=arp_entry["mac"],
+                                    port=arp_entry["port"],
+                                    status=arp_entry["status"],
+                                    ttl=int(arp_entry["ttl"]),
+                                )
+
+                        # Create Route instances for each route in the snapshot results
+                        if "routes" in snapshot_results:
+                            for route in snapshot_results["routes"].values():
+                                Route.objects.create(
+                                    snapshot=snapshot,
+                                    virtual_router=route["virtual-router"],
+                                    destination=route["destination"],
+                                    nexthop=route["nexthop"],
+                                    metric=int(route["metric"]),
+                                    flags=route["flags"],
+                                    age=int(route["age"]) if route["age"] else None,
+                                    interface=route["interface"],
+                                    route_table=route["route-table"],
+                                )
+
+                        # Create SessionStats instance for the session statistics in the snapshot results
+                        if "session_stats" in snapshot_results:
+                            stats = snapshot_results["session_stats"]
+                            SessionStats.objects.create(
+                                snapshot=snapshot,
+                                age_accel_thresh=int(stats["age-accel-thresh"]),
+                                age_accel_tsf=int(stats["age-accel-tsf"]),
+                                age_scan_ssf=int(stats["age-scan-ssf"]),
+                                age_scan_thresh=int(stats["age-scan-thresh"]),
+                                age_scan_tmo=int(stats["age-scan-tmo"]),
+                                cps=int(stats["cps"]),
+                                dis_def=int(stats["dis-def"]),
+                                dis_sctp=int(stats["dis-sctp"]),
+                                dis_tcp=int(stats["dis-tcp"]),
+                                dis_udp=int(stats["dis-udp"]),
+                                icmp_unreachable_rate=int(
+                                    stats["icmp-unreachable-rate"]
+                                ),
+                                kbps=int(stats["kbps"]),
+                                max_pending_mcast=int(stats["max-pending-mcast"]),
+                                num_active=int(stats["num-active"]),
+                                num_bcast=int(stats["num-bcast"]),
+                                num_gtpc=int(stats["num-gtpc"]),
+                                num_gtpu_active=int(stats["num-gtpu-active"]),
+                                num_gtpu_pending=int(stats["num-gtpu-pending"]),
+                                num_http2_5gc=int(stats["num-http2-5gc"]),
+                                num_icmp=int(stats["num-icmp"]),
+                                num_imsi=int(stats["num-imsi"]),
+                                num_installed=int(stats["num-installed"]),
+                                num_max=int(stats["num-max"]),
+                                num_mcast=int(stats["num-mcast"]),
+                                num_pfcpc=int(stats["num-pfcpc"]),
+                                num_predict=int(stats["num-predict"]),
+                                num_sctp_assoc=int(stats["num-sctp-assoc"]),
+                                num_sctp_sess=int(stats["num-sctp-sess"]),
+                                num_tcp=int(stats["num-tcp"]),
+                                num_udp=int(stats["num-udp"]),
+                                pps=int(stats["pps"]),
+                                tcp_cong_ctrl=int(stats["tcp-cong-ctrl"]),
+                                tcp_reject_siw_thresh=int(
+                                    stats["tcp-reject-siw-thresh"]
+                                ),
+                                tmo_5gcdelete=int(stats["tmo-5gcdelete"]),
+                                tmo_cp=int(stats["tmo-cp"]),
+                                tmo_def=int(stats["tmo-def"]),
+                                tmo_icmp=int(stats["tmo-icmp"]),
+                                tmo_sctp=int(stats["tmo-sctp"]),
+                                tmo_sctpcookie=int(stats["tmo-sctpcookie"]),
+                                tmo_sctpinit=int(stats["tmo-sctpinit"]),
+                                tmo_sctpshutdown=int(stats["tmo-sctpshutdown"]),
+                                tmo_tcp=int(stats["tmo-tcp"]),
+                                tmo_tcp_delayed_ack=int(stats["tmo-tcp-delayed-ack"]),
+                                tmo_tcp_unverif_rst=int(stats["tmo-tcp-unverif-rst"]),
+                                tmo_tcphalfclosed=int(stats["tmo-tcphalfclosed"]),
+                                tmo_tcphandshake=int(stats["tmo-tcphandshake"]),
+                                tmo_tcpinit=int(stats["tmo-tcpinit"]),
+                                tmo_tcptimewait=int(stats["tmo-tcptimewait"]),
+                                tmo_udp=int(stats["tmo-udp"]),
+                                vardata_rate=int(stats["vardata-rate"]),
+                            )
+
                         self.logger.log_task(
                             action="success",
+                            message=f"{device['db_device'].hostname}: Snapshot results: {snapshot_results}",
+                        )
+
+                        self.logger.log_task(
+                            action="debug",
                             message=f"{device['db_device'].hostname}: Snapshot creation completed successfully",
                         )
 
@@ -968,7 +1065,7 @@ class PanosUpgrade:
             except Exception as e:
                 self.logger.log_task(
                     action="error",
-                    message=f"{device['db_device'].hostname}: An error occurred during readiness checks: {str(e)}",
+                    message=f"{device['db_device'].hostname}: An error occurred during snapshots: {str(e)}",
                 )
                 self.readiness_checks_succeeded = False
 

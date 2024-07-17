@@ -1,0 +1,38 @@
+backend:
+  replicas: 1
+  image: ghcr.io/cdot65/pan-os-upgrade-web-backend:1.0.0-beta
+  env:
+    DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,*"
+    DJANGO_DEBUG: "False"
+    DJANGO_SECRET_KEY: "qKJ9h-ph4VY7zJIQnnRuvR-MARWs-b2tOdRtJZpeXfc"
+    DJANGO_SUPERUSER_PASSWORD: "paloalto123"
+    DJANGO_SUPERUSER_USERNAME: "admin"
+  service:
+    nodePort: 32081
+
+frontend:
+  replicas: 1
+  image: ghcr.io/cdot65/pan-os-upgrade-web-frontend:1.0.0-beta
+  env:
+    API_URL: "http://pan-os-upgrade-web-backend:8000"
+    BACKEND_PORT: "8000"
+  service:
+    type: NodePort
+    port: 80
+    targetPort: 80
+    nodePort: 32080
+
+postgres:
+  image: postgres:14
+  storage: 1Gi
+  username: django_user
+  password: django_password
+  database: postgres
+  port: 5432
+
+redis:
+  image: redis:7.0.5-alpine
+
+worker:
+  replicas: 2
+  image: ghcr.io/cdot65/pan-os-upgrade-web-worker:1.0.0-beta

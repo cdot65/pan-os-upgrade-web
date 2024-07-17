@@ -46,6 +46,7 @@ export class ThemePicker implements OnInit, OnDestroy {
             displayName: "Redtail Light",
             name: "redtail-light",
             isDark: false,
+            isDefault: true,
         },
         {
             primary: "#395873",
@@ -53,7 +54,6 @@ export class ThemePicker implements OnInit, OnDestroy {
             displayName: "Redtail Dark",
             name: "redtail-dark",
             isDark: true,
-            isDefault: true,
         },
     ];
 
@@ -68,7 +68,7 @@ export class ThemePicker implements OnInit, OnDestroy {
         iconRegistry.addSvgIcon(
             "theme-example",
             sanitizer.bypassSecurityTrustResourceUrl(
-                "assets/img/theme-demo-icon.svg",
+                "assets/img/site/theme-demo-icon.svg",
             ),
         );
         const themeName = this._themeStorage.getStoredThemeName();

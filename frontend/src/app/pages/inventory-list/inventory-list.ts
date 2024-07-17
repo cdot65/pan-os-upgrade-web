@@ -13,7 +13,9 @@ import {
 import { MatDialog, MatDialogModule } from "@angular/material/dialog";
 import { MatSort, MatSortModule, Sort } from "@angular/material/sort";
 import { MatTableDataSource, MatTableModule } from "@angular/material/table";
-import { Subject, forkJoin } from "rxjs";
+import { forkJoin, Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
+import { NgxChartsModule } from "@swimlane/ngx-charts";
 
 import { ComponentPageTitle } from "../page-title/page-title";
 import { CookieService } from "ngx-cookie-service";
@@ -33,7 +35,6 @@ import { ProfileDialogComponent } from "../profile-select-dialog/profile-select-
 import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
 import { SelectionModel } from "@angular/cdk/collections";
-import { takeUntil } from "rxjs/operators";
 
 @Component({
     selector: "app-inventory-list",
@@ -49,8 +50,10 @@ import { takeUntil } from "rxjs/operators";
         MatButtonModule,
         MatDialogModule,
         MatListModule,
+        NgxChartsModule,
     ],
 })
+
 /**
  * Component for displaying the inventory list.
  */
@@ -97,8 +100,7 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         private snackBar: MatSnackBar,
         private _liveAnnouncer: LiveAnnouncer,
         public _componentPageTitle: ComponentPageTitle,
-    ) {
-    }
+    ) {}
 
     /**
      * Announces the change in sort state.
@@ -557,5 +559,4 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
                 }
             });
     }
-
 }

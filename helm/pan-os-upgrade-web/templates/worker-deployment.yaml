@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "pan-os-upgrade-web.name" . }}-worker
+  labels:
+    {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  replicas: {{ .Values.worker.replicas }}
+  selector:
+    matchLabels:
+      {{- include "pan-os-upgrade-web.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        {{- include "pan-os-upgrade-web.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: worker
+    spec:
+      containers:
+        - name: worker
+          image: {{ .Values.worker.image }}
+          command: ["celery", "-A", "django_project", "worker", "-l", "debug"]
+          env:
+            - name: POSTGRES_HOST
+              value: {{ include "pan-os-upgrade-web.name" . }}-postgres
+            - name: POSTGRES_USER
+              value: {{ .Values.postgres.username | quote }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgres.password | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.postgres.database | quote }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.postgres.port | quote }}
+            - name: REDIS_HOST
+              value: {{ include "pan-os-upgrade-web.name" . }}-redis
+            - name: CELERY_BROKER_URL
+              value: "redis://{{ include "pan-os-upgrade-web.name" . }}-redis:6379/0"
+            - name: CELERY_RESULT_BACKEND
+              value: "redis://{{ include "pan-os-upgrade-web.name" . }}-redis:6379/0"
+            {{- range $key, $value := .Values.backend.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}

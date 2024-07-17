@@ -1,0 +1,72 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pan-os-upgrade-web.name" . }}-backend
+  labels:
+    {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+spec:
+  type: NodePort
+  selector:
+    {{- include "pan-os-upgrade-web.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+  ports:
+  - port: 8000
+    targetPort: 8000
+    {{- if .Values.backend.service.nodePort }}
+    nodePort: {{ .Values.backend.service.nodePort }}
+    {{- end }}
+    protocol: TCP
+    name: http-backend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pan-os-upgrade-web.name" . }}-frontend
+  labels:
+    {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+spec:
+  type: {{ .Values.frontend.service.type }}
+  ports:
+    - port: {{ .Values.frontend.service.port }}
+      targetPort: {{ .Values.frontend.service.targetPort }}
+      {{- if and (eq .Values.frontend.service.type "NodePort") .Values.frontend.service.nodePort }}
+      nodePort: {{ .Values.frontend.service.nodePort }}
+      {{- end }}
+      protocol: TCP
+      name: http-frontend
+  selector:
+    {{- include "pan-os-upgrade-web.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pan-os-upgrade-web.name" . }}-postgres
+  labels:
+    {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
+    app.kubernetes.io/component: database
+spec:
+  selector:
+    {{- include "pan-os-upgrade-web.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: database
+  ports:
+  - port: 5432
+    targetPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pan-os-upgrade-web.name" . }}-redis
+  labels:
+    {{- include "pan-os-upgrade-web.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cache
+spec:
+  selector:
+    {{- include "pan-os-upgrade-web.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: cache
+  ports:
+  - port: 6379
+    targetPort: 6379

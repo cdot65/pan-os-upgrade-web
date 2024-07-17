@@ -15,13 +15,13 @@ from invoke import task
 # DOCKER PARAMETERS
 # ---------------------------------------------------------------------------
 DOCKER_IMG_BACKEND = "ghcr.io/cdot65/pan-os-upgrade-web-backend"
-DOCKER_TAG_BACKEND = "0.0.1"
+DOCKER_TAG_BACKEND = "1.0.0-beta"
 
 DOCKER_IMG_FRONTEND = "ghcr.io/cdot65/pan-os-upgrade-web-frontend"
-DOCKER_TAG_FRONTEND = "0.0.1"
+DOCKER_TAG_FRONTEND = "1.0.0-beta"
 
 DOCKER_IMG_WORKER = "ghcr.io/cdot65/pan-os-upgrade-web-worker"
-DOCKER_TAG_WORKER = "0.0.1"
+DOCKER_TAG_WORKER = "1.0.0-beta"
 
 
 # ---------------------------------------------------------------------------
@@ -36,11 +36,13 @@ PWD = os.getcwd()
 @task()
 def build(context):
     """Build our Docker images."""
-    backend = f"docker build -t {DOCKER_IMG_BACKEND}:{DOCKER_TAG_BACKEND} ./backend"
-    worker = f"docker tag {DOCKER_IMG_BACKEND}:{DOCKER_TAG_BACKEND} {DOCKER_IMG_WORKER}:{DOCKER_TAG_WORKER}"
-    frontend = f"docker build -t {DOCKER_IMG_FRONTEND}:{DOCKER_TAG_FRONTEND} ./frontend"
+    build_containers = (
+        "docker buildx bake -f docker-compose.build.yaml --set backend.platform=linux/amd64,"
+        "linux/arm64  --set frontend.platform=linux/amd64,linux/arm64  --set "
+        "worker.platform=linux/amd64,linux/arm64  --push"
+    )
     context.run(
-        f"{backend} && {frontend} && {worker}",
+        f"{build_containers}",
     )
 
 

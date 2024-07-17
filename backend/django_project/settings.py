@@ -1,5 +1,6 @@
 # backend/django_project/settings.py
 
+import os
 from pathlib import Path
 from environs import Env
 
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     # local
     "accounts.apps.AccountsConfig",
     "panosupgradeweb.apps.PanOsUpgradeWebConfig",
+    "django_extensions",
 ]
 
 MIDDLEWARE = [
@@ -132,13 +134,19 @@ WSGI_APPLICATION = "django_project.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": env.str("POSTGRES_DB"),
-        "USER": env.str("POSTGRES_USER"),
-        "PASSWORD": env.str("POSTGRES_PASSWORD"),
-        "HOST": env.str("POSTGRES_HOST"),
-        "PORT": env.int("POSTGRES_PORT"),
+        "NAME": os.environ.get("POSTGRES_DB"),
+        "USER": os.environ.get("POSTGRES_USER"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+        "HOST": os.environ.get("POSTGRES_HOST"),
+        "PORT": os.environ.get("POSTGRES_PORT", "5432"),
     }
 }
+
+REDIS_HOST = os.environ.get("REDIS_HOST", "redis")
+REDIS_PORT = os.environ.get("REDIS_PORT", "6379")
+
+CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"
+CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -214,9 +222,6 @@ SPECTACULAR_SETTINGS = {
 
 # custom auth model
 AUTH_USER_MODEL = "accounts.CustomUser"
-
-# celery broker
-CELERY_BROKER_URL = "redis://redis:6379/0"
 
 LOGGING = {
     "version": 1,

@@ -1,6 +1,7 @@
 ---
 services:
     backend:
+        image: ghcr.io/cdot65/pan-os-upgrade-web-backend:1.0.1-beta
         build:
             context: ./backend
             dockerfile: Dockerfile
@@ -11,17 +12,23 @@ services:
             - "8000:8000"
         depends_on:
             - db
+        environment:
+          - POSTGRES_HOST=db
+          - REDIS_HOST=redis
         env_file:
             - ./backend/.env
 
     frontend:
+        image: ghcr.io/cdot65/pan-os-upgrade-web-frontend:1.0.1-beta
         build:
             context: ./frontend
             dockerfile: Dockerfile
         ports:
-            - "8080:80"
+          - "8080:80"
         depends_on:
-            - backend
+          - backend
+        environment:
+          - API_URL=http://backend:8000
 
     db:
         image: postgres:14
@@ -40,6 +47,7 @@ services:
             - 6379
 
     worker:
+        image: ghcr.io/cdot65/pan-os-upgrade-web-worker:1.0.1-beta
         build:
             context: ./backend
             dockerfile: Dockerfile

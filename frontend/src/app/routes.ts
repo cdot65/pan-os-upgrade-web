@@ -90,6 +90,32 @@ export const APP_ROUTES: Routes = [
                 ],
             },
             {
+                path: "documentation",
+                canActivate: [authGuard],
+                children: [
+                    {
+                        path: "",
+                        loadComponent: () =>
+                            import("./pages/documentation/documentation").then(
+                                (m) => m.Documentation,
+                            ),
+                    },
+                ],
+            },
+            {
+                path: "snapshots",
+                canActivate: [authGuard],
+                children: [
+                    {
+                        path: "",
+                        loadComponent: () =>
+                            import("./pages/snapshot-list").then(
+                                (m) => m.SnapshotListComponent,
+                            ),
+                    },
+                ],
+            },
+            {
                 path: "upgrade",
                 canActivate: [authGuard],
                 children: [

@@ -1,0 +1,186 @@
+<div class="snapshot-list-container">
+    <form [formGroup]="form">
+        <mat-form-field>
+            <mat-label>Select Job ID</mat-label>
+            <mat-select formControlName="jobId">
+                @for (jobId of jobIds; track jobId) {
+                    <mat-option [value]="jobId">{{ jobId }}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+            <mat-label>Select Device</mat-label>
+            <mat-select formControlName="deviceHostname">
+                @for (hostname of deviceHostnames; track hostname) {
+                    <mat-option [value]="hostname">{{ hostname }}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        <mat-radio-group formControlName="snapshotType">
+            <mat-radio-button value="pre">Pre Snapshot</mat-radio-button>
+            <mat-radio-button value="post">Post Snapshot</mat-radio-button>
+        </mat-radio-group>
+    </form>
+
+    @for (snapshot of filteredSnapshots; track snapshot.uuid) {
+        <div class="snapshot-details">
+            <h2>Snapshot Details</h2>
+            <p>Snapshot Type: {{ snapshot.snapshot_type }}</p>
+            <p>Created At: {{ snapshot.created_at | date:'medium' }}</p>
+            <p>Device: {{ snapshot.device_hostname }}</p>
+
+            @if (snapshot.content_versions && snapshot.content_versions.length > 0) {
+                <h3>Content Versions</h3>
+                <table mat-table [dataSource]="snapshot.content_versions" class="mat-elevation-z2">
+                    <ng-container matColumnDef="version">
+                        <th mat-header-cell *matHeaderCellDef>
+                            Version
+                            <mat-icon class="sort-icon">arrow_downward</mat-icon>
+                        </th>
+                        <td mat-cell *matCellDef="let version">{{ version.version }}</td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="contentVersionColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: contentVersionColumns;"></tr>
+                </table>
+            }
+
+            @if (snapshot.licenses && snapshot.licenses.length > 0) {
+                <h3>Licenses</h3>
+                <table mat-table [dataSource]="snapshot.licenses" class="mat-elevation-z2">
+                    @for (column of licenseColumns; track column) {
+                        <ng-container [matColumnDef]="column">
+                            <th mat-header-cell *matHeaderCellDef>
+                                {{ column | titlecase }}
+                                @if (column === 'feature') {
+                                    <mat-icon class="sort-icon">arrow_downward</mat-icon>
+                                }
+                            </th>
+                            <td mat-cell *matCellDef="let license">{{ license[column] }}</td>
+                        </ng-container>
+                    }
+                    <tr mat-header-row *matHeaderRowDef="licenseColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: licenseColumns;"></tr>
+                </table>
+            }
+
+            @if (snapshot.network_interfaces && snapshot.network_interfaces.length > 0) {
+                <h3>Network Interfaces</h3>
+                <table mat-table [dataSource]="snapshot.network_interfaces" class="mat-elevation-z2">
+                    @for (column of networkInterfaceColumns; track column) {
+                        <ng-container [matColumnDef]="column">
+                            <th mat-header-cell *matHeaderCellDef>
+                                {{ column | titlecase }}
+                                @if (column === 'name') {
+                                    <mat-icon class="sort-icon">arrow_downward</mat-icon>
+                                }
+                            </th>
+                            <td mat-cell *matCellDef="let iface">{{ iface[column] }}</td>
+                        </ng-container>
+                    }
+                    <tr mat-header-row *matHeaderRowDef="networkInterfaceColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: networkInterfaceColumns;"></tr>
+                </table>
+            }
+
+            @if (snapshot.arp_table_entries && snapshot.arp_table_entries.length > 0) {
+                <h3>ARP Table Entries</h3>
+                <table mat-table [dataSource]="snapshot.arp_table_entries" class="mat-elevation-z2">
+                    @for (column of arpTableColumns; track column) {
+                        <ng-container [matColumnDef]="column">
+                            <th mat-header-cell *matHeaderCellDef>
+                                {{ column | titlecase }}
+                                @if (column === 'ip') {
+                                    <mat-icon class="sort-icon">arrow_downward</mat-icon>
+                                }
+                            </th>
+                            <td mat-cell *matCellDef="let entry">{{ entry[column] }}</td>
+                        </ng-container>
+                    }
+                    <tr mat-header-row *matHeaderRowDef="arpTableColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: arpTableColumns;"></tr>
+                </table>
+            }
+
+            @if (snapshot.routes && snapshot.routes.length > 0) {
+                <h3>Routes</h3>
+                <table mat-table [dataSource]="snapshot.routes" class="mat-elevation-z2">
+                    @for (column of routeColumns; track column) {
+                        <ng-container [matColumnDef]="column">
+                            <th mat-header-cell *matHeaderCellDef>
+                                {{ column | titlecase }}
+                                @if (column === 'destination') {
+                                    <mat-icon class="sort-icon">arrow_downward</mat-icon>
+                                }
+                            </th>
+                            <td mat-cell *matCellDef="let route">{{ route[column] }}</td>
+                        </ng-container>
+                    }
+                    <tr mat-header-row *matHeaderRowDef="routeColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: routeColumns;"></tr>
+                </table>
+            }
+
+            @if (snapshot.session_stats && snapshot.session_stats.length > 0) {
+                <h3>Session Statistics</h3>
+                <div class="chart-container">
+                    <h4>Session Counts</h4>
+                    <ngx-charts-bar-vertical
+                        [view]="view"
+                        [scheme]="colorScheme"
+                        [results]="sessionCountsData"
+                        [gradient]="gradient"
+                        [xAxis]="showXAxis"
+                        [yAxis]="showYAxis"
+                        [legend]="showLegend"
+                        [showXAxisLabel]="showXAxisLabel"
+                        [showYAxisLabel]="showYAxisLabel"
+                        [xAxisLabel]="xAxisLabel"
+                        [yAxisLabel]="'Count'"
+                        (select)="onSelect($event)">
+                    </ngx-charts-bar-vertical>
+                </div>
+
+                <div class="chart-container">
+                    <h4>Session Rates</h4>
+                    <ngx-charts-bar-vertical
+                        [view]="view"
+                        [scheme]="colorScheme"
+                        [results]="sessionRatesData"
+                        [gradient]="gradient"
+                        [xAxis]="showXAxis"
+                        [yAxis]="showYAxis"
+                        [legend]="showLegend"
+                        [showXAxisLabel]="showXAxisLabel"
+                        [showYAxisLabel]="showYAxisLabel"
+                        [xAxisLabel]="xAxisLabel"
+                        [yAxisLabel]="'Rate'"
+                        (select)="onSelect($event)">
+                    </ngx-charts-bar-vertical>
+                </div>
+
+                <div class="chart-container">
+                    <h4>Timeouts</h4>
+                    <ngx-charts-bar-vertical
+                        [view]="view"
+                        [scheme]="colorScheme"
+                        [results]="timeoutData"
+                        [gradient]="gradient"
+                        [xAxis]="showXAxis"
+                        [yAxis]="showYAxis"
+                        [legend]="showLegend"
+                        [showXAxisLabel]="showXAxisLabel"
+                        [showYAxisLabel]="showYAxisLabel"
+                        [xAxisLabel]="xAxisLabel"
+                        [yAxisLabel]="'Timeout (s)'"
+                        (select)="onSelect($event)">
+                    </ngx-charts-bar-vertical>
+                </div>
+            }
+
+        </div>
+    } @empty {
+        <p>No snapshots found matching the current criteria.</p>
+    }
+</div>
