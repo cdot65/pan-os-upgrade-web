@@ -1,7 +1,7 @@
-// src/app/shared/services/upgrade-step.service.ts
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable } from "rxjs";
 import { map } from "rxjs/operators";
+import { Job } from "../interfaces/job.interface";
 
 export interface StepMapping {
     name: string;
@@ -62,34 +62,8 @@ export class UpgradeStepService {
     private currentStepSubject = new BehaviorSubject<string>("");
     currentStep$ = this.currentStepSubject.asObservable();
 
-    updateCurrentStep(logs: any[]): void {
-        const reversedLogs = [...logs].reverse();
-        for (const log of reversedLogs) {
-            const message = log.message;
-            if (message.includes("Upgrade required from")) {
-                this.currentStepSubject.next("Validate Upgrade Path");
-                break;
-            } else if (
-                message.includes("Checking to see if the target image")
-            ) {
-                this.currentStepSubject.next("Image Version Validation");
-                break;
-            } else if (message.includes("Begin running the readiness checks")) {
-                this.currentStepSubject.next("Readiness Checks");
-                break;
-            } else if (
-                message.includes(
-                    "Performing snapshot of network state information pre-upgrade",
-                )
-            ) {
-                this.currentStepSubject.next("Pre-Upgrade Snapshot");
-                break;
-            } else if (message.includes("Suspending the HA state of device")) {
-                this.currentStepSubject.next("HA State Suspension");
-                break;
-            }
-            // Add more conditions as needed
-        }
+    updateCurrentStep(job: Job): void {
+        this.currentStepSubject.next(job.current_step);
     }
 
     getCurrentStepSvgPath(): Observable<string> {
