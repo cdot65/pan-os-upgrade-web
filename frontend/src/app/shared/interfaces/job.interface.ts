@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+
 // frontend/src/app/shared/interfaces/job.interface.ts
 
 export interface Job {
@@ -8,4 +9,5 @@ export interface Job {
     updated_at: string;
     job_type: string;
     job_status: string;
+    current_step: string;
 }
