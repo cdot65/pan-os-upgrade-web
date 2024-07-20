@@ -15,9 +15,7 @@ interface StepMapping {
     styleUrls: ["./upgrade-diagram.component.scss"],
 })
 export class UpgradeDiagramComponent implements OnChanges {
-    @Input() completedSteps: string[] = [];
-
-    currentStep: string = "";
+    @Input() currentStep: string = "";
 
     readonly stepMappings: StepMapping[] = [
         {
@@ -25,7 +23,7 @@ export class UpgradeDiagramComponent implements OnChanges {
             svgPath: "assets/img/site/validate-upgrade-path.svg",
         },
         {
-            name: "Image Version Validation",
+            name: "s",
             svgPath: "assets/img/site/image-version-validation.svg",
         },
         {
@@ -67,8 +65,8 @@ export class UpgradeDiagramComponent implements OnChanges {
     ];
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes["completedSteps"]) {
-            this.updateCurrentStep();
+        if (changes["currentStep"]) {
+            this.getCurrentStepSvgPath();
         }
     }
 
@@ -77,74 +75,5 @@ export class UpgradeDiagramComponent implements OnChanges {
             (step) => step.name === this.currentStep,
         );
         return currentStepMapping ? currentStepMapping.svgPath : "";
-    }
-
-    private updateCurrentStep(): void {
-        for (const step of this.stepMappings) {
-            if (!this.isStepComplete(step.name)) {
-                this.currentStep = step.name;
-                return;
-            }
-        }
-        this.currentStep = "Upgrade Complete";
-    }
-
-    private isStepComplete(step: string): boolean {
-        switch (step) {
-            case "Validate Upgrade Path":
-                return this.completedSteps.some((s) =>
-                    s.includes("The target version is compatible"),
-                );
-            case "Image Version Validation":
-                return this.completedSteps.some((s) =>
-                    s.includes("found in list of available versions"),
-                );
-            case "Download Base Image":
-                return this.completedSteps.some(
-                    (s) =>
-                        s.includes("Base image") &&
-                        s.includes("skipping the download process"),
-                );
-            case "Download Target Image":
-                return this.completedSteps.some(
-                    (s) =>
-                        s.includes("Target image") &&
-                        s.includes("skipping the process of downloading again"),
-                );
-            case "Readiness Checks":
-                return this.completedSteps.some((s) =>
-                    s.includes("Readiness checks successfully completed"),
-                );
-            case "Pre-Upgrade Snapshot":
-                return this.completedSteps.some(
-                    (s) =>
-                        s.includes(
-                            "Snapshot creation completed successfully",
-                        ) && s.includes("pre-upgrade"),
-                );
-            case "HA State Suspension":
-                return this.completedSteps.some((s) =>
-                    s.includes("HA state suspended"),
-                );
-            case "Upgrade PAN-OS":
-                return this.completedSteps.some((s) =>
-                    s.includes("Upgrade completed successfully"),
-                );
-            case "Reboot and Wait":
-                return this.completedSteps.some(
-                    (s) =>
-                        s.includes("Device upgraded") &&
-                        s.includes("rebooted successfully"),
-                );
-            case "Post-Upgrade Snapshot":
-                return this.completedSteps.some(
-                    (s) =>
-                        s.includes(
-                            "Snapshot creation completed successfully",
-                        ) && s.includes("post-upgrade"),
-                );
-            default:
-                return false;
-        }
     }
 }
