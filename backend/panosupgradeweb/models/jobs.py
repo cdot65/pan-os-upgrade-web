@@ -9,6 +9,12 @@ class Job(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    current_step = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="Current Step",
+    )
     job_status = models.CharField(
         max_length=20,
         choices=(

@@ -366,6 +366,9 @@ class JobViewSet(viewsets.ModelViewSet):
             "job_status": (
                 instance.job_status if instance.job_status is not None else "pending"
             ),
+            "current_step": instance.current_step
+            if instance.current_step is not None
+            else "pending",
         }
         return JsonResponse(response_data, status=200)
 

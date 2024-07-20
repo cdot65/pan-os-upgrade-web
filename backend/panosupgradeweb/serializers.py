@@ -238,6 +238,7 @@ class JobSerializer(serializers.ModelSerializer):
             "updated_at",
             "job_status",
             "job_type",
+            "current_step",
         )
 
 
