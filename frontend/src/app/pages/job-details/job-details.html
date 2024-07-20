@@ -6,12 +6,15 @@
                 <mat-card-header>
                     <mat-card-title>Job Details</mat-card-title>
                     <mat-card-subtitle>
-                        {{ (jobDetails$ | async)?.job?.task_id }}
+                        Job{{ (jobDetails$ | async)?.job?.task_id }}
                     </mat-card-subtitle>
                 </mat-card-header>
                 <mat-card-content>
                     <div class="upgrade-diagram-wrapper">
-                        <app-upgrade-diagram></app-upgrade-diagram>
+                        <app-upgrade-diagram
+                            [currentStep]="currentStep$ | async"
+                            [jobStatus]="jobStatus$ | async"
+                        ></app-upgrade-diagram>
                     </div>
 
                     <div class="job-details-info">

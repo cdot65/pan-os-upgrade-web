@@ -1,7 +1,7 @@
 // src/app/pages/job-details/job-details.component.ts
 import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
-import { Subject, timer } from "rxjs";
-import { catchError, switchMap, takeUntil, tap } from "rxjs/operators";
+import { Observable, Subject, timer } from "rxjs";
+import { catchError, map, switchMap, takeUntil, tap } from "rxjs/operators";
 import { ActivatedRoute } from "@angular/router";
 import { CommonModule } from "@angular/common";
 import { ComponentPageTitle } from "../page-title/page-title";
@@ -18,7 +18,7 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { NgxJsonViewerModule } from "ngx-json-viewer";
 import { SortingService } from "../../shared/services/sorting.service";
-import { UpgradeDiagramComponent } from "../upgrade-diagram/upgrade-diagram.component";
+import { UpgradeDiagramComponent } from "../upgrade-diagram";
 import { UpgradeStepService } from "../../shared/services/upgrade-step.service";
 
 @Component({
@@ -44,7 +44,11 @@ import { UpgradeStepService } from "../../shared/services/upgrade-step.service";
 export class JobDetailsComponent implements OnDestroy, OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     jobDetails$ = this.loggingService.jobDetails$;
-    currentStep$ = this.upgradeStepService.currentStep$;
+    currentStep$: Observable<string> =
+        this.upgradeStepService.currentStep$.pipe(map((step) => step ?? ""));
+    jobStatus$: Observable<string> = this.jobDetails$.pipe(
+        map((details) => details?.job?.job_status ?? ""),
+    );
 
     private destroy$ = new Subject<void>();
     private pollingInterval = 3000; // 3 seconds
