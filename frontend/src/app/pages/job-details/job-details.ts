@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/naming-convention */
+// src/app/pages/job-details/job-details.component.ts
 import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
 import { Subject, timer } from "rxjs";
 import { catchError, switchMap, takeUntil, tap } from "rxjs/operators";
-
 import { ActivatedRoute } from "@angular/router";
 import { CommonModule } from "@angular/common";
 import { ComponentPageTitle } from "../page-title/page-title";
@@ -19,7 +18,8 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { NgxJsonViewerModule } from "ngx-json-viewer";
 import { SortingService } from "../../shared/services/sorting.service";
-import { UpgradeDiagramComponent } from "../upgrade-diagram";
+import { UpgradeDiagramComponent } from "../upgrade-diagram/upgrade-diagram.component";
+import { UpgradeStepService } from "../../shared/services/upgrade-step.service";
 
 @Component({
     selector: "app-job-details",
@@ -44,8 +44,7 @@ import { UpgradeDiagramComponent } from "../upgrade-diagram";
 export class JobDetailsComponent implements OnDestroy, OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     jobDetails$ = this.loggingService.jobDetails$;
-    completedSteps: string[] = [];
-    currentStep: string = "";
+    currentStep$ = this.upgradeStepService.currentStep$;
 
     private destroy$ = new Subject<void>();
     private pollingInterval = 3000; // 3 seconds
@@ -57,6 +56,7 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
         private snackBar: MatSnackBar,
         public sortingService: SortingService,
         public _componentPageTitle: ComponentPageTitle,
+        private upgradeStepService: UpgradeStepService,
     ) {}
 
     ngOnDestroy(): void {
@@ -82,6 +82,7 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
                         ...jobDetails,
                         logs: sortedLogs,
                     });
+                    this.upgradeStepService.updateCurrentStep(sortedLogs);
                     if (
                         jobDetails.job.job_status === "pending" ||
                         jobDetails.job.job_status === "running"
@@ -112,6 +113,7 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
                         ...jobDetails,
                         logs: sortedLogs,
                     });
+                    this.upgradeStepService.updateCurrentStep(sortedLogs);
                 }),
                 takeUntil(this.destroy$),
             )
@@ -149,50 +151,13 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
                 ...jobDetails,
                 logs: sortedLogs,
             });
-        }
-    }
-
-    private updateCurrentStep(logs: any[]): void {
-        for (const log of logs.reverse()) {
-            // Check logs from newest to oldest
-            const message = log.message;
-            if (message.includes("Upgrade required from")) {
-                this.currentStep = "Validate Upgrade Path";
-                break;
-            } else if (
-                message.includes("Checking to see if the target image")
-            ) {
-                this.currentStep = "Image Version Validation";
-                break;
-            } else if (message.includes("Begin running the readiness checks")) {
-                this.currentStep = "Readiness Checks";
-                break;
-            } else if (
-                message.includes(
-                    "Performing snapshot of network state information pre-upgrade",
-                )
-            ) {
-                this.currentStep = "Pre-Upgrade Snapshot";
-                break;
-            } else if (message.includes("Suspending the HA state of device")) {
-                this.currentStep = "HA State Suspension";
-                break;
-            }
+            this.upgradeStepService.updateCurrentStep(sortedLogs);
         }
     }
 
     private sortLogs(logs: any[]) {
-        const sortedLogs =
-            this.sortingService.sortOrder() === "asc"
-                ? logs.sort((a, b) => a.timestamp.localeCompare(b.timestamp))
-                : logs.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
-
-        this.updateCurrentStep(sortedLogs);
-        this.updateCompletedSteps(sortedLogs);
-        return sortedLogs;
-    }
-
-    private updateCompletedSteps(logs: any[]): void {
-        this.completedSteps = logs.map((log) => log.message);
+        return this.sortingService.sortOrder() === "asc"
+            ? logs.sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+            : logs.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
     }
 }

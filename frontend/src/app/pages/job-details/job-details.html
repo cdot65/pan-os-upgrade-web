@@ -1,10 +1,6 @@
 <!-- src/app/pages/job-details/job-details.html -->
 <div class="job-details-container">
-    <main
-        aria-label="Job details"
-        id="job-details"
-        class="job-details"
-    >
+    <main aria-label="Job details" id="job-details" class="job-details">
         <div class="mat-elevation-z2">
             <mat-card class="job-details-card">
                 <mat-card-header>
@@ -15,27 +11,27 @@
                 </mat-card-header>
                 <mat-card-content>
                     <div class="upgrade-diagram-wrapper">
-                        <app-upgrade-diagram [currentStep]="currentStep"></app-upgrade-diagram>
+                        <app-upgrade-diagram></app-upgrade-diagram>
                     </div>
 
                     <div class="job-details-info">
                         <p>
                             <b>Job Type</b>: {{
-                                (jobDetails$ |
-                                    async)?.job?.job_type
+                                (jobDetails$ | async)?.job?.job_type
                             }}
                         </p>
                         <p>
                             <b>Created at</b>: {{
-                                (jobDetails$ |
-                                    async)?.job?.created_at | date:'medium'
+                                (jobDetails$ | async)?.job?.created_at | date:'medium'
                             }}
                         </p>
                         <p>
                             <b>Status</b>: {{
-                                (jobDetails$ |
-                                    async)?.job?.job_status
+                                (jobDetails$ | async)?.job?.job_status
                             }}
+                        </p>
+                        <p>
+                            <b>Current Step</b>: {{ currentStep$ | async }}
                         </p>
                     </div>
 
