@@ -77,6 +77,8 @@ def main(
         profile_uuid=profile_uuid,
     )
 
+    upgrade_job.update_current_step("Initializing Upgrade Process")
+
     # Log the start of the PAN-OS upgrade process
     upgrade_job.logger.log_task(
         action="report",
@@ -404,7 +406,7 @@ def main(
                     )
 
                     # Download the base image for the target version
-                    downloaded = PanosUpgrade.software_download(
+                    downloaded = upgrade_job.software_download(
                         device=targeted_device["pan_device"],
                         target_version=base_version_key,
                     )

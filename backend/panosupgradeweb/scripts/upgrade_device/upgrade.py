@@ -1,7 +1,8 @@
 import time
 from http.client import RemoteDisconnected
 from typing import Dict, Optional, Tuple, Union
-from celery.exceptions import WorkerTerminate
+from django.utils import timezone
+from django.db import transaction
 
 # Palo Alto Networks SDK imports
 from panos.firewall import Firewall
@@ -154,6 +155,9 @@ class PanosUpgrade:
                 F --> G
             ```
         """
+        self.update_current_step(
+            "Assign a device dictionary to the appropriate attribute based on its local state"
+        )
         if device_dict["db_device"].local_state in ["active", "active-primary"]:
             # Assign device_dict to the primary attribute if 'local_state' is "active" or "active-primary"
             self.primary_device = device_dict
@@ -214,6 +218,9 @@ class PanosUpgrade:
                 H --> N
             ```
         """
+        self.update_current_step(
+            "Assign the devices to be upgraded to the appropriate attributes based on their HA status"
+        )
         # Retrieve the device object based on the provided device UUID
         device = Device.objects.get(uuid=device_uuid)
         peer = None
@@ -343,6 +350,10 @@ class PanosUpgrade:
             ```
         """
 
+        self.update_current_step(
+            "Check the compatibility of upgrading a firewall in an HA pair to a target version"
+        )
+
         # Check if the major upgrade is more than one release apart
         if target_version[0] - current_version[0] > 1:
             self.logger.log_task(
@@ -419,6 +430,11 @@ class PanosUpgrade:
                 B -->|local == peer| E[Return "equal"]
             ```
         """
+
+        self.update_current_step(
+            "Compare two version tuples and determine their relative order"
+        )
+
         # Log the task of comparing version strings for the device
         self.logger.log_task(
             action="search",
@@ -469,6 +485,9 @@ class PanosUpgrade:
                 G --> H[Set self.upgrade_required to False]
             ```
         """
+        self.update_current_step(
+            "Determine if a firewall requires an upgrade based on the current and target versions"
+        )
 
         # Log the current and target versions
         self.logger.log_task(
@@ -536,6 +555,10 @@ class PanosUpgrade:
             ```
         """
 
+        self.update_current_step(
+            "Retrieve the deployment information and HA status of a firewall device"
+        )
+
         # Get the deployment type using show_highavailability_state()
         deployment_type = device.show_highavailability_state()
 
@@ -566,6 +589,9 @@ class PanosUpgrade:
         Returns:
             None
         """
+        self.update_current_step(
+            "Perform readiness checks on a firewall device before the upgrade process"
+        )
 
         # Attempt to perform readiness checks
         self.readiness_checks_succeeded = False
@@ -634,6 +660,10 @@ class PanosUpgrade:
             If the device fails to reboot to the specified PAN-OS version after a set number of retries, or if HA
             synchronization is not achieved post-reboot, the script will terminate with an error.
         """
+
+        self.update_current_step(
+            "Initiates a reboot on a specified device and verifies it boots up with the desired PAN-OS version"
+        )
 
         rebooted = False
         attempt = 0
@@ -735,6 +765,10 @@ class PanosUpgrade:
         str
             The status of the upgrade process ("completed", "errored").
         """
+
+        self.update_current_step(
+            "Conducting the upgrade process for a Palo Alto Networks device to a specified version"
+        )
 
         # Log message to console about starting the upgrade process
         self.logger.log_task(
@@ -858,6 +892,10 @@ class PanosUpgrade:
         Returns:
             None
         """
+
+        self.update_current_step(
+            "Run assurance checks or snapshots on a firewall device."
+        )
 
         # Setup Firewall client
         checks_firewall = CheckFirewall(
@@ -1186,6 +1224,11 @@ class PanosUpgrade:
                 O --> M
             ```
         """
+
+        self.update_current_step(
+            "Set the profile settings based on the provided profile UUID."
+        )
+
         try:
             # Retrieve the profile object based on the provided profile UUID
             profile = Profile.objects.get(uuid=self.profile_uuid)
@@ -1305,6 +1348,10 @@ class PanosUpgrade:
             ```
         """
 
+        self.update_current_step(
+            "Check if a software update to the target version is available and compatible."
+        )
+
         # Retrieve available versions of PAN-OS
         device["pan_device"].software.check()
         available_versions = device["pan_device"].software.versions
@@ -1317,8 +1364,8 @@ class PanosUpgrade:
             )
             return True
 
-    @staticmethod
     def software_download(
+        self,
         device: Union[Firewall, Panorama],
         target_version: str,
     ) -> bool:
@@ -1354,6 +1401,10 @@ class PanosUpgrade:
                 J --> F
             ```
         """
+
+        self.update_current_step(
+            "Download the target software version to the firewall device."
+        )
 
         try:
             # Initiate the download of the target software version
@@ -1408,6 +1459,10 @@ class PanosUpgrade:
                 F --> G[Log error message and return False]
             ```
         """
+
+        self.update_current_step(
+            "Suspend the active device in a high-availability (HA) pair."
+        )
 
         try:
             # Send API request to suspend the device
@@ -1492,6 +1547,10 @@ class PanosUpgrade:
             ```
         """
 
+        self.update_current_step(
+            f"Take {snapshot_type.capitalize()} snapshot of the network state information"
+        )
+
         # Log the start of the snapshot process
         self.logger.log_task(
             action="start",
@@ -1534,3 +1593,43 @@ class PanosUpgrade:
 
                 # Increment the snapshot attempt number
                 self.snapshot_attempt += 1
+
+    def update_current_step(self, step_name: str):
+        """
+        Update the current_step of the associated Job.
+
+        Args:
+            step_name (str): The name of the current step.
+        """
+        try:
+            with transaction.atomic():
+                job = Job.objects.select_for_update().get(task_id=self.job_id)
+                job.current_step = step_name
+                job.updated_at = timezone.now()
+                job.save()
+
+            self.logger.log_task(
+                action="report", message=f"Updated current step to: {step_name}"
+            )
+
+            # Double-check the update
+            updated_job = Job.objects.get(task_id=self.job_id)
+            if updated_job.current_step != step_name:
+                self.logger.log_task(
+                    action="error",
+                    message=f"Failed to update current step. Database shows: {updated_job.current_step}",
+                )
+            else:
+                self.logger.log_task(
+                    action="success",
+                    message=f"Confirmed current step update in database: {updated_job.current_step}",
+                )
+        except Job.DoesNotExist:
+            self.logger.log_task(
+                action="error",
+                message=f"Failed to update current step. Job with ID {self.job_id} not found.",
+            )
+        except Exception as e:
+            self.logger.log_task(
+                action="error", message=f"Error updating current step: {str(e)}"
+            )
