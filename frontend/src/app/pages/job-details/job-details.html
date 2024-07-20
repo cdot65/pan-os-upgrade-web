@@ -54,8 +54,7 @@
                             <div>No logs found.</div>
                         } @else {
                             <div>
-                                @for (log of (jobDetails$ | async)?.logs ?? [];
-                                    track log) {
+                                @for (log of (jobDetails$ | async)?.logs ?? []; track log) {
                                     <mat-card class="log-entry">
                                         <mat-card-header class="mat-card-header">
                                             <mat-card-title class="mat-card-title">
