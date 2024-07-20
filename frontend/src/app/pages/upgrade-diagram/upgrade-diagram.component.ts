@@ -72,6 +72,13 @@ export class UpgradeDiagramComponent implements OnChanges {
         }
     }
 
+    getCurrentStepSvgPath(): string {
+        const currentStepMapping = this.stepMappings.find(
+            (step) => step.name === this.currentStep,
+        );
+        return currentStepMapping ? currentStepMapping.svgPath : "";
+    }
+
     private updateCurrentStep(): void {
         for (const step of this.stepMappings) {
             if (!this.isStepComplete(step.name)) {

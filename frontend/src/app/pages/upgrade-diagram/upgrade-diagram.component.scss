@@ -1,15 +1,23 @@
 // src/app/pages/upgrade-diagram/upgrade-diagram.component.scss
 .upgrade-diagram-container {
-    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
+    padding: 10px;
+    height: 200px; // Set a fixed height
 }
 
-.base-diagram, .step-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: auto;
+.base-diagram {
+    width: 48%; // Slightly less than half to account for spacing
+    height: 100%; // Fill the container height
+    object-fit: contain;
+}
+
+.step-overlay {
+    width: 48%; // Slightly less than half to account for spacing
+    height: 100%; // Fill the container height
+    object-fit: contain;
 }
