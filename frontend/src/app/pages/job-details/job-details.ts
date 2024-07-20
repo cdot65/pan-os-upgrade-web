@@ -82,7 +82,7 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
                         ...jobDetails,
                         logs: sortedLogs,
                     });
-                    this.upgradeStepService.updateCurrentStep(sortedLogs);
+                    this.upgradeStepService.updateCurrentStep(jobDetails.job);
                     if (
                         jobDetails.job.job_status === "pending" ||
                         jobDetails.job.job_status === "running"
@@ -113,7 +113,7 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
                         ...jobDetails,
                         logs: sortedLogs,
                     });
-                    this.upgradeStepService.updateCurrentStep(sortedLogs);
+                    this.upgradeStepService.updateCurrentStep(jobDetails.job);
                 }),
                 takeUntil(this.destroy$),
             )
@@ -151,7 +151,6 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
                 ...jobDetails,
                 logs: sortedLogs,
             });
-            this.upgradeStepService.updateCurrentStep(sortedLogs);
         }
     }
 
