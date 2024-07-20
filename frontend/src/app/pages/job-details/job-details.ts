@@ -45,6 +45,7 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     jobDetails$ = this.loggingService.jobDetails$;
     completedSteps: string[] = [];
+    currentStep: string = "";
 
     private destroy$ = new Subject<void>();
     private pollingInterval = 3000; // 3 seconds
@@ -151,12 +152,42 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
         }
     }
 
+    private updateCurrentStep(logs: any[]): void {
+        for (const log of logs.reverse()) {
+            // Check logs from newest to oldest
+            const message = log.message;
+            if (message.includes("Upgrade required from")) {
+                this.currentStep = "Validate Upgrade Path";
+                break;
+            } else if (
+                message.includes("Checking to see if the target image")
+            ) {
+                this.currentStep = "Image Version Validation";
+                break;
+            } else if (message.includes("Begin running the readiness checks")) {
+                this.currentStep = "Readiness Checks";
+                break;
+            } else if (
+                message.includes(
+                    "Performing snapshot of network state information pre-upgrade",
+                )
+            ) {
+                this.currentStep = "Pre-Upgrade Snapshot";
+                break;
+            } else if (message.includes("Suspending the HA state of device")) {
+                this.currentStep = "HA State Suspension";
+                break;
+            }
+        }
+    }
+
     private sortLogs(logs: any[]) {
         const sortedLogs =
             this.sortingService.sortOrder() === "asc"
                 ? logs.sort((a, b) => a.timestamp.localeCompare(b.timestamp))
                 : logs.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 
+        this.updateCurrentStep(sortedLogs);
         this.updateCompletedSteps(sortedLogs);
         return sortedLogs;
     }
