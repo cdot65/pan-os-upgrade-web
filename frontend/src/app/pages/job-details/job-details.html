@@ -6,7 +6,7 @@
                 <mat-card-header>
                     <mat-card-title>Job Details</mat-card-title>
                     <mat-card-subtitle>
-                        Job{{ (jobDetails$ | async)?.job?.task_id }}
+                        Job ID: {{ (jobDetails$ | async)?.job?.task_id }}
                     </mat-card-subtitle>
                 </mat-card-header>
                 <mat-card-content>
@@ -32,9 +32,6 @@
                             <b>Status</b>: {{
                                 (jobDetails$ | async)?.job?.job_status
                             }}
-                        </p>
-                        <p>
-                            <b>Current Step</b>: {{ currentStep$ | async }}
                         </p>
                     </div>
 
