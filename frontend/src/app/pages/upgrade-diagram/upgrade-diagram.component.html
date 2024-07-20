@@ -1,8 +1,14 @@
 <!-- src/app/pages/upgrade-diagram/upgrade-diagram.component.html -->
 <div class="upgrade-diagram-container">
-    <img src="assets/img/site/firewall.svg" alt="Firewall Base Diagram" class="base-diagram">
-    <img [src]="getCurrentStepSvgPath()"
-         alt="Current Step Overlay"
-         class="step-overlay"
-         *ngIf="currentStep">
+    <img
+        src="assets/img/site/firewall.svg"
+        alt="Firewall Base Diagram"
+        class="base-diagram"
+    />
+    <img
+        [src]="currentStepSvgPath$ | async"
+        alt="Current Step Overlay"
+        class="step-overlay"
+        *ngIf="currentStepSvgPath$ | async"
+    />
 </div>
