@@ -1,0 +1,13 @@
+<!-- src/app/pages/upgrade-diagram/upgrade-diagram.component.html -->
+<div class="upgrade-diagram-container">
+    <img class="base-diagram" src="assets/img/site/firewall.svg" alt="Firewall Base Diagram">
+    @for (step of stepMappings; track step.name) {
+        @if (currentStep === step.name) {
+            <img
+                class="step-overlay"
+                [src]="step.svgPath"
+                [alt]="step.name + ' overlay'"
+            >
+        }
+    }
+</div>

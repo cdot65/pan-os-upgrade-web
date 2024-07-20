@@ -19,6 +19,7 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { NgxJsonViewerModule } from "ngx-json-viewer";
 import { SortingService } from "../../shared/services/sorting.service";
+import { UpgradeDiagramComponent } from "../upgrade-diagram";
 
 @Component({
     selector: "app-job-details",
@@ -37,11 +38,14 @@ import { SortingService } from "../../shared/services/sorting.service";
         MatMenuModule,
         MatSelectModule,
         NgxJsonViewerModule,
+        UpgradeDiagramComponent,
     ],
 })
 export class JobDetailsComponent implements OnDestroy, OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     jobDetails$ = this.loggingService.jobDetails$;
+    completedSteps: string[] = [];
+
     private destroy$ = new Subject<void>();
     private pollingInterval = 3000; // 3 seconds
     private jobUuid: string | null = null;
@@ -148,8 +152,16 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
     }
 
     private sortLogs(logs: any[]) {
-        return this.sortingService.sortOrder() === "asc"
-            ? logs.sort((a, b) => a.timestamp.localeCompare(b.timestamp))
-            : logs.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+        const sortedLogs =
+            this.sortingService.sortOrder() === "asc"
+                ? logs.sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+                : logs.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+
+        this.updateCompletedSteps(sortedLogs);
+        return sortedLogs;
+    }
+
+    private updateCompletedSteps(logs: any[]): void {
+        this.completedSteps = logs.map((log) => log.message);
     }
 }

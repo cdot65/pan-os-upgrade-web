@@ -1,2 +1,38 @@
-// src/app/pages/job-details/job-details.scss
+// job-details.scss
+@use '@angular/material' as mat;
 
+.job-details-container {
+    padding: 20px;
+}
+
+.job-details {
+    width: 100%;
+    min-height: 900px;
+}
+
+.job-details-info {
+    margin-bottom: 20px;
+}
+
+.job-details-button-row {
+    margin-bottom: 20px;
+}
+
+.live-logs {
+    margin-top: 20px;
+
+    .log-entry {
+        margin-bottom: 16px;
+        padding: 8px;
+        background-color: mat.get-color-from-palette(mat.$gray-palette, 100);
+        border-radius: 4px;
+    }
+}
+
+app-upgrade-diagram {
+    display: block;
+    margin-bottom: 20px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}

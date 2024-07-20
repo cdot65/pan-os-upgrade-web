@@ -1,0 +1,15 @@
+// src/app/pages/upgrade-diagram/upgrade-diagram.component.scss
+.upgrade-diagram-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.base-diagram, .step-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+}
