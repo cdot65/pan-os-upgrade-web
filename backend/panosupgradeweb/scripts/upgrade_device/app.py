@@ -773,34 +773,35 @@ def main(
     # ------------------------------------------------------------------------------------------------------------------
     # Workflow: Target device HA suspension
     # ------------------------------------------------------------------------------------------------------------------
-    try:
-        if not dry_run:
-            # Log message to console
+    if not upgrade_job.standalone_device:
+        try:
+            if not dry_run:
+                # Log message to console
+                upgrade_job.logger.log_task(
+                    action="start",
+                    message=f"{targeted_device['db_device'].hostname}: Suspending the HA state of device",
+                )
+
+                # Suspend HA state of the active device
+                upgrade_job.suspend_ha_device(
+                    device=targeted_device,
+                )
+
+            else:
+                upgrade_job.logger.log_task(
+                    action="skipped",
+                    message=f"{targeted_device['db_device'].hostname}: Dry run mode enabled. Skipping HA state "
+                    f"suspension.",
+                )
+
+        except Exception as e:
+            # Log the error of the target device's upgrade
             upgrade_job.logger.log_task(
-                action="start",
-                message=f"{targeted_device['db_device'].hostname}: Suspending the HA state of device",
+                action="error",
+                message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the "
+                f"HA suspension of the device: {str(e)} ",
             )
-
-            # Suspend HA state of the active device
-            upgrade_job.suspend_ha_device(
-                device=targeted_device,
-            )
-
-        else:
-            upgrade_job.logger.log_task(
-                action="skipped",
-                message=f"{targeted_device['db_device'].hostname}: Dry run mode enabled. Skipping HA state "
-                f"suspension.",
-            )
-
-    except Exception as e:
-        # Log the error of the target device's upgrade
-        upgrade_job.logger.log_task(
-            action="error",
-            message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the "
-            f"HA suspension of the device: {str(e)} ",
-        )
-        return "errored"
+            return "errored"
 
     # ------------------------------------------------------------------------------------------------------------------
     # Workflow: Target device upgrade process
