@@ -5,10 +5,12 @@
         alt="Firewall Base Diagram"
         class="base-diagram"
     />
-    <img
-        [src]="currentStepSvgPath$ | async"
-        alt="Current Step Overlay"
-        class="step-overlay"
-        *ngIf="currentStepSvgPath$ | async"
-    />
+    <div class="status-container">
+        <img
+            [src]="statusSvg"
+            [alt]="jobStatus"
+            class="status-svg"
+        />
+        <span class="status-text">{{ statusText }}</span>
+    </div>
 </div>

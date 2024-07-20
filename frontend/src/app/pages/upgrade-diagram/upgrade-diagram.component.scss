@@ -7,17 +7,29 @@
     max-width: 800px;
     margin: 0 auto;
     padding: 10px;
-    height: 200px; // Set a fixed height
+    height: 200px;
 }
 
 .base-diagram {
-    width: 48%; // Slightly less than half to account for spacing
-    height: 100%; // Fill the container height
+    width: 48%;
+    height: 100%;
     object-fit: contain;
 }
 
-.step-overlay {
-    width: 48%; // Slightly less than half to account for spacing
-    height: 100%; // Fill the container height
-    object-fit: contain;
+.status-container {
+    display: flex;
+    align-items: center;
+    width: 48%;
+    height: 100%;
+}
+
+.status-svg {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+
+.status-text {
+    font-size: 18px;
+    font-weight: bold;
 }

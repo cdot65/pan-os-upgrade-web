@@ -1,7 +1,5 @@
-// src/app/pages/upgrade-diagram/upgrade-diagram.component.ts
-import { Component } from "@angular/core";
+import { Component, Input } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { UpgradeStepService } from "../../shared/services/upgrade-step.service";
 
 @Component({
     selector: "app-upgrade-diagram",
@@ -11,7 +9,23 @@ import { UpgradeStepService } from "../../shared/services/upgrade-step.service";
     styleUrls: ["./upgrade-diagram.component.scss"],
 })
 export class UpgradeDiagramComponent {
-    currentStepSvgPath$ = this.upgradeStepService.getCurrentStepSvgPath();
+    @Input() currentStep: string | null = "";
+    @Input() jobStatus: string | null = "";
 
-    constructor(private upgradeStepService: UpgradeStepService) {}
+    get statusSvg(): string {
+        switch (this.jobStatus) {
+            case "completed":
+                return "assets/img/site/check.svg";
+            case "errored":
+                return "assets/img/site/failed.svg";
+            default:
+                return "assets/img/site/spin.svg";
+        }
+    }
+
+    get statusText(): string {
+        return this.jobStatus === "completed"
+            ? "Job completed"
+            : this.currentStep ?? "";
+    }
 }
