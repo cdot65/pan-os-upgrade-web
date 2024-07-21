@@ -33,3 +33,14 @@
     font-size: 18px;
     font-weight: bold;
 }
+
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-label {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
