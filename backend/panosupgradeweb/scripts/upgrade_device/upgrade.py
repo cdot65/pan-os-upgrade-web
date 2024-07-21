@@ -665,7 +665,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            f"{device['db_device'].hostname}: Initiate reboot on and verify it boots up with the desired PAN-OS version"
+            f"{device['db_device'].hostname}: Initiate reboot on and verify it boots up {target_version}"
         )
 
         rebooted = False
@@ -770,7 +770,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            f"{device['db_device'].hostname}: Begin the upgrade process for device to a specified version"
+            f"{device['db_device'].hostname}: Upgrading device to version {target_version}."
         )
 
         # Log message to console about starting the upgrade process
@@ -795,11 +795,6 @@ class PanosUpgrade:
                     action="working",
                     message=f"{device['db_device'].hostname}: Attempting upgrade to version {target_version} (Attempt "
                     f"{attempt + 1} of {self.profile['install']['maximum_attempts']}).",
-                )
-
-                self.logger.log_task(
-                    action="working",
-                    message=f"{device['db_device'].hostname}: Calling device['pan_device'].software.install()",
                 )
 
                 install_job = device["pan_device"].software.install(
