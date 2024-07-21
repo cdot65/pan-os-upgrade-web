@@ -140,7 +140,6 @@ export class JobService {
     }
 
     getJob(uuid: string): Observable<Job> {
-        // Construct URL with placeholder
         const url = `${this.apiEndpointJobs}${uuid}/`;
 
         return this.http
@@ -148,24 +147,20 @@ export class JobService {
                 headers: this.getAuthHeaders(),
             })
             .pipe(
-                // Retry the request for server errors up to 3 times with an exponential backoff strategy
                 retryWhen((errors) =>
                     errors.pipe(
                         mergeMap((error: HttpErrorResponse, i) => {
                             const retryAttempt = i + 1;
                             if (retryAttempt <= 3 && this.shouldRetry(error)) {
-                                // Apply an exponential backoff strategy
                                 const delayTime =
                                     Math.pow(2, retryAttempt) * 1000;
                                 return timer(delayTime);
                             } else {
-                                // After 3 retries, throw error
                                 return throwError(() => error);
                             }
                         }),
                     ),
                 ),
-                // Log an error message and return an empty array if the request fails
                 catchError(this.handleError.bind(this)),
             );
     }
