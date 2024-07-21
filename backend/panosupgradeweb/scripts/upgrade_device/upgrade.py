@@ -156,7 +156,7 @@ class PanosUpgrade:
             ```
         """
         self.update_current_step(
-            f"{device_dict['db_device'].hostname}: Assign a device dictionary to the attribute based on its local state"
+            "Assign a device dictionary to the attribute based on its local state"
         )
         if device_dict["db_device"].local_state in ["active", "active-primary"]:
             # Assign device_dict to the primary attribute if 'local_state' is "active" or "active-primary"
@@ -351,7 +351,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            f"{hostname}: Check the compatibility of upgrading a firewall in an HA pair to a target version"
+            "Check the compatibility of upgrading a firewall in an HA pair to a target version"
         )
 
         # Check if the major upgrade is more than one release apart
@@ -432,7 +432,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            f"{hostname}: Compare two version tuples and determine their relative order"
+            "Compare two version tuples and determine their relative order"
         )
 
         # Log the task of comparing version strings for the device
@@ -486,7 +486,7 @@ class PanosUpgrade:
             ```
         """
         self.update_current_step(
-            f"{hostname}: Determine if the device requires an upgrade based on the current and target versions"
+            "Determine if the device requires an upgrade based on the current and target versions"
         )
 
         # Log the current and target versions
@@ -519,7 +519,7 @@ class PanosUpgrade:
                 message=f"{hostname}: Halting upgrade.",
             )
             self.update_current_step(
-                f"{hostname}: No upgrade required or downgrade attempt detected."
+                "No upgrade required or downgrade attempt detected."
             )
 
             # ensure self.upgrade_required = False
@@ -559,7 +559,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            f"{device['db_device'].hostname}: Retrieve the deployment information and HA status of a firewall device"
+            "Retrieve the deployment information and HA status of a firewall device"
         )
 
         # Get the deployment type using show_highavailability_state()
@@ -593,7 +593,7 @@ class PanosUpgrade:
             None
         """
         self.update_current_step(
-            f"{device['db_device'].hostname}: Perform readiness checks on a firewall device before the upgrade process"
+            "Perform readiness checks on a firewall device before the upgrade process"
         )
 
         # Attempt to perform readiness checks
@@ -665,7 +665,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            f"{device['db_device'].hostname}: Initiate reboot on and verify it boots up {target_version}"
+            f"Initiate reboot on and verify it boots up {target_version}"
         )
 
         rebooted = False
@@ -769,9 +769,7 @@ class PanosUpgrade:
             The status of the upgrade process ("completed", "errored").
         """
 
-        self.update_current_step(
-            f"{device['db_device'].hostname}: Upgrading device to version {target_version}."
-        )
+        self.update_current_step(f"Upgrading device to version {target_version}.")
 
         # Log message to console about starting the upgrade process
         self.logger.log_task(
@@ -891,9 +889,7 @@ class PanosUpgrade:
             None
         """
 
-        self.update_current_step(
-            f"{device['db_device'].hostname}: Run the 'Upgrade Assurance' tasks on device."
-        )
+        self.update_current_step(f"Run the 'Upgrade Assurance' tasks on device.")
 
         # Setup Firewall client
         checks_firewall = CheckFirewall(
@@ -1342,7 +1338,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            f"{device['db_device'].hostname}: Check if a software update to the version is available and compatible."
+            f"Check if a software update to the version is available and compatible."
         )
 
         # Retrieve available versions of PAN-OS
@@ -1396,7 +1392,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            f"{device['db_device'].hostname}: Download the target software version to the firewall device."
+            "Download the target software version to the firewall device."
         )
 
         try:
@@ -1454,7 +1450,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            f"{device['db_device'].hostname}: Suspend the active device in a high-availability (HA) pair."
+            f"Suspend the active device in a high-availability (HA) pair."
         )
 
         try:
@@ -1541,7 +1537,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            f"{device['db_device'].hostname}: Take {snapshot_type.capitalize()} snapshot of the network information"
+            f"Take {snapshot_type.capitalize()} snapshot of the network information"
         )
 
         # Log the start of the snapshot process
