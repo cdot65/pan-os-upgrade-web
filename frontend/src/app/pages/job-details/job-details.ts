@@ -1,6 +1,6 @@
 // src/app/pages/job-details/job-details.component.ts
 import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
-import { Observable, Subject, timer } from "rxjs";
+import { Observable, of, Subject, timer } from "rxjs";
 import { catchError, map, switchMap, takeUntil, tap } from "rxjs/operators";
 import { ActivatedRoute } from "@angular/router";
 import { CommonModule } from "@angular/common";
@@ -49,6 +49,7 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
     jobStatus$: Observable<string> = this.jobDetails$.pipe(
         map((details) => details?.job?.job_status ?? ""),
     );
+    jobDetailsTableData$: Observable<{ key: string; value: string }[]> = of([]);
 
     private destroy$ = new Subject<void>();
     private pollingInterval = 3000; // 3 seconds
@@ -74,6 +75,7 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
         if (this.jobUuid) {
             this.fetchInitialJobDetailsAndLogs();
         }
+        this.initJobDetailsTableData();
     }
 
     private fetchInitialJobDetailsAndLogs(): void {
@@ -103,6 +105,33 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
                 }),
             )
             .subscribe();
+    }
+
+    private initJobDetailsTableData(): void {
+        this.jobDetailsTableData$ = this.jobDetails$.pipe(
+            map((details) => {
+                if (!details?.job) {
+                    return [];
+                }
+                return [
+                    { key: "Job Type", value: details.job.job_type },
+                    {
+                        key: "Created at",
+                        value: new Date(
+                            details.job.created_at,
+                        ).toLocaleString(),
+                    },
+                    {
+                        key: "Updated at",
+                        value: new Date(
+                            details.job.updated_at,
+                        ).toLocaleString(),
+                    },
+                    { key: "Status", value: details.job.job_status },
+                ];
+            }),
+            catchError(() => of([])),
+        );
     }
 
     private startPolling(): void {
