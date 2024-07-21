@@ -8,7 +8,7 @@ import traceback
 
 from celery import shared_task
 from django.contrib.auth import get_user_model
-from panosupgradeweb.models import Job
+from panosupgradeweb.models import Device, Job
 
 # import the inventory sync script
 from panosupgradeweb.scripts import (
@@ -207,11 +207,25 @@ def execute_upgrade_device_task(
     author = User.objects.get(id=author_id)
     logging.debug(f"Author: {author}")
 
+    # Fetch the device
+    device = Device.objects.get(uuid=device_uuid)
+
     job = Job.objects.create(
         author=author,
         job_status="pending",
         job_type="device_upgrade",
         task_id=self.request.id,
+        # Populate new fields
+        device_group=device.device_group,
+        ha_enabled=device.ha_enabled,
+        hostname=device.hostname,
+        local_state=device.local_state,
+        panorama_managed=device.panorama_managed,
+        peer_device=device.peer_device.hostname if device.peer_device else None,
+        peer_state=device.peer_state,
+        platform=device.platform.name if device.platform else None,
+        serial=device.serial,
+        sw_version=device.sw_version,
     )
     logging.debug(f"Job ID: {job.pk}")
 
