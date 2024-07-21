@@ -33,13 +33,6 @@ app-upgrade-diagram {
 
 .live-logs {
     margin-top: 20px;
-
-    .log-entry {
-        margin-bottom: 16px;
-        padding: 8px;
-        background-color: mat.get-color-from-palette(mat.$gray-palette, 100);
-        border-radius: 4px;
-    }
 }
 
 .job-details-grid {
@@ -58,6 +51,6 @@ app-upgrade-diagram {
     margin-bottom: 4px;
 }
 
-.detail-value {
-    color: rgba(0, 0, 0, 0.87);
-}
+//.detail-value {
+//    color: rgba(0, 0, 0, 0.87);
+//}
