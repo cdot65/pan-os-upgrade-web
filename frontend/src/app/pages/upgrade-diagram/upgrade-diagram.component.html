@@ -7,6 +7,9 @@
             [alt]="jobStatus"
             class="status-svg"
         />
-        <span class="status-text">{{ statusText }}</span>
+        <div class="job-text">
+            <h2 class="detail-label">{{ deviceDetails.hostname }}</h2>
+            <p>{{ statusText }}</p>
+        </div>
     </div>
 </div>
