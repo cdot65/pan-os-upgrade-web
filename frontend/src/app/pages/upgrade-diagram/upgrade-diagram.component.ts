@@ -11,6 +11,13 @@ import { CommonModule } from "@angular/common";
 export class UpgradeDiagramComponent {
     @Input() currentStep: string | null = "";
     @Input() jobStatus: string | null = "";
+    @Input() deviceDetails: any | null = null;
+
+    get baseDiagramSrc(): string {
+        return this.deviceDetails?.ha_enabled
+            ? "assets/img/site/firewalls.svg"
+            : "assets/img/site/firewall.svg";
+    }
 
     get statusSvg(): string {
         switch (this.jobStatus) {
