@@ -451,8 +451,8 @@ class PanosUpgrade:
 
     def determine_upgrade(
         self,
-        hostname: str,
         current_version: Tuple[int, int, int, int],
+        hostname: str,
         target_version: Tuple[int, int, int, int],
     ) -> None:
         """
@@ -518,13 +518,16 @@ class PanosUpgrade:
                 action="stop",
                 message=f"{hostname}: Halting upgrade.",
             )
+            self.update_current_step(
+                f"{hostname}: No upgrade required or downgrade attempt detected."
+            )
 
             # ensure self.upgrade_required = False
             self.upgrade_required = False
 
     def get_ha_status(
         self,
-        device: Firewall,
+        device: Dict,
     ) -> None:
         """
         Retrieve the deployment information and HA status of a firewall device.
@@ -534,7 +537,7 @@ class PanosUpgrade:
         using the `self.logger.log_task()` function.
 
         Args:
-            device (Firewall): An object representing the firewall device.
+            device (Dict): An object representing the firewall device.
 
         Returns:
             Tuple[str, Optional[dict]]: A tuple containing two elements:
@@ -560,7 +563,7 @@ class PanosUpgrade:
         )
 
         # Get the deployment type using show_highavailability_state()
-        deployment_type = device.show_highavailability_state()
+        deployment_type = device["pan_device"].show_highavailability_state()
 
         # Check if HA details are available
         if deployment_type[1]:
