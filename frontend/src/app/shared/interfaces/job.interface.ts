@@ -11,14 +11,16 @@ export interface Job {
     job_status: string;
     current_step: string;
     // Device fields
-    device_group?: string | null;
-    ha_enabled?: boolean | null;
-    hostname?: string | null;
-    local_state?: string | null;
-    panorama_managed?: boolean | null;
-    peer_device?: string | null;
-    peer_state?: string | null;
-    platform?: string | null;
-    serial?: string | null;
-    sw_version?: string | null;
+    device: {
+        device_group?: string | null;
+        ha_enabled?: boolean | null;
+        hostname?: string | null;
+        local_state?: string | null;
+        panorama_managed?: boolean | null;
+        peer_device?: string | null;
+        peer_state?: string | null;
+        platform?: string | null;
+        serial?: string | null;
+        sw_version?: string | null;
+    };
 }
