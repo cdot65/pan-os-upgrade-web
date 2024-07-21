@@ -10,7 +10,7 @@ class Job(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     current_step = models.CharField(
-        max_length=128,
+        max_length=255,
         blank=True,
         null=True,
         verbose_name="Current Step",
