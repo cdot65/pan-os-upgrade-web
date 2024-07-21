@@ -363,12 +363,23 @@ class JobViewSet(viewsets.ModelViewSet):
             "created_at": instance.created_at.isoformat(),
             "updated_at": instance.updated_at.isoformat(),
             "job_type": instance.job_type,
-            "job_status": (
-                instance.job_status if instance.job_status is not None else "pending"
-            ),
+            "job_status": instance.job_status
+            if instance.job_status is not None
+            else "pending",
             "current_step": instance.current_step
             if instance.current_step is not None
             else "errored",
+            # Device fields
+            "device_group": instance.device_group,
+            "ha_enabled": instance.ha_enabled,
+            "hostname": instance.hostname,
+            "local_state": instance.local_state,
+            "panorama_managed": instance.panorama_managed,
+            "peer_device": instance.peer_device,
+            "peer_state": instance.peer_state,
+            "platform": instance.platform,
+            "serial": instance.serial,
+            "sw_version": instance.sw_version,
         }
         return JsonResponse(response_data, status=200)
 
