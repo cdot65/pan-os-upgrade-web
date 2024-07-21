@@ -1,10 +1,6 @@
 <!-- src/app/pages/upgrade-diagram/upgrade-diagram.component.html -->
 <div class="upgrade-diagram-container">
-    <img
-        src="assets/img/site/firewall.svg"
-        alt="Firewall Base Diagram"
-        class="base-diagram"
-    />
+    <img [src]="baseDiagramSrc" alt="Firewall Base Diagram" class="base-diagram">
     <div class="status-container">
         <img
             [src]="statusSvg"
