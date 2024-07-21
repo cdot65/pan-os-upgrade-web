@@ -368,7 +368,7 @@ class JobViewSet(viewsets.ModelViewSet):
             ),
             "current_step": instance.current_step
             if instance.current_step is not None
-            else "pending",
+            else "errored",
         }
         return JsonResponse(response_data, status=200)
 
