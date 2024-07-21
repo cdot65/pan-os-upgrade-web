@@ -128,6 +128,37 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
                         ).toLocaleString(),
                     },
                     { key: "Status", value: details.job.job_status },
+                    {
+                        key: "Device Group",
+                        value: details.job.device_group || "N/A",
+                    },
+                    {
+                        key: "HA Enabled",
+                        value: details.job.ha_enabled ? "Yes" : "No",
+                    },
+                    { key: "Hostname", value: details.job.hostname || "N/A" },
+                    {
+                        key: "Local State",
+                        value: details.job.local_state || "N/A",
+                    },
+                    {
+                        key: "Panorama Managed",
+                        value: details.job.panorama_managed ? "Yes" : "No",
+                    },
+                    {
+                        key: "Peer Device",
+                        value: details.job.peer_device || "N/A",
+                    },
+                    {
+                        key: "Peer State",
+                        value: details.job.peer_state || "N/A",
+                    },
+                    { key: "Platform", value: details.job.platform || "N/A" },
+                    { key: "Serial", value: details.job.serial || "N/A" },
+                    {
+                        key: "Software Version",
+                        value: details.job.sw_version || "N/A",
+                    },
                 ];
             }),
             catchError(() => of([])),
