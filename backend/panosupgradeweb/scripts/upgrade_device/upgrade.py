@@ -156,7 +156,7 @@ class PanosUpgrade:
             ```
         """
         self.update_current_step(
-            "Assign a device dictionary to the appropriate attribute based on its local state"
+            f"{device_dict['db_device'].hostname}: Assign a device dictionary to the attribute based on its local state"
         )
         if device_dict["db_device"].local_state in ["active", "active-primary"]:
             # Assign device_dict to the primary attribute if 'local_state' is "active" or "active-primary"
@@ -351,7 +351,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            "Check the compatibility of upgrading a firewall in an HA pair to a target version"
+            f"{hostname}: Check the compatibility of upgrading a firewall in an HA pair to a target version"
         )
 
         # Check if the major upgrade is more than one release apart
@@ -432,7 +432,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            "Compare two version tuples and determine their relative order"
+            f"{hostname}: Compare two version tuples and determine their relative order"
         )
 
         # Log the task of comparing version strings for the device
@@ -486,7 +486,7 @@ class PanosUpgrade:
             ```
         """
         self.update_current_step(
-            "Determine if a firewall requires an upgrade based on the current and target versions"
+            f"{hostname}: Determine if the device requires an upgrade based on the current and target versions"
         )
 
         # Log the current and target versions
@@ -556,7 +556,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            "Retrieve the deployment information and HA status of a firewall device"
+            f"{device['db_device'].hostname}: Retrieve the deployment information and HA status of a firewall device"
         )
 
         # Get the deployment type using show_highavailability_state()
@@ -590,7 +590,7 @@ class PanosUpgrade:
             None
         """
         self.update_current_step(
-            "Perform readiness checks on a firewall device before the upgrade process"
+            f"{device['db_device'].hostname}: Perform readiness checks on a firewall device before the upgrade process"
         )
 
         # Attempt to perform readiness checks
@@ -662,7 +662,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            "Initiates a reboot on a specified device and verifies it boots up with the desired PAN-OS version"
+            f"{device['db_device'].hostname}: Initiate reboot on and verify it boots up with the desired PAN-OS version"
         )
 
         rebooted = False
@@ -767,7 +767,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            "Conducting the upgrade process for a Palo Alto Networks device to a specified version"
+            f"{device['db_device'].hostname}: Begin the upgrade process for device to a specified version"
         )
 
         # Log message to console about starting the upgrade process
@@ -894,7 +894,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            "Run assurance checks or snapshots on a firewall device."
+            f"{device['db_device'].hostname}: Run the 'Upgrade Assurance' tasks on device."
         )
 
         # Setup Firewall client
@@ -1070,11 +1070,6 @@ class PanosUpgrade:
 
                         self.logger.log_task(
                             action="success",
-                            message=f"{device['db_device'].hostname}: Snapshot results: {snapshot_results}",
-                        )
-
-                        self.logger.log_task(
-                            action="debug",
                             message=f"{device['db_device'].hostname}: Snapshot creation completed successfully",
                         )
 
@@ -1349,7 +1344,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            "Check if a software update to the target version is available and compatible."
+            f"{device['db_device'].hostname}: Check if a software update to the version is available and compatible."
         )
 
         # Retrieve available versions of PAN-OS
@@ -1403,7 +1398,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            "Download the target software version to the firewall device."
+            f"{device['db_device'].hostname}: Download the target software version to the firewall device."
         )
 
         try:
@@ -1461,7 +1456,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            "Suspend the active device in a high-availability (HA) pair."
+            f"{device['db_device'].hostname}: Suspend the active device in a high-availability (HA) pair."
         )
 
         try:
@@ -1548,7 +1543,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            f"Take {snapshot_type.capitalize()} snapshot of the network state information"
+            f"{device['db_device'].hostname}: Take {snapshot_type.capitalize()} snapshot of the network information"
         )
 
         # Log the start of the snapshot process
@@ -1608,22 +1603,6 @@ class PanosUpgrade:
                 job.updated_at = timezone.now()
                 job.save()
 
-            self.logger.log_task(
-                action="report", message=f"Updated current step to: {step_name}"
-            )
-
-            # Double-check the update
-            updated_job = Job.objects.get(task_id=self.job_id)
-            if updated_job.current_step != step_name:
-                self.logger.log_task(
-                    action="error",
-                    message=f"Failed to update current step. Database shows: {updated_job.current_step}",
-                )
-            else:
-                self.logger.log_task(
-                    action="success",
-                    message=f"Confirmed current step update in database: {updated_job.current_step}",
-                )
         except Job.DoesNotExist:
             self.logger.log_task(
                 action="error",
