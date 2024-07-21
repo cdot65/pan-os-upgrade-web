@@ -370,16 +370,18 @@ class JobViewSet(viewsets.ModelViewSet):
             if instance.current_step is not None
             else "errored",
             # Device fields
-            "device_group": instance.device_group,
-            "ha_enabled": instance.ha_enabled,
-            "hostname": instance.hostname,
-            "local_state": instance.local_state,
-            "panorama_managed": instance.panorama_managed,
-            "peer_device": instance.peer_device,
-            "peer_state": instance.peer_state,
-            "platform": instance.platform,
-            "serial": instance.serial,
-            "sw_version": instance.sw_version,
+            "device": {
+                "device_group": instance.device_group,
+                "ha_enabled": instance.ha_enabled,
+                "hostname": instance.hostname,
+                "local_state": instance.local_state,
+                "panorama_managed": instance.panorama_managed,
+                "peer_device": instance.peer_device,
+                "peer_state": instance.peer_state,
+                "platform": instance.platform,
+                "serial": instance.serial,
+                "sw_version": instance.sw_version,
+            },
         }
         return JsonResponse(response_data, status=200)
 
