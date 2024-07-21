@@ -38,6 +38,18 @@ class Job(models.Model):
         verbose_name="Job Type",
     )
 
+    # Device Object fields
+    device_group = models.CharField(max_length=100, blank=True, null=True)
+    ha_enabled = models.BooleanField(null=True)
+    hostname = models.CharField(max_length=100, blank=True, null=True)
+    local_state = models.CharField(max_length=20, blank=True, null=True)
+    panorama_managed = models.BooleanField(null=True)
+    peer_device = models.CharField(max_length=100, blank=True, null=True)
+    peer_state = models.CharField(max_length=20, blank=True, null=True)
+    platform = models.CharField(max_length=100, blank=True, null=True)
+    serial = models.CharField(max_length=100, blank=True, null=True)
+    sw_version = models.CharField(max_length=100, blank=True, null=True)
+
     def __str__(self) -> str:
         return str(self.task_id)
 
