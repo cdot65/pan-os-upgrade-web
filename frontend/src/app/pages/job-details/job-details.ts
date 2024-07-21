@@ -49,6 +49,9 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
     jobStatus$: Observable<string> = this.jobDetails$.pipe(
         map((details) => details?.job?.job_status ?? ""),
     );
+    deviceDetails$: Observable<any> = this.jobDetails$.pipe(
+        map((details) => details?.job?.device ?? null),
+    );
     jobDetailsTableData$: Observable<{ key: string; value: string }[]> = of([]);
 
     private destroy$ = new Subject<void>();
@@ -130,34 +133,45 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
                     { key: "Status", value: details.job.job_status },
                     {
                         key: "Device Group",
-                        value: details.job.device_group || "N/A",
+                        value: details.job.device.device_group || "N/A",
                     },
                     {
                         key: "HA Enabled",
-                        value: details.job.ha_enabled ? "Yes" : "No",
+                        value: details.job.device.ha_enabled ? "Yes" : "No",
                     },
-                    { key: "Hostname", value: details.job.hostname || "N/A" },
+                    {
+                        key: "Hostname",
+                        value: details.job.device.hostname || "N/A",
+                    },
                     {
                         key: "Local State",
-                        value: details.job.local_state || "N/A",
+                        value: details.job.device.local_state || "N/A",
                     },
                     {
                         key: "Panorama Managed",
-                        value: details.job.panorama_managed ? "Yes" : "No",
+                        value: details.job.device.panorama_managed
+                            ? "Yes"
+                            : "No",
                     },
                     {
                         key: "Peer Device",
-                        value: details.job.peer_device || "N/A",
+                        value: details.job.device.peer_device || "N/A",
                     },
                     {
                         key: "Peer State",
-                        value: details.job.peer_state || "N/A",
+                        value: details.job.device.peer_state || "N/A",
                     },
-                    { key: "Platform", value: details.job.platform || "N/A" },
-                    { key: "Serial", value: details.job.serial || "N/A" },
+                    {
+                        key: "Platform",
+                        value: details.job.device.platform || "N/A",
+                    },
+                    {
+                        key: "Serial",
+                        value: details.job.device.serial || "N/A",
+                    },
                     {
                         key: "Software Version",
-                        value: details.job.sw_version || "N/A",
+                        value: details.job.device.sw_version || "N/A",
                     },
                 ];
             }),
