@@ -366,23 +366,40 @@ class JobViewSet(viewsets.ModelViewSet):
             "job_status": instance.job_status
             if instance.job_status is not None
             else "pending",
+            "current_device": instance.current_device,
             "current_step": instance.current_step
             if instance.current_step is not None
             else "errored",
-            # Device fields
-            "device": {
-                "device_group": instance.device_group,
-                "ha_enabled": instance.ha_enabled,
-                "hostname": instance.hostname,
-                "local_state": instance.local_state,
-                "panorama_managed": instance.panorama_managed,
-                "peer_device": instance.peer_device,
-                "peer_state": instance.peer_state,
-                "platform": instance.platform,
-                "serial": instance.serial,
-                "sw_version": instance.sw_version,
+            "devices": {
+                "target": {
+                    "device_group": instance.target_device_group,
+                    "ha_enabled": instance.target_ha_enabled,
+                    "hostname": instance.target_hostname,
+                    "local_state": instance.target_local_state,
+                    "panorama_managed": instance.target_panorama_managed,
+                    "peer_device": instance.target_peer_device,
+                    "peer_state": instance.target_peer_state,
+                    "platform": instance.target_platform,
+                    "serial": instance.target_serial,
+                    "sw_version": instance.target_sw_version,
+                }
             },
         }
+
+        if instance.peer_hostname:
+            response_data["devices"]["peer"] = {
+                "device_group": instance.peer_device_group,
+                "ha_enabled": instance.peer_ha_enabled,
+                "hostname": instance.peer_hostname,
+                "local_state": instance.peer_local_state,
+                "panorama_managed": instance.peer_panorama_managed,
+                "peer_device": instance.peer_peer_device,
+                "peer_state": instance.peer_peer_state,
+                "platform": instance.peer_platform,
+                "serial": instance.peer_serial,
+                "sw_version": instance.peer_sw_version,
+            }
+
         return JsonResponse(response_data, status=200)
 
     @action(detail=True, methods=["get"])
