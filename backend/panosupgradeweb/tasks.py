@@ -209,24 +209,45 @@ def execute_upgrade_device_task(
 
     # Fetch the device
     device = Device.objects.get(uuid=device_uuid)
+    peer_device = device.peer_device
 
-    job = Job.objects.create(
-        author=author,
-        job_status="pending",
-        job_type="device_upgrade",
-        task_id=self.request.id,
-        # Populate new fields
-        device_group=device.device_group,
-        ha_enabled=device.ha_enabled,
-        hostname=device.hostname,
-        local_state=device.local_state,
-        panorama_managed=device.panorama_managed,
-        peer_device=device.peer_device.hostname if device.peer_device else None,
-        peer_state=device.peer_state,
-        platform=device.platform.name if device.platform else None,
-        serial=device.serial,
-        sw_version=device.sw_version,
-    )
+    job_data = {
+        "author": author,
+        "job_status": "pending",
+        "job_type": "upgrade",
+        "task_id": self.request.id,
+        "current_device": device.hostname,  # Set the initial current_device
+        "target_device_group": device.device_group,
+        "target_ha_enabled": device.ha_enabled,
+        "target_hostname": device.hostname,
+        "target_local_state": device.local_state,
+        "target_panorama_managed": device.panorama_managed,
+        "target_peer_device": peer_device.hostname if peer_device else None,
+        "target_peer_state": device.peer_state,
+        "target_platform": device.platform.name if device.platform else None,
+        "target_serial": device.serial,
+        "target_sw_version": device.sw_version,
+    }
+
+    if peer_device:
+        job_data.update(
+            {
+                "peer_device_group": peer_device.device_group,
+                "peer_ha_enabled": peer_device.ha_enabled,
+                "peer_hostname": peer_device.hostname,
+                "peer_local_state": peer_device.local_state,
+                "peer_panorama_managed": peer_device.panorama_managed,
+                "peer_peer_device": device.hostname,
+                "peer_peer_state": peer_device.peer_state,
+                "peer_platform": peer_device.platform.name
+                if peer_device.platform
+                else None,
+                "peer_serial": peer_device.serial,
+                "peer_sw_version": peer_device.sw_version,
+            }
+        )
+
+    job = Job.objects.create(**job_data)
     logging.debug(f"Job ID: {job.pk}")
 
     try:
