@@ -156,7 +156,8 @@ class PanosUpgrade:
             ```
         """
         self.update_current_step(
-            "Assign a device dictionary to the attribute based on its local state"
+            device_name=device_dict["db_device"].hostname,
+            step_name="Assign a device dictionary to the attribute based on its local state",
         )
         if device_dict["db_device"].local_state in ["active", "active-primary"]:
             # Assign device_dict to the primary attribute if 'local_state' is "active" or "active-primary"
@@ -219,7 +220,8 @@ class PanosUpgrade:
             ```
         """
         self.update_current_step(
-            "Assign the devices to be upgraded to the appropriate attributes based on their HA status"
+            device_name="pending",
+            step_name="Assign the devices to be upgraded to the appropriate attributes based on their HA status",
         )
         # Retrieve the device object based on the provided device UUID
         device = Device.objects.get(uuid=device_uuid)
@@ -351,7 +353,8 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            "Check the compatibility of upgrading a firewall in an HA pair to a target version"
+            device_name=hostname,
+            step_name="Check the compatibility of upgrading a firewall in an HA pair to a target version",
         )
 
         # Check if the major upgrade is more than one release apart
@@ -432,7 +435,8 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            "Compare two version tuples and determine their relative order"
+            device_name=hostname,
+            step_name="Compare two version tuples and determine their relative order",
         )
 
         # Log the task of comparing version strings for the device
@@ -486,7 +490,8 @@ class PanosUpgrade:
             ```
         """
         self.update_current_step(
-            "Determine if the device requires an upgrade based on the current and target versions"
+            device_name=hostname,
+            step_name="Determine if the device requires an upgrade based on the current and target versions",
         )
 
         # Log the current and target versions
@@ -519,7 +524,8 @@ class PanosUpgrade:
                 message=f"{hostname}: Halting upgrade.",
             )
             self.update_current_step(
-                "No upgrade required or downgrade attempt detected."
+                device_name=hostname,
+                step_name="No upgrade required or downgrade attempt detected.",
             )
 
             # ensure self.upgrade_required = False
@@ -559,7 +565,8 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            "Retrieve the deployment information and HA status of a firewall device"
+            device_name=device["db_device"].hostname,
+            step_name="Retrieve the deployment information and HA status of a firewall device.",
         )
 
         # Get the deployment type using show_highavailability_state()
@@ -593,7 +600,8 @@ class PanosUpgrade:
             None
         """
         self.update_current_step(
-            "Perform readiness checks on a firewall device before the upgrade process"
+            device_name=device["db_device"].hostname,
+            step_name="Perform readiness checks on a firewall device before the upgrade process.",
         )
 
         # Attempt to perform readiness checks
@@ -665,7 +673,8 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            f"Initiate reboot on and verify it boots up {target_version}"
+            device_name=device["db_device"].hostname,
+            step_name=f"Initiate reboot on and verify it boots up {target_version}.",
         )
 
         rebooted = False
@@ -769,7 +778,10 @@ class PanosUpgrade:
             The status of the upgrade process ("completed", "errored").
         """
 
-        self.update_current_step(f"Upgrading device to version {target_version}.")
+        self.update_current_step(
+            device_name=device["db_device"].hostname,
+            step_name=f"Upgrading device to version {target_version}.",
+        )
 
         # Log message to console about starting the upgrade process
         self.logger.log_task(
@@ -889,7 +901,10 @@ class PanosUpgrade:
             None
         """
 
-        self.update_current_step(f"Run the 'Upgrade Assurance' tasks on device.")
+        self.update_current_step(
+            device_name=device["db_device"].hostname,
+            step_name="Run the 'Upgrade Assurance' tasks on device.",
+        )
 
         # Setup Firewall client
         checks_firewall = CheckFirewall(
@@ -1149,7 +1164,8 @@ class PanosUpgrade:
                     if test_result["state"]:
                         self.logger.log_task(
                             action="success",
-                            message=f"{device['db_device'].hostname}: Passed Readiness Check: {test_info['description']}",
+                            message=f"{device['db_device'].hostname}: Passed Readiness Check: "
+                            f"{test_info['description']}",
                         )
                     else:
                         reason = test_result["reason"]
@@ -1159,7 +1175,8 @@ class PanosUpgrade:
                             # Log the skipped message
                             self.logger.log_task(
                                 action="skipped",
-                                message=f"{device['db_device'].hostname}: {log_message}, but continuing with the execution",
+                                message=f"{device['db_device'].hostname}: {log_message}, "
+                                f"but continuing with the execution",
                             )
                         elif test_info["exit_on_failure"]:
                             # Log the error message
@@ -1215,7 +1232,8 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            "Set the profile settings based on the provided profile UUID."
+            device_name="pending",
+            step_name="Set the profile settings based on the provided profile UUID",
         )
 
         try:
@@ -1338,7 +1356,8 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            f"Check if a software update to the version is available and compatible."
+            device_name=device["db_device"].hostname,
+            step_name="Check if a software update to the version is available and compatible.",
         )
 
         # Retrieve available versions of PAN-OS
@@ -1392,7 +1411,8 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            "Download the target software version to the firewall device."
+            device_name=device.hostname,
+            step_name="Download the target software version to the firewall device.",
         )
 
         try:
@@ -1450,7 +1470,8 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            f"Suspend the active device in a high-availability (HA) pair."
+            device_name=device["db_device"].hostname,
+            step_name="Suspend the active device in a high-availability (HA) pair.",
         )
 
         try:
@@ -1537,7 +1558,8 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            f"Take {snapshot_type.capitalize()} snapshot of the network information"
+            device_name=device["db_device"].hostname,
+            step_name=f"Take {snapshot_type.capitalize()} snapshot of the network information",
         )
 
         # Log the start of the snapshot process
@@ -1583,16 +1605,22 @@ class PanosUpgrade:
                 # Increment the snapshot attempt number
                 self.snapshot_attempt += 1
 
-    def update_current_step(self, step_name: str):
+    def update_current_step(
+        self,
+        device_name: str,
+        step_name: str,
+    ):
         """
-        Update the current_step of the associated Job.
+        Update the current_step and current_device of the associated Job.
 
         Args:
+            device_name (str): The name of the target device.
             step_name (str): The name of the current step.
         """
         try:
             with transaction.atomic():
                 job = Job.objects.select_for_update().get(task_id=self.job_id)
+                job.current_device = device_name
                 job.current_step = step_name
                 job.updated_at = timezone.now()
                 job.save()
