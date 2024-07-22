@@ -9,6 +9,12 @@ class Job(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    current_device = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="Current Device",
+    )
     current_step = models.CharField(
         max_length=255,
         blank=True,
@@ -38,17 +44,29 @@ class Job(models.Model):
         verbose_name="Job Type",
     )
 
-    # Device Object fields
-    device_group = models.CharField(max_length=100, blank=True, null=True)
-    ha_enabled = models.BooleanField(null=True)
-    hostname = models.CharField(max_length=100, blank=True, null=True)
-    local_state = models.CharField(max_length=20, blank=True, null=True)
-    panorama_managed = models.BooleanField(null=True)
-    peer_device = models.CharField(max_length=100, blank=True, null=True)
-    peer_state = models.CharField(max_length=20, blank=True, null=True)
-    platform = models.CharField(max_length=100, blank=True, null=True)
-    serial = models.CharField(max_length=100, blank=True, null=True)
-    sw_version = models.CharField(max_length=100, blank=True, null=True)
+    # Target device fields
+    target_device_group = models.CharField(max_length=100, blank=True, null=True)
+    target_ha_enabled = models.BooleanField(null=True)
+    target_hostname = models.CharField(max_length=100, blank=True, null=True)
+    target_local_state = models.CharField(max_length=20, blank=True, null=True)
+    target_panorama_managed = models.BooleanField(null=True)
+    target_peer_device = models.CharField(max_length=100, blank=True, null=True)
+    target_peer_state = models.CharField(max_length=20, blank=True, null=True)
+    target_platform = models.CharField(max_length=100, blank=True, null=True)
+    target_serial = models.CharField(max_length=100, blank=True, null=True)
+    target_sw_version = models.CharField(max_length=100, blank=True, null=True)
+
+    # Peer device fields
+    peer_device_group = models.CharField(max_length=100, blank=True, null=True)
+    peer_ha_enabled = models.BooleanField(null=True)
+    peer_hostname = models.CharField(max_length=100, blank=True, null=True)
+    peer_local_state = models.CharField(max_length=20, blank=True, null=True)
+    peer_panorama_managed = models.BooleanField(null=True)
+    peer_peer_device = models.CharField(max_length=100, blank=True, null=True)
+    peer_peer_state = models.CharField(max_length=20, blank=True, null=True)
+    peer_platform = models.CharField(max_length=100, blank=True, null=True)
+    peer_serial = models.CharField(max_length=100, blank=True, null=True)
+    peer_sw_version = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self) -> str:
         return str(self.task_id)
