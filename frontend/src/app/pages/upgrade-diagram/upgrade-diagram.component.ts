@@ -13,10 +13,8 @@ export class UpgradeDiagramComponent {
     @Input() jobStatus: string | null = "";
     @Input() deviceDetails: any | null = null;
 
-    get baseDiagramSrc(): string {
-        return this.deviceDetails?.ha_enabled
-            ? "assets/img/site/firewalls.svg"
-            : "assets/img/site/firewall.svg";
+    get firewallSrc(): string {
+        return "assets/img/site/firewall.svg";
     }
 
     get statusSvg(): string {
