@@ -7,7 +7,7 @@
 
 .job-details {
     width: 100%;
-    min-height: auto; // Remove fixed min-height
+    min-height: auto;
 }
 
 .job-details-info {
@@ -22,13 +22,13 @@
     width: 100%;
     max-width: 800px;
     margin: 0 auto 20px;
-    height: 360px; // Match the height of upgrade-diagram-container
+    height: 320px;
 }
 
 app-upgrade-diagram {
     display: block;
     width: 100%;
-    height: 100%; // Ensure it fills the wrapper
+    height: 100%;
 }
 
 .live-logs {

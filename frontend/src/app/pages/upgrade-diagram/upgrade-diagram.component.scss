@@ -1,18 +1,18 @@
 .upgrade-diagram-container {
     display: flex;
     justify-content: space-between;
-    align-items: center; // Changed back to center for vertical alignment
+    align-items: center;
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    height: 360px; // Fixed height as requested
+    height: 320px;
 }
 
 .firewall-container {
     display: flex;
     flex-direction: column;
-    justify-content: center; // Changed to center for vertical alignment
+    justify-content: center;
     width: 48%;
     height: 100%;
 }
@@ -30,7 +30,7 @@
 
 .base-diagram {
     width: 100%;
-    max-height: 120px; // Increased slightly
+    max-height: 120px;
     object-fit: contain;
 }
 
@@ -41,7 +41,7 @@
     max-width: 100%;
     word-wrap: break-word;
     line-height: 1.2;
-    min-height: 2.4em; // Ensures space for at least two lines of text
+    min-height: 2.4em;
 }
 
 .status-container {
