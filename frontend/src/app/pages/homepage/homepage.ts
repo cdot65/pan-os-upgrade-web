@@ -37,7 +37,7 @@ import {
 import { takeUntil } from "rxjs/operators";
 import { Subject } from "rxjs";
 import { JobService } from "../../shared/services/job.service";
-import { Job } from "../../shared/interfaces/job.interface";
+import { JobStatus } from "../../shared/interfaces/job.interface";
 
 @Component({
     selector: "app-homepage",
@@ -263,7 +263,7 @@ export class Homepage implements OnInit, OnDestroy {
         }));
     }
 
-    prepareJobChartData(jobs: Job[]): void {
+    prepareJobChartData(jobs: JobStatus[]): void {
         const jobTypeMap = new Map<string, Map<string, number>>();
 
         jobs.forEach((job) => {
