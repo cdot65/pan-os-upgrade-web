@@ -2,25 +2,30 @@
 
 // frontend/src/app/shared/interfaces/job.interface.ts
 
-export interface Job {
+export interface Device {
+    device_group: string;
+    ha_enabled: boolean;
+    hostname: string;
+    local_state: string;
+    panorama_managed: boolean;
+    peer_device: string;
+    peer_state: string;
+    platform: string;
+    serial: string;
+    sw_version: string;
+}
+
+export interface JobStatus {
     task_id: string;
     author: number;
     created_at: string;
     updated_at: string;
     job_type: string;
     job_status: string;
+    current_device: string;
     current_step: string;
-    // Device fields
-    device: {
-        device_group?: string | null;
-        ha_enabled?: boolean | null;
-        hostname?: string | null;
-        local_state?: string | null;
-        panorama_managed?: boolean | null;
-        peer_device?: string | null;
-        peer_state?: string | null;
-        platform?: string | null;
-        serial?: string | null;
-        sw_version?: string | null;
+    devices: {
+        target: Device;
+        peer?: Device;
     };
 }
