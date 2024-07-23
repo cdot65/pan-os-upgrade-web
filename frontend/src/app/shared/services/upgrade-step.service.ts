@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable } from "rxjs";
 import { map } from "rxjs/operators";
-import { Job } from "../interfaces/job.interface";
+import { JobStatus } from "../interfaces/job.interface";
 
 export interface StepMapping {
     name: string;
@@ -62,7 +62,7 @@ export class UpgradeStepService {
     private currentStepSubject = new BehaviorSubject<string>("");
     currentStep$ = this.currentStepSubject.asObservable();
 
-    updateCurrentStep(job: Job): void {
+    updateCurrentStep(job: JobStatus): void {
         this.currentStepSubject.next(job.current_step);
     }
 
