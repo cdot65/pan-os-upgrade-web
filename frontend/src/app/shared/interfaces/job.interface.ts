@@ -3,6 +3,7 @@
 // frontend/src/app/shared/interfaces/job.interface.ts
 
 export interface Device {
+    current_status: string;
     device_group: string;
     ha_enabled: boolean;
     hostname: string;
