@@ -139,6 +139,8 @@ def main(
             else upgrade_job.standalone_device
         )
 
+        upgrade_job.update_device_status(targeted_device, "active")
+
     except Exception as e:
         # Log the error of determining the HA status of the target device
         upgrade_job.logger.log_task(
@@ -1057,13 +1059,10 @@ def main(
             return "errored"
 
     # ------------------------------------------------------------------------------------------------------------------
-    # Workflow: Target device PDF report generation on pre/post upgrade diff
+    # Workflow: Update status to "completed"
     # ------------------------------------------------------------------------------------------------------------------
-    # TODO: PDF Report Generation
+    upgrade_job.update_device_status(targeted_device, "completed")
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # Workflow: Exit the upgrade workflow if there is no primary_device attribute
-    # ------------------------------------------------------------------------------------------------------------------
     if not upgrade_job.primary_device:
         upgrade_job.update_current_step(
             device_name=f"{targeted_device['db_device'].hostname}",
@@ -1276,6 +1275,6 @@ def main(
             return "errored"
 
     # ------------------------------------------------------------------------------------------------------------------
-    # Workflow: Target device PDF report generation on pre/post upgrade diff
+    # Workflow: Update status of primary e
     # ------------------------------------------------------------------------------------------------------------------
-    # TODO: PDF Report Generation
+    upgrade_job.update_device_status(upgrade_job.primary_device, "completed")
