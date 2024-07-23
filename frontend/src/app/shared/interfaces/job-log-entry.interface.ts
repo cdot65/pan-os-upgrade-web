@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // src/app/shared/interfaces/job-log-entry.ts
-import { Job } from "./job.interface";
+import { JobStatus } from "./job.interface";
 
 export interface JobLogEntry {
     timestamp: string;
@@ -8,7 +8,7 @@ export interface JobLogEntry {
     message: string;
 }
 
-export interface JobDetails {
-    job: Job;
+export interface JobStatusAndLogs {
+    job: JobStatus;
     logs: JobLogEntry[];
 }
