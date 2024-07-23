@@ -9,14 +9,12 @@
                 <mat-card-content>
                     <div class="upgrade-diagram-wrapper">
                         <app-upgrade-diagram
-                            [currentStep]="currentStep$ | async"
-                            [jobStatus]="jobStatus$ | async"
-                            [deviceDetails]="deviceDetails$ | async">
+                            [jobStatusDetails]="jobStatusDetails$ | async"
                         ></app-upgrade-diagram>
                     </div>
 
                     <div class="job-details-info">
-                        @if (jobDetails$ | async; as jobDetails) {
+                        @if (jobStatusAndLogs$ | async; as jobDetails) {
                             <mat-card>
                                 <mat-card-content class="job-details-grid">
                                     <div class="detail-item">
@@ -65,11 +63,11 @@
                     <mat-divider></mat-divider>
 
                     <div class="live-logs">
-                        @if ((jobDetails$ | async)?.logs?.length === 0) {
+                        @if ((jobStatusAndLogs$ | async)?.logs?.length === 0) {
                             <div>No logs found.</div>
                         } @else {
                             <div>
-                                @for (log of (jobDetails$ | async)?.logs ?? []; track log) {
+                                @for (log of (jobStatusAndLogs$ | async)?.logs ?? []; track log) {
                                     <mat-card class="log-entry">
                                         <mat-card-header class="mat-card-header">
                                             <mat-card-title class="mat-card-title">
