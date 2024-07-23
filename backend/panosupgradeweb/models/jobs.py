@@ -45,6 +45,17 @@ class Job(models.Model):
     )
 
     # Target device fields
+    target_current_status = models.CharField(
+        max_length=20,
+        choices=(
+            ("pending", "Pending"),
+            ("working", "Working"),
+            ("completed", "Completed"),
+            ("errored", "Errored"),
+        ),
+        default="pending",
+        verbose_name="Target Device Current Status",
+    )
     target_device_group = models.CharField(max_length=100, blank=True, null=True)
     target_ha_enabled = models.BooleanField(null=True)
     target_hostname = models.CharField(max_length=100, blank=True, null=True)
@@ -57,6 +68,19 @@ class Job(models.Model):
     target_sw_version = models.CharField(max_length=100, blank=True, null=True)
 
     # Peer device fields
+    peer_current_status = models.CharField(
+        max_length=20,
+        choices=(
+            ("pending", "Pending"),
+            ("working", "Working"),
+            ("completed", "Completed"),
+            ("errored", "Errored"),
+        ),
+        default="pending",
+        verbose_name="Peer Device Current Status",
+        null=True,
+        blank=True,
+    )
     peer_device_group = models.CharField(max_length=100, blank=True, null=True)
     peer_ha_enabled = models.BooleanField(null=True)
     peer_hostname = models.CharField(max_length=100, blank=True, null=True)
