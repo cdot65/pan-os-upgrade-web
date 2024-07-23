@@ -1,5 +1,8 @@
+// upgrade-diagram.component.ts
+
 import { Component, Input } from "@angular/core";
 import { CommonModule } from "@angular/common";
+import { Device, JobStatus } from "../../shared/interfaces/job.interface";
 
 @Component({
     selector: "app-upgrade-diagram",
@@ -9,9 +12,15 @@ import { CommonModule } from "@angular/common";
     styleUrls: ["./upgrade-diagram.component.scss"],
 })
 export class UpgradeDiagramComponent {
-    @Input() jobStatusDetails: any | null = null;
+    @Input() jobStatusDetails: JobStatus | null = null;
 
-    get firewallSrc(): string {
+    getFirewallSrc(device: Device | undefined): string {
+        if (
+            device?.local_state === "passive" ||
+            device?.local_state === "active-secondary"
+        ) {
+            return "assets/img/site/firewall_secondary.svg";
+        }
         return "assets/img/site/firewall.svg";
     }
 
@@ -29,6 +38,6 @@ export class UpgradeDiagramComponent {
     get statusText(): string {
         return this.jobStatusDetails?.job_status === "completed"
             ? "Job completed"
-            : this.jobStatusDetails?.current_step ?? "";
+            : (this.jobStatusDetails?.current_step ?? "");
     }
 }

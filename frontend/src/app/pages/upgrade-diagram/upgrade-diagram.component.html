@@ -1,13 +1,13 @@
 <div class="upgrade-diagram-container">
     <div class="firewall-container">
         <div class="firewall">
-            <img [src]="firewallSrc" alt="Firewall Diagram" class="base-diagram">
-            <div class="hostname">{{ jobStatusDetails?.devices?.target?.hostname }}</div>
+            <img [src]="getFirewallSrc(jobStatusDetails?.devices?.target)" alt="Firewall">
+            <div class="hostname">{{ jobStatusDetails?.devices?.target?.hostname }} | {{ jobStatusDetails?.devices?.target?.local_state }} | {{ jobStatusDetails?.devices?.target?.sw_version }}</div>
         </div>
         @if (jobStatusDetails?.devices?.peer) {
             <div class="firewall">
-                <img [src]="firewallSrc" alt="Peer Firewall Diagram" class="base-diagram">
-                <div class="hostname">{{ jobStatusDetails?.devices?.peer?.hostname }}</div>
+                <img [src]="getFirewallSrc(jobStatusDetails?.devices?.peer)" alt="Peer Firewall">
+                <div class="hostname">{{ jobStatusDetails?.devices?.peer?.hostname }} | {{ jobStatusDetails?.devices?.peer?.local_state }} | {{ jobStatusDetails?.devices?.peer?.sw_version }}</div>
             </div>
         }
     </div>
