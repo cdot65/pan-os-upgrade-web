@@ -9,16 +9,14 @@ import { CommonModule } from "@angular/common";
     styleUrls: ["./upgrade-diagram.component.scss"],
 })
 export class UpgradeDiagramComponent {
-    @Input() currentStep: string | null = "";
-    @Input() jobStatus: string | null = "";
-    @Input() deviceDetails: any | null = null;
+    @Input() jobStatusDetails: any | null = null;
 
     get firewallSrc(): string {
         return "assets/img/site/firewall.svg";
     }
 
     get statusSvg(): string {
-        switch (this.jobStatus) {
+        switch (this.jobStatusDetails?.job_status) {
             case "completed":
                 return "assets/img/site/check.svg";
             case "errored":
@@ -29,8 +27,8 @@ export class UpgradeDiagramComponent {
     }
 
     get statusText(): string {
-        return this.jobStatus === "completed"
+        return this.jobStatusDetails?.job_status === "completed"
             ? "Job completed"
-            : this.currentStep ?? "";
+            : this.jobStatusDetails?.current_step ?? "";
     }
 }

@@ -2,17 +2,19 @@
     <div class="firewall-container">
         <div class="firewall">
             <img [src]="firewallSrc" alt="Firewall Diagram" class="base-diagram">
-            <div class="hostname">{{ deviceDetails?.hostname }}</div>
+            <div class="hostname">{{ jobStatusDetails?.devices?.target?.hostname }}</div>
         </div>
-        <div *ngIf="deviceDetails?.ha_enabled" class="firewall">
-            <img [src]="firewallSrc" alt="Peer Firewall Diagram" class="base-diagram">
-            <div class="hostname">{{ deviceDetails?.peer_device }}</div>
-        </div>
+        @if (jobStatusDetails?.devices?.peer) {
+            <div class="firewall">
+                <img [src]="firewallSrc" alt="Peer Firewall Diagram" class="base-diagram">
+                <div class="hostname">{{ jobStatusDetails?.devices?.peer?.hostname }}</div>
+            </div>
+        }
     </div>
     <div class="status-container">
         <img [src]="statusSvg" alt="Status" class="status-svg">
         <div class="job-text">
-            <h2 class="detail-label">{{ deviceDetails?.hostname }}</h2>
+            <h2 class="detail-label">{{ jobStatusDetails?.current_device }}</h2>
             <span class="status-text">{{ statusText }}</span>
         </div>
     </div>
