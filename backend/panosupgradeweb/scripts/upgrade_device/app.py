@@ -467,6 +467,7 @@ def main(
                     # Download the base image for the target version
                     downloaded = upgrade_job.software_download(
                         device=targeted_device["pan_device"],
+                        hostname=targeted_device["db_device"].hostname,
                         target_version=base_version_key,
                     )
 
@@ -602,6 +603,7 @@ def main(
                     # Download the target image
                     downloaded = upgrade_job.software_download(
                         device=targeted_device["pan_device"],
+                        hostname=targeted_device["db_device"].hostname,
                         target_version=target_version,
                     )
 

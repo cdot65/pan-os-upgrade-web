@@ -1375,6 +1375,7 @@ class PanosUpgrade:
     def software_download(
         self,
         device: Union[Firewall, Panorama],
+        hostname: str,
         target_version: str,
     ) -> bool:
         """
@@ -1386,6 +1387,7 @@ class PanosUpgrade:
 
         Args:
             device (Union[Firewall, Panorama]): The firewall or Panorama device object.
+            hostname (str): The hostname of the device.
             target_version (str): The target software version to be downloaded.
 
         Returns:
@@ -1411,7 +1413,7 @@ class PanosUpgrade:
         """
 
         self.update_current_step(
-            device_name=device.hostname,
+            device_name=hostname,
             step_name="Download the target software version to the firewall device.",
         )
 
