@@ -216,7 +216,8 @@ def execute_upgrade_device_task(
         "job_status": "pending",
         "job_type": "upgrade",
         "task_id": self.request.id,
-        "current_device": device.hostname,  # Set the initial current_device
+        "current_device": device.hostname,
+        "target_current_status": "pending",
         "target_device_group": device.device_group,
         "target_ha_enabled": device.ha_enabled,
         "target_hostname": device.hostname,
@@ -232,6 +233,7 @@ def execute_upgrade_device_task(
     if peer_device:
         job_data.update(
             {
+                "peer_current_status": "pending",
                 "peer_device_group": peer_device.device_group,
                 "peer_ha_enabled": peer_device.ha_enabled,
                 "peer_hostname": peer_device.hostname,
@@ -252,6 +254,7 @@ def execute_upgrade_device_task(
 
     try:
         job.job_status = "running"
+        job.target_current_status = "active"
         job.save()
 
         # Run the PAN-OS upgrade script
@@ -266,19 +269,24 @@ def execute_upgrade_device_task(
 
         if job_status == "errored":
             job.job_status = "errored"
+            job.target_current_status = "errored"
         elif job_status == "skipped":
             job.job_status = "skipped"
+            job.target_current_status = "completed"
         else:
             job.job_status = "completed"
+            job.target_current_status = "completed"
 
     except WorkerTerminate as e:
         job.job_status = "errored"
+        job.target_current_status = "errored"
         logging.debug(f"Job ID: {job.pk}\nError: {e}")
         logging.error(f"Exception Type: {type(e).__name__}")
         logging.error(f"Traceback: {traceback.format_exc()}")
 
     except Exception as e:
         job.job_status = "errored"
+        job.target_current_status = "errored"
         logging.debug(f"Job ID: {job.pk}\nError: {e}")
         logging.error(f"Exception Type: {type(e).__name__}")
         logging.error(f"Traceback: {traceback.format_exc()}")
