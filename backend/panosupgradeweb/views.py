@@ -372,6 +372,7 @@ class JobViewSet(viewsets.ModelViewSet):
             else "errored",
             "devices": {
                 "target": {
+                    "current_status": instance.target_current_status,
                     "device_group": instance.target_device_group,
                     "ha_enabled": instance.target_ha_enabled,
                     "hostname": instance.target_hostname,
@@ -388,6 +389,7 @@ class JobViewSet(viewsets.ModelViewSet):
 
         if instance.peer_hostname:
             response_data["devices"]["peer"] = {
+                "current_status": instance.peer_current_status,
                 "device_group": instance.peer_device_group,
                 "ha_enabled": instance.peer_ha_enabled,
                 "hostname": instance.peer_hostname,
