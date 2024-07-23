@@ -783,6 +783,8 @@ class PanosUpgrade:
             step_name=f"Upgrading device to version {target_version}.",
         )
 
+        self.update_device_status(device, "active")
+
         # Log message to console about starting the upgrade process
         self.logger.log_task(
             action="working",
@@ -825,6 +827,7 @@ class PanosUpgrade:
 
                     # Mark installation as successful
                     self.upgrade_succeeded = True
+                    self.update_device_status(device, "completed")
 
                     # Return "completed" status to indicate successful upgrade
                     return "completed"
@@ -847,6 +850,7 @@ class PanosUpgrade:
 
                 # Set self.stop_upgrade_workflow to True
                 self.stop_upgrade_workflow = True
+                self.update_device_status(device, "errored")
 
                 # Return "errored" status to indicate upgrade failure
                 return "errored"
@@ -1635,4 +1639,46 @@ class PanosUpgrade:
         except Exception as e:
             self.logger.log_task(
                 action="error", message=f"Error updating current step: {str(e)}"
+            )
+
+    def update_device_status(
+        self,
+        device: Dict,
+        status: str,
+    ):
+        """
+        Update the current_status of the device in the Job.
+
+        Args:
+            device (Dict): A dictionary containing information about the firewall device.
+            status (str): The new status to set for the device. Should be one of:
+                          "pending", "active", "completed", or "errored".
+        """
+        try:
+            with transaction.atomic():
+                job = Job.objects.select_for_update().get(task_id=self.job_id)
+
+                if device == self.secondary_device:
+                    job.target_current_status = status
+                elif device == self.primary_device:
+                    job.peer_current_status = status
+                else:
+                    # For standalone devices, update target_current_status
+                    job.target_current_status = status
+
+                job.updated_at = timezone.now()
+                job.save()
+
+            self.logger.log_task(
+                action="success",
+                message=f"{device['db_device'].hostname}: Updated device status to {status}.",
+            )
+        except Job.DoesNotExist:
+            self.logger.log_task(
+                action="error",
+                message=f"Failed to update device status. Job with ID {self.job_id} not found.",
+            )
+        except Exception as e:
+            self.logger.log_task(
+                action="error", message=f"Error updating device status: {str(e)}"
             )
