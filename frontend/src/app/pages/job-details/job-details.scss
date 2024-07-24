@@ -2,7 +2,9 @@
 @use '@angular/material' as mat;
 
 .job-details-container {
-    padding: 40px;
+    //min-height: 100vh;
+    //width: 99%;
+    padding: 20px;
 }
 
 .job-details {

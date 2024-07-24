@@ -33,7 +33,9 @@
 .inventory-list-container {
     display: grid;
     grid-template-rows: auto 1fr auto;
-    min-height: 100vh;
+    //min-height: 100vh;
+    //width: 99%;
+    padding: 20px;
 }
 
 .inventory-list {
@@ -90,7 +92,7 @@
         // padding: 24px 8px;
         font-size: 20px;
         text-align: center;
-        color: accent;
+        //color: accent;
     }
 
     .refresh-error {
@@ -113,7 +115,7 @@
         // padding: 24px 8px;
         font-size: 20px;
         text-align: center;
-        color: accent;
+        //color: accent;
     }
 
     .sync-error {
