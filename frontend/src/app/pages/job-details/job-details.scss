@@ -18,12 +18,12 @@
     margin-bottom: 20px;
 }
 
-.upgrade-diagram-wrapper {
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto 20px;
-    height: 240px;
-}
+//.upgrade-diagram-wrapper {
+//    width: 100%;
+//    max-width: 800px;
+//    margin: 0 auto 20px;
+//    height: 300px; // Adjust this value as needed
+//}
 
 app-upgrade-diagram {
     display: block;
@@ -51,6 +51,4 @@ app-upgrade-diagram {
     margin-bottom: 4px;
 }
 
-//.detail-value {
-//    color: rgba(0, 0, 0, 0.87);
-//}
+// Removed commented out .detail-value
