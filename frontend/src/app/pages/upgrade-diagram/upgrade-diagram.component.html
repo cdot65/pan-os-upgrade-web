@@ -1,15 +1,24 @@
 <div class="upgrade-diagram-container">
-    <div class="firewall-container">
-        <div class="firewall">
-            <img [src]="getFirewallSrc(jobStatusDetails?.devices?.target)" alt="Firewall">
-            <div class="hostname">
-                <span class="span-text">{{ jobStatusDetails?.devices?.target?.hostname }}</span> | <span class="span-text">{{ jobStatusDetails?.devices?.target?.current_status }}</span> | <span class="span-text">{{ jobStatusDetails?.devices?.target?.sw_version }}</span></div>
+    <div class="firewall-container" [class.single-firewall]="!hasPeerDevice">
+        <div class="firewall-group">
+            <img [src]="getFirewallSrc(jobStatusDetails?.devices?.target)" alt="Firewall" class="firewall-image">
+            <div class="firewall-details">
+                <mat-chip-set>
+                    <mat-chip>{{ jobStatusDetails?.devices?.target?.hostname }}</mat-chip>
+                    <mat-chip>{{ jobStatusDetails?.devices?.target?.current_status }}</mat-chip>
+                    <mat-chip>{{ jobStatusDetails?.devices?.target?.sw_version }}</mat-chip>
+                </mat-chip-set>
+            </div>
         </div>
-        @if (jobStatusDetails?.devices?.peer) {
-            <div class="firewall">
-                <img [src]="getFirewallSrc(jobStatusDetails?.devices?.peer)" alt="Peer Firewall">
-                <div class="hostname">
-                    <span class="span-text">{{ jobStatusDetails?.devices?.peer?.hostname }}</span> | <span class="span-text">{{ jobStatusDetails?.devices?.peer?.current_status }}</span> | <span class="span-text">{{ jobStatusDetails?.devices?.peer?.sw_version }}</span>
+        @if (hasPeerDevice) {
+            <div class="firewall-group">
+                <img [src]="getFirewallSrc(jobStatusDetails?.devices?.peer)" alt="Peer Firewall" class="firewall-image">
+                <div class="firewall-details">
+                    <mat-chip-set>
+                        <mat-chip>{{ jobStatusDetails?.devices?.peer?.hostname }}</mat-chip>
+                        <mat-chip>{{ jobStatusDetails?.devices?.peer?.current_status }}</mat-chip>
+                        <mat-chip>{{ jobStatusDetails?.devices?.peer?.sw_version }}</mat-chip>
+                    </mat-chip-set>
                 </div>
             </div>
         }

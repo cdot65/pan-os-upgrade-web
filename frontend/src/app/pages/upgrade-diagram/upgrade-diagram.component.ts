@@ -3,11 +3,12 @@
 import { Component, Input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Device, JobStatus } from "../../shared/interfaces/job.interface";
+import { MatChipsModule } from "@angular/material/chips";
 
 @Component({
     selector: "app-upgrade-diagram",
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, MatChipsModule],
     templateUrl: "./upgrade-diagram.component.html",
     styleUrls: ["./upgrade-diagram.component.scss"],
 })
@@ -39,5 +40,9 @@ export class UpgradeDiagramComponent {
         return this.jobStatusDetails?.job_status === "completed"
             ? "Job completed"
             : (this.jobStatusDetails?.current_step ?? "");
+    }
+
+    get hasPeerDevice(): boolean {
+        return !!this.jobStatusDetails?.devices?.peer;
     }
 }

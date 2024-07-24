@@ -1,55 +1,66 @@
+// upgrade-diagram.component.scss
 .upgrade-diagram-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
     width: 100%;
-    max-width: 800px;
+    height: 100%;
     margin: 0 auto;
     padding: 20px;
-    height: 320px;
 }
 
 .firewall-container {
     display: flex;
-    flex-direction: column;
     justify-content: center;
-    width: 48%;
-    height: 100%;
-}
-
-.firewall {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    //width: 120%;
+    //height: 100%;
     margin-bottom: 20px;
 
-    &:last-child {
-        margin-bottom: 0;
+    &.single-firewall {
+        justify-content: center;
     }
 }
 
-.base-diagram {
-    width: 100%;
-    max-height: 120px;
-    object-fit: contain;
+.firewall-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 40%;
+    height: 100%;
+
+    .single-firewall & {
+        width: 40%;
+    }
 }
 
-.hostname {
-    margin-top: 10px;
-    font-weight: bold;
-    text-align: center;
-    max-width: 100%;
-    word-wrap: break-word;
-    line-height: 1.2;
-    min-height: 2.4em;
+.firewall-image {
+    width: 100%;
+    height: 80%;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
+
+.firewall-details {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+mat-chip-set {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+mat-chip {
+    margin: 2px;
+    font-size: 12px;
 }
 
 .status-container {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    width: 48%;
-    height: 100%;
+    justify-content: center;
+    width: 100%;
 }
 
 .status-svg {
@@ -70,9 +81,4 @@
 
 .status-text {
     font-size: 18px;
-}
-
-.span-text {
-    font-size: 16px;
-    font-weight: normal;
 }
