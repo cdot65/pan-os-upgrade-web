@@ -82,3 +82,21 @@ mat-chip {
 .status-text {
     font-size: 18px;
 }
+
+mat-chip {
+    margin: 2px;
+    font-size: 12px;
+
+    &.ha-active {
+        color: green;
+    }
+
+    &.ha-passive {
+        color: red;
+    }
+
+    &.standalone {
+        color: blue; // You can change this color if you prefer
+    }
+}
+

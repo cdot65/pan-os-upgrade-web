@@ -5,7 +5,10 @@
             <div class="firewall-details">
                 <mat-chip-set>
                     <mat-chip>{{ jobStatusDetails?.devices?.target?.hostname }}</mat-chip>
-                    <mat-chip>{{ jobStatusDetails?.devices?.target?.current_status }}</mat-chip>
+                    <mat-chip
+                        [ngClass]="getHaStatusClass(jobStatusDetails?.devices?.target?.local_state, jobStatusDetails?.devices?.target?.ha_enabled)">
+                        {{ jobStatusDetails?.devices?.target?.ha_enabled ? jobStatusDetails?.devices?.target?.local_state : 'standalone' }}
+                    </mat-chip>
                     <mat-chip>{{ jobStatusDetails?.devices?.target?.sw_version }}</mat-chip>
                 </mat-chip-set>
             </div>
@@ -16,7 +19,10 @@
                 <div class="firewall-details">
                     <mat-chip-set>
                         <mat-chip>{{ jobStatusDetails?.devices?.peer?.hostname }}</mat-chip>
-                        <mat-chip>{{ jobStatusDetails?.devices?.peer?.current_status }}</mat-chip>
+                        <mat-chip
+                            [ngClass]="getHaStatusClass(jobStatusDetails?.devices?.peer?.local_state, jobStatusDetails?.devices?.peer?.ha_enabled)">
+                            {{ jobStatusDetails?.devices?.peer?.local_state }}
+                        </mat-chip>
                         <mat-chip>{{ jobStatusDetails?.devices?.peer?.sw_version }}</mat-chip>
                     </mat-chip-set>
                 </div>

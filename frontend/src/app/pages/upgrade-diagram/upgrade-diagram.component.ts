@@ -1,5 +1,4 @@
 // upgrade-diagram.component.ts
-
 import { Component, Input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Device, JobStatus } from "../../shared/interfaces/job.interface";
@@ -39,10 +38,26 @@ export class UpgradeDiagramComponent {
     get statusText(): string {
         return this.jobStatusDetails?.job_status === "completed"
             ? "Job completed"
-            : (this.jobStatusDetails?.current_step ?? "");
+            : this.jobStatusDetails?.current_step ?? "";
     }
 
     get hasPeerDevice(): boolean {
         return !!this.jobStatusDetails?.devices?.peer;
+    }
+
+    getHaStatusClass(
+        localState: string | undefined,
+        haEnabled: boolean | undefined,
+    ): string {
+        if (!haEnabled) {
+return "standalone";
+}
+        if (localState === "active" || localState === "active-primary") {
+return "ha-active";
+}
+        if (localState === "passive" || localState === "active-secondary") {
+return "ha-passive";
+}
+        return "";
     }
 }
