@@ -1,4 +1,3 @@
-// upgrade-diagram.component.scss
 .upgrade-diagram-container {
     display: flex;
     flex-direction: column;
@@ -10,9 +9,8 @@
 
 .firewall-container {
     display: flex;
-    justify-content: center;
-    //width: 120%;
-    //height: 100%;
+    justify-content: space-around;
+    width: 100%;
     margin-bottom: 20px;
 
     &.single-firewall {
@@ -24,17 +22,17 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 40%;
+    width: 45%;
     height: 100%;
 
     .single-firewall & {
-        width: 40%;
+        width: 60%;
     }
 }
 
 .firewall-image {
     width: 100%;
-    height: 80%;
+    height: auto;
     object-fit: contain;
     margin-bottom: 10px;
 }
@@ -43,44 +41,13 @@
     width: 100%;
     display: flex;
     justify-content: center;
+    margin-bottom: 10px;
 }
 
 mat-chip-set {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-}
-
-mat-chip {
-    margin: 2px;
-    font-size: 12px;
-}
-
-.status-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-}
-
-.status-svg {
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-
-.job-text {
-    display: flex;
-    flex-direction: column;
-}
-
-.detail-label {
-    font-weight: bold;
-    margin-bottom: 4px;
-}
-
-.status-text {
-    font-size: 18px;
 }
 
 mat-chip {
@@ -96,7 +63,36 @@ mat-chip {
     }
 
     &.standalone {
-        color: blue; // You can change this color if you prefer
+        color: blue;
     }
 }
 
+.status-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.status-svg {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+
+.job-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.detail-label {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.status-text {
+    font-size: 18px;
+}
