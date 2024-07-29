@@ -1,0 +1,98 @@
+.upgrade-diagram-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.firewall-container {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-bottom: 20px;
+
+    &.single-firewall {
+        justify-content: center;
+    }
+}
+
+.firewall-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 45%;
+    height: 100%;
+
+    .single-firewall & {
+        width: 60%;
+    }
+}
+
+.firewall-image {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
+
+.firewall-details {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+mat-chip-set {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+mat-chip {
+    margin: 2px;
+    font-size: 12px;
+
+    &.ha-active {
+        color: green;
+    }
+
+    &.ha-passive {
+        color: red;
+    }
+
+    &.standalone {
+        color: blue;
+    }
+}
+
+.status-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.status-svg {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+
+.job-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.detail-label {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.status-text {
+    font-size: 18px;
+}

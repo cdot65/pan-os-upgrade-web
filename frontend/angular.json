@@ -19,7 +19,8 @@
                         "sourceMap": true,
                         "allowedCommonJsDependencies": [
                             "moment",
-                            "path-normalize"
+                            "path-normalize",
+                            "rfdc"
                         ],
                         "outputPath": "dist/pan-os-upgrade",
                         "index": "src/index.html",
@@ -116,7 +117,10 @@
                 "lint": {
                     "builder": "@angular-eslint/builder:lint",
                     "options": {
-                        "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+                        "lintFilePatterns": [
+                            "src/**/*.ts",
+                            "src/**/*.html"
+                        ]
                     }
                 },
                 "e2e": {
@@ -156,7 +160,9 @@
                             "scenes/src/favicon.ico",
                             "scenes/src/assets"
                         ],
-                        "styles": ["scenes/src/styles.scss"],
+                        "styles": [
+                            "scenes/src/styles.scss"
+                        ],
                         "scripts": [],
                         "vendorChunk": true,
                         "extractLicenses": false,
@@ -235,5 +241,8 @@
                 }
             }
         }
+    },
+    "cli": {
+        "analytics": false
     }
 }

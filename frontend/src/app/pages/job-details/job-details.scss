@@ -1,2 +1,56 @@
-// src/app/pages/job-details/job-details.scss
+// job-details.scss
+@use '@angular/material' as mat;
 
+.job-details-container {
+    //min-height: 100vh;
+    //width: 99%;
+    padding: 40px;
+}
+
+.job-details {
+    width: 99%;
+    min-height: auto;
+}
+
+.job-details-info {
+    margin-bottom: 20px;
+}
+
+.job-details-button-row {
+    margin-bottom: 20px;
+}
+
+//.upgrade-diagram-wrapper {
+//    width: 100%;
+//    max-width: 800px;
+//    margin: 0 auto 20px;
+//    height: 300px; // Adjust this value as needed
+//}
+
+app-upgrade-diagram {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.live-logs {
+    margin-top: 20px;
+}
+
+.job-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-label {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+// Removed commented out .detail-value

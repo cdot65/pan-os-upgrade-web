@@ -9,6 +9,18 @@ class Job(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    current_device = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="Current Device",
+    )
+    current_step = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="Current Step",
+    )
     job_status = models.CharField(
         max_length=20,
         choices=(
@@ -31,6 +43,54 @@ class Job(models.Model):
         ),
         verbose_name="Job Type",
     )
+
+    # Target device fields
+    target_current_status = models.CharField(
+        max_length=20,
+        choices=(
+            ("pending", "Pending"),
+            ("working", "Working"),
+            ("completed", "Completed"),
+            ("errored", "Errored"),
+        ),
+        default="pending",
+        verbose_name="Target Device Current Status",
+    )
+    target_device_group = models.CharField(max_length=100, blank=True, null=True)
+    target_ha_enabled = models.BooleanField(null=True)
+    target_hostname = models.CharField(max_length=100, blank=True, null=True)
+    target_local_state = models.CharField(max_length=20, blank=True, null=True)
+    target_panorama_managed = models.BooleanField(null=True)
+    target_peer_device = models.CharField(max_length=100, blank=True, null=True)
+    target_peer_state = models.CharField(max_length=20, blank=True, null=True)
+    target_platform = models.CharField(max_length=100, blank=True, null=True)
+    target_serial = models.CharField(max_length=100, blank=True, null=True)
+    target_sw_version = models.CharField(max_length=100, blank=True, null=True)
+
+    # Peer device fields
+    peer_current_status = models.CharField(
+        max_length=20,
+        choices=(
+            ("pending", "Pending"),
+            ("working", "Working"),
+            ("completed", "Completed"),
+            ("errored", "Errored"),
+        ),
+        default="pending",
+        verbose_name="Peer Device Current Status",
+        null=True,
+        blank=True,
+    )
+    peer_device_group = models.CharField(max_length=100, blank=True, null=True)
+    peer_ha_enabled = models.BooleanField(null=True)
+    peer_hostname = models.CharField(max_length=100, blank=True, null=True)
+    peer_local_state = models.CharField(max_length=20, blank=True, null=True)
+    peer_panorama_managed = models.BooleanField(null=True)
+    peer_peer_device = models.CharField(max_length=100, blank=True, null=True)
+    peer_peer_state = models.CharField(max_length=20, blank=True, null=True)
+    peer_platform = models.CharField(max_length=100, blank=True, null=True)
+    peer_serial = models.CharField(max_length=100, blank=True, null=True)
+    peer_sw_version = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self) -> str:
         return str(self.task_id)

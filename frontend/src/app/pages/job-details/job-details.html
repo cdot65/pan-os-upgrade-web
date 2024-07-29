@@ -1,32 +1,51 @@
 <!-- src/app/pages/job-details/job-details.html -->
 <div class="job-details-container">
-    <main
-        aria-label="Job details"
-        id="job-details"
-        class="job-details"
-    >
+    <main aria-label="Job details" id="job-details" class="job-details">
         <div class="mat-elevation-z2">
             <mat-card class="job-details-card">
                 <mat-card-header>
                     <mat-card-title>Job Details</mat-card-title>
-                    <mat-card-subtitle>
-                        {{ (jobDetails$ | async)?.job?.task_id }}
-                    </mat-card-subtitle>
                 </mat-card-header>
                 <mat-card-content>
+                    <div class="upgrade-diagram-wrapper">
+                        <app-upgrade-diagram
+                            [jobStatusDetails]="jobStatusDetails$ | async"
+                        ></app-upgrade-diagram>
+                    </div>
+
                     <div class="job-details-info">
-                        <p>
-                            <b>Job Type</b>: {{ (jobDetails$ |
-                            async)?.job?.job_type }}
-                        </p>
-                        <p>
-                            <b>Created at</b>: {{ (jobDetails$ |
-                            async)?.job?.created_at | date:'medium' }}
-                        </p>
-                        <p>
-                            <b>Status</b>: {{ (jobDetails$ |
-                            async)?.job?.job_status }}
-                        </p>
+                        @if (jobStatusAndLogs$ | async; as jobDetails) {
+                            <mat-card>
+                                <mat-card-content class="job-details-grid">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Job ID</span>
+                                        <span class="detail-value">{{ jobDetails.job.task_id }}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Job Type</span>
+                                        <span class="detail-value">{{ jobDetails.job.job_type }}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Created at</span>
+                                        <span class="detail-value">{{ jobDetails.job.created_at | date:'medium' }}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Updated at</span>
+                                        <span class="detail-value">{{ jobDetails.job.updated_at | date:'medium' }}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Status</span>
+                                        <span class="detail-value">{{ jobDetails.job.job_status }}</span>
+                                    </div>
+                                </mat-card-content>
+                            </mat-card>
+                        } @else {
+                            <mat-card>
+                                <mat-card-content>
+                                    <p>Loading job details...</p>
+                                </mat-card-content>
+                            </mat-card>
+                        }
                     </div>
 
                     <div class="job-details-button-row">
@@ -35,34 +54,34 @@
                             color="accent"
                             (click)="toggleSortOrder()"
                         >
-                            Toggle Sorting (Current: {{
-                            sortingService.sortOrder() }})
+                            Toggle Sorting
+                            <mat-icon>{{ sortingService.sortOrder() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                         </button>
                     </div>
+
 
                     <mat-divider></mat-divider>
 
                     <div class="live-logs">
-                        @if ((jobDetails$ | async)?.logs?.length === 0) {
-                        <div>No logs found.</div>
+                        @if ((jobStatusAndLogs$ | async)?.logs?.length === 0) {
+                            <div>No logs found.</div>
                         } @else {
-                        <div>
-                            @for (log of (jobDetails$ | async)?.logs ?? [] ;
-                            track log) {
-                            <mat-card class="log-entry">
-                                <mat-card-header class="mat-card-header">
-                                    <mat-card-title class="mat-card-title">
-                                        {{ log.message }}
-                                    </mat-card-title>
-                                    <mat-card-subtitle
-                                        class="mat-card-subtitle"
-                                    >
-                                        {{ log.timestamp | date:'medium' }}
-                                    </mat-card-subtitle>
-                                </mat-card-header>
-                            </mat-card>
-                            }
-                        </div>
+                            <div>
+                                @for (log of (jobStatusAndLogs$ | async)?.logs ?? []; track log) {
+                                    <mat-card class="log-entry">
+                                        <mat-card-header class="mat-card-header">
+                                            <mat-card-title class="mat-card-title">
+                                                {{ log.message }}
+                                            </mat-card-title>
+                                            <mat-card-subtitle
+                                                class="mat-card-subtitle"
+                                            >
+                                                {{ log.timestamp | date:'medium' }}
+                                            </mat-card-subtitle>
+                                        </mat-card-header>
+                                    </mat-card>
+                                }
+                            </div>
                         }
                     </div>
                 </mat-card-content>

@@ -10,11 +10,11 @@ import {
 } from "@angular/core";
 import { MatSort, MatSortModule, Sort } from "@angular/material/sort";
 import { MatTableDataSource, MatTableModule } from "@angular/material/table";
-import { Subject, forkJoin } from "rxjs";
+import { forkJoin, Subject } from "rxjs";
 
 import { ComponentPageTitle } from "../page-title/page-title";
 import { Footer } from "src/app/shared/footer/footer";
-import { Job } from "../../shared/interfaces/job.interface";
+import { JobStatus } from "../../shared/interfaces/job.interface";
 import { JobDeleteDialogComponent } from "../job-delete-dialog/job-delete-dialog";
 import { JobService } from "../../shared/services/job.service";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
@@ -47,7 +47,7 @@ import { takeUntil } from "rxjs/operators";
 export class JobListComponent implements OnInit, AfterViewInit, OnDestroy {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
-    jobItems: Job[] = [];
+    jobItems: JobStatus[] = [];
     displayedColumns: string[] = [
         "select",
         "task_id",
@@ -55,8 +55,9 @@ export class JobListComponent implements OnInit, AfterViewInit, OnDestroy {
         "created_at",
         "view_details",
     ];
-    selection = new SelectionModel<Job>(true, []);
-    dataSource: MatTableDataSource<Job> = new MatTableDataSource<Job>([]);
+    selection = new SelectionModel<JobStatus>(true, []);
+    dataSource: MatTableDataSource<JobStatus> =
+        new MatTableDataSource<JobStatus>([]);
     private destroy$ = new Subject<void>();
 
     @ViewChild(MatSort) sort: MatSort = new MatSort();
@@ -78,7 +79,7 @@ export class JobListComponent implements OnInit, AfterViewInit, OnDestroy {
         }
     }
 
-    checkboxLabel(row?: Job): string {
+    checkboxLabel(row?: JobStatus): string {
         if (!row) {
             return `${this.isAllSelected() ? "select" : "deselect"} all`;
         }
@@ -139,7 +140,7 @@ export class JobListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.getJobs();
     }
 
-    onDeleteClick(item: Job): void {
+    onDeleteClick(item: JobStatus): void {
         const dialogRef = this.dialog.open(JobDeleteDialogComponent, {
             width: "300px",
             data: {
@@ -211,7 +212,7 @@ export class JobListComponent implements OnInit, AfterViewInit, OnDestroy {
             });
     }
 
-    onViewClick(item: Job): void {
+    onViewClick(item: JobStatus): void {
         this.router.navigate(["/jobs", item.task_id]);
     }
 

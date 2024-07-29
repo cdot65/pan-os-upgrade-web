@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // frontend/src/app/shared/services/logging.service.ts
 
-import { BehaviorSubject, Observable, forkJoin, throwError, timer } from "rxjs";
+import { BehaviorSubject, forkJoin, Observable, throwError, timer } from "rxjs";
 import {
     ForbiddenError,
     LoggingServiceError,
@@ -15,12 +15,15 @@ import {
     HttpErrorResponse,
     HttpHeaders,
 } from "@angular/common/http";
-import { JobDetails, JobLogEntry } from "../interfaces/job-log-entry.interface";
+import {
+    JobLogEntry,
+    JobStatusAndLogs,
+} from "../interfaces/job-log-entry.interface";
 import { catchError, map, mergeMap, retryWhen } from "rxjs/operators";
 
 import { CookieService } from "ngx-cookie-service";
 import { Injectable } from "@angular/core";
-import { Job } from "../interfaces/job.interface";
+import { JobStatus } from "../interfaces/job.interface";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { environment } from "../../../environments/environment.prod";
 
@@ -32,7 +35,9 @@ export class LoggingService {
     private apiUrl = environment.apiUrl;
     private apiEndpointJobs = `${this.apiUrl}/api/v1/jobs/`;
 
-    public jobDetails$ = new BehaviorSubject<JobDetails | null>(null);
+    public jobStatusAndLogs$ = new BehaviorSubject<JobStatusAndLogs | null>(
+        null,
+    );
 
     constructor(
         private cookieService: CookieService,
@@ -114,25 +119,28 @@ export class LoggingService {
      * @param jobUuid - The UUID of the job.
      * @returns An Observable that emits the job details.
      */
-    getJob(uuid: string): Observable<Job> {
+    getJob(uuid: string): Observable<JobStatus> {
         const url = `${this.apiEndpointJobs}${uuid}/`;
 
-        return this.http.get<Job>(url, { headers: this.getAuthHeaders() }).pipe(
-            retryWhen((errors) =>
-                errors.pipe(
-                    mergeMap((error: HttpErrorResponse, i) => {
-                        const retryAttempt = i + 1;
-                        if (retryAttempt <= 3 && this.shouldRetry(error)) {
-                            const delayTime = Math.pow(2, retryAttempt) * 1000;
-                            return timer(delayTime);
-                        } else {
-                            return throwError(() => error);
-                        }
-                    }),
+        return this.http
+            .get<JobStatus>(url, { headers: this.getAuthHeaders() })
+            .pipe(
+                retryWhen((errors) =>
+                    errors.pipe(
+                        mergeMap((error: HttpErrorResponse, i) => {
+                            const retryAttempt = i + 1;
+                            if (retryAttempt <= 3 && this.shouldRetry(error)) {
+                                const delayTime =
+                                    Math.pow(2, retryAttempt) * 1000;
+                                return timer(delayTime);
+                            } else {
+                                return throwError(() => error);
+                            }
+                        }),
+                    ),
                 ),
-            ),
-            catchError(this.handleError.bind(this)),
-        );
+                catchError(this.handleError.bind(this)),
+            );
     }
 
     /**
@@ -171,7 +179,7 @@ export class LoggingService {
      * @param uuid - The UUID of the job.
      * @returns An Observable that emits the combined job details and logs.
      */
-    getJobDetailsAndLogs(uuid: string): Observable<JobDetails> {
+    getJobDetailsAndLogs(uuid: string): Observable<JobStatusAndLogs> {
         return forkJoin([this.getJob(uuid), this.getJobLogs(uuid)]).pipe(
             map(([job, logs]) => ({ job, logs })),
             catchError(this.handleError.bind(this)),
@@ -183,8 +191,8 @@ export class LoggingService {
      *
      * @returns The current value of the job details and logs.
      */
-    getJobDetailsAndLogsValue(): JobDetails | null {
-        return this.jobDetails$.getValue();
+    getJobDetailsAndLogsValue(): JobStatusAndLogs | null {
+        return this.jobStatusAndLogs$.getValue();
     }
 
     /**
@@ -192,7 +200,7 @@ export class LoggingService {
      *
      * @param jobDetails - The job details and logs to set.
      */
-    setJobDetailsAndLogs(jobDetails: JobDetails | null): void {
-        this.jobDetails$.next(jobDetails);
+    setJobDetailsAndLogs(jobDetails: JobStatusAndLogs | null): void {
+        this.jobStatusAndLogs$.next(jobDetails);
     }
 }

@@ -18,7 +18,7 @@ import { catchError, map, mergeMap, retryWhen } from "rxjs/operators";
 
 import { CookieService } from "ngx-cookie-service";
 import { Injectable } from "@angular/core";
-import { Job } from "../interfaces/job.interface";
+import { JobStatus } from "../interfaces/job.interface";
 import { JobLogEntry } from "../interfaces/job-log-entry.interface";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { environment } from "../../../environments/environment.prod";
@@ -105,10 +105,10 @@ export class JobService {
         return error.status >= 500 || error.error instanceof ErrorEvent;
     }
 
-    getJobs(): Observable<Job[]> {
+    getJobs(): Observable<JobStatus[]> {
         return this.http
             .get<
-                Job[]
+                JobStatus[]
             >(this.apiEndpointJobs, { headers: this.getAuthHeaders() })
             .pipe(
                 map((jobs) =>
@@ -139,33 +139,28 @@ export class JobService {
             );
     }
 
-    getJob(uuid: string): Observable<Job> {
-        // Construct URL with placeholder
+    getJob(uuid: string): Observable<JobStatus> {
         const url = `${this.apiEndpointJobs}${uuid}/`;
 
         return this.http
-            .get<Job>(url, {
+            .get<JobStatus>(url, {
                 headers: this.getAuthHeaders(),
             })
             .pipe(
-                // Retry the request for server errors up to 3 times with an exponential backoff strategy
                 retryWhen((errors) =>
                     errors.pipe(
                         mergeMap((error: HttpErrorResponse, i) => {
                             const retryAttempt = i + 1;
                             if (retryAttempt <= 3 && this.shouldRetry(error)) {
-                                // Apply an exponential backoff strategy
                                 const delayTime =
                                     Math.pow(2, retryAttempt) * 1000;
                                 return timer(delayTime);
                             } else {
-                                // After 3 retries, throw error
                                 return throwError(() => error);
                             }
                         }),
                     ),
                 ),
-                // Log an error message and return an empty array if the request fails
                 catchError(this.handleError.bind(this)),
             );
     }
@@ -203,27 +198,30 @@ export class JobService {
         // Construct URL with placeholder
         const url = `${this.apiEndpointJobs}${uuid}/`;
 
-        return this.http.get<Job>(url, { headers: this.getAuthHeaders() }).pipe(
-            map((job) => job.job_status),
-            // Retry the request for server errors up to 3 times with an exponential backoff strategy
-            retryWhen((errors) =>
-                errors.pipe(
-                    mergeMap((error: HttpErrorResponse, i) => {
-                        const retryAttempt = i + 1;
-                        if (retryAttempt <= 3 && this.shouldRetry(error)) {
-                            // Apply an exponential backoff strategy
-                            const delayTime = Math.pow(2, retryAttempt) * 1000;
-                            return timer(delayTime);
-                        } else {
-                            // After 3 retries, throw error
-                            return throwError(() => error);
-                        }
-                    }),
+        return this.http
+            .get<JobStatus>(url, { headers: this.getAuthHeaders() })
+            .pipe(
+                map((job) => job.job_status),
+                // Retry the request for server errors up to 3 times with an exponential backoff strategy
+                retryWhen((errors) =>
+                    errors.pipe(
+                        mergeMap((error: HttpErrorResponse, i) => {
+                            const retryAttempt = i + 1;
+                            if (retryAttempt <= 3 && this.shouldRetry(error)) {
+                                // Apply an exponential backoff strategy
+                                const delayTime =
+                                    Math.pow(2, retryAttempt) * 1000;
+                                return timer(delayTime);
+                            } else {
+                                // After 3 retries, throw error
+                                return throwError(() => error);
+                            }
+                        }),
+                    ),
                 ),
-            ),
-            // Log an error message and return an empty array if the request fails
-            catchError(this.handleError.bind(this)),
-        );
+                // Log an error message and return an empty array if the request fails
+                catchError(this.handleError.bind(this)),
+            );
     }
 
     deleteJob(uuid: string): Observable<any> {

@@ -77,6 +77,11 @@ def main(
         profile_uuid=profile_uuid,
     )
 
+    upgrade_job.update_current_step(
+        device_name="pending",
+        step_name="Initializing Upgrade Process",
+    )
+
     # Log the start of the PAN-OS upgrade process
     upgrade_job.logger.log_task(
         action="report",
@@ -87,10 +92,9 @@ def main(
     # ------------------------------------------------------------------------------------------------------------------
     # Workflow: Check if the target device is the primary device in an HA pair, and if so, skip the upgrade
     # ------------------------------------------------------------------------------------------------------------------
+    # Retrieve database object for target device
+    targeted_device = Device.objects.get(uuid=device_uuid)
     try:
-        # Retrieve database object for target device
-        targeted_device = Device.objects.get(uuid=device_uuid)
-
         # Check if the device is the active/primary device in an HA pair, and if so, skip the upgrade
         if targeted_device.ha_enabled and targeted_device.local_state in [
             "active",
@@ -112,6 +116,10 @@ def main(
             action="error",
             message=f"Error checking HA status of firewall devices: {str(e)}",
         )
+        upgrade_job.update_current_step(
+            device_name=f"{targeted_device.hostname}",
+            step_name="Errored",
+        )
         return "errored"
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -131,12 +139,19 @@ def main(
             else upgrade_job.standalone_device
         )
 
+        upgrade_job.update_device_status(targeted_device, "active")
+
     except Exception as e:
         # Log the error of determining the HA status of the target device
         upgrade_job.logger.log_task(
             action="error",
             message=f"Error assigning selected device(s) to a role as either primary, active, or standalone: {str(e)}",
         )
+        upgrade_job.update_current_step(
+            device_name=f"{targeted_device['db_device'].hostname}",
+            step_name="Errored",
+        )
+        return "errored"
 
     # ------------------------------------------------------------------------------------------------------------------
     # Workflow: Target device and will gracefully exit the upgrade workflow if it should be within a 'suspended' state
@@ -145,7 +160,7 @@ def main(
         if upgrade_job.secondary_device is not None:
             # Target the secondary devices within an HA pair and refresh the HA state using the
             # `show_highavailability_state()` method
-            upgrade_job.get_ha_status(device=upgrade_job.secondary_device["pan_device"])
+            upgrade_job.get_ha_status(device=upgrade_job.secondary_device)
 
             # Skip the upgrade process for devices that are suspended
             if upgrade_job.ha_details["result"]["group"]:
@@ -161,6 +176,10 @@ def main(
                     )
 
                     # Raise an exception to skip the upgrade process
+                    upgrade_job.update_current_step(
+                        device_name=f"{targeted_device['db_device'].hostname}",
+                        step_name="Errored",
+                    )
                     return "errored"
 
                 elif (
@@ -175,6 +194,10 @@ def main(
                     )
 
                     # Raise an exception to skip the upgrade process
+                    upgrade_job.update_current_step(
+                        device_name=f"{targeted_device['db_device'].hostname}",
+                        step_name="Errored",
+                    )
                     return "errored"
 
             elif upgrade_job.ha_details["result"]["local-info"]["state"] == "suspended":
@@ -186,6 +209,10 @@ def main(
                 )
 
                 # Raise an exception to skip the upgrade process
+                upgrade_job.update_current_step(
+                    device_name=f"{targeted_device['db_device'].hostname}",
+                    step_name="Errored",
+                )
                 return "errored"
 
             elif upgrade_job.ha_details["result"]["peer-info"]["state"] == "suspended":
@@ -197,6 +224,10 @@ def main(
                 )
 
                 # Raise an exception to skip the upgrade process
+                upgrade_job.update_current_step(
+                    device_name=f"{targeted_device['db_device'].hostname}",
+                    step_name="Errored",
+                )
                 return "errored"
 
     except Exception as e:
@@ -205,6 +236,10 @@ def main(
             action="error",
             message=f"{upgrade_job.secondary_device['pan_device']}: Error determining the HA status of the target "
             f"device: {str(e)}",
+        )
+        upgrade_job.update_current_step(
+            device_name=f"{targeted_device['db_device'].hostname}",
+            step_name="Errored",
         )
         return "errored"
 
@@ -255,6 +290,10 @@ def main(
             message=f"{targeted_device['db_device'].hostname}: Error parsing the current and/or targeted upgrade "
             f"version of PAN-OS: {str(e)}",
         )
+        upgrade_job.update_current_step(
+            device_name=f"{targeted_device['db_device'].hostname}",
+            step_name="Errored",
+        )
         return "errored"
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -275,6 +314,10 @@ def main(
                 message=f"{targeted_device['db_device'].hostname}: It was determined that this device is not "
                 f"suitable to kick off an upgrade workflow to version {target_version}.",
             )
+            upgrade_job.update_current_step(
+                device_name=f"{targeted_device['db_device'].hostname}",
+                step_name="Errored",
+            )
             return "errored"
 
     except Exception as e:
@@ -283,6 +326,10 @@ def main(
             action="error",
             message=f"{targeted_device['db_device'].hostname}: Error determining if the device is ready to be upgraded "
             f"to PAN-OS version {target_version}: {str(e)}",
+        )
+        upgrade_job.update_current_step(
+            device_name=f"{targeted_device['db_device'].hostname}",
+            step_name="Errored",
         )
         return "errored"
 
@@ -311,6 +358,10 @@ def main(
                 )
 
                 # Return an error status
+                upgrade_job.update_current_step(
+                    device_name=f"{targeted_device['db_device'].hostname}",
+                    step_name="Errored",
+                )
                 return "errored"
 
     except Exception as e:
@@ -319,6 +370,10 @@ def main(
             action="error",
             message=f"{targeted_device['db_device'].hostname}: Error determining if the devices in an HA pair are "
             f"compatible for the target PAN-OS version {target_version}: {str(e)}",
+        )
+        upgrade_job.update_current_step(
+            device_name=f"{targeted_device['db_device'].hostname}",
+            step_name="Errored",
         )
         return "errored"
 
@@ -338,6 +393,10 @@ def main(
                 action="error",
                 message=f"{targeted_device['db_device'].hostname}: Target version {target_version} is not available.",
             )
+            upgrade_job.update_current_step(
+                device_name=f"{targeted_device['db_device'].hostname}",
+                step_name="Errored",
+            )
             return "errored"
 
     except Exception as e:
@@ -346,6 +405,10 @@ def main(
             action="error",
             message=f"{targeted_device['db_device'].hostname}: Error determining if the PAN-OS version is available for"
             f" download {target_version}: {str(e)}",
+        )
+        upgrade_job.update_current_step(
+            device_name=f"{targeted_device['db_device'].hostname}",
+            step_name="Errored",
         )
         return "errored"
 
@@ -404,8 +467,9 @@ def main(
                     )
 
                     # Download the base image for the target version
-                    downloaded = PanosUpgrade.software_download(
+                    downloaded = upgrade_job.software_download(
                         device=targeted_device["pan_device"],
+                        hostname=targeted_device["db_device"].hostname,
                         target_version=base_version_key,
                     )
 
@@ -450,6 +514,10 @@ def main(
 
                         # Return "errored" if the download failed after multiple attempts
                         else:
+                            upgrade_job.update_current_step(
+                                device_name=f"{targeted_device['db_device'].hostname}",
+                                step_name="Errored",
+                            )
                             return "errored"
 
             # If the status is "downloading", then we can deduce that multiple executions are being
@@ -464,6 +532,10 @@ def main(
                 )
 
                 # Return "errored" to prevent conflicts
+                upgrade_job.update_current_step(
+                    device_name=f"{targeted_device['db_device'].hostname}",
+                    step_name="Errored",
+                )
                 return "errored"
 
         # Since the base image is already downloaded, simply log message to console
@@ -480,6 +552,10 @@ def main(
         upgrade_job.logger.log_task(
             action="error",
             message=f"{targeted_device['db_device'].hostname}: Error downloading the base image: {str(e)} ",
+        )
+        upgrade_job.update_current_step(
+            device_name=f"{targeted_device['db_device'].hostname}",
+            step_name="Errored",
         )
         return "errored"
 
@@ -527,8 +603,9 @@ def main(
                     upgrade_job.profile["download"]["maximum_attempts"]
                 ):
                     # Download the target image
-                    downloaded = PanosUpgrade.software_download(
+                    downloaded = upgrade_job.software_download(
                         device=targeted_device["pan_device"],
+                        hostname=targeted_device["db_device"].hostname,
                         target_version=target_version,
                     )
 
@@ -573,6 +650,10 @@ def main(
 
                         # Return "errored" if the download failed after multiple attempts
                         else:
+                            upgrade_job.update_current_step(
+                                device_name=f"{targeted_device['db_device'].hostname}",
+                                step_name="Errored",
+                            )
                             return "errored"
 
                 # Log the message to the console
@@ -593,6 +674,10 @@ def main(
                 )
 
                 # Return "errored" to prevent conflicts
+                upgrade_job.update_current_step(
+                    device_name=f"{targeted_device['db_device'].hostname}",
+                    step_name="Errored",
+                )
                 return "errored"
 
         # Since the target image is already downloaded, simply log message to console
@@ -610,6 +695,10 @@ def main(
             action="error",
             message=f"{targeted_device['db_device'].hostname}: Error occurred when downloading the targeted upgrade "
             f"PAN-OS version {target_version}: {str(e)}",
+        )
+        upgrade_job.update_current_step(
+            device_name=f"{targeted_device['db_device'].hostname}",
+            step_name="Errored",
         )
         return "errored"
 
@@ -630,6 +719,10 @@ def main(
                 )
 
                 # Return "errored", gracefully exiting the upgrade's execution
+                upgrade_job.update_current_step(
+                    device_name=f"{targeted_device['db_device'].hostname}",
+                    step_name="Errored",
+                )
                 return "errored"
 
             # Wait for HA synchronization to complete
@@ -687,11 +780,15 @@ def main(
                     )
 
                     # Return an error status
+                    upgrade_job.update_current_step(
+                        device_name=f"{targeted_device['db_device'].hostname}",
+                        step_name="Errored",
+                    )
                     return "errored"
 
             # Compare the local and peer PAN-OS versions
             version_comparison = upgrade_job.compare_versions(
-                hostname=targeted_device["db_device"],
+                hostname=targeted_device["db_device"].hostname,
                 local_version_sliced=upgrade_job.version_local_parsed,
                 peer_version_sliced=upgrade_job.version_peer_parsed,
             )
@@ -711,6 +808,10 @@ def main(
                 )
 
                 # Return "errored", gracefully exiting the upgrade's execution
+                upgrade_job.update_current_step(
+                    device_name=f"{targeted_device['db_device'].hostname}",
+                    step_name="Errored",
+                )
                 return "errored"
 
     except Exception as e:
@@ -719,6 +820,10 @@ def main(
             action="error",
             message=f"{targeted_device['db_device'].hostname}: Error occurred when validating the HA status of device: "
             f"{str(e)}",
+        )
+        upgrade_job.update_current_step(
+            device_name=f"{targeted_device['db_device'].hostname}",
+            step_name="Errored",
         )
         return "errored"
 
@@ -730,6 +835,10 @@ def main(
             device=targeted_device,
         )
         if not upgrade_job.readiness_checks_succeeded:
+            upgrade_job.update_current_step(
+                device_name=f"{targeted_device['db_device'].hostname}",
+                step_name="Errored",
+            )
             return "errored"
 
     except Exception as e:
@@ -738,6 +847,10 @@ def main(
             action="error",
             message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the "
             f"readiness checks of the device: {str(e)} ",
+        )
+        upgrade_job.update_current_step(
+            device_name=f"{targeted_device['db_device'].hostname}",
+            step_name="Errored",
         )
         return "errored"
 
@@ -759,6 +872,10 @@ def main(
                 message=f"{targeted_device['db_device'].hostname}: Snapshot failed to complete successfully before the "
                 f"upgrade initiated.",
             )
+            upgrade_job.update_current_step(
+                device_name=f"{targeted_device['db_device'].hostname}",
+                step_name="Errored",
+            )
             return "errored"
 
     except Exception as e:
@@ -768,39 +885,48 @@ def main(
             message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the "
             f"snapshot of the network state of device: {str(e)} ",
         )
+        upgrade_job.update_current_step(
+            device_name=f"{targeted_device['db_device'].hostname}",
+            step_name="Errored",
+        )
         return "errored"
 
     # ------------------------------------------------------------------------------------------------------------------
     # Workflow: Target device HA suspension
     # ------------------------------------------------------------------------------------------------------------------
-    try:
-        if not dry_run:
-            # Log message to console
+    if not upgrade_job.standalone_device:
+        try:
+            if not dry_run:
+                # Log message to console
+                upgrade_job.logger.log_task(
+                    action="start",
+                    message=f"{targeted_device['db_device'].hostname}: Suspending the HA state of device",
+                )
+
+                # Suspend HA state of the active device
+                upgrade_job.suspend_ha_device(
+                    device=targeted_device,
+                )
+
+            else:
+                upgrade_job.logger.log_task(
+                    action="skipped",
+                    message=f"{targeted_device['db_device'].hostname}: Dry run mode enabled. Skipping HA state "
+                    f"suspension.",
+                )
+
+        except Exception as e:
+            # Log the error of the target device's upgrade
             upgrade_job.logger.log_task(
-                action="start",
-                message=f"{targeted_device['db_device'].hostname}: Suspending the HA state of device",
+                action="error",
+                message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the "
+                f"HA suspension of the device: {str(e)} ",
             )
-
-            # Suspend HA state of the active device
-            upgrade_job.suspend_ha_device(
-                device=targeted_device,
+            upgrade_job.update_current_step(
+                device_name=f"{targeted_device['db_device'].hostname}",
+                step_name="Errored",
             )
-
-        else:
-            upgrade_job.logger.log_task(
-                action="skipped",
-                message=f"{targeted_device['db_device'].hostname}: Dry run mode enabled. Skipping HA state "
-                f"suspension.",
-            )
-
-    except Exception as e:
-        # Log the error of the target device's upgrade
-        upgrade_job.logger.log_task(
-            action="error",
-            message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the "
-            f"HA suspension of the device: {str(e)} ",
-        )
-        return "errored"
+            return "errored"
 
     # ------------------------------------------------------------------------------------------------------------------
     # Workflow: Target device upgrade process
@@ -828,6 +954,10 @@ def main(
                 )
 
                 # Return an error status
+                upgrade_job.update_current_step(
+                    device_name=f"{targeted_device['db_device'].hostname}",
+                    step_name="Errored",
+                )
                 return "errored"
 
     except Exception as e:
@@ -836,6 +966,10 @@ def main(
             action="error",
             message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the "
             f"upgrade of the device: {str(e)} ",
+        )
+        upgrade_job.update_current_step(
+            device_name=f"{targeted_device['db_device'].hostname}",
+            step_name="Errored",
         )
         return "errored"
 
@@ -859,6 +993,10 @@ def main(
                 )
 
                 # Return an error status
+                upgrade_job.update_current_step(
+                    device_name=f"{targeted_device['db_device'].hostname}",
+                    step_name="Errored",
+                )
                 return "errored"
 
         except Exception as e:
@@ -867,6 +1005,10 @@ def main(
                 action="error",
                 message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the "
                 f"reboot of the device: {str(e)} ",
+            )
+            upgrade_job.update_current_step(
+                device_name=f"{targeted_device['db_device'].hostname}",
+                step_name="Errored",
             )
             return "errored"
 
@@ -897,6 +1039,10 @@ def main(
                     message=f"{targeted_device['db_device'].hostname}: Snapshot failed to complete "
                     f"successfully after the upgrade completed.",
                 )
+                upgrade_job.update_current_step(
+                    device_name=f"{targeted_device['db_device'].hostname}",
+                    step_name="Errored",
+                )
                 return "errored"
 
         except Exception as e:
@@ -906,23 +1052,33 @@ def main(
                 message=f"{targeted_device['db_device'].hostname}: Error occurred when performing the snapshot "
                 f"of the network state of device: {str(e)} ",
             )
+            upgrade_job.update_current_step(
+                device_name=f"{targeted_device['db_device'].hostname}",
+                step_name="Errored",
+            )
             return "errored"
 
     # ------------------------------------------------------------------------------------------------------------------
-    # Workflow: Target device PDF report generation on pre/post upgrade diff
+    # Workflow: Update status to "completed"
     # ------------------------------------------------------------------------------------------------------------------
-    # TODO: PDF Report Generation
+    upgrade_job.update_device_status(targeted_device, "completed")
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # Workflow: Exit the upgrade workflow if there is no primary_device attribute
-    # ------------------------------------------------------------------------------------------------------------------
     if not upgrade_job.primary_device:
+        upgrade_job.update_current_step(
+            device_name=f"{targeted_device['db_device'].hostname}",
+            step_name="Upgrade Completed!",
+        )
         return "completed"
 
     # --------------------------------------------------------------------------------------------------------------
     # Workflow: Primary device readiness checks
     # --------------------------------------------------------------------------------------------------------------
     # Perform readiness checks on the primary device before the upgrade process
+    upgrade_job.update_current_step(
+        device_name=f"{upgrade_job.primary_device['db_device'].hostname}",
+        step_name="Beginning upgrade workflow on active device",
+    )
+
     try:
         upgrade_job.perform_readiness_checks(
             device=upgrade_job.primary_device,
@@ -930,6 +1086,10 @@ def main(
 
         # Attempt to perform readiness checks
         if not upgrade_job.readiness_checks_succeeded:
+            upgrade_job.update_current_step(
+                device_name=f"{upgrade_job.primary_device['db_device'].hostname}",
+                step_name="Errored",
+            )
             return "errored"
 
     except Exception as e:
@@ -938,6 +1098,10 @@ def main(
             action="error",
             message=f"{upgrade_job.primary_device['db_device'].hostname}: Error occurred when performing the "
             f"readiness checks of the device: {str(e)} ",
+        )
+        upgrade_job.update_current_step(
+            device_name=f"{upgrade_job.primary_device['db_device'].hostname}",
+            step_name="Errored",
         )
         return "errored"
 
@@ -959,6 +1123,10 @@ def main(
                 message=f"{upgrade_job.primary_device['db_device'].hostname}: Snapshot failed to complete "
                 f"successfully before the upgrade initiated.",
             )
+            upgrade_job.update_current_step(
+                device_name=f"{upgrade_job.primary_device['db_device'].hostname}",
+                step_name="Errored",
+            )
             return "errored"
 
     except Exception as e:
@@ -967,6 +1135,10 @@ def main(
             action="error",
             message=f"{upgrade_job.primary_device['db_device'].hostname}: Error occurred when performing the "
             f"snapshot of the network state of device: {str(e)} ",
+        )
+        upgrade_job.update_current_step(
+            device_name=f"{upgrade_job.primary_device['db_device'].hostname}",
+            step_name="Errored",
         )
         return "errored"
 
@@ -991,6 +1163,10 @@ def main(
                 )
 
                 # Return an error status
+                upgrade_job.update_current_step(
+                    device_name=f"{upgrade_job.primary_device['db_device'].hostname}",
+                    step_name="Errored",
+                )
                 return "errored"
 
         except Exception as e:
@@ -999,6 +1175,10 @@ def main(
                 action="error",
                 message=f"{upgrade_job.primary_device['db_device'].hostname}: Error occurred when performing the "
                 f"upgrade of the device: {str(e)} ",
+            )
+            upgrade_job.update_current_step(
+                device_name=f"{upgrade_job.primary_device['db_device'].hostname}",
+                step_name="Errored",
             )
             return "errored"
 
@@ -1022,6 +1202,10 @@ def main(
                 )
 
                 # Return an error status
+                upgrade_job.update_current_step(
+                    device_name=f"{upgrade_job.primary_device['db_device'].hostname}",
+                    step_name="Errored",
+                )
                 return "errored"
 
         except Exception as e:
@@ -1030,6 +1214,10 @@ def main(
                 action="error",
                 message=f"{upgrade_job.primary_device['db_device'].hostname}: Error occurred when performing the "
                 f"reboot of the device: {str(e)} ",
+            )
+            upgrade_job.update_current_step(
+                device_name=f"{upgrade_job.primary_device['db_device'].hostname}",
+                step_name="Errored",
             )
             return "errored"
 
@@ -1067,6 +1255,10 @@ def main(
                     message=f"{upgrade_job.primary_device['db_device'].hostname}: Snapshot failed to complete "
                     f"successfully after the upgrade was completed.",
                 )
+                upgrade_job.update_current_step(
+                    device_name=f"{upgrade_job.primary_device['db_device'].hostname}",
+                    step_name="Errored",
+                )
                 return "errored"
 
         except Exception as e:
@@ -1076,9 +1268,13 @@ def main(
                 message=f"{upgrade_job.primary_device['db_device'].hostname}: Error occurred when performing the "
                 f"snapshot of the network state of device: {str(e)} ",
             )
+            upgrade_job.update_current_step(
+                device_name=f"{upgrade_job.primary_device['db_device'].hostname}",
+                step_name="Errored",
+            )
             return "errored"
 
     # ------------------------------------------------------------------------------------------------------------------
-    # Workflow: Target device PDF report generation on pre/post upgrade diff
+    # Workflow: Update status of primary e
     # ------------------------------------------------------------------------------------------------------------------
-    # TODO: PDF Report Generation
+    upgrade_job.update_device_status(upgrade_job.primary_device, "completed")
