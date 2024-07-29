@@ -1,17 +1,17 @@
-// upgrade-diagram.component.ts
+// firewall-diagram.component.ts
 import { Component, Input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Device, JobStatus } from "../../shared/interfaces/job.interface";
 import { MatChipsModule } from "@angular/material/chips";
 
 @Component({
-    selector: "app-upgrade-diagram",
+    selector: "app-firewall-diagram",
     standalone: true,
     imports: [CommonModule, MatChipsModule],
-    templateUrl: "./upgrade-diagram.component.html",
-    styleUrls: ["./upgrade-diagram.component.scss"],
+    templateUrl: "./firewall-diagram.component.html",
+    styleUrls: ["./firewall-diagram.component.scss"],
 })
-export class UpgradeDiagramComponent {
+export class FirewallDiagramComponent {
     @Input() jobStatusDetails: JobStatus | null = null;
 
     getFirewallSrc(device: Device | undefined): string {
@@ -38,7 +38,7 @@ export class UpgradeDiagramComponent {
     get statusText(): string {
         return this.jobStatusDetails?.job_status === "completed"
             ? "Job completed"
-            : this.jobStatusDetails?.current_step ?? "";
+            : (this.jobStatusDetails?.current_step ?? "");
     }
 
     get hasPeerDevice(): boolean {
@@ -50,14 +50,14 @@ export class UpgradeDiagramComponent {
         haEnabled: boolean | undefined,
     ): string {
         if (!haEnabled) {
-return "standalone";
-}
+            return "standalone";
+        }
         if (localState === "active" || localState === "active-primary") {
-return "ha-active";
-}
+            return "ha-active";
+        }
         if (localState === "passive" || localState === "active-secondary") {
-return "ha-passive";
-}
+            return "ha-passive";
+        }
         return "";
     }
 }

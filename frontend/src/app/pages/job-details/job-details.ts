@@ -18,7 +18,7 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { NgxJsonViewerModule } from "ngx-json-viewer";
 import { SortingService } from "../../shared/services/sorting.service";
-import { UpgradeDiagramComponent } from "../upgrade-diagram";
+import { FirewallDiagramComponent } from "../firewall-diagram";
 import { UpgradeStepService } from "../../shared/services/upgrade-step.service";
 
 @Component({
@@ -40,7 +40,7 @@ import { UpgradeStepService } from "../../shared/services/upgrade-step.service";
         MatMenuModule,
         MatSelectModule,
         NgxJsonViewerModule,
-        UpgradeDiagramComponent,
+        FirewallDiagramComponent,
     ],
 })
 export class JobDetailsComponent implements OnDestroy, OnInit {
