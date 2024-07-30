@@ -1,0 +1,25 @@
+flowchart TD
+    A[Start: assign_device] --> B[Update current step]
+    B --> C{Is local_state 'active' or 'active-primary'?}
+    C -->|Yes| D[Assign device_dict to self.primary_device]
+    C -->|No| E[Assign device_dict to self.secondary_device]
+    D --> F[Set assigned_as to 'primary']
+    E --> G[Set assigned_as to 'secondary']
+    F --> H[Return assigned_as]
+    G --> H
+    H --> I[End: assign_device]
+
+    subgraph update_current_step
+        B1[Get device hostname]
+        B2[Set step name]
+        B1 --> B2
+    end
+
+    B -.-> update_current_step
+
+%% Additional information
+    J[Input: device_dict]
+    J --> A
+    K[Class Attributes]
+    K --> |Modifies| D
+    K --> |Modifies| E

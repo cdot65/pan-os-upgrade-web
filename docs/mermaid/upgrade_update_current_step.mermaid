@@ -1,0 +1,48 @@
+flowchart TD
+    A[Start: update_current_step] --> B{Job exists?}
+    B -->|Yes| C[Lock Job for update]
+    B -->|No| D[Log error: Job not found]
+    C --> E[Update Job fields]
+    E --> F[Save Job]
+    F --> G[End: Success]
+    C -->|Exception| H[Log error: Update failed]
+    D --> I[End: Failure]
+    H --> I
+
+    subgraph update_current_step
+        A
+        B
+        C
+        D
+        E
+        F
+        G
+        H
+        I
+    end
+
+%% Input parameters
+    J[device_name] --> A
+    K[step_name] --> A
+
+%% Database interaction
+    L[(Database)] <--> C
+    L <--> F
+
+%% Logger
+    M[Logger] --> D
+    M --> H
+
+%% Additional components
+    N[transaction.atomic] --> C
+    O[Job.objects.select_for_update] --> C
+    P[timezone.now] --> E
+
+%% Exception handling
+    Q[Job.DoesNotExist] --> D
+    R[Exception] --> H
+
+%% Class context
+    S[self.job_id] --> B
+    T[self.logger.log_task] --> D
+    T --> H

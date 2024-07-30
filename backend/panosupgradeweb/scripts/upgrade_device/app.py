@@ -24,7 +24,7 @@ def main(
     This function orchestrates the PAN-OS upgrade process for a firewall device. It checks the device's HA status,
     prepares the upgrade devices list, performs compatibility checks, downloads the required software versions,
     handles HA scenarios, performs pre-upgrade snapshots, upgrades the devices, performs post-upgrade snapshots,
-    and generates PDF reports.
+    and stores the resulting information within the backend's database.
 
     Args:
         author_id (int): The ID of the author initiating the upgrade job.

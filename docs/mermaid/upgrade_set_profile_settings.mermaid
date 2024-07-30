@@ -1,0 +1,37 @@
+flowchart TD
+    A[Start] --> B{Profile exists?}
+    B -->|Yes| C[Retrieve profile object]
+    C --> D[Set authentication attributes]
+    D --> E[Set image download attributes]
+    E --> F[Set image install attributes]
+    F --> G[Set reboot attributes]
+    G --> H[Set timeout attributes]
+    H --> I[Set readiness checks]
+    I --> J[Set snapshot attributes]
+    J --> K[Set snapshot state]
+    K --> L[Log success message]
+    L --> M[End]
+    B -->|No| N[Log error message]
+    N --> O[Raise Profile.DoesNotExist exception]
+    O --> M
+
+    subgraph Set Profile Settings
+        C --> D --> E --> F --> G --> H --> I --> J --> K
+    end
+
+    subgraph Error Handling
+        N --> O
+    end
+
+%% Additional details
+    C -.-> |Profile.objects.get| P[(Database)]
+    D -.-> |Update self.profile| Q[Profile object]
+    E -.-> |Update self.profile| Q
+    F -.-> |Update self.profile| Q
+    G -.-> |Update self.profile| Q
+    H -.-> |Update self.profile| Q
+    I -.-> |Update self.profile| Q
+    J -.-> |Update self.profile| Q
+    K -.-> |Update self.profile| Q
+    L -.-> |self.logger.log_task| R[Logger]
+    N -.-> |self.logger.log_task| R

@@ -1,0 +1,35 @@
+flowchart TD
+    A[Start: update_device_status] --> B{Try block}
+    B -->|Success| C[Open database transaction]
+    C --> D[Get Job object]
+    D --> E{Check device type}
+    E -->|Secondary device| F[Update target_current_status]
+    E -->|Primary device| G[Update peer_current_status]
+    E -->|Standalone device| H[Update target_current_status]
+    F --> I[Update job timestamp]
+    G --> I
+    H --> I
+    I --> J[Save job]
+    J --> K[Log success message]
+    K --> L[End transaction]
+    L --> M[End: Success]
+
+    B -->|Failure| N{Exception type}
+    N -->|Job.DoesNotExist| O[Log error: Job not found]
+    N -->|Other exceptions| P[Log error: General exception]
+    O --> Q[End: Error]
+    P --> Q
+
+    subgraph Error Handling
+        N
+        O
+        P
+    end
+
+%% Relationships and data flow
+    A -->|Input: device, status| B
+    D -.->|Query| R[(Database)]
+    J -.->|Update| R
+    K -.->|Write| S[Log]
+    O -.->|Write| S
+    P -.->|Write| S

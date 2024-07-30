@@ -1,0 +1,40 @@
+flowchart TD
+    A[Start take_snapshot] --> B[Update current step]
+    B --> C[Log start of snapshot process]
+    C --> D[Initialize snapshot_attempt and snapshot_succeeded]
+    D --> E{snapshot_attempt < retry_interval and not snapshot_succeeded?}
+    E -->|Yes| F[Attempt to run_assurance]
+    F --> G{Snapshot successful?}
+    G -->|Yes| H[Set snapshot_succeeded to True]
+    G -->|No| I[Catch and log error]
+    I --> J[Wait for retry interval]
+    J --> K[Increment snapshot_attempt]
+    K --> E
+    E -->|No| L{Max retries reached?}
+    L -->|Yes| M[Log snapshot failure]
+    M --> N[Return 'errored']
+    L -->|No| O{Firewall requires upgrade?}
+    O -->|No| P[Log snapshot failed, halt upgrade]
+    P --> Q[Return 'errored']
+    O -->|Yes| R[Log snapshot success]
+    R --> S[Return 'completed']
+    H --> O
+
+    subgraph Error Handling
+        I
+        J
+        K
+    end
+
+    subgraph Retry Logic
+        E
+        F
+        G
+    end
+
+%% Relationships and data flow
+    B -.-> |device name, step name| B
+    C -.-> |log message| C
+    F -.-> |device, operation_type, snapshot_type| F
+    I -.-> |error message| I
+    J -.-> |retry interval| J

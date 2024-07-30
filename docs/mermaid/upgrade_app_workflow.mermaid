@@ -1,0 +1,32 @@
+flowchart TD
+    A[Start] --> B[Initialize PanosUpgrade]
+    B --> C{Check HA status}
+    C -->|Primary in HA| D[Skip upgrade]
+    C -->|Not primary or standalone| E[Assign upgrade devices]
+    E --> F[Parse versions]
+    F --> G{Determine upgrade}
+    G -->|Upgrade not required| H[Exit with error]
+    G -->|Upgrade required| I{Check HA compatibility}
+    I -->|Not compatible| J[Exit with error]
+    I -->|Compatible or standalone| K[Check software availability]
+    K -->|Not available| L[Exit with error]
+    K -->|Available| M[Download base image if needed]
+    M --> N[Download target image if needed]
+    N --> O{Device in HA?}
+    O -->|Yes| P[Check HA sync]
+    O -->|No| Q[Perform readiness checks]
+    P --> Q
+    Q -->|Checks failed| R[Exit with error]
+    Q -->|Checks passed| S[Take pre-upgrade snapshot]
+    S --> T{Dry run?}
+    T -->|Yes| U[Skip upgrade]
+    T -->|No| V[Suspend HA if applicable]
+    V --> W[Perform upgrade]
+    W --> X[Reboot device]
+    X --> Y[Take post-upgrade snapshot]
+    Y --> Z{Primary device exists?}
+    Z -->|No| AA[Update status to completed]
+    Z -->|Yes| AB[Repeat process for primary device]
+    AB --> AC[Update status to completed]
+    AA --> AD[End]
+    AC --> AD

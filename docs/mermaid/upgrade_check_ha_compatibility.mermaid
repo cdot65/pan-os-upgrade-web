@@ -1,0 +1,14 @@
+flowchart TD
+    A[Start] --> B[Update current step]
+    B --> C{Major upgrade > 1 release apart?}
+    C -->|Yes| D[Log warning: Major version compatibility issue]
+    C -->|No| E{Same major version and minor upgrade > 1 release apart?}
+    D --> J[Set stop_upgrade_workflow to True]
+    E -->|Yes| F[Log warning: Minor version compatibility issue]
+    E -->|No| G{Spans 1 major version and increases minor version?}
+    F --> J
+    G -->|Yes| H[Log warning: Major + minor version compatibility issue]
+    G -->|No| I[Log success: Target version is compatible]
+    H --> J
+    J --> K[End]
+    I --> K

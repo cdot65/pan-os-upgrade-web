@@ -1,0 +1,31 @@
+flowchart TD
+    A[Start: perform_reboot] --> B[Update current step]
+    B --> C[Initialize variables]
+    C --> D[Log reboot start]
+    D --> E[Initiate reboot]
+    E --> F[Wait 60 seconds]
+    F --> G{Rebooted or Max attempts reached?}
+    G -->|No| H[Refresh system info]
+    H --> I[Log current version]
+    I --> J{Version matches target?}
+    J -->|Yes| K[Log success]
+    J -->|No| L[Log error]
+    L --> M[Set stop_upgrade_workflow to True]
+    K --> N[Set rebooted to True]
+    N --> G
+    M --> G
+    G -->|Yes| O{Rebooted successfully?}
+    O -->|Yes| P[End: Successful reboot]
+    O -->|No| Q[Log failure]
+    Q --> R[Set stop_upgrade_workflow to True]
+    R --> S[End: Failed reboot]
+
+    subgraph Error Handling
+        T[Catch exceptions]
+        T --> U[Log retry attempt]
+        U --> V[Increment attempt]
+        V --> W[Wait retry interval]
+        W --> G
+    end
+
+    H --> T

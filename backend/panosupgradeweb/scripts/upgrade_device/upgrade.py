@@ -145,15 +145,32 @@ class PanosUpgrade:
             str: The attribute name ("primary" or "secondary") t
         Mermaid Workflow:
             ```mermaid
-            graph TD
-                A[Start] --> B{Is 'local_state' in ["active", "active-primary"]?}
-                B -->|Yes| C[Assign device_dict to self.primary_device]
-                B -->|No| D[Assign device_dict to self.secondary_device]
-                C --> E[Set assigned_as to "primary"]
-                D --> F[Set assigned_as to "secondary"]
-                E --> G[Return assigned_as]
-                F --> G
-            ```
+            flowchart TD
+                A[Start: assign_device] --> B[Update current step]
+                B --> C{Is local_state 'active' or 'active-primary'?}
+                C -->|Yes| D[Assign device_dict to self.primary_device]
+                C -->|No| E[Assign device_dict to self.secondary_device]
+                D --> F[Set assigned_as to 'primary']
+                E --> G[Set assigned_as to 'secondary']
+                F --> H[Return assigned_as]
+                G --> H
+                H --> I[End: assign_device]
+
+                subgraph update_current_step
+                    B1[Get device hostname]
+                    B2[Set step name]
+                    B1 --> B2
+                end
+
+                B -.-> update_current_step
+
+                %% Additional information
+                J[Input: device_dict]
+                J --> A
+                K[Class Attributes]
+                K --> |Modifies| D
+                K --> |Modifies| E
+                ```
         """
         self.update_current_step(
             device_name=device_dict["db_device"].hostname,
@@ -195,29 +212,38 @@ class PanosUpgrade:
 
         Mermaid Workflow:
             ```mermaid
-            graph TD
-                A[Start] --> B{Is device Panorama-managed?}
-                B -->|Yes| C[Create Panorama-managed firewall object]
-                B -->|No| D[Create standalone_device firewall object]
-                C --> E[Create device dictionary]
-                D --> E
-                E --> F{Is device in an HA pair?}
-                F -->|Yes| G[Get HA status]
-                F -->|No| H[Assign device to standalone_device attribute]
-                G --> I{Is device active or active-primary?}
-                I -->|Yes| J[Assign device to primary_device attribute]
-                I -->|No| K[Assign device to secondary_device attribute]
-                J --> L{Is peer device available?}
-                K --> L
-                L -->|Yes| M[Create peer firewall object]
-                L -->|No| N[End]
-                M --> O{Is peer device active or active-primary?}
-                O -->|Yes| P[Assign peer device to primary attribute]
-                O -->|No| Q[Assign peer device to secondary_device attribute]
-                P --> N
-                Q --> N
-                H --> N
-            ```
+            flowchart TD
+                A[Start: assign_upgrade_devices] --> B[Update current step]
+                B --> C[Retrieve device object]
+                C --> D{Is device in HA pair?}
+                D -->|Yes| E[Retrieve peer device]
+                D -->|No| F[Set peer to None]
+                E --> G[Create devices list]
+                F --> G
+                G --> H[Retrieve profile object]
+                H --> I[Loop through devices]
+                I --> J{Is device None?}
+                J -->|Yes| I
+                J -->|No| K{Is device Panorama-managed?}
+                K -->|Yes| L[Create Panorama-managed firewall object]
+                K -->|No| M[Create standalone firewall object]
+                L --> N[Create device dictionary]
+                M --> N
+                N --> O[Log device object creation]
+                O --> P{Is device in HA pair?}
+                P -->|Yes| Q[Assign device based on HA status]
+                P -->|No| R[Assign as standalone device]
+                Q --> S{Assigned as primary?}
+                S -->|Yes| T[Set as primary_device]
+                S -->|No| U[Set as secondary_device]
+                T --> V[Log primary assignment]
+                U --> W[Log secondary assignment]
+                R --> X[Log standalone assignment]
+                V --> I
+                W --> I
+                X --> I
+                I --> Y[End]
+                ```
         """
         self.update_current_step(
             device_name="pending",
@@ -341,14 +367,20 @@ class PanosUpgrade:
 
         Mermaid Workflow:
             ```mermaid
-            graph TD
-                A[Start] --> B{Major upgrade more than one release apart?}
-                B -->|Yes| C[Log warning, set stop_upgrade_workflow to True]
-                B -->|No| D{Within same major version and minor upgrade more than one release apart?}
-                D -->|Yes| E[Log warning, set stop_upgrade_workflow to True]
-                D -->|No| F{Spans exactly one major version and increases minor version?}
-                F -->|Yes| G[Log warning, set stop_upgrade_workflow to True]
-                F -->|No| H[Log compatibility check success]
+            flowchart TD
+                A[Start] --> B[Update current step]
+                B --> C{Major upgrade > 1 release apart?}
+                C -->|Yes| D[Log warning: Major version compatibility issue]
+                C -->|No| E{Same major version and minor upgrade > 1 release apart?}
+                D --> J[Set stop_upgrade_workflow to True]
+                E -->|Yes| F[Log warning: Minor version compatibility issue]
+                E -->|No| G{Spans 1 major version and increases minor version?}
+                F --> J
+                G -->|Yes| H[Log warning: Major + minor version compatibility issue]
+                G -->|No| I[Log success: Target version is compatible]
+                H --> J
+                J --> K[End]
+                I --> K
             ```
         """
 
@@ -426,11 +458,33 @@ class PanosUpgrade:
 
         Mermaid Workflow:
             ```mermaid
-            graph TD
-                A[Start] --> B[Compare local and peer version tuples]
-                B -->|local < peer| C[Return "older"]
-                B -->|local > peer| D[Return "newer"]
-                B -->|local == peer| E[Return "equal"]
+            flowchart TD
+                A[Start] --> B[compare_versions function]
+                B --> C{Update current step}
+                C --> D[Log task]
+                D --> E{Compare version tuples}
+                E -->|local less than peer| F[Return 'older']
+                E -->|local greater than peer| G[Return 'newer']
+                E -->|local equals peer| H[Return 'equal']
+                F --> I[End]
+                G --> I
+                H --> I
+
+                subgraph compare_versions
+                    B
+                    C
+                    D
+                    E
+                    F
+                    G
+                    H
+                end
+
+                J[local_version_sliced] --> B
+                K[hostname] --> B
+                L[peer_version_sliced] --> B
+                M[self.update_current_step] --> C
+                N[self.logger.log_task] --> D
             ```
         """
 
@@ -479,14 +533,46 @@ class PanosUpgrade:
 
         Mermaid Workflow:
             ```mermaid
-            graph TD
-                A[Start] --> B[Log current and target versions]
-                B --> C{Is current version less than target version?}
-                C -->|Yes| D[Log upgrade required message]
-                C -->|No| E[Log no upgrade required or downgrade attempt detected]
-                D --> F[Set self.upgrade_required to True]
-                E --> G[Log halting upgrade message]
-                G --> H[Set self.upgrade_required to False]
+            flowchart TD
+                A[Start] --> B[Update current step]
+                B --> C[Log current version]
+                C --> D[Log target version]
+                D --> E{Is current version < target version?}
+                E -->|Yes| F[Log upgrade required message]
+                F --> G[Set self.upgrade_required to True]
+                G --> H[End]
+                E -->|No| I[Log no upgrade required or downgrade attempt message]
+                I --> J[Log halting upgrade message]
+                J --> K[Update current step: No upgrade required]
+                K --> L[Set self.upgrade_required to False]
+                L --> H
+
+                subgraph determine_upgrade function
+                A
+                B
+                C
+                D
+                E
+                F
+                G
+                I
+                J
+                K
+                L
+                H
+                end
+
+                %% Logging operations
+                C -.-> M((Logger))
+                D -.-> M
+                F -.-> M
+                I -.-> M
+                J -.-> M
+
+                %% Input parameters
+                N[current_version] -.-> A
+                O[hostname] -.-> A
+                P[target_version] -.-> A
             ```
         """
         self.update_current_step(
@@ -552,15 +638,29 @@ class PanosUpgrade:
 
         Mermaid Workflow:
             ```mermaid
-            graph TD
-                A[Start] --> B[Log start of getting deployment information]
-                B --> C[Get deployment type using show_highavailability_state()]
-                C --> D[Log target device deployment type]
-                D --> E{HA details available?}
-                E -->|Yes| F[Flatten XML to dictionary]
-                F --> G[Log target device deployment details collected]
-                E -->|No| H[Return deployment type and None]
-                G --> I[Return deployment type and HA details]
+            flowchart TD
+                A[Start] --> B[Update current step]
+                B --> C[Get deployment type]
+                C --> D{HA details available?}
+                D -->|Yes| E[Flatten XML to dictionary]
+                D -->|No| F[Return deployment type and None]
+                E --> G[Return deployment type and HA details]
+
+                subgraph get_ha_status
+                    B
+                    C[Get deployment type using show_highavailability_state]
+                    D
+                    E
+                end
+
+            %% Additional components and relationships
+                H[self.update_current_step] --> B
+                I[device 'pan_device'.show_highavailability_state] --> C
+                J[flatten_xml_to_dict] --> E
+            %% Error handling (implied)
+                C -->|Error| K[Handle error]
+                E -->|Error| K
+                K --> F
             ```
         """
 
@@ -598,6 +698,35 @@ class PanosUpgrade:
 
         Returns:
             None
+
+        Mermaid:
+            ```mermaid
+            flowchart TD
+                A[Start: perform_readiness_checks] --> B[Update current step]
+                B --> C[Initialize readiness_checks_succeeded as false]
+                C --> D{Try to run assurance}
+                D -->|Success| E[Set readiness_checks_succeeded to true]
+                D -->|Failure| F[Log error message]
+                E --> G{Check readiness_checks_succeeded}
+                F --> G
+                G -->|True| H[Log success message]
+                G -->|False| I[Log error message]
+                H --> J[End: Return None]
+                I --> J
+
+                subgraph Error Handling
+                K[Catch AttributeError]
+                L[Catch IOError]
+                M[Catch general Exception]
+                end
+
+                D -.-> K
+                D -.-> L
+                D -.-> M
+                K --> F
+                L --> F
+                M --> F
+            ```
         """
         self.update_current_step(
             device_name=device["db_device"].hostname,
@@ -670,6 +799,41 @@ class PanosUpgrade:
         SystemExit
             If the device fails to reboot to the specified PAN-OS version after a set number of retries, or if HA
             synchronization is not achieved post-reboot, the script will terminate with an error.
+
+        Mermaid:
+            ```mermaid
+            flowchart TD
+                A[Start: perform_reboot] --> B[Update current step]
+                B --> C[Initialize variables]
+                C --> D[Log reboot start]
+                D --> E[Initiate reboot]
+                E --> F[Wait 60 seconds]
+                F --> G{Rebooted or Max attempts reached?}
+                G -->|No| H[Refresh system info]
+                H --> I[Log current version]
+                I --> J{Version matches target?}
+                J -->|Yes| K[Log success]
+                J -->|No| L[Log error]
+                L --> M[Set stop_upgrade_workflow to True]
+                K --> N[Set rebooted to True]
+                N --> G
+                M --> G
+                G -->|Yes| O{Rebooted successfully?}
+                O -->|Yes| P[End: Successful reboot]
+                O -->|No| Q[Log failure]
+                Q --> R[Set stop_upgrade_workflow to True]
+                R --> S[End: Failed reboot]
+
+                subgraph Error Handling
+                T[Catch exceptions]
+                T --> U[Log retry attempt]
+                U --> V[Increment attempt]
+                V --> W[Wait retry interval]
+                W --> G
+                end
+
+                H --> T
+            ```
         """
 
         self.update_current_step(
@@ -776,6 +940,60 @@ class PanosUpgrade:
         -------
         str
             The status of the upgrade process ("completed", "errored").
+
+        Mermaid:
+            ```mermaid
+            flowchart TD
+                A[Start perform_upgrade] --> B[Update current step]
+                B --> C[Update device status to 'active']
+                C --> D[Log task: Beginning PAN-OS upgrade]
+                D --> E[Initialize attempt counter]
+                E --> F{attempt < maximum_attempts?}
+                F -->|Yes| G[Log task: Attempt upgrade]
+                G --> H[Install software]
+                H --> I{Install job successful?}
+                I -->|Yes| J[Log task: Upgrade completed]
+                J --> K[Mark upgrade as successful]
+                K --> L[Update device status to 'completed']
+                L --> M[Return 'completed']
+                I -->|No| N[Increment attempt counter]
+                N --> O{Max attempts reached?}
+                O -->|No| P[Log task: Retrying]
+                P --> Q[Wait for retry interval]
+                Q --> F
+                O -->|Yes| R[Log task: Upgrade failed]
+                R --> S[Return 'errored']
+                F -->|No| R
+                H --> T{PanDeviceError or PanXapiError?}
+                T -->|Yes| U[Log task: Error upgrading device]
+                U --> V[Set stop_upgrade_workflow to True]
+                V --> W[Update device status to 'errored']
+                W --> X[Return 'errored']
+                T -->|No| Y{Other Exception?}
+                Y -->|Yes| Z[Log task: Unexpected error]
+                Z --> V
+                Y -->|No| I
+
+                subgraph Error Handling
+                    T
+                    U
+                    V
+                    W
+                    X
+                    Y
+                    Z
+                end
+
+                subgraph Retry Logic
+                    F
+                    N
+                    O
+                    P
+                    Q
+                    R
+                    S
+                end
+            ```
         """
 
         self.update_current_step(
@@ -903,6 +1121,50 @@ class PanosUpgrade:
 
         Returns:
             None
+
+        Mermaid:
+            ```mermaid
+            flowchart TD
+                A[Start run_assurance] --> B{Operation Type?}
+                B -->|state_snapshot| C[Setup Firewall client]
+                B -->|readiness_checks| D[Setup Firewall client]
+
+                C --> E[Determine enabled snapshots]
+                E --> F[Run snapshots]
+                F --> G{Snapshot Type?}
+                G -->|pre_upgrade| H[Store pre_snapshot]
+                G -->|post_upgrade| I[Store post_snapshot]
+
+                H --> J{Snapshot Results?}
+                I --> J
+
+                J -->|Yes| K[Create Snapshot in DB]
+                J -->|No| L[Log error]
+
+                K --> M[Create ContentVersion]
+                K --> N[Create License entries]
+                K --> O[Create NetworkInterface entries]
+                K --> P[Create ArpTableEntry entries]
+                K --> Q[Create Route entries]
+                K --> R[Create SessionStats]
+
+                M & N & O & P & Q & R --> S[Log success]
+                S --> T[Set snapshot_succeeded = True]
+
+                L --> U[Set snapshot_succeeded = False]
+
+                D --> V[Determine enabled readiness checks]
+                V --> W[Run readiness checks]
+                W --> X[Process check results]
+                X --> Y{All checks passed?}
+                Y -->|Yes| Z[Log success]
+                Y -->|No| AA[Log failures]
+
+                Z --> AB[Set readiness_checks_succeeded = True]
+                AA --> AC[Set readiness_checks_succeeded = False]
+
+                T & U & AB & AC --> AD[End run_assurance]
+            ```
         """
 
         self.update_current_step(
@@ -1216,7 +1478,7 @@ class PanosUpgrade:
 
         Mermaid Workflow:
             ```mermaid
-            graph TD
+            flowchart TD
                 A[Start] --> B{Profile exists?}
                 B -->|Yes| C[Retrieve profile object]
                 C --> D[Set authentication attributes]
@@ -1232,6 +1494,27 @@ class PanosUpgrade:
                 B -->|No| N[Log error message]
                 N --> O[Raise Profile.DoesNotExist exception]
                 O --> M
+
+                subgraph Set Profile Settings
+                    C --> D --> E --> F --> G --> H --> I --> J --> K
+                end
+
+                subgraph Error Handling
+                    N --> O
+                end
+
+                %% Additional details
+                C -.-> |Profile.objects.get| P[(Database)]
+                D -.-> |Update self.profile| Q[Profile object]
+                E -.-> |Update self.profile| Q
+                F -.-> |Update self.profile| Q
+                G -.-> |Update self.profile| Q
+                H -.-> |Update self.profile| Q
+                I -.-> |Update self.profile| Q
+                J -.-> |Update self.profile| Q
+                K -.-> |Update self.profile| Q
+                L -.-> |self.logger.log_task| R[Logger]
+                N -.-> |self.logger.log_task| R
             ```
         """
 
@@ -1331,31 +1614,36 @@ class PanosUpgrade:
             bool
         Mermaid Workflow:
             ```mermaid
-            graph TD
+            flowchart TD
                 A[Start] --> B[Parse target version]
-                B --> C[Check if target version is older than current version]
-                C --> D[Verify compatibility with current version and HA setup]
-                D --> E{Compatible?}
-                E -->|No| F[Return None]
-                E -->|Yes| G[Retrieve available software versions]
-                G --> H{Target version available?}
-                H -->|No| I[Return None]
-                H -->|Yes| J{Base image downloaded?}
-                J -->|Yes| K[Return available versions]
-                J -->|No| L[Attempt base image download]
-                L --> M{Download successful?}
-                M -->|Yes| N[Wait for image to load]
-                N --> O[Re-check available versions]
-                O --> P{Target version available?}
-                P -->|Yes| Q[Return available versions]
-                P -->|No| R{Retry count exceeded?}
-                R -->|No| S[Retry download]
-                S --> L
-                R -->|Yes| T[Return None]
-                M -->|No| U{Retry count exceeded?}
-                U -->|No| V[Wait and retry download]
-                V --> L
-                U -->|Yes| W[Return None]
+                B --> C{Is target version older than current?}
+                C -->|Yes| D[Return False]
+                C -->|No| E[Verify compatibility with current version and HA setup]
+                E --> F{Is compatible?}
+                F -->|No| G[Return False]
+                F -->|Yes| H[Retrieve available software versions]
+                H --> I[Update current step]
+                I --> J[Check available versions]
+                J --> K{Is target version available?}
+                K -->|No| L[Log version not found]
+                L --> M[Return False]
+                K -->|Yes| N[Log version found]
+                N --> O[Return True]
+            %% Subgraph for logging
+                subgraph Logging
+                    P[Log task: report]
+                end
+
+                N --> P
+            %% Subgraph for device operations
+                subgraph Device Operations
+                    Q[device 'pan_device' .software.check]
+                    R[Get device 'pan_device' .software.versions]
+                end
+
+                H --> Q
+                Q --> R
+                R --> J
             ```
         """
 
@@ -1402,7 +1690,7 @@ class PanosUpgrade:
 
         Mermaid Workflow:
             ```mermaid
-            graph TD
+            flowchart TD
                 A[Start] --> B{Is target version already downloaded?}
                 B -->|Yes| C[Log success and return True]
                 B -->|No| D[Initiate download]
@@ -1413,6 +1701,35 @@ class PanosUpgrade:
                 H -->|Yes| I[Log success and return True]
                 H -->|No| J[Wait for 30 seconds]
                 J --> F
+
+                subgraph software_download function
+                A
+                B
+                C
+                D
+                E
+                F
+                G
+                H
+                I
+                J
+                end
+
+                %% Error handling
+                D -->|PanDeviceXapiError| G
+
+                %% Function parameters
+                K[device: Union[Firewall, Panorama]]
+                L[hostname: str]
+                M[target_version: str]
+                K --> A
+                L --> A
+                M --> A
+
+                %% Return value
+                I --> N[Return True]
+                G --> O[Return False]
+                C --> N
             ```
         """
 
@@ -1465,13 +1782,39 @@ class PanosUpgrade:
 
         Mermaid Workflow:
             ```mermaid
-            graph TD
-                A[Start] --> B[Send API request to suspend active device]
-                B --> C{Parse XML response}
-                C -->|Success| D[Log success message and return True]
-                C -->|Failure| E[Log failure message and return False]
-                B --> F[Catch exception]
-                F --> G[Log error message and return False]
+            flowchart TD
+                A[Start] --> B[Update current step]
+                B --> C{Try to suspend device}
+                C -->|API Request| D[Send suspension request to device]
+                D --> E[Parse XML response]
+                E --> F{Check suspension result}
+                F -->|Success| G[Log success message]
+                G --> H[Return True]
+                F -->|Failure| I[Log failure message]
+                I --> J[Return False]
+                C -->|Exception| K[Log error message]
+                K --> L[Return False]
+
+                subgraph "suspend_ha_device function"
+                    B
+                    C
+                    D
+                    E
+                    F
+                    G
+                    H
+                    I
+                    J
+                    K
+                    L
+                end
+
+                %% Additional components and relationships
+                M[PanDevice object] -.-> D
+                N[Logger object] -.-> G
+                N -.-> I
+                N -.-> K
+                O[flatten_xml_to_dict function] -.-> E
             ```
         """
 
@@ -1546,20 +1889,46 @@ class PanosUpgrade:
 
         Mermaid Workflow:
             ```mermaid
-            graph TD
-                A[Start] --> B[Log start of snapshot process]
-                B --> C{Attempt snapshot}
-                C -->|Success| D{Firewall requires upgrade?}
-                D -->|No| E[Log snapshot failed, halt upgrade]
-                E --> F[Return "errored"]
-                D -->|Yes| G[Log snapshot success]
-                G --> H[Return "completed"]
-                C -->|Failure| I{Max retries reached?}
-                I -->|No| J[Log snapshot error]
-                J --> K[Wait for retry interval]
-                K --> C
-                I -->|Yes| L[Log snapshot failure after max retries]
-                L --> M[Return "errored"]
+            flowchart TD
+                A[Start take_snapshot] --> B[Update current step]
+                B --> C[Log start of snapshot process]
+                C --> D[Initialize snapshot_attempt and snapshot_succeeded]
+                D --> E{snapshot_attempt < retry_interval and not snapshot_succeeded?}
+                E -->|Yes| F[Attempt to run_assurance]
+                F --> G{Snapshot successful?}
+                G -->|Yes| H[Set snapshot_succeeded to True]
+                G -->|No| I[Catch and log error]
+                I --> J[Wait for retry interval]
+                J --> K[Increment snapshot_attempt]
+                K --> E
+                E -->|No| L{Max retries reached?}
+                L -->|Yes| M[Log snapshot failure]
+                M --> N[Return 'errored']
+                L -->|No| O{Firewall requires upgrade?}
+                O -->|No| P[Log snapshot failed, halt upgrade]
+                P --> Q[Return 'errored']
+                O -->|Yes| R[Log snapshot success]
+                R --> S[Return 'completed']
+                H --> O
+
+                subgraph Error Handling
+                I
+                J
+                K
+                end
+
+                subgraph Retry Logic
+                E
+                F
+                G
+                end
+
+                %% Relationships and data flow
+                B -.-> |device name, step name| B
+                C -.-> |log message| C
+                F -.-> |device, operation_type, snapshot_type| F
+                I -.-> |error message| I
+                J -.-> |retry interval| J
             ```
         """
 
@@ -1622,6 +1991,58 @@ class PanosUpgrade:
         Args:
             device_name (str): The name of the target device.
             step_name (str): The name of the current step.
+
+        Mermaid:
+            ```mermaid
+            flowchart TD
+                A[Start: update_current_step] --> B{Job exists?}
+                B -->|Yes| C[Lock Job for update]
+                B -->|No| D[Log error: Job not found]
+                C --> E[Update Job fields]
+                E --> F[Save Job]
+                F --> G[End: Success]
+                C -->|Exception| H[Log error: Update failed]
+                D --> I[End: Failure]
+                H --> I
+
+                subgraph update_current_step
+                    A
+                    B
+                    C
+                    D
+                    E
+                    F
+                    G
+                    H
+                    I
+                end
+
+                %% Input parameters
+                J[device_name] --> A
+                K[step_name] --> A
+
+                %% Database interaction
+                L[(Database)] <--> C
+                L <--> F
+
+                %% Logger
+                M[Logger] --> D
+                M --> H
+
+                %% Additional components
+                N[transaction.atomic] --> C
+                O[Job.objects.select_for_update] --> C
+                P[timezone.now] --> E
+
+                %% Exception handling
+                Q[Job.DoesNotExist] --> D
+                R[Exception] --> H
+
+                %% Class context
+                S[self.job_id] --> B
+                T[self.logger.log_task] --> D
+                T --> H
+            ```
         """
         try:
             with transaction.atomic():
@@ -1653,6 +2074,46 @@ class PanosUpgrade:
             device (Dict): A dictionary containing information about the firewall device.
             status (str): The new status to set for the device. Should be one of:
                           "pending", "active", "completed", or "errored".
+
+
+        Mermaid:
+            ```mermaid
+            flowchart TD
+                A[Start: update_device_status] --> B{Try block}
+                B -->|Success| C[Open database transaction]
+                C --> D[Get Job object]
+                D --> E{Check device type}
+                E -->|Secondary device| F[Update target_current_status]
+                E -->|Primary device| G[Update peer_current_status]
+                E -->|Standalone device| H[Update target_current_status]
+                F --> I[Update job timestamp]
+                G --> I
+                H --> I
+                I --> J[Save job]
+                J --> K[Log success message]
+                K --> L[End transaction]
+                L --> M[End: Success]
+
+                B -->|Failure| N{Exception type}
+                N -->|Job.DoesNotExist| O[Log error: Job not found]
+                N -->|Other exceptions| P[Log error: General exception]
+                O --> Q[End: Error]
+                P --> Q
+
+                subgraph Error Handling
+                N
+                O
+                P
+                end
+
+                %% Relationships and data flow
+                A -->|Input: device, status| B
+                D -.->|Query| R[(Database)]
+                J -.->|Update| R
+                K -.->|Write| S[Log]
+                O -.->|Write| S
+                P -.->|Write| S
+            ```
         """
         try:
             with transaction.atomic():

@@ -1,0 +1,40 @@
+flowchart TD
+    A[Start] --> B[Update current step]
+    B --> C[Log current version]
+    C --> D[Log target version]
+    D --> E{Is current version < target version?}
+    E -->|Yes| F[Log upgrade required message]
+    F --> G[Set self.upgrade_required to True]
+    G --> H[End]
+    E -->|No| I[Log no upgrade required or downgrade attempt message]
+    I --> J[Log halting upgrade message]
+    J --> K[Update current step: No upgrade required]
+    K --> L[Set self.upgrade_required to False]
+    L --> H
+
+    subgraph determine_upgrade function
+        A
+        B
+        C
+        D
+        E
+        F
+        G
+        I
+        J
+        K
+        L
+        H
+    end
+
+%% Logging operations
+    C -.-> M((Logger))
+    D -.-> M
+    F -.-> M
+    I -.-> M
+    J -.-> M
+
+%% Input parameters
+    N[current_version] -.-> A
+    O[hostname] -.-> A
+    P[target_version] -.-> A
