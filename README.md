@@ -38,8 +38,6 @@ The resulting application is a robust, scalable, and performant solution for exe
 - **Postgres**: Postgres serves as the primary database for storing user data, system configurations, and logs of upgrade operations.
 - **Celery**: Celery is used for asynchronous task execution, enabling background processing of long-running tasks such as firmware upgrades and snapshot collection.
 - **Redis**: Redis acts as the broker for Celery, managing job queues and ensuring efficient task distribution.
-- **Logstash**: Logstash is used to process and forward log data to Elasticsearch, enabling centralized logging.
-- **Elasticsearch**: Elasticsearch provides powerful indexing and search capabilities for logs, aiding in troubleshooting and monitoring.
 
 ## 📸 Screenshots
 
@@ -68,7 +66,7 @@ Here are some screenshots showcasing the different parts of the application:
 
 - ![Upgrade Running](docs/screenshots/upgrade_ha.png)
   _An upgrade job running will reveal the current status for each firewall, alongside detailed logging information._
-f
+
 - ![Job Logs](docs/screenshots/jobs.png)
   _This shows what the list of job logs look like._
 
