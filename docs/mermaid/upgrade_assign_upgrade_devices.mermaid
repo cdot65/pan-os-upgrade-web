@@ -1,0 +1,31 @@
+flowchart TD
+    A[Start: assign_upgrade_devices] --> B[Update current step]
+    B --> C[Retrieve device object]
+    C --> D{Is device in HA pair?}
+    D -->|Yes| E[Retrieve peer device]
+    D -->|No| F[Set peer to None]
+    E --> G[Create devices list]
+    F --> G
+    G --> H[Retrieve profile object]
+    H --> I[Loop through devices]
+    I --> J{Is device None?}
+    J -->|Yes| I
+    J -->|No| K{Is device Panorama-managed?}
+    K -->|Yes| L[Create Panorama-managed firewall object]
+    K -->|No| M[Create standalone firewall object]
+    L --> N[Create device dictionary]
+    M --> N
+    N --> O[Log device object creation]
+    O --> P{Is device in HA pair?}
+    P -->|Yes| Q[Assign device based on HA status]
+    P -->|No| R[Assign as standalone device]
+    Q --> S{Assigned as primary?}
+    S -->|Yes| T[Set as primary_device]
+    S -->|No| U[Set as secondary_device]
+    T --> V[Log primary assignment]
+    U --> W[Log secondary assignment]
+    R --> X[Log standalone assignment]
+    V --> I
+    W --> I
+    X --> I
+    I --> Y[End]

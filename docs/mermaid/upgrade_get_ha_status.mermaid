@@ -1,0 +1,23 @@
+flowchart TD
+    A[Start] --> B[Update current step]
+    B --> C[Get deployment type]
+    C --> D{HA details available?}
+    D -->|Yes| E[Flatten XML to dictionary]
+    D -->|No| F[Return deployment type and None]
+    E --> G[Return deployment type and HA details]
+
+    subgraph get_ha_status
+        B
+        C[Get deployment type using show_highavailability_state]
+        D
+        E
+    end
+
+%% Additional components and relationships
+    H[self.update_current_step] --> B
+    I[device 'pan_device'.show_highavailability_state] --> C
+    J[flatten_xml_to_dict] --> E
+%% Error handling (implied)
+    C -->|Error| K[Handle error]
+    E -->|Error| K
+    K --> F

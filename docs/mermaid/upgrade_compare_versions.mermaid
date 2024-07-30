@@ -1,0 +1,27 @@
+flowchart TD
+    A[Start] --> B[compare_versions function]
+    B --> C{Update current step}
+    C --> D[Log task]
+    D --> E{Compare version tuples}
+    E -->|local less than peer| F[Return 'older']
+    E -->|local greater than peer| G[Return 'newer']
+    E -->|local equals peer| H[Return 'equal']
+    F --> I[End]
+    G --> I
+    H --> I
+
+    subgraph compare_versions
+        B
+        C
+        D
+        E
+        F
+        G
+        H
+    end
+
+    J[local_version_sliced] --> B
+    K[hostname] --> B
+    L[peer_version_sliced] --> B
+    M[self.update_current_step] --> C
+    N[self.logger.log_task] --> D

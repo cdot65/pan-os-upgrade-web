@@ -1,0 +1,40 @@
+flowchart TD
+    A[Start run_assurance] --> B{Operation Type?}
+    B -->|state_snapshot| C[Setup Firewall client]
+    B -->|readiness_checks| D[Setup Firewall client]
+
+    C --> E[Determine enabled snapshots]
+    E --> F[Run snapshots]
+    F --> G{Snapshot Type?}
+    G -->|pre_upgrade| H[Store pre_snapshot]
+    G -->|post_upgrade| I[Store post_snapshot]
+
+    H --> J{Snapshot Results?}
+    I --> J
+
+    J -->|Yes| K[Create Snapshot in DB]
+    J -->|No| L[Log error]
+
+    K --> M[Create ContentVersion]
+    K --> N[Create License entries]
+    K --> O[Create NetworkInterface entries]
+    K --> P[Create ArpTableEntry entries]
+    K --> Q[Create Route entries]
+    K --> R[Create SessionStats]
+
+    M & N & O & P & Q & R --> S[Log success]
+    S --> T[Set snapshot_succeeded = True]
+
+    L --> U[Set snapshot_succeeded = False]
+
+    D --> V[Determine enabled readiness checks]
+    V --> W[Run readiness checks]
+    W --> X[Process check results]
+    X --> Y{All checks passed?}
+    Y -->|Yes| Z[Log success]
+    Y -->|No| AA[Log failures]
+
+    Z --> AB[Set readiness_checks_succeeded = True]
+    AA --> AC[Set readiness_checks_succeeded = False]
+
+    T & U & AB & AC --> AD[End run_assurance]

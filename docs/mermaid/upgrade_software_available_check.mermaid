@@ -1,0 +1,30 @@
+flowchart TD
+    A[Start] --> B[Parse target version]
+    B --> C{Is target version older than current?}
+    C -->|Yes| D[Return False]
+    C -->|No| E[Verify compatibility with current version and HA setup]
+    E --> F{Is compatible?}
+    F -->|No| G[Return False]
+    F -->|Yes| H[Retrieve available software versions]
+    H --> I[Update current step]
+    I --> J[Check available versions]
+    J --> K{Is target version available?}
+    K -->|No| L[Log version not found]
+    L --> M[Return False]
+    K -->|Yes| N[Log version found]
+    N --> O[Return True]
+%% Subgraph for logging
+    subgraph Logging
+        P[Log task: report]
+    end
+
+    N --> P
+%% Subgraph for device operations
+    subgraph Device Operations
+        Q[device 'pan_device' .software.check]
+        R[Get device 'pan_device' .software.versions]
+    end
+
+    H --> Q
+    Q --> R
+    R --> J

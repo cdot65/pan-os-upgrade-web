@@ -1,0 +1,33 @@
+flowchart TD
+    A[Start] --> B[Update current step]
+    B --> C{Try to suspend device}
+    C -->|API Request| D[Send suspension request to device]
+    D --> E[Parse XML response]
+    E --> F{Check suspension result}
+    F -->|Success| G[Log success message]
+    G --> H[Return True]
+    F -->|Failure| I[Log failure message]
+    I --> J[Return False]
+    C -->|Exception| K[Log error message]
+    K --> L[Return False]
+
+    subgraph "suspend_ha_device function"
+        B
+        C
+        D
+        E
+        F
+        G
+        H
+        I
+        J
+        K
+        L
+    end
+
+%% Additional components and relationships
+    M[PanDevice object] -.-> D
+    N[Logger object] -.-> G
+    N -.-> I
+    N -.-> K
+    O[flatten_xml_to_dict function] -.-> E

@@ -1,0 +1,25 @@
+flowchart TD
+    A[Start: perform_readiness_checks] --> B[Update current step]
+    B --> C[Initialize readiness_checks_succeeded as false]
+    C --> D{Try to run assurance}
+    D -->|Success| E[Set readiness_checks_succeeded to true]
+    D -->|Failure| F[Log error message]
+    E --> G{Check readiness_checks_succeeded}
+    F --> G
+    G -->|True| H[Log success message]
+    G -->|False| I[Log error message]
+    H --> J[End: Return None]
+    I --> J
+
+    subgraph Error Handling
+        K[Catch AttributeError]
+        L[Catch IOError]
+        M[Catch general Exception]
+    end
+
+    D -.-> K
+    D -.-> L
+    D -.-> M
+    K --> F
+    L --> F
+    M --> F

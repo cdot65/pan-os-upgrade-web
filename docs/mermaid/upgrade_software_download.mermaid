@@ -1,0 +1,38 @@
+flowchart TD
+    A[Start] --> B{Is target version already downloaded?}
+    B -->|Yes| C[Log success and return True]
+    B -->|No| D[Initiate download]
+    D --> E{Download initiated successfully?}
+    E -->|Yes| F[Monitor download progress]
+    E -->|No| G[Log error and return False]
+    F --> H{Download complete?}
+    H -->|Yes| I[Log success and return True]
+    H -->|No| J[Wait for 30 seconds]
+    J --> F
+
+    subgraph software_download function
+        A
+        B
+        C
+        D
+        E
+        F
+        G
+        H
+        I
+        J
+    end
+
+%% Error handling
+    D -->|PanDeviceXapiError| G
+%% Function parameters
+    K[device: Union Firewall, Panorama]
+    L[hostname: str]
+    M[target_version: str]
+    K --> A
+    L --> A
+    M --> A
+%% Return value
+    I --> N[Return True]
+    G --> O[Return False]
+    C --> N

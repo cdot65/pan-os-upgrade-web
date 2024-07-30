@@ -1,0 +1,50 @@
+flowchart TD
+    A[Start perform_upgrade] --> B[Update current step]
+    B --> C[Update device status to 'active']
+    C --> D[Log task: Beginning PAN-OS upgrade]
+    D --> E[Initialize attempt counter]
+    E --> F{attempt < maximum_attempts?}
+    F -->|Yes| G[Log task: Attempt upgrade]
+    G --> H[Install software]
+    H --> I{Install job successful?}
+    I -->|Yes| J[Log task: Upgrade completed]
+    J --> K[Mark upgrade as successful]
+    K --> L[Update device status to 'completed']
+    L --> M[Return 'completed']
+    I -->|No| N[Increment attempt counter]
+    N --> O{Max attempts reached?}
+    O -->|No| P[Log task: Retrying]
+    P --> Q[Wait for retry interval]
+    Q --> F
+    O -->|Yes| R[Log task: Upgrade failed]
+    R --> S[Return 'errored']
+    F -->|No| R
+    H --> T{PanDeviceError or PanXapiError?}
+    T -->|Yes| U[Log task: Error upgrading device]
+    U --> V[Set stop_upgrade_workflow to True]
+    V --> W[Update device status to 'errored']
+    W --> X[Return 'errored']
+    T -->|No| Y{Other Exception?}
+    Y -->|Yes| Z[Log task: Unexpected error]
+    Z --> V
+    Y -->|No| I
+
+    subgraph Error Handling
+        T
+        U
+        V
+        W
+        X
+        Y
+        Z
+    end
+
+    subgraph Retry Logic
+        F
+        N
+        O
+        P
+        Q
+        R
+        S
+    end
