@@ -34,6 +34,7 @@
             .chart-container {
                 margin-top: 20px;
                 margin-bottom: 20px;
+                color: mat.get-color-from-palette($foreground, text);
                 background-color: mat.get-color-from-palette($foreground, 100);
                 display: flex;
                 flex-direction: column;

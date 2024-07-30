@@ -2,6 +2,16 @@
 $margin-promotion-sections: 50px;
 $margin-promotion-sections-small: 15px;
 
+::ng-deep {
+    .custom-chart {
+        .ngx-charts {
+            text {
+                fill: currentColor !important;
+            }
+        }
+    }
+}
+
 .app-headerbackground {
     overflow: hidden;
     position: relative;
