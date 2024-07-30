@@ -48,44 +48,29 @@ Here are some screenshots showcasing the different parts of the application:
 - ![Login Page](docs/screenshots/login.png)
   _This is the login page. The default login is `admin` with the password `paloalto123`._
 
-- ![Home Page](docs/screenshots/home.png)
+- ![Home Page](docs/screenshots/homepage.png)
   _This is the home page of the web application._
 
-- ![Sidenav](docs/screenshots/home_sidenav.png)
+- ![Sidenav](docs/screenshots/minimize.png)
   _The Side Nav can be expanded or collapsed with this button._
 
-- ![Change Theme](docs/screenshots/home_light.png)
-  _Light Mode can be enabled by visiting the paint can button in the nav bar._
+- ![Change Theme](docs/screenshots/dark_mode.png)
+  _Dark Mode can be enabled by visiting the paint can button in the nav bar._
 
-- ![Empty Inventory](docs/screenshots/device_list.png)
-  _Empty Inventory page, click Add new Device._
+- ![Manage Inventory](docs/screenshots/inventory.png)
+  _The Inventory component will allow you to manage your device inventory, sync from Panorama, or refresh the database._
 
-- ![Add Device](docs/screenshots/device_create.png)
-  _This is the page where devices can be added manually._
-
-- ![Refresh Device Details](docs/screenshots/refresh.png)
-  _Select a device and refresh details from live device._
-
-- ![Refresh Completed](docs/screenshots/refresh_completed.png)
-  _Refreshed details will appear once job completes._
-
-- ![Sync Firewalls From Panorama](docs/screenshots/sync.png)
-  _This shows that firewalls can be synced from a Panorama appliance._
-
-- ![Sync Completed](docs/screenshots/sync_completed.png)
-  _Firewalls connected to Panorama will be pulled into the application's database._
-
-- ![List Profiles](docs/screenshots/profile_list.png)
+- ![Manage Profiles](docs/screenshots/profile_create.png)
   _Profiles combine device authentication with readiness checks, snapshots, and upgrade settings._
 
-- ![Create Profile](docs/screenshots/profile_create.png)
-  _This is how a new profile is added, containing the credentials used to connect to devices and the upgrade settings._
-
-- ![Select Devices to Upgrade](docs/screenshots/upgrade_running.png)
+- ![Upgrade List](docs/screenshots/upgrade_list.png)
   _This is how you select which devices to upgrade and which upgrade profile to associate with the job._
 
-- ![Upgrade Job Logs](docs/screenshots/logs.png)
-  _This shows what the upgrade job logs look like._
+- ![Upgrade Running](docs/screenshots/upgrade_ha.png)
+  _An upgrade job running will reveal the current status for each firewall, alongside detailed logging information._
+f
+- ![Job Logs](docs/screenshots/jobs.png)
+  _This shows what the list of job logs look like._
 
 ## 🛠️ Setup Instructions
 
