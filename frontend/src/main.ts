@@ -8,10 +8,12 @@ import {
 import { provideRouter, withInMemoryScrolling } from "@angular/router";
 
 import { APP_ROUTES } from "./app/routes";
-import { PanOsUpgradeApp } from "./app/app";
+import { PanOsUpgradeApp } from "./app";
 import { bootstrapApplication } from "@angular/platform-browser";
 import { provideHttpClient } from "@angular/common/http";
 import { unregisterServiceWorkers } from "./unregister-service-workers";
+import { StyleManager } from "./app/shared/style-manager";
+import { ThemePicker } from "./app/shared/theme-picker/theme-picker";
 
 const prefersReducedMotion =
     typeof matchMedia === "function"
@@ -26,6 +28,8 @@ unregisterServiceWorkers().then(
 
 bootstrapApplication(PanOsUpgradeApp, {
     providers: [
+        StyleManager,
+        ThemePicker,
         prefersReducedMotion ? provideNoopAnimations() : provideAnimations(),
         { provide: LocationStrategy, useClass: PathLocationStrategy },
         provideRouter(
