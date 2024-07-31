@@ -218,18 +218,6 @@ export class Homepage implements OnInit, OnDestroy {
         this.getJobs();
     }
 
-    onSelect(event: any): void {
-        console.log("Item clicked", JSON.parse(JSON.stringify(event)));
-    }
-
-    onActivate(event: any): void {
-        console.log("Activate", JSON.parse(JSON.stringify(event)));
-    }
-
-    onDeactivate(event: any): void {
-        console.log("Deactivate", JSON.parse(JSON.stringify(event)));
-    }
-
     updatePanOsVersionChart(): void {
         const versionCounts = new Map<string, number>();
 
