@@ -148,7 +148,6 @@ export class SnapshotListComponent implements OnInit {
 
     constructor() {
         effect(() => {
-            console.log("Filtered Snapshots:", this.filteredSnapshots());
             const firstSnapshot = this.filteredSnapshots()[0];
             if (
                 firstSnapshot &&
