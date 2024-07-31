@@ -33,7 +33,6 @@
                     [scheme]="colorScheme"
                     [results]="panOsVersionData"
                     [gradient]="gradient"
-                    (select)="onSelect($event)"
                 >
                 </ngx-charts-advanced-pie-chart>
             </div>
@@ -56,9 +55,6 @@
                     [xAxisLabel]="swVersionXAxisLabel"
                     [yAxisLabel]="swVersionYAxisLabel"
                     [legendTitle]="swVersionLegendTitle"
-                    (select)="onSelect($event)"
-                    (activate)="onActivate($event)"
-                    (deactivate)="onDeactivate($event)"
                     class="custom-chart"
                 >
                     >
@@ -80,7 +76,6 @@
                     [scheme]="colorScheme"
                     [results]="appIdVersionData"
                     [gradient]="gradient"
-                    (select)="onSelect($event)"
                 >
                 </ngx-charts-advanced-pie-chart>
             </div>
@@ -103,9 +98,6 @@
                     [xAxisLabel]="appVersionXAxisLabel"
                     [yAxisLabel]="appVersionYAxisLabel"
                     [legendTitle]="appVersionLegendTitle"
-                    (select)="onSelect($event)"
-                    (activate)="onActivate($event)"
-                    (deactivate)="onDeactivate($event)"
                 >
                 </ngx-charts-bar-horizontal-2d>
             </div>
@@ -131,9 +123,6 @@
                     [xAxisLabel]="jobXAxisLabel"
                     [yAxisLabel]="jobYAxisLabel"
                     [legendTitle]="jobLegendTitle"
-                    (select)="onSelect($event)"
-                    (activate)="onActivate($event)"
-                    (deactivate)="onDeactivate($event)"
                 >
                 </ngx-charts-bar-horizontal-2d>
             </div>
