@@ -3,6 +3,7 @@
 import { Layout } from "./shared/layout/layout";
 import { Routes } from "@angular/router";
 import { authGuard } from "./shared/guards/auth.guard";
+import { LoginComponent } from "./pages/auth/login/login.component";
 
 export const APP_ROUTES: Routes = [
     {
@@ -139,8 +140,16 @@ export const APP_ROUTES: Routes = [
     },
     {
         path: "auth",
-        loadChildren: () =>
-            import("./pages/auth/auth.module").then((m) => m.AuthModule),
+        children: [
+            {
+                path: "login",
+                component: LoginComponent,
+            },
+            // {
+            //     path: "register",
+            //     component: RegisterComponent,
+            // },
+        ],
     },
     {
         path: "guides",
