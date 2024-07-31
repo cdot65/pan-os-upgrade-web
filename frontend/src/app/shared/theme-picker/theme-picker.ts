@@ -83,6 +83,10 @@ export class ThemePicker implements OnInit, OnDestroy {
         }
     }
 
+    getStoredThemeName(): string | null {
+        return this._themeStorage.getStoredThemeName();
+    }
+
     ngOnInit() {
         this._queryParamSubscription = this._activatedRoute.queryParamMap
             .pipe(map((params: ParamMap) => params.get("theme")))
@@ -111,6 +115,13 @@ export class ThemePicker implements OnInit, OnDestroy {
         this.styleManager.setStyle("theme", `${theme.name}.css`);
 
         if (this.currentTheme) {
+            // Remove previous theme class from body
+            document.body.classList.remove(
+                "redtail-light-theme",
+                "redtail-dark-theme",
+            );
+            // Add new theme class to body
+            document.body.classList.add(`${theme.name}-theme`);
             this.liveAnnouncer.announce(
                 `${theme.displayName} theme selected.`,
                 "polite",
