@@ -1,7 +1,7 @@
 // src/styles/custom-themes/redtail-dark.scss
 
-@use "@angular/material" as mat;
-@use "../../app-theme";
+@use "../../../node_modules/@angular/material/index" as mat;
+@use "app-theme";
 
 // Custom color palettes
 $redtail-dark-primary-palette: (
@@ -60,12 +60,12 @@ $accent: mat.define-palette($redtail-dark-accent-palette);
 
 // Create the dark theme
 $theme: mat.define-dark-theme(
-    (
-        color: (
-            primary: $primary,
-            accent: $accent,
-        ),
-    )
+        (
+            color: (
+                primary: $primary,
+                accent: $accent,
+            ),
+        )
 );
 
 // Apply to Angular Material components and your app

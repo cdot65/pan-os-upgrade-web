@@ -1,5 +1,5 @@
 @use "sass:map";
-@use "@angular/material" as mat;
+@use "../../../node_modules/@angular/material/index" as mat;
 
 // Mixin to apply theme colors for docs generated from markdown files in the material2 repo.
 @mixin theme($theme) {
@@ -14,21 +14,20 @@
     .docs-markdown {
         a:not(.mat-mdc-button-base) {
             color: mat.get-color-from-palette(
-                $primary,
-                if($is-dark-theme, 200, default)
+                    $primary,
+                    if($is-dark-theme, 200, default)
             );
         }
 
         pre {
             background: rgba(
-                mat.get-color-from-palette($foreground, secondary-text),
-                0.01
+                    mat.get-color-from-palette($foreground, secondary-text),
+                    0.01
             );
-            border: 0.5px solid
-                rgba(
+            border: 0.5px solid rgba(
                     mat.get-color-from-palette($foreground, secondary-text),
                     0.2
-                );
+            );
 
             code {
                 background: transparent;
@@ -42,8 +41,8 @@
 
         code {
             background: rgba(
-                mat.get-color-from-palette($foreground, secondary-text),
-                $exportBackgroundOpacity
+                    mat.get-color-from-palette($foreground, secondary-text),
+                    $exportBackgroundOpacity
             );
         }
     }

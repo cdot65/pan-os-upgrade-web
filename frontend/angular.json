@@ -48,12 +48,12 @@
                             },
                             {
                                 "inject": false,
-                                "input": "src/styles/custom-themes/redtail-light.scss",
+                                "input": "src/styles/themes/redtail-light.scss",
                                 "bundleName": "redtail-light"
                             },
                             {
                                 "inject": false,
-                                "input": "src/styles/custom-themes/redtail-dark.scss",
+                                "input": "src/styles/themes/redtail-dark.scss",
                                 "bundleName": "redtail-dark"
                             }
                         ],

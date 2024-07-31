@@ -1,23 +1,22 @@
 // src/_app-theme.scss
 
-@use "@angular/material" as mat;
+@use "../../../node_modules/@angular/material/index" as mat;
 @use "sass:map";
-@use "./app/pages/auth/login/login-theme";
-@use "./app/pages/documentation/documentation-theme";
-@use "./app/pages/guide-list/guide-list-theme";
-@use "./app/pages/homepage/homepage-theme";
-@use "./app/pages/not-found/not-found-theme";
-@use "./app/pages/job-details/job-details-theme";
-@use "./app/shared/carousel/carousel-theme";
-@use "./app/shared/footer/footer-theme";
-@use "./app/shared/navbar/navbar-theme";
-@use "./app/pages/profile-select-dialog/profile-select-dialogue-theme";
-@use "./app/shared/sidenav/sidenav-theme";
-@use "./app/shared/table-of-contents/table-of-contents-theme";
-@use "./styles/api-theme";
-@use "./styles/markdown-theme";
-@use "./styles/svg-theme";
-@use "./styles/tables-theme";
+@use "../../app/pages/auth/login/login-theme";
+@use "../../app/pages/documentation/documentation-theme";
+@use "../../app/pages/guide-list/guide-list-theme";
+@use "../../app/pages/homepage/homepage-theme";
+@use "../../app/pages/not-found/not-found-theme";
+@use "../../app/pages/job-details/job-details-theme";
+@use "../../app/shared/carousel/carousel-theme";
+@use "../../app/shared/footer/footer-theme";
+@use "../../app/shared/navbar/navbar-theme";
+@use "../../app/pages/profile-select-dialog/profile-select-dialogue-theme";
+@use "../../app/shared/sidenav/sidenav-theme";
+@use "../../app/shared/table-of-contents/table-of-contents-theme";
+@use "../components/markdown-theme";
+@use "../components/svg-theme";
+@use "../components/tables-theme";
 
 // Styles for the docs app that are based on the current theme.
 @mixin theme($theme) {
@@ -54,7 +53,6 @@
     }
 
     @include carousel-theme.theme($theme);
-    @include api-theme.theme($theme);
     @include markdown-theme.theme($theme);
     @include svg-theme.theme($theme);
     @include tables-theme.theme($theme);

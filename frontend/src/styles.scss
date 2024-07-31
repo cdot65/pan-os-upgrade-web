@@ -1,11 +1,8 @@
 // src/styles.scss
 
 @use "@angular/material" as mat;
-@use "./app-theme";
-@use "./styles/api";
-@use "./styles/markdown";
-@use "./styles/tables";
-@use "./styles/general";
+@use "styles/themes/app-theme";
+@use "styles/base/general";
 
 // Define the light theme.
 $primary: mat.define-palette(mat.$indigo-palette);
