@@ -1,4 +1,4 @@
-// src/styles/custom-themes/redtail-dark.scss
+// src/styles/themes/redtail-dark.scss
 
 @use "../../../node_modules/@angular/material/index" as mat;
 @use "app-theme";
@@ -68,6 +68,6 @@ $theme: mat.define-dark-theme(
         )
 );
 
-// Apply to Angular Material components and your app
+// Output the theme
 @include mat.all-component-themes($theme);
 @include app-theme.theme($theme);
