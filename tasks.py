@@ -55,13 +55,13 @@ CONTAINER_RUNTIME = get_container_runtime()
 # CONTAINER PARAMETERS
 # ---------------------------------------------------------------------------
 DOCKER_IMG_BACKEND = "ghcr.io/cdot65/pan-os-upgrade-web-backend"
-DOCKER_TAG_BACKEND = "1.0.2-beta"
+DOCKER_TAG_BACKEND = "1.0.3-beta"
 
 DOCKER_IMG_FRONTEND = "ghcr.io/cdot65/pan-os-upgrade-web-frontend"
-DOCKER_TAG_FRONTEND = "1.0.2-beta"
+DOCKER_TAG_FRONTEND = "1.0.3-beta"
 
 DOCKER_IMG_WORKER = "ghcr.io/cdot65/pan-os-upgrade-web-worker"
-DOCKER_TAG_WORKER = "1.0.2-beta"
+DOCKER_TAG_WORKER = "1.0.3-beta"
 
 # ---------------------------------------------------------------------------
 # SYSTEM PARAMETERS
