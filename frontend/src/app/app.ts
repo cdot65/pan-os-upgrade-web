@@ -6,10 +6,11 @@ import { map, pairwise, startWith } from "rxjs/operators";
 import { AuthInterceptor } from "./shared/interceptors/auth.interceptor";
 import { CookieService } from "ngx-cookie-service";
 import { HTTP_INTERCEPTORS } from "@angular/common/http";
-import { NavBar } from "./shared/navbar/navbar";
+import { NavBar } from "./shared/navbar";
 import { NavigationFocusService } from "./shared/navigation-focus/navigation-focus.service";
 import { RouterOutlet } from "@angular/router";
 import { Subscription } from "rxjs";
+import { ThemePicker } from "./shared/theme-picker/theme-picker";
 
 @Component({
     selector: "app",
@@ -17,7 +18,7 @@ import { Subscription } from "rxjs";
     styleUrls: ["./app.scss"],
     encapsulation: ViewEncapsulation.None,
     standalone: true,
-    imports: [NavBar, RouterOutlet],
+    imports: [NavBar, RouterOutlet, ThemePicker],
     providers: [
         CookieService,
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

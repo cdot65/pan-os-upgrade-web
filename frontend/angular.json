@@ -40,21 +40,17 @@
                             }
                         ],
                         "styles": [
+                            "src/styles.scss",
+                            "src/highlightjs/material-light.scss",
                             {
-                                "input": "src/styles.scss"
+                                "input": "src/styles/themes/redtail-light.scss",
+                                "bundleName": "redtail-light",
+                                "inject": false
                             },
                             {
-                                "input": "src/highlightjs/material-light.scss"
-                            },
-                            {
-                                "inject": false,
-                                "input": "src/styles/custom-themes/redtail-light.scss",
-                                "bundleName": "redtail-light"
-                            },
-                            {
-                                "inject": false,
-                                "input": "src/styles/custom-themes/redtail-dark.scss",
-                                "bundleName": "redtail-dark"
+                                "input": "src/styles/themes/redtail-dark.scss",
+                                "bundleName": "redtail-dark",
+                                "inject": false
                             }
                         ],
                         "stylePreprocessorOptions": {
@@ -161,7 +157,18 @@
                             "scenes/src/assets"
                         ],
                         "styles": [
-                            "scenes/src/styles.scss"
+                            "src/styles.scss",
+                            "src/highlightjs/material-light.scss",
+                            {
+                                "input": "src/styles/themes/redtail-light.scss",
+                                "bundleName": "redtail-light",
+                                "inject": false
+                            },
+                            {
+                                "input": "src/styles/themes/redtail-dark.scss",
+                                "bundleName": "redtail-dark",
+                                "inject": false
+                            }
                         ],
                         "scripts": [],
                         "vendorChunk": true,

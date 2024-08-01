@@ -2,7 +2,7 @@ import { NgFor, NgIf } from "@angular/common";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 
 import { AuthService } from "../services/auth.service";
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 import { NavigationFocusService } from "../navigation-focus/navigation-focus.service";
@@ -28,13 +28,14 @@ export interface DocSection {
         ThemePicker,
     ],
 })
-export class NavBar {
+export class NavBar implements OnInit {
     skipLinkHref: string | null | undefined;
     skipLinkHidden = true;
 
     constructor(
         public authService: AuthService,
         private navigationFocusService: NavigationFocusService,
+        private themePicker: ThemePicker,
     ) {
         setTimeout(
             () =>
@@ -46,5 +47,16 @@ export class NavBar {
 
     get hasAuthToken() {
         return this.authService.getIsLoggedIn();
+    }
+
+    ngOnInit() {
+        // Initialize the theme
+        const storedTheme = this.themePicker.getStoredThemeName();
+        if (storedTheme) {
+            this.themePicker.selectTheme(storedTheme);
+        } else {
+            // Select default theme
+            this.themePicker.selectTheme("redtail-light");
+        }
     }
 }
