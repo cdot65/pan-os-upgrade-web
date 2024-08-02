@@ -24,7 +24,7 @@
             <a mat-list-item routerLink="/inventory" routerLinkActive="active">
                 <mat-icon class="sidenav-icon">inventory</mat-icon>
                 @if (sidenavStateService.isExpanded()) {
-                <span class="sidenav-text">Inventory</span>
+                    <span class="sidenav-text">Inventory</span>
                 }
             </a>
 
@@ -90,10 +90,4 @@
         </a>
     </mat-nav-list>
     </mat-sidenav>
-
-    <mat-sidenav-content [style.marginLeft.px]="sidenavStateService.isExpanded() ? 275 : 100">
-        <div class="content-wrapper">
-            <router-outlet></router-outlet>
-        </div>
-    </mat-sidenav-content>
 </mat-sidenav-container>

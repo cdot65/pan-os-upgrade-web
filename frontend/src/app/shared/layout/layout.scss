@@ -1,12 +1,22 @@
 // src/app/shared/layout/layout.scss
 
-.app-layout {
+:host {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 56px);
+    height: 100vh;
 }
 
-.app-content {
+.main-container {
+    display: flex;
     flex: 1;
-    overflow: auto;
+    overflow: hidden;
+}
+
+app-sidenav {
+    z-index: 2;
+}
+
+app-content {
+    flex: 1;
+    overflow-y: auto;
 }

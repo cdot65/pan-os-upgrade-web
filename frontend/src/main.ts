@@ -13,7 +13,7 @@ import { bootstrapApplication } from "@angular/platform-browser";
 import { provideHttpClient } from "@angular/common/http";
 import { unregisterServiceWorkers } from "./unregister-service-workers";
 import { StyleManager } from "./app/shared/style-manager";
-import { ThemePicker } from "./app/shared/theme-picker/theme-picker";
+import { ThemePicker } from "./app/shared/theme-picker";
 
 const prefersReducedMotion =
     typeof matchMedia === "function"

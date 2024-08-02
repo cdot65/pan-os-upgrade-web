@@ -2,6 +2,7 @@
 
 import { Component } from "@angular/core";
 import { CommonModule } from "@angular/common";
+import { SidenavStateService } from "../services/sidenav-state.service";
 
 @Component({
     selector: "app-content",
@@ -11,5 +12,5 @@ import { CommonModule } from "@angular/common";
     styleUrls: ["./app-content.component.scss"],
 })
 export class AppContentComponent {
-    // Add any logic specific to the app-content component here
+    constructor(public sidenavStateService: SidenavStateService) {}
 }

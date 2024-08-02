@@ -1,55 +1,42 @@
-// src/app/shared/sidenav/sidenav.scss
-
 .sidenav-container {
-    height: 100vh; // Set the height to 100% of the viewport height
+    height: 100%;
     background-color: transparent;
-    display: flex;
-    flex-direction: column;
 }
 
 .sidenav {
-    padding: 20px;
+    width: 250px;
     background-color: inherit;
-    transition: width 0.2s ease-in-out;
-    flex: 1; // Make the sidenav flex to fill available space
+    transition: width 0.3s ease-in-out;
+    overflow-x: hidden;
 
     &.minimized {
+        width: 64px;
+
         .sidenav-text {
-            opacity: 0;
-            transition: opacity 0.2s ease-in-out;
+            display: none;
         }
     }
 
-    .sidenav-text {
-        opacity: 1;
-        transition: opacity 0.2s ease-in-out;
-    }
-
     .mat-nav-list {
-        height: 100%; // Make the nav list take full height
-        display: flex;
-        flex-direction: column;
+        padding-top: 0;
 
         .mat-list-item {
-            display: flex;
-            align-items: center;
-            padding-left: 24px;
+            height: 48px;
 
             .sidenav-icon {
                 margin-right: 16px;
             }
 
             .sidenav-text {
-                line-height: 24px;
+                white-space: nowrap;
             }
         }
     }
 
     .sidenav-toggle {
-        margin-top: auto; // Push the toggle to the bottom
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
     }
-}
-
-mat-sidenav-content {
-    min-height: 100vh; // Ensure the content area is at least full viewport height
 }

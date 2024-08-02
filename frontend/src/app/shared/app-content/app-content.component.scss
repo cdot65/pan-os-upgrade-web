@@ -1,6 +1,7 @@
 /* src/app/shared/app-content/app-content.component.scss */
 
 .app-content {
-    padding: 20px;
-    // Add any other styling for the content area
+    transition: margin-left 0.3s ease-in-out;
+    height: 100%;
+    overflow-y: auto;
 }

@@ -1,5 +1,13 @@
 // src/app/shared/sidenav/sidenav.ts
 
+import { Component } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { MatSidenavModule } from "@angular/material/sidenav";
+import { MatListModule } from "@angular/material/list";
+import { MatIconModule } from "@angular/material/icon";
+import { MatDividerModule } from "@angular/material/divider";
+import { RouterModule } from "@angular/router";
+import { SidenavStateService } from "../services/sidenav-state.service";
 import {
     animate,
     state,
@@ -7,16 +15,6 @@ import {
     transition,
     trigger,
 } from "@angular/animations";
-
-import { CommonModule } from "@angular/common";
-import { Component } from "@angular/core";
-import { MatDividerModule } from "@angular/material/divider";
-import { MatExpansionModule } from "@angular/material/expansion";
-import { MatIconModule } from "@angular/material/icon";
-import { MatListModule } from "@angular/material/list";
-import { MatSidenavModule } from "@angular/material/sidenav";
-import { RouterModule } from "@angular/router";
-import { SidenavStateService } from "../services/sidenav-state.service";
 
 @Component({
     selector: "app-sidenav",
@@ -26,7 +24,6 @@ import { SidenavStateService } from "../services/sidenav-state.service";
         MatSidenavModule,
         MatListModule,
         MatIconModule,
-        MatExpansionModule,
         MatDividerModule,
         RouterModule,
     ],
@@ -34,17 +31,13 @@ import { SidenavStateService } from "../services/sidenav-state.service";
     styleUrls: ["./sidenav.scss"],
     animations: [
         trigger("sidenavAnimation", [
-            state("expanded", style({ width: "275px" })),
-            state("minimized", style({ width: "100px" })),
+            state("expanded", style({ width: "250px" })),
+            state("minimized", style({ width: "64px" })),
             transition("expanded <=> minimized", animate("300ms ease-in-out")),
         ]),
     ],
 })
 export class SideNav {
-    get sidenavExpanded(): boolean {
-        return this.sidenavStateService.isExpanded();
-    }
-
     constructor(public sidenavStateService: SidenavStateService) {}
 
     toggleSidenav() {
