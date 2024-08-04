@@ -12,6 +12,7 @@
 @use "../../app/pages/not-found/not-found-theme";
 @use "../../app/pages/job-details/job-details-theme";
 @use '../../app/pages/profile-create/profile-create-theme' as profile-create;
+@use '../../app/pages/profile-details/profile-details-theme' as profile-details;
 @use '../../app/pages/profile-list/profile-list-theme' as profile-list;
 @use "../../app/pages/profile-select-dialog/profile-select-dialogue-theme";
 @use "../../app/shared/carousel/carousel-theme";
@@ -64,6 +65,7 @@
     @include navbar-theme.theme($theme);
     @include not-found-theme.theme($theme);
     @include profile-create.theme($theme);
+    @include profile-details.theme($theme);
     @include profile-list.theme($theme);
     @include profile-select-dialogue-theme.theme($theme);
     @include sidenav-theme.theme($theme);

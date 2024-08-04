@@ -27,6 +27,7 @@ import { Profile } from "../../shared/interfaces/profile.interface";
 import { ProfileService } from "../../shared/services/profile.service";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
+import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
 
 @Component({
     selector: "app-profile-details",
@@ -46,6 +47,7 @@ import { takeUntil } from "rxjs/operators";
         MatRadioModule,
         MatSliderModule,
         ReactiveFormsModule,
+        PageHeaderComponent,
     ],
 })
 
@@ -55,6 +57,16 @@ import { takeUntil } from "rxjs/operators";
 export class ProfileDetailsComponent implements OnInit, OnDestroy {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
+
+    // Component page details
+    pageTitle = "Profile Details";
+    pageDescription = "View and edit settings profile details";
+    breadcrumbs = [
+        { label: "Home", url: "/" },
+        { label: "Profiles", url: "/profiles" },
+        { label: "Details", url: "" },
+    ];
+
     profile: Profile | undefined;
     updateProfileForm: FormGroup;
     private destroy$ = new Subject<void>();
@@ -150,7 +162,7 @@ export class ProfileDetailsComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this._componentPageTitle.title = "Profile Details";
+        this._componentPageTitle.title = this.pageTitle;
         const uuid = this.route.snapshot.paramMap.get("uuid");
         if (uuid) {
             this.getProfile(uuid);
