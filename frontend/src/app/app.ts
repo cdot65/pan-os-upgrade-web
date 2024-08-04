@@ -10,7 +10,7 @@ import { NavBar } from "./shared/navbar";
 import { NavigationFocusService } from "./shared/navigation-focus/navigation-focus.service";
 import { RouterOutlet } from "@angular/router";
 import { Subscription } from "rxjs";
-import { ThemePicker } from "./shared/theme-picker/theme-picker";
+import { ThemePicker } from "./shared/theme-picker";
 
 @Component({
     selector: "app",

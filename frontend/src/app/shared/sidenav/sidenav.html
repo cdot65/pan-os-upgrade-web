@@ -69,20 +69,6 @@
 
             <mat-divider class="sidenav-divider"></mat-divider>
 
-            <a
-                mat-list-item
-                routerLink="/documentation"
-                routerLinkActive="active"
-                [routerLinkActiveOptions]="{exact: true}"
-            >
-                <mat-icon class="sidenav-icon">book</mat-icon>
-                @if (sidenavStateService.isExpanded()) {
-                    <span class="sidenav-text">Documentation</span>
-                }
-            </a>
-
-            <mat-divider class="sidenav-divider"></mat-divider>
-
             <a mat-list-item (click)="toggleSidenav()" class="sidenav-toggle">
                 <mat-icon class="sidenav-icon">
                     {{ sidenavStateService.isExpanded() ? 'menu_open' : 'menu' }}
