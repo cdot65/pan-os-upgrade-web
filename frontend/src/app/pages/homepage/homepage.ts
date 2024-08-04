@@ -37,6 +37,7 @@ import { takeUntil } from "rxjs/operators";
 import { Subject } from "rxjs";
 import { JobService } from "../../shared/services/job.service";
 import { JobStatus } from "../../shared/interfaces/job.interface";
+import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
 
 @Component({
     selector: "app-homepage",
@@ -51,6 +52,7 @@ import { JobStatus } from "../../shared/interfaces/job.interface";
         MatIconModule,
         Carousel,
         NgFor,
+        PageHeaderComponent,
         CarouselItem,
         MatCardModule,
         YouTubePlayer,
@@ -61,6 +63,14 @@ import { JobStatus } from "../../shared/interfaces/job.interface";
 export class Homepage implements OnInit, OnDestroy {
     @HostBinding("class.main-content") readonly mainContentClass = true;
     @HostBinding("class.animations-disabled")
+    // Properties for component
+    pageTitle = "Dashboard";
+    breadcrumbs = [
+        { label: "Home", url: "/" },
+        { label: "Dashboard", url: "/" },
+    ];
+    pageDescription = "Overview of PAN-OS upgrades and statistics";
+
     readonly animationsDisabled: boolean;
     private destroy$ = new Subject<void>();
     inventoryItems: Device[] = [];
