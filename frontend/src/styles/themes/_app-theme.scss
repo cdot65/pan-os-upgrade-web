@@ -6,6 +6,7 @@
 @use "../../app/pages/documentation/documentation-theme";
 @use "../../app/pages/guide-list/guide-list-theme";
 @use '../../app/pages/homepage/homepage-theme' as homepage;
+@use '../../app/pages/inventory-create/inventory-create-theme' as inventory-create;
 @use '../../app/pages/inventory-list/inventory-list-theme' as inventory-list;
 @use "../../app/pages/not-found/not-found-theme";
 @use "../../app/pages/job-details/job-details-theme";
@@ -51,6 +52,7 @@
     @include documentation-theme.theme($theme);
     @include guide-list-theme.theme($theme);
     @include homepage.theme($theme);
+    @include inventory-create.theme($theme);
     @include inventory-list.theme($theme);
     @include job-details-theme.theme($theme);
     @include login-theme.theme($theme);
