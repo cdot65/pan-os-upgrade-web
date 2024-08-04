@@ -272,8 +272,4 @@ export class SnapshotListComponent implements OnInit {
         this.sessionRatesData = [];
         this.timeoutData = [];
     }
-
-    onSelect(event: any) {
-        console.log("Item clicked", JSON.parse(JSON.stringify(event)));
-    }
 }
