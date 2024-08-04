@@ -1,4 +1,15 @@
 <!-- src/app/pages/inventory-details/inventory-details.html -->
+
+<app-page-header
+    [title]="pageTitle"
+    [description]="pageDescription"
+    [breadcrumbs]="breadcrumbs">
+    <button mat-raised-button color="primary" (click)="refreshDeviceDetails()">
+        <mat-icon>sync</mat-icon>
+        Refresh Device Details
+    </button>
+</app-page-header>
+
 <div class="inventory-details-container">
     <main
         aria-label="Inventory details"
@@ -10,25 +21,6 @@
             (ngSubmit)="updateDevice()"
             class="mat-elevation-z2"
         >
-            <div class="table-header">
-                <h2>Devices</h2>
-
-                <!-- container for the Refresh button. -->
-                <div class="refresh-header">
-                    <button
-                        mat-raised-button
-                        color="accent"
-                        type="button"
-                        (click)="refreshDeviceDetails()"
-                        aria-label="Refresh Device Details"
-                        [disabled]="showRefreshProgress"
-                    >
-                        <mat-icon>sync</mat-icon>
-                        Refresh Device Details
-                    </button>
-                </div>
-            </div>
-
             <div class="inventory-details-grid">
                 <div>
                     <!-- Heading for the firewall information section -->

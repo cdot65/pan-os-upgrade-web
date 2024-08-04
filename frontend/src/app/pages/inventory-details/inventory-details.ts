@@ -33,6 +33,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { ProfileDialogComponent } from "../profile-select-dialog/profile-select-dialog.component";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
+import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
 
 @Component({
     selector: "app-inventory-details",
@@ -41,6 +42,7 @@ import { takeUntil } from "rxjs/operators";
     standalone: true,
     imports: [
         CommonModule,
+        ReactiveFormsModule,
         MatButtonModule,
         MatCardModule,
         MatCheckboxModule,
@@ -50,7 +52,7 @@ import { takeUntil } from "rxjs/operators";
         MatInputModule,
         MatProgressBarModule,
         MatSelectModule,
-        ReactiveFormsModule,
+        PageHeaderComponent,
     ],
 })
 
@@ -60,6 +62,16 @@ import { takeUntil } from "rxjs/operators";
 export class InventoryDetailsComponent implements OnDestroy, OnInit {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
+
+    // Component page details
+    pageTitle = "Inventory Details";
+    pageDescription = "View and edit device details";
+    breadcrumbs = [
+        { label: "Home", url: "/" },
+        { label: "Inventory", url: "/inventory" },
+        { label: "Details", url: "" },
+    ];
+
     devices: Device[] = [];
     firewallPlatforms: DeviceType[] = [];
     haStates: string[] = [
@@ -312,7 +324,7 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
      * @return
      */
     ngOnInit(): void {
-        this._componentPageTitle.title = "Inventory Details";
+        this._componentPageTitle.title = this.pageTitle;
         this.getDevices();
         this.getPanoramaAppliances();
         const itemId = this.route.snapshot.paramMap.get("id");
@@ -433,8 +445,6 @@ export class InventoryDetailsComponent implements OnDestroy, OnInit {
      * Validates if at least one of the IP addresses (IPv4 or IPv6) is provided.
      *
      * @returns A ValidatorFn that validates the IP addresses.
-     *
-     * @param control - The AbstractControl object representing the form control being validated.
      *
      * @returns An object with validation errors if the IP addresses are invalid or missing, otherwise returns null.
      */
