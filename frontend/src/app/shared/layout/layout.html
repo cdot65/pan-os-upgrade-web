@@ -1,11 +1,10 @@
 <!-- src/app/shared/layout/layout.html -->
 
-<div class="main-container">
-    <app-sidenav>
+<app-sidenav>
+    <div class="content-wrapper" [class.expanded]="sidenavStateService.isExpanded()">
         <app-navbar></app-navbar>
-        <app-content>
+        <main class="main-content" role="main">
             <router-outlet></router-outlet>
-        </app-content>
-    </app-sidenav>
-</div>
-<app-footer></app-footer>
+        </main>
+    </div>
+</app-sidenav>

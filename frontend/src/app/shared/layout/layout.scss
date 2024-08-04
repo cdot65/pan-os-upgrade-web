@@ -1,22 +1,19 @@
 // src/app/shared/layout/layout.scss
 
-:host {
+.content-wrapper {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    flex-grow: 1;
+    transition: margin-left 0.3s ease-in-out;
+    margin-left: 64px;
+
+    &.expanded {
+        margin-left: 250px;
+    }
 }
 
-.main-container {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-}
-
-app-sidenav {
-    display: flex;
-    flex: 1;
-}
-
-.footer {
-    flex-shrink: 0;
+.main-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 20px;
 }

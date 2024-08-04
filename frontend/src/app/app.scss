@@ -8,36 +8,13 @@ app {
     height: 100vh;
 }
 
-
-app-navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 2;
-}
-
-app > app-component-sidenav {
-    flex: 1;
-    display: flex;
-}
-
-app > router-outlet + .main-content,
-app > router-outlet + app-component-sidenav {
-    margin-top: 56px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
 .content-container {
     flex: 1;
     overflow-y: auto;
 }
 
 @media (max-width: constants.$extra-small-breakpoint-width) {
-    app > router-outlet + .main-content,
-    app > router-outlet + app-component-sidenav {
+    .content-container {
         margin-top: 92px;
-        overflow-y: visible;
     }
 }

@@ -1,5 +1,6 @@
-<!-- TODO: figure out if the <nav> should go inside of a <header> element. -->
-<nav class="app-navbar-header" aria-label="Top Toolbar">
+<!-- src/app/shared/navbar/navbar.html-->
+
+<nav class="app-navbar-header" aria-label="Top Toolbar" [class.expanded]="sidenavStateService.isExpanded()">
     <div class="flex-spacer"></div>
     <theme-picker></theme-picker>
     @if (!hasAuthToken) {

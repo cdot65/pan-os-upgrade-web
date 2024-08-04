@@ -1,3 +1,5 @@
+// src/app/shared/navbar/navbar.scss
+
 .app-navbar-header {
     display: flex;
     flex-wrap: wrap;
@@ -5,8 +7,9 @@
     padding: 4px 16px;
     height: 56px;
     z-index: 1000;
+    width: 100%;
+    transition: width 0.3s ease-in-out;
 }
-
 
 .mat-mdc-button-base:not(:disabled) {
     color: inherit;

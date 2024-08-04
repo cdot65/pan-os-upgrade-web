@@ -1,3 +1,5 @@
+<!--src/app/shared/sidenav/sidenav.html-->
+
 <mat-sidenav-container class="sidenav-container">
     <mat-sidenav
         mode="side"
@@ -19,7 +21,7 @@
                     <span class="sidenav-text">PAN-OS Upgrade</span>
                 }
             </a>
-            
+
             <mat-divider class="sidenav-divider"></mat-divider>
 
             <a mat-list-item routerLink="/inventory" routerLinkActive="active">
@@ -92,10 +94,7 @@
         </mat-nav-list>
     </mat-sidenav>
 
-    <mat-sidenav-content [style.marginLeft.px]="sidenavStateService.isExpanded() ? 250 : 64">
-        <div class="sidenav-content">
-            <ng-content select="app-navbar"></ng-content>
-            <ng-content select="app-content"></ng-content>
-        </div>
+    <mat-sidenav-content>
+        <ng-content></ng-content>
     </mat-sidenav-content>
 </mat-sidenav-container>
