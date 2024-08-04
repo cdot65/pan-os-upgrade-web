@@ -1,4 +1,14 @@
 <!-- upgrade-list.component.html -->
+<app-page-header
+    [title]="pageTitle"
+    [description]="pageDescription"
+    [breadcrumbs]="breadcrumbs">
+    <button mat-raised-button color="primary" (click)="onUpgradeClick()" [disabled]="!upgradeForm.valid">
+        <mat-icon>sync</mat-icon>
+        Start Upgrade
+    </button>
+</app-page-header>
+
 <div class="upgrade-list-container">
     <main
         aria-label="Upgrade list"
