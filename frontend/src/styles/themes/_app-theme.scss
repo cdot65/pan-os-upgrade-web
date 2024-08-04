@@ -16,6 +16,7 @@
 @use '../../app/pages/profile-details/profile-details-theme' as profile-details;
 @use '../../app/pages/profile-list/profile-list-theme' as profile-list;
 @use "../../app/pages/profile-select-dialog/profile-select-dialogue-theme";
+@use '../../app/pages/snapshot-list/snapshot-list-theme' as snapshot-list;
 @use '../../app/pages/upgrade-list/upgrade-list-theme' as upgrade-list;
 @use "../../app/shared/carousel/carousel-theme";
 @use "../../app/shared/navbar/navbar-theme";
@@ -72,6 +73,7 @@
     @include profile-list.theme($theme);
     @include profile-select-dialogue-theme.theme($theme);
     @include sidenav-theme.theme($theme);
+    @include snapshot-list.theme($theme);
     @include svg-theme.theme($theme);
     @include tables-theme.theme($theme);
     @include table-of-contents-theme.theme($theme);

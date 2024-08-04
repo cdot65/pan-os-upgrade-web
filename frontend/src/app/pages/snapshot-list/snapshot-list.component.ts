@@ -21,6 +21,8 @@ import {
     Snapshot,
 } from "../../shared/interfaces/snapshot.interface";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
+import { ComponentPageTitle } from "../page-title/page-title";
 
 @Component({
     selector: "app-snapshot-list",
@@ -35,11 +37,20 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
         MatRadioModule,
         MatIconModule,
         NgxChartsModule,
+        PageHeaderComponent,
     ],
     templateUrl: "./snapshot-list.component.html",
     styleUrls: ["./snapshot-list.component.scss"],
 })
 export class SnapshotListComponent implements OnInit {
+    // Component page details
+    pageTitle = "Snapshot List";
+    pageDescription = "View and compare snapshots of device states";
+    breadcrumbs = [
+        { label: "Home", url: "/" },
+        { label: "Snapshots", url: "/snapshots" },
+    ];
+
     private snapshotService = inject(SnapshotService);
     private destroyRef = inject(DestroyRef);
 
@@ -146,7 +157,7 @@ export class SnapshotListComponent implements OnInit {
         ],
     };
 
-    constructor() {
+    constructor(public _componentPageTitle: ComponentPageTitle) {
         effect(() => {
             const firstSnapshot = this.filteredSnapshots()[0];
             if (
@@ -162,6 +173,7 @@ export class SnapshotListComponent implements OnInit {
     }
 
     ngOnInit() {
+        this._componentPageTitle.title = this.pageTitle;
         this.loadSnapshots();
     }
 
