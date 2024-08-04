@@ -1,7 +1,8 @@
 /* src/app/shared/app-content/app-content.component.scss */
 
 .app-content {
-    transition: margin-left 0.3s ease-in-out;
-    height: 100%;
+    flex: 1;
     overflow-y: auto;
+    padding: 20px;
+    height: calc(100vh - 56px);
 }

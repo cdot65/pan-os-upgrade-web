@@ -6,19 +6,20 @@
         [class.minimized]="!sidenavStateService.isExpanded()"
         [@sidenavAnimation]="sidenavStateService.isExpanded() ? 'expanded' : 'minimized'"
     >
-    <mat-nav-list>
-            <a
-                mat-list-item
-                routerLink="/"
-                routerLinkActive="active"
-                [routerLinkActiveOptions]="{exact: true}"
-            >
-                <mat-icon class="sidenav-icon">home</mat-icon>
+        <mat-nav-list>
+            <a mat-list-item routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                <img
+                    class="logo sidenav-icon"
+                    matButtonIcon
+                    src="../../../assets/img/site/pan-orange.svg"
+                    alt="angular"
+                    aria-hidden="true"
+                />
                 @if (sidenavStateService.isExpanded()) {
-                    <span class="sidenav-text">Home</span>
+                    <span class="sidenav-text">PAN-OS Upgrade</span>
                 }
             </a>
-
+            
             <mat-divider class="sidenav-divider"></mat-divider>
 
             <a mat-list-item routerLink="/inventory" routerLinkActive="active">
@@ -33,7 +34,7 @@
             <a mat-list-item routerLink="/profiles" routerLinkActive="active">
                 <mat-icon class="sidenav-icon">person</mat-icon>
                 @if (sidenavStateService.isExpanded()) {
-                <span class="sidenav-text">Profiles</span>
+                    <span class="sidenav-text">Profiles</span>
                 }
             </a>
 
@@ -42,7 +43,7 @@
             <a mat-list-item routerLink="/upgrade" routerLinkActive="active">
                 <mat-icon class="sidenav-icon">upgrade</mat-icon>
                 @if (sidenavStateService.isExpanded()) {
-                <span class="sidenav-text">Upgrade</span>
+                    <span class="sidenav-text">Upgrade</span>
                 }
             </a>
 
@@ -80,14 +81,21 @@
 
             <mat-divider class="sidenav-divider"></mat-divider>
 
-        <a mat-list-item (click)="toggleSidenav()" class="sidenav-toggle">
-            <mat-icon class="sidenav-icon">
-                {{ sidenavStateService.isExpanded() ? 'menu_open' : 'menu' }}
-            </mat-icon>
-            @if (sidenavStateService.isExpanded()) {
-                <span class="sidenav-text">Minimize</span>
-            }
-        </a>
-    </mat-nav-list>
+            <a mat-list-item (click)="toggleSidenav()" class="sidenav-toggle">
+                <mat-icon class="sidenav-icon">
+                    {{ sidenavStateService.isExpanded() ? 'menu_open' : 'menu' }}
+                </mat-icon>
+                @if (sidenavStateService.isExpanded()) {
+                    <span class="sidenav-text">Minimize</span>
+                }
+            </a>
+        </mat-nav-list>
     </mat-sidenav>
+
+    <mat-sidenav-content [style.marginLeft.px]="sidenavStateService.isExpanded() ? 250 : 64">
+        <div class="sidenav-content">
+            <ng-content select="app-navbar"></ng-content>
+            <ng-content select="app-content"></ng-content>
+        </div>
+    </mat-sidenav-content>
 </mat-sidenav-container>

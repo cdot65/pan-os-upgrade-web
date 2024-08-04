@@ -8,6 +8,7 @@ app {
     height: 100vh;
 }
 
+
 app-navbar {
     position: fixed;
     top: 0;
@@ -18,6 +19,7 @@ app-navbar {
 
 app > app-component-sidenav {
     flex: 1;
+    display: flex;
 }
 
 app > router-outlet + .main-content,
@@ -28,7 +30,8 @@ app > router-outlet + app-component-sidenav {
 }
 
 .content-container {
-    margin-top: 56px;
+    flex: 1;
+    overflow-y: auto;
 }
 
 @media (max-width: constants.$extra-small-breakpoint-width) {

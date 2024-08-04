@@ -3,13 +3,10 @@
     flex-wrap: wrap;
     align-items: center;
     padding: 4px 16px;
-
-    > .mat-mdc-button {
-        &:last-child {
-            margin-left: auto;
-        }
-    }
+    height: 56px;
+    z-index: 1000;
 }
+
 
 .mat-mdc-button-base:not(:disabled) {
     color: inherit;
@@ -17,11 +14,6 @@
 
 .flex-spacer {
     flex-grow: 1;
-}
-
-.logo {
-    height: 26px;
-    margin-right: 6px;
 }
 
 .docs-navbar-link {

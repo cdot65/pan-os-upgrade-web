@@ -1,8 +1,8 @@
 // src/app/shared/footer/footer.scss
 
 .app-footer {
-    padding: 12px;
-    font-size: 12px;
+    flex-shrink: 0;
+    z-index: 1000;
 }
 
 .app-footer-list {

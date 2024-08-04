@@ -15,6 +15,7 @@ import {
     transition,
     trigger,
 } from "@angular/animations";
+import { MatAnchor } from "@angular/material/button";
 
 @Component({
     selector: "app-sidenav",
@@ -26,6 +27,7 @@ import {
         MatIconModule,
         MatDividerModule,
         RouterModule,
+        MatAnchor,
     ],
     templateUrl: "./sidenav.html",
     styleUrls: ["./sidenav.scss"],
