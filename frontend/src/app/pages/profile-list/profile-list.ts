@@ -26,6 +26,7 @@ import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
 import { SelectionModel } from "@angular/cdk/collections";
 import { takeUntil } from "rxjs/operators";
+import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
 
 @Component({
     selector: "app-profile-list",
@@ -39,11 +40,21 @@ import { takeUntil } from "rxjs/operators";
         MatSortModule,
         MatIconModule,
         MatButtonModule,
+        PageHeaderComponent,
     ],
 })
 export class ProfileListComponent implements OnInit, AfterViewInit, OnDestroy {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
+
+    // Component page details
+    pageTitle = "Profile List";
+    pageDescription = "Manage your settings profiles";
+    breadcrumbs = [
+        { label: "Home", url: "/" },
+        { label: "Profiles", url: "/profiles" },
+    ];
+
     profiles: Profile[] = [];
     displayedColumns: string[] = ["select", "name", "description", "details"];
     dataSource: MatTableDataSource<Profile> = new MatTableDataSource<Profile>(
@@ -131,7 +142,7 @@ export class ProfileListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this._componentPageTitle.title = "Profile List";
+        this._componentPageTitle.title = this.pageTitle;
         this.getProfiles();
     }
 
