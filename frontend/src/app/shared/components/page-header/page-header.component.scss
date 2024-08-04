@@ -1,0 +1,92 @@
+@use '@angular/material' as mat;
+
+:host {
+    display: block;
+}
+
+.app-headerbackground {
+    overflow: hidden;
+    position: relative;
+    height: 420px;
+
+    &::before {
+        content: "";
+        position: absolute;
+        background-image: url("../../../../assets/img/site/pan-trans.svg");
+        background-size: 600px;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-repeat: no-repeat;
+        background-position: 80% 20px;
+        opacity: 0.2;
+    }
+}
+
+.app-headersection {
+    width: 90%;
+    position: absolute;
+    z-index: 0;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.app-headerheadline {
+    h1 {
+        font-size: 56px;
+        font-weight: bold;
+        line-height: 56px;
+        margin: 15px 5px;
+    }
+
+    h2 {
+        font-size: 20px;
+        font-weight: 300;
+        line-height: 28px;
+        margin: 15px 0 25px 0;
+    }
+}
+
+.app-headerstart {
+    text-align: center;
+    margin: 50px 0 0 0;
+
+    ::ng-deep .mat-mdc-raised-button {
+        font-size: 15px;
+    }
+}
+
+.breadcrumbs {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1;
+
+    a {
+        color: inherit;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+@media (max-width: 1200px) {
+    .app-headerbackground {
+        height: 330px;
+    }
+
+    .app-headerbackground:before {
+        background-image: none;
+    }
+}
+
+@media (max-width: 720px) {
+    .app-headerstart {
+        margin: 15px 0 0 0;
+    }
+}

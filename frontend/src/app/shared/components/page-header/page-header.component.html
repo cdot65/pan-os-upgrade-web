@@ -1,0 +1,19 @@
+<header class="app-headerbackground" aria-label="Page header" id="page-header">
+    <div class="breadcrumbs" *ngIf="breadcrumbs.length > 0">
+        @for (crumb of breadcrumbs; track crumb.url) {
+            <a [routerLink]="crumb.url">{{ crumb.label }}</a>
+            @if (!$last) {
+                <span> > </span>
+            }
+        }
+    </div>
+    <div class="app-headersection">
+        <div class="app-headerheadline">
+            <h1 class="mat-h1">{{ title }}</h1>
+            <h2>{{ description }}</h2>
+        </div>
+        <div class="app-headerstart">
+            <ng-content></ng-content>
+        </div>
+    </div>
+</header>
