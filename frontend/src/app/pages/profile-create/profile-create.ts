@@ -11,7 +11,6 @@ import {
 
 import { CommonModule } from "@angular/common";
 import { ComponentPageTitle } from "../page-title/page-title";
-import { Footer } from "src/app/shared/footer/footer";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatFormFieldModule } from "@angular/material/form-field";
@@ -36,7 +35,6 @@ import { takeUntil } from "rxjs/operators";
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
-        Footer,
     ],
 })
 export class ProfileCreateComponent implements OnInit, OnDestroy {

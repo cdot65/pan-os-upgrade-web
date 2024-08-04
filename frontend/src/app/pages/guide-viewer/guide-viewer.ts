@@ -7,7 +7,6 @@ import { GuideItem, GuideItems } from "../../shared/guide-items/guide-items";
 import { ComponentPageTitle } from "../page-title/page-title";
 import { DocViewer } from "../../shared/doc-viewer/doc-viewer";
 import { DocViewerModule } from "../../shared/doc-viewer/doc-viewer-module";
-import { Footer } from "../../shared/footer/footer";
 import { NavigationFocus } from "../../shared/navigation-focus/navigation-focus";
 import { ReactiveFormsModule } from "@angular/forms";
 import { TableOfContents } from "../../shared/table-of-contents/table-of-contents";
@@ -17,7 +16,7 @@ import { TableOfContents } from "../../shared/table-of-contents/table-of-content
     templateUrl: "./guide-viewer.html",
     styleUrls: ["./guide-viewer.scss"],
     standalone: true,
-    imports: [DocViewer, NavigationFocus, TableOfContents, Footer],
+    imports: [DocViewer, NavigationFocus, TableOfContents],
 })
 export class GuideViewer implements OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;

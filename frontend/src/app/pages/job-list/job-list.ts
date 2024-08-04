@@ -13,7 +13,6 @@ import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 import { forkJoin, Subject } from "rxjs";
 
 import { ComponentPageTitle } from "../page-title/page-title";
-import { Footer } from "src/app/shared/footer/footer";
 import { JobStatus } from "../../shared/interfaces/job.interface";
 import { JobDeleteDialogComponent } from "../job-delete-dialog/job-delete-dialog";
 import { JobService } from "../../shared/services/job.service";
@@ -33,7 +32,6 @@ import { takeUntil } from "rxjs/operators";
     styleUrls: ["./job-list.scss"],
     standalone: true,
     imports: [
-        Footer,
         MatCheckboxModule,
         MatTableModule,
         MatSortModule,

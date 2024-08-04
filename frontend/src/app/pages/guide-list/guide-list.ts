@@ -3,7 +3,6 @@
 import { Component, HostBinding, OnInit } from "@angular/core";
 
 import { ComponentPageTitle } from "../page-title/page-title";
-import { Footer } from "../../shared/footer/footer";
 import { GuideItems } from "../../shared/guide-items/guide-items";
 import { MatCardModule } from "@angular/material/card";
 import { NavigationFocus } from "../../shared/navigation-focus/navigation-focus";
@@ -15,7 +14,7 @@ import { RouterLink } from "@angular/router";
     templateUrl: "./guide-list.html",
     styleUrls: ["./guide-list.scss"],
     standalone: true,
-    imports: [NavigationFocus, NgFor, RouterLink, MatCardModule, Footer],
+    imports: [NavigationFocus, NgFor, RouterLink, MatCardModule],
 })
 export class GuideList implements OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;

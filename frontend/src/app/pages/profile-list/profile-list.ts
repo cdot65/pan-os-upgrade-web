@@ -10,10 +10,9 @@ import {
 } from "@angular/core";
 import { MatSort, MatSortModule, Sort } from "@angular/material/sort";
 import { MatTableDataSource, MatTableModule } from "@angular/material/table";
-import { Subject, forkJoin } from "rxjs";
+import { forkJoin, Subject } from "rxjs";
 
 import { ComponentPageTitle } from "../page-title/page-title";
-import { Footer } from "src/app/shared/footer/footer";
 import { InventoryDeleteDialogComponent } from "../inventory-delete-dialog/inventory-delete-dialog";
 import { Layout } from "../../shared/layout/layout";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
@@ -34,7 +33,6 @@ import { takeUntil } from "rxjs/operators";
     styleUrls: ["./profile-list.scss"],
     standalone: true,
     imports: [
-        Footer,
         Layout,
         MatCheckboxModule,
         MatTableModule,

@@ -15,7 +15,6 @@ import { Device } from "../../shared/interfaces/device.interface";
 import { MatSnackBar } from "@angular/material/snack-bar";
 
 import { MatButtonModule } from "@angular/material/button";
-import { Footer } from "../../shared/footer/footer";
 import { RouterLink } from "@angular/router";
 import { ComponentPageTitle } from "../page-title/page-title";
 import { NavigationFocus } from "../../shared/navigation-focus/navigation-focus";
@@ -55,7 +54,6 @@ import { JobStatus } from "../../shared/interfaces/job.interface";
         CarouselItem,
         MatCardModule,
         YouTubePlayer,
-        Footer,
         NgxChartsModule,
         PieChartModule,
     ],

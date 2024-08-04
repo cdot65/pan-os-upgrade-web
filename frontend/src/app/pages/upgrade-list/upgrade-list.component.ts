@@ -7,7 +7,6 @@ import { mergeMap, retryWhen, switchMap, takeUntil, takeWhile, tap } from "rxjs/
 import { UpgradeJob, UpgradeResponse } from "../../shared/interfaces/upgrade-response.interface";
 import { ComponentPageTitle } from "../page-title/page-title";
 import { Device } from "../../shared/interfaces/device.interface";
-import { Footer } from "src/app/shared/footer/footer";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { JobService } from "src/app/shared/services/job.service";
 import { MatButtonModule } from "@angular/material/button";
@@ -36,7 +35,6 @@ import { HttpErrorResponse } from "@angular/common/http";
     standalone: true,
     imports: [
         AsyncPipe,
-        Footer,
         MatDividerModule,
         MatFormFieldModule,
         MatIconModule,

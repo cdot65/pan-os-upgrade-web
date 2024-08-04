@@ -5,7 +5,6 @@ import { catchError, map, switchMap, takeUntil, tap } from "rxjs/operators";
 import { ActivatedRoute } from "@angular/router";
 import { AsyncPipe, CommonModule, DatePipe } from "@angular/common";
 import { ComponentPageTitle } from "../page-title/page-title";
-import { Footer } from "src/app/shared/footer/footer";
 import { LoggingService } from "../../shared/services/logging.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
@@ -30,7 +29,6 @@ import { UpgradeStepService } from "../../shared/services/upgrade-step.service";
         AsyncPipe,
         CommonModule,
         DatePipe,
-        Footer,
         MatButtonModule,
         MatCardModule,
         MatDividerModule,

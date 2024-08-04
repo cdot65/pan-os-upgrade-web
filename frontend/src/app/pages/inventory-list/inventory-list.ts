@@ -21,7 +21,6 @@ import { ComponentPageTitle } from "../page-title/page-title";
 import { CookieService } from "ngx-cookie-service";
 import { Device } from "../../shared/interfaces/device.interface";
 import { DeviceSyncForm } from "../../shared/interfaces/device-sync-form.interface";
-import { Footer } from "src/app/shared/footer/footer";
 import { InventoryDeleteDialogComponent } from "../inventory-delete-dialog/inventory-delete-dialog";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
@@ -42,7 +41,6 @@ import { SelectionModel } from "@angular/cdk/collections";
     styleUrls: ["./inventory-list.scss"],
     standalone: true,
     imports: [
-        Footer,
         MatCheckboxModule,
         MatTableModule,
         MatSortModule,
