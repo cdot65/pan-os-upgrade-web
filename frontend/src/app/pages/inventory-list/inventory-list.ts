@@ -378,7 +378,7 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         this.getPanoramaDevices();
         this.getProfiles();
 
-        // Add this line to update the data source when selection changes
+        // Update the data source when selection changes
         this.selection.changed.subscribe(() => {
             this.dataSource._updateChangeSubscription();
         });
