@@ -4,16 +4,16 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    image: ghcr.io/cdot65/pan-os-upgrade-web-backend:1.0.3-beta
+    image: ghcr.io/cdot65/pan-os-upgrade-web-backend:1.0.4-beta
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    image: ghcr.io/cdot65/pan-os-upgrade-web-frontend:1.0.3-beta
+    image: ghcr.io/cdot65/pan-os-upgrade-web-frontend:1.0.4-beta
 
   worker:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    image: ghcr.io/cdot65/pan-os-upgrade-web-worker:1.0.3-beta
+    image: ghcr.io/cdot65/pan-os-upgrade-web-worker:1.0.4-beta

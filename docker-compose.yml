@@ -1,7 +1,7 @@
 ---
 services:
     backend:
-        image: ghcr.io/cdot65/pan-os-upgrade-web-backend:1.0.3-beta
+        image: ghcr.io/cdot65/pan-os-upgrade-web-backend:1.0.4-beta
         command: ./start.sh
         volumes:
             - ./backend:/code
@@ -16,7 +16,7 @@ services:
             - ./backend/.env
 
     frontend:
-        image: ghcr.io/cdot65/pan-os-upgrade-web-frontend:1.0.3-beta
+        image: ghcr.io/cdot65/pan-os-upgrade-web-frontend:1.0.4-beta
         ports:
           - "8080:80"
         depends_on:
@@ -41,7 +41,7 @@ services:
             - 6379
 
     worker:
-        image: ghcr.io/cdot65/pan-os-upgrade-web-worker:1.0.3-beta
+        image: ghcr.io/cdot65/pan-os-upgrade-web-worker:1.0.4-beta
         command: celery -A django_project worker -l debug
         deploy:
             replicas: 2
