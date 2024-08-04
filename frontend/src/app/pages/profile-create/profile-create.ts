@@ -21,6 +21,7 @@ import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
+import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
 
 @Component({
     selector: "app-profile-create",
@@ -35,10 +36,21 @@ import { takeUntil } from "rxjs/operators";
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
+        PageHeaderComponent,
     ],
 })
 export class ProfileCreateComponent implements OnInit, OnDestroy {
     @HostBinding("class.main-content") readonly mainContentClass = true;
+
+    // Component page details
+    pageTitle = "Create Settings Profile";
+    pageDescription = "Create a new settings profile for your devices";
+    breadcrumbs = [
+        { label: "Home", url: "/" },
+        { label: "Profiles", url: "/profiles" },
+        { label: "Create", url: "/profiles/create" },
+    ];
+
     createProfileForm: FormGroup;
     private destroy$ = new Subject<void>();
 
@@ -134,7 +146,7 @@ export class ProfileCreateComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this._componentPageTitle.title = "Create Settings Profile";
+        this._componentPageTitle.title = this.pageTitle;
     }
 
     onCancel(): void {

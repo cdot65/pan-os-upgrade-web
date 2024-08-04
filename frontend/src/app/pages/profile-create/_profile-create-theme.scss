@@ -1,0 +1,68 @@
+// src/app/pages/profile-create/_profile-create-theme.scss
+
+@use "sass:map";
+@use "@angular/material" as mat;
+
+@mixin theme($theme) {
+    $primary: map.get($theme, primary);
+    $accent: map.get($theme, accent);
+    $warn: map.get($theme, warn);
+    $background: map.get($theme, background);
+    $foreground: map.get($theme, foreground);
+
+    app-profile-create {
+        app-page-header {
+            .app-headerbackground {
+                background: mat.get-color-from-palette($primary);
+            }
+
+            .app-headerheadline {
+                color: mat.get-color-from-palette($primary, default-contrast);
+            }
+
+            .app-headerstart {
+                color: mat.get-color-from-palette($primary);
+
+                ::ng-deep .mat-mdc-raised-button {
+                    color: mat.get-color-from-palette($primary, default-contrast);
+                }
+            }
+
+            .breadcrumbs {
+                color: mat.get-color-from-palette($primary, default-contrast);
+            }
+        }
+
+        .profile-create {
+            color: mat.get-color-from-palette($foreground, text);
+
+            form {
+                background-color: mat.get-color-from-palette($background, card);
+            }
+
+            .mat-mdc-form-field {
+                .mat-mdc-form-field-label {
+                    color: mat.get-color-from-palette($foreground, secondary-text);
+                }
+            }
+
+            .mat-mdc-checkbox {
+                color: mat.get-color-from-palette($foreground, text);
+            }
+
+            .button-container {
+                button.mat-mdc-raised-button {
+                    &.mat-primary {
+                        background-color: mat.get-color-from-palette($primary);
+                        color: mat.get-color-from-palette($primary, default-contrast);
+                    }
+
+                    &.mat-warn {
+                        background-color: mat.get-color-from-palette($warn);
+                        color: mat.get-color-from-palette($warn, default-contrast);
+                    }
+                }
+            }
+        }
+    }
+}
