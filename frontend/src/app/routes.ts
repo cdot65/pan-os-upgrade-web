@@ -139,18 +139,6 @@ export const APP_ROUTES: Routes = [
         ],
     },
     {
-        path: "guides",
-        loadComponent: () =>
-            import("./pages/guide-list").then((m) => m.GuideList),
-        canActivate: [authGuard],
-    },
-    {
-        path: "guide/:id",
-        loadChildren: () =>
-            import("./pages/guide-viewer").then((m) => m.GuideViewerModule),
-        canActivate: [authGuard],
-    },
-    {
         path: "404",
         loadComponent: () =>
             import("./pages/not-found").then((m) => m.NotFound),

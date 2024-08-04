@@ -3,7 +3,6 @@
 @use "../../../node_modules/@angular/material/index" as mat;
 @use "sass:map";
 @use "../../app/pages/auth/login/login-theme";
-@use "../../app/pages/guide-list/guide-list-theme";
 @use '../../app/pages/homepage/homepage-theme' as homepage;
 @use '../../app/pages/inventory-create/inventory-create-theme' as inventory-create;
 @use '../../app/pages/inventory-details/inventory-details-theme' as inventory-details;
@@ -20,7 +19,6 @@
 @use "../../app/shared/carousel/carousel-theme";
 @use "../../app/shared/navbar/navbar-theme";
 @use "../../app/shared/sidenav/sidenav-theme";
-@use "../../app/shared/table-of-contents/table-of-contents-theme";
 @use "../components/markdown-theme";
 @use "../components/svg-theme";
 @use "../components/tables-theme";
@@ -55,7 +53,6 @@
     }
 
     @include carousel-theme.theme($theme);
-    @include guide-list-theme.theme($theme);
     @include homepage.theme($theme);
     @include inventory-create.theme($theme);
     @include inventory-details.theme($theme);
@@ -74,6 +71,5 @@
     @include snapshot-list.theme($theme);
     @include svg-theme.theme($theme);
     @include tables-theme.theme($theme);
-    @include table-of-contents-theme.theme($theme);
     @include upgrade-list.theme($theme);
 }
