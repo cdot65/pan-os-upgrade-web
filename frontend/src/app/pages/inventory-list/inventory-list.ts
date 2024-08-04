@@ -34,6 +34,7 @@ import { ProfileDialogComponent } from "../profile-select-dialog/profile-select-
 import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
 import { SelectionModel } from "@angular/cdk/collections";
+import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
 
 @Component({
     selector: "app-inventory-list",
@@ -49,6 +50,7 @@ import { SelectionModel } from "@angular/cdk/collections";
         MatDialogModule,
         MatListModule,
         NgxChartsModule,
+        PageHeaderComponent,
     ],
 })
 
@@ -58,6 +60,15 @@ import { SelectionModel } from "@angular/cdk/collections";
 export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
+
+    // Component page details
+    pageTitle = "Inventory List";
+    pageDescription = "Manage your device inventory";
+    breadcrumbs = [
+        { label: "Home", url: "/" },
+        { label: "Inventory", url: "/inventory" },
+    ];
+
     inventoryItems: Device[] = [];
     displayedColumns: string[] = [
         "select",
@@ -289,11 +300,10 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         return numSelected === numRows;
     }
 
-    /**
-     * Determines if the sync from panorama button is active.
-     *
-     * @returns True if the button is active, false otherwise.
-     */
+    isAnyItemSelected(): boolean {
+        return this.selection.selected.length > 0;
+    }
+
     isSyncFromPanoramaButtonActive(): boolean {
         return (
             this.selection.selected.length > 0 &&
@@ -363,10 +373,15 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
      * @returns
      */
     ngOnInit(): void {
-        this._componentPageTitle.title = "Inventory List";
+        this._componentPageTitle.title = this.pageTitle;
         this.getDevices();
         this.getPanoramaDevices();
         this.getProfiles();
+
+        // Add this line to update the data source when selection changes
+        this.selection.changed.subscribe(() => {
+            this.dataSource._updateChangeSubscription();
+        });
     }
 
     /**
