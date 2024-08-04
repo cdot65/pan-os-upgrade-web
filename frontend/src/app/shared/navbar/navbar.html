@@ -1,26 +1,28 @@
 <!-- src/app/shared/navbar/navbar.html-->
 
 <nav class="app-navbar-header" aria-label="Top Toolbar" [class.expanded]="sidenavStateService.isExpanded()">
-    <div class="flex-spacer"></div>
-    <theme-picker></theme-picker>
-    @if (!hasAuthToken) {
-        <a
-            mat-button
-            class="app-button app-navbar-hide-small"
-            routerLink="/auth/login"
-        >
-            <mat-icon>login</mat-icon>
-            Login
-        </a>
-    } @else {
-        <a
-            mat-button
-            class="app-button app-navbar-hide-small"
-            routerLink="/auth/login"
-            (click)="authService.logout()"
-        >
-            <mat-icon>logout</mat-icon>
-            Logout
-        </a>
-    }
+    <div class="app-navbar-content">
+        <div class="flex-spacer"></div>
+        <theme-picker></theme-picker>
+        @if (!hasAuthToken) {
+            <a
+                mat-button
+                class="app-button app-navbar-hide-small"
+                routerLink="/auth/login"
+            >
+                <mat-icon>login</mat-icon>
+                Login
+            </a>
+        } @else {
+            <a
+                mat-button
+                class="app-button app-navbar-hide-small"
+                routerLink="/auth/login"
+                (click)="authService.logout()"
+            >
+                <mat-icon>logout</mat-icon>
+                Logout
+            </a>
+        }
+    </div>
 </nav>

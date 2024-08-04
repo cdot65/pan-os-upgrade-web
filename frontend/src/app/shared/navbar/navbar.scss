@@ -4,8 +4,8 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    padding: 4px 16px;
-    height: 56px;
+    //padding: 4px 16px;
+    height: 66px;
     z-index: 1000;
     width: 100%;
     transition: width 0.3s ease-in-out;
@@ -69,3 +69,11 @@ theme-picker {
         display: block;
     }
 }
+
+.app-navbar-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0 16px;
+}
+
