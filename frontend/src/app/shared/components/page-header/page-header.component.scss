@@ -7,13 +7,13 @@
 .app-headerbackground {
     overflow: hidden;
     position: relative;
-    height: 420px;
+    height: 240px;
 
     &::before {
         content: "";
         position: absolute;
         background-image: url("../../../../assets/img/site/pan-trans.svg");
-        background-size: 600px;
+        background-size: 320px;
         top: 0;
         bottom: 0;
         left: 0;
