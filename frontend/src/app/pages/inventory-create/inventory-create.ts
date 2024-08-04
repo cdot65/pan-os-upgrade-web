@@ -28,6 +28,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { Router } from "@angular/router";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
+import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
 
 @Component({
     selector: "app-inventory-create",
@@ -36,16 +37,27 @@ import { takeUntil } from "rxjs/operators";
     standalone: true,
     imports: [
         CommonModule,
+        ReactiveFormsModule,
         MatButtonModule,
         MatCheckboxModule,
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
-        ReactiveFormsModule,
+        PageHeaderComponent,
     ],
 })
 export class InventoryCreateComponent implements OnDestroy, OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
+
+    // Component page details
+    pageTitle = "Create Inventory Item";
+    pageDescription = "Add a new device to your inventory";
+    breadcrumbs = [
+        { label: "Home", url: "/" },
+        { label: "Inventory", url: "/inventory" },
+        { label: "Create", url: "/inventory/create" },
+    ];
+
     createInventoryForm: FormGroup;
     devices: Device[] = [];
     firewallPlatforms: DeviceType[] = [];
@@ -244,7 +256,7 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
      * @return
      */
     ngOnInit(): void {
-        this._componentPageTitle.title = "Inventory Create";
+        this._componentPageTitle.title = this.pageTitle;
         this.getDevices();
         this.getFirewallPlatforms();
         this.createInventoryForm.setValidators(this.requireIpAddress());
