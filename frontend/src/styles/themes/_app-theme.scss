@@ -9,7 +9,6 @@
 @use "../../app/pages/not-found/not-found-theme";
 @use "../../app/pages/job-details/job-details-theme";
 @use "../../app/shared/carousel/carousel-theme";
-@use "../../app/shared/footer/footer-theme";
 @use "../../app/shared/navbar/navbar-theme";
 @use "../../app/pages/profile-select-dialog/profile-select-dialogue-theme";
 @use "../../app/shared/sidenav/sidenav-theme";
@@ -39,11 +38,6 @@
         }
     }
 
-    .app-footer {
-        background: mat.get-color-from-palette($primary);
-        color: mat.get-color-from-palette($primary, default-contrast);
-    }
-
     .app-help-support {
         color: mat.get-color-from-palette($foreground, secondary-text);
 
@@ -56,7 +50,6 @@
     @include markdown-theme.theme($theme);
     @include svg-theme.theme($theme);
     @include tables-theme.theme($theme);
-    @include footer-theme.theme($theme);
     @include guide-list-theme.theme($theme);
     @include documentation-theme.theme($theme);
     @include homepage-theme.theme($theme);
