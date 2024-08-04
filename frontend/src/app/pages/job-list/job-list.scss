@@ -3,8 +3,6 @@
 .job-list-container {
     display: grid;
     grid-template-rows: auto 1fr auto;
-    //min-height: 100vh;
-    //width: 99%;
     padding: 20px;
 }
 
@@ -12,47 +10,14 @@
     width: 97%;
     padding: 25px;
 
-    .table-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-
-        h2 {
-            margin: 0;
-        }
-
-        button {
-            mat-icon {
-                margin-right: 5px;
-            }
-        }
-
-        .button-container {
-            margin-top: 20px;
-            display: flex;
-            justify-content: flex-end;
-
-            button {
-                margin-left: 5px;
-            }
-        }
-    }
-
     .mat-table {
         width: 100%;
 
         .mat-row {
-            &:hover {
-                .mat-cell {
-                    background-color: rgba(0, 0, 0, 0.2);
-                }
+            .mat-cell {
+                padding-right: 20px;
+                transition: background-color 0.3s;
             }
-        }
-
-        .mat-cell {
-            padding-right: 20px;
-            transition: background-color 0.3s;
         }
 
         .mat-header-cell {
@@ -62,5 +27,15 @@
         .edit-button {
             margin-left: 10px;
         }
+    }
+}
+
+.header-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    button {
+        margin: 0 5px 10px;
     }
 }

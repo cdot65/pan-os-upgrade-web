@@ -1,0 +1,82 @@
+@use "sass:map";
+@use "@angular/material" as mat;
+
+@mixin theme($theme) {
+    $primary: map.get($theme, primary);
+    $accent: map.get($theme, accent);
+    $warn: map.get($theme, warn);
+    $background: map.get($theme, background);
+    $foreground: map.get($theme, foreground);
+
+    app-inventory-list {
+        app-page-header {
+            .app-headerbackground {
+                background: mat.get-color-from-palette($primary);
+            }
+
+            .app-headerheadline {
+                color: mat.get-color-from-palette($primary, default-contrast);
+            }
+
+            .app-headerstart {
+                .header-buttons {
+                    button.mat-mdc-raised-button {
+                        &.mat-primary {
+                            background-color: mat.get-color-from-palette($primary);
+                            color: mat.get-color-from-palette($primary, default-contrast);
+
+                            &:disabled {
+                                background-color: mat.get-color-from-palette($background, disabled-button);
+                                color: mat.get-color-from-palette($foreground, disabled-text);
+                            }
+                        }
+
+                        &.mat-accent {
+                            background-color: mat.get-color-from-palette($accent);
+                            color: mat.get-color-from-palette($accent, default-contrast);
+
+                            &:disabled {
+                                background-color: mat.get-color-from-palette($background, disabled-button);
+                                color: mat.get-color-from-palette($foreground, disabled-text);
+                            }
+                        }
+
+                        &.mat-warn {
+                            background-color: mat.get-color-from-palette($warn);
+                            color: mat.get-color-from-palette($warn, default-contrast);
+
+                            &:disabled {
+                                background-color: mat.get-color-from-palette($background, disabled-button);
+                                color: mat.get-color-from-palette($foreground, disabled-text);
+                            }
+                        }
+                    }
+                }
+            }
+
+            .breadcrumbs {
+                color: mat.get-color-from-palette($primary, default-contrast);
+            }
+        }
+
+        .inventory-list {
+            color: mat.get-color-from-palette($foreground, text);
+
+            .mat-table {
+                background-color: mat.get-color-from-palette($background, card);
+
+                .mat-header-cell {
+                    color: mat.get-color-from-palette($foreground, secondary-text);
+                }
+
+                .mat-row:hover {
+                    background-color: mat.get-color-from-palette($background, hover);
+                }
+            }
+
+            .refresh-error, .sync-error {
+                color: mat.get-color-from-palette($warn);
+            }
+        }
+    }
+}

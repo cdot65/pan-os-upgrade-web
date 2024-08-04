@@ -1,4 +1,14 @@
 <!-- upgrade-list.component.html -->
+<app-page-header
+    [title]="pageTitle"
+    [description]="pageDescription"
+    [breadcrumbs]="breadcrumbs">
+    <button mat-raised-button color="accent" (click)="onUpgradeClick()" [disabled]="!upgradeForm.valid">
+        <mat-icon>sync</mat-icon>
+        Start Upgrade
+    </button>
+</app-page-header>
+
 <div class="upgrade-list-container">
     <main
         aria-label="Upgrade list"
@@ -10,24 +20,6 @@
             (ngSubmit)="onUpgradeClick()"
             class="mat-elevation-z2"
         >
-            <div class="table-header">
-                <h2>Upgrade Devices</h2>
-
-                <!-- container for the Refresh button. -->
-                <div class="refresh-header">
-                    <button
-                        mat-raised-button
-                        color="accent"
-                        type="submit"
-                        aria-label="Upgrade Devices"
-                        [disabled]="upgradeForm.invalid"
-                    >
-                        <mat-icon>sync</mat-icon>
-                        Start Upgrade
-                    </button>
-                </div>
-            </div>
-
             <div class="upgrade-form-grid">
                 <div class="form-fields-container">
                     <!-- Form field for entering the profile name -->

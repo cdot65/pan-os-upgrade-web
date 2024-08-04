@@ -1,0 +1,62 @@
+// src/app/pages/snapshot-list/_snapshot-list-theme.scss
+
+@use "sass:map";
+@use "@angular/material" as mat;
+
+@mixin theme($theme) {
+    $primary: map.get($theme, primary);
+    $accent: map.get($theme, accent);
+    $warn: map.get($theme, warn);
+    $background: map.get($theme, background);
+    $foreground: map.get($theme, foreground);
+
+    app-snapshot-list {
+        app-page-header {
+            .app-headerbackground {
+                background: mat.get-color-from-palette($primary);
+            }
+
+            .app-headerheadline {
+                color: mat.get-color-from-palette($primary, default-contrast);
+            }
+
+            .app-headerstart {
+                color: mat.get-color-from-palette($primary);
+
+                ::ng-deep .mat-mdc-raised-button {
+                    color: mat.get-color-from-palette($primary, default-contrast);
+                }
+            }
+
+            .breadcrumbs {
+                color: mat.get-color-from-palette($primary, default-contrast);
+            }
+        }
+
+        .snapshot-list-container {
+            color: mat.get-color-from-palette($foreground, text);
+
+            mat-form-field {
+                .mat-mdc-form-field-label {
+                    color: mat.get-color-from-palette($foreground, secondary-text);
+                }
+            }
+
+            table {
+                background-color: mat.get-color-from-palette($background, card);
+
+                th.mat-header-cell {
+                    color: mat.get-color-from-palette($foreground, secondary-text);
+                }
+
+                .mat-row:hover {
+                    background-color: mat.get-color-from-palette($background, hover);
+                }
+            }
+
+            .sort-icon {
+                color: mat.get-color-from-palette($primary);
+            }
+        }
+    }
+}

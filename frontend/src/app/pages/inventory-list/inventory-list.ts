@@ -21,7 +21,6 @@ import { ComponentPageTitle } from "../page-title/page-title";
 import { CookieService } from "ngx-cookie-service";
 import { Device } from "../../shared/interfaces/device.interface";
 import { DeviceSyncForm } from "../../shared/interfaces/device-sync-form.interface";
-import { Footer } from "src/app/shared/footer/footer";
 import { InventoryDeleteDialogComponent } from "../inventory-delete-dialog/inventory-delete-dialog";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
@@ -35,6 +34,7 @@ import { ProfileDialogComponent } from "../profile-select-dialog/profile-select-
 import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
 import { SelectionModel } from "@angular/cdk/collections";
+import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
 
 @Component({
     selector: "app-inventory-list",
@@ -42,7 +42,6 @@ import { SelectionModel } from "@angular/cdk/collections";
     styleUrls: ["./inventory-list.scss"],
     standalone: true,
     imports: [
-        Footer,
         MatCheckboxModule,
         MatTableModule,
         MatSortModule,
@@ -51,6 +50,7 @@ import { SelectionModel } from "@angular/cdk/collections";
         MatDialogModule,
         MatListModule,
         NgxChartsModule,
+        PageHeaderComponent,
     ],
 })
 
@@ -60,6 +60,15 @@ import { SelectionModel } from "@angular/cdk/collections";
 export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
+
+    // Component page details
+    pageTitle = "Inventory List";
+    pageDescription = "Manage your device inventory";
+    breadcrumbs = [
+        { label: "Home", url: "/" },
+        { label: "Inventory", url: "/inventory" },
+    ];
+
     inventoryItems: Device[] = [];
     displayedColumns: string[] = [
         "select",
@@ -291,11 +300,10 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
         return numSelected === numRows;
     }
 
-    /**
-     * Determines if the sync from panorama button is active.
-     *
-     * @returns True if the button is active, false otherwise.
-     */
+    isAnyItemSelected(): boolean {
+        return this.selection.selected.length > 0;
+    }
+
     isSyncFromPanoramaButtonActive(): boolean {
         return (
             this.selection.selected.length > 0 &&
@@ -365,10 +373,15 @@ export class InventoryList implements OnInit, AfterViewInit, OnDestroy {
      * @returns
      */
     ngOnInit(): void {
-        this._componentPageTitle.title = "Inventory List";
+        this._componentPageTitle.title = this.pageTitle;
         this.getDevices();
         this.getPanoramaDevices();
         this.getProfiles();
+
+        // Update the data source when selection changes
+        this.selection.changed.subscribe(() => {
+            this.dataSource._updateChangeSubscription();
+        });
     }
 
     /**

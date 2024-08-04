@@ -1,0 +1,10 @@
+<!-- src/app/shared/layout/layout.html -->
+
+<app-sidenav>
+    <div class="content-wrapper" [class.expanded]="sidenavStateService.isExpanded()">
+        <app-navbar></app-navbar>
+        <main class="main-content" role="main">
+            <router-outlet></router-outlet>
+        </main>
+    </div>
+</app-sidenav>

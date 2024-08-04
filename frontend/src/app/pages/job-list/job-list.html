@@ -1,25 +1,22 @@
 <!-- src/app/pages/job-list/job-list.html -->
+<app-page-header
+    [title]="pageTitle"
+    [description]="pageDescription"
+    [breadcrumbs]="breadcrumbs">
+    <div class="header-buttons">
+        <button mat-raised-button color="warn" (click)="onDeleteSelectedClick()" [disabled]="!selection.hasValue()">
+            <mat-icon>delete</mat-icon>
+            Delete Selected
+        </button>
+    </div>
+</app-page-header>
+
 <div class="job-list-container">
     <main
         aria-label="Job list"
         id="job-list"
         class="job-list"
     >
-        <div class="table-header">
-            <h2>Jobs</h2>
-
-            <div class="button-container">
-                <button
-                    mat-raised-button
-                    color="warn"
-                    (click)="onDeleteSelectedClick()"
-                    [disabled]="selection.selected.length === 0"
-                >
-                    <mat-icon>delete</mat-icon>
-                    Delete Selected
-                </button>
-            </div>
-        </div>
 
         <table
             mat-table

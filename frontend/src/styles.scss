@@ -1,3 +1,5 @@
+// src/styles.scss
+
 @use "@angular/material" as mat;
 @use "./styles/themes/app-theme";
 @use "./styles/components/tables-theme";
@@ -5,6 +7,7 @@
 @use "./styles/components/markdown-theme";
 @use "./styles/base/general";
 @use "./styles/base/constants";
+@use "./styles/themes/redtail-light";
 
 // Include material core styles.
 @include mat.core();

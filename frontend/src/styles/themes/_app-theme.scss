@@ -5,13 +5,21 @@
 @use "../../app/pages/auth/login/login-theme";
 @use "../../app/pages/documentation/documentation-theme";
 @use "../../app/pages/guide-list/guide-list-theme";
-@use "../../app/pages/homepage/homepage-theme";
+@use '../../app/pages/homepage/homepage-theme' as homepage;
+@use '../../app/pages/inventory-create/inventory-create-theme' as inventory-create;
+@use '../../app/pages/inventory-details/inventory-details-theme' as inventory-details;
+@use '../../app/pages/inventory-list/inventory-list-theme' as inventory-list;
 @use "../../app/pages/not-found/not-found-theme";
-@use "../../app/pages/job-details/job-details-theme";
-@use "../../app/shared/carousel/carousel-theme";
-@use "../../app/shared/footer/footer-theme";
-@use "../../app/shared/navbar/navbar-theme";
+@use '../../app/pages/job-details/job-details-theme' as job-details;
+@use '../../app/pages/job-list/job-list-theme' as job-list;
+@use '../../app/pages/profile-create/profile-create-theme' as profile-create;
+@use '../../app/pages/profile-details/profile-details-theme' as profile-details;
+@use '../../app/pages/profile-list/profile-list-theme' as profile-list;
 @use "../../app/pages/profile-select-dialog/profile-select-dialogue-theme";
+@use '../../app/pages/snapshot-list/snapshot-list-theme' as snapshot-list;
+@use '../../app/pages/upgrade-list/upgrade-list-theme' as upgrade-list;
+@use "../../app/shared/carousel/carousel-theme";
+@use "../../app/shared/navbar/navbar-theme";
 @use "../../app/shared/sidenav/sidenav-theme";
 @use "../../app/shared/table-of-contents/table-of-contents-theme";
 @use "../components/markdown-theme";
@@ -39,11 +47,6 @@
         }
     }
 
-    .app-footer {
-        background: mat.get-color-from-palette($primary);
-        color: mat.get-color-from-palette($primary, default-contrast);
-    }
-
     .app-help-support {
         color: mat.get-color-from-palette($foreground, secondary-text);
 
@@ -53,18 +56,26 @@
     }
 
     @include carousel-theme.theme($theme);
-    @include markdown-theme.theme($theme);
-    @include svg-theme.theme($theme);
-    @include tables-theme.theme($theme);
-    @include footer-theme.theme($theme);
-    @include guide-list-theme.theme($theme);
     @include documentation-theme.theme($theme);
-    @include homepage-theme.theme($theme);
-    @include not-found-theme.theme($theme);
+    @include guide-list-theme.theme($theme);
+    @include homepage.theme($theme);
+    @include inventory-create.theme($theme);
+    @include inventory-details.theme($theme);
+    @include inventory-list.theme($theme);
+    @include job-details.theme($theme);
+    @include job-list.theme($theme);
     @include login-theme.theme($theme);
-    @include job-details-theme.theme($theme);
+    @include markdown-theme.theme($theme);
     @include navbar-theme.theme($theme);
+    @include not-found-theme.theme($theme);
+    @include profile-create.theme($theme);
+    @include profile-details.theme($theme);
+    @include profile-list.theme($theme);
     @include profile-select-dialogue-theme.theme($theme);
     @include sidenav-theme.theme($theme);
+    @include snapshot-list.theme($theme);
+    @include svg-theme.theme($theme);
+    @include tables-theme.theme($theme);
     @include table-of-contents-theme.theme($theme);
+    @include upgrade-list.theme($theme);
 }

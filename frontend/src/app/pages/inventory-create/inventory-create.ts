@@ -18,7 +18,6 @@ import { ComponentPageTitle } from "../page-title/page-title";
 import { CookieService } from "ngx-cookie-service";
 import { Device } from "../../shared/interfaces/device.interface";
 import { DeviceType } from "../../shared/interfaces/device-type.interface";
-import { Footer } from "src/app/shared/footer/footer";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
@@ -29,6 +28,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { Router } from "@angular/router";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
+import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
 
 @Component({
     selector: "app-inventory-create",
@@ -37,17 +37,27 @@ import { takeUntil } from "rxjs/operators";
     standalone: true,
     imports: [
         CommonModule,
-        Footer,
+        ReactiveFormsModule,
         MatButtonModule,
         MatCheckboxModule,
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
-        ReactiveFormsModule,
+        PageHeaderComponent,
     ],
 })
 export class InventoryCreateComponent implements OnDestroy, OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
+
+    // Component page details
+    pageTitle = "Create Inventory Item";
+    pageDescription = "Add a new device to your inventory";
+    breadcrumbs = [
+        { label: "Home", url: "/" },
+        { label: "Inventory", url: "/inventory" },
+        { label: "Create", url: "/inventory/create" },
+    ];
+
     createInventoryForm: FormGroup;
     devices: Device[] = [];
     firewallPlatforms: DeviceType[] = [];
@@ -246,7 +256,7 @@ export class InventoryCreateComponent implements OnDestroy, OnInit {
      * @return
      */
     ngOnInit(): void {
-        this._componentPageTitle.title = "Inventory Create";
+        this._componentPageTitle.title = this.pageTitle;
         this.getDevices();
         this.getFirewallPlatforms();
         this.createInventoryForm.setValidators(this.requireIpAddress());

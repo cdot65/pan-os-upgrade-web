@@ -9,58 +9,65 @@
     $warn: map.get($theme, warn);
     $background: map.get($theme, background);
     $foreground: map.get($theme, foreground);
-    $next-theme: mat.define-palette(mat.$red-palette);
 
-    .live-logs {
-        .polling-info {
-            color: mat.get-color-from-palette($accent, 500);
-            margin-bottom: 16px;
-            font-style: italic;
-        }
+    app-job-details {
+        app-page-header {
+            .app-headerbackground {
+                background: mat.get-color-from-palette($primary);
+            }
 
-        .polling-warning {
-            color: mat.get-color-from-palette($accent, 800);
-            margin-bottom: 16px;
-            font-style: italic;
-        }
+            .app-headerheadline {
+                color: mat.get-color-from-palette($primary, default-contrast);
+            }
 
-        .polling-interval-dropdown {
-            mat-form-field {
-                width: 50%;
+            .app-headerstart {
+                color: mat.get-color-from-palette($primary);
+
+                ::ng-deep .mat-mdc-raised-button {
+                    color: mat.get-color-from-palette($primary, default-contrast);
+                }
+            }
+
+            .breadcrumbs {
+                color: mat.get-color-from-palette($primary, default-contrast);
             }
         }
 
-        .log-entry {
-            margin-bottom: 16px;
+        .job-details {
+            color: mat.get-color-from-palette($foreground, text);
+            background-color: mat.get-color-from-palette($background, card);
+        }
 
-            .mat-card-header {
-                background: mat.get-color-from-palette($background, 500);
-                padding: 8px 16px;
+        .live-logs {
+            .polling-info {
+                color: mat.get-color-from-palette($accent, 500);
             }
 
-            .mat-card-title {
-                font-size: 18px;
-                font-weight: bold;
-                background: mat.get-color-from-palette($background, 300);
+            .polling-warning {
+                color: mat.get-color-from-palette($accent, 800);
             }
 
-            .mat-card-subtitle {
-                background: mat.get-color-from-palette($foreground, 700);
-            }
+            .log-entry {
+                .mat-card-header {
+                    background: mat.get-color-from-palette($background, 500);
+                }
 
-            .mat-drawer-container {
-                height: 100%;
-                background: mat.get-color-from-palette($foreground, 300);
-            }
+                .mat-card-title {
+                    background: mat.get-color-from-palette($background, 300);
+                }
 
-            .mat-card-content {
-                padding: 16px;
-                background: mat.get-color-from-palette($foreground, 300);
+                .mat-card-subtitle {
+                    background: mat.get-color-from-palette($foreground, 700);
+                }
+
+                .mat-drawer-container {
+                    background: mat.get-color-from-palette($foreground, 300);
+                }
+
+                .mat-card-content {
+                    background: mat.get-color-from-palette($foreground, 300);
+                }
             }
         }
-    }
-
-    .job-details-button-row {
-        padding-bottom: 20px;
     }
 }

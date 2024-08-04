@@ -1,14 +1,14 @@
+// src/app/shared/navbar/navbar.scss
+
 .app-navbar-header {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    padding: 4px 16px;
-
-    > .mat-mdc-button {
-        &:last-child {
-            margin-left: auto;
-        }
-    }
+    //padding: 4px 16px;
+    height: 66px;
+    z-index: 1000;
+    width: 100%;
+    transition: width 0.3s ease-in-out;
 }
 
 .mat-mdc-button-base:not(:disabled) {
@@ -17,11 +17,6 @@
 
 .flex-spacer {
     flex-grow: 1;
-}
-
-.logo {
-    height: 26px;
-    margin-right: 6px;
 }
 
 .docs-navbar-link {
@@ -74,3 +69,11 @@ theme-picker {
         display: block;
     }
 }
+
+.app-navbar-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0 16px;
+}
+

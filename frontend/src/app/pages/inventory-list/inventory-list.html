@@ -1,59 +1,41 @@
 <!-- src/app/pages/inventory-list/inventory-list.html -->
+
+<app-page-header
+    [title]="pageTitle"
+    [description]="pageDescription"
+    [breadcrumbs]="breadcrumbs">
+    <div class="header-buttons">
+        <button mat-raised-button color="accent" (click)="navigateToCreateInventory()">
+            <mat-icon>add</mat-icon>
+            Add new Device
+        </button>
+        <button mat-raised-button color="accent"
+                (click)="onSyncFromPanoramaClick()"
+                [disabled]="!isSyncFromPanoramaButtonActive()">
+            <mat-icon>sync</mat-icon>
+            Sync from Panorama
+        </button>
+        <button mat-raised-button color="accent"
+                (click)="onRefreshSelectedClick()"
+                [disabled]="!isAnyItemSelected()">
+            <mat-icon>refresh</mat-icon>
+            Refresh Selected
+        </button>
+        <button mat-raised-button color="warn"
+                (click)="onDeleteSelectedClick()"
+                [disabled]="!isAnyItemSelected()">
+            <mat-icon>delete</mat-icon>
+            Delete Selected
+        </button>
+    </div>
+</app-page-header>
+
 <div class="inventory-list-container">
     <main
         aria-label="Inventory list"
         id="inventory-list"
         class="inventory-list"
     >
-        <div class="table-header">
-            <h2>Manage Devices</h2>
-
-            <div class="button-row">
-                <div class="button-container">
-                    <button
-                        mat-raised-button
-                        color="primary"
-                        (click)="navigateToCreateInventory()"
-                        aria-label="Add a new device"
-                    >
-                        <mat-icon>add</mat-icon>
-                        Add new Device
-                    </button>
-
-                    <button
-                        mat-raised-button
-                        color="accent"
-                        (click)="onSyncFromPanoramaClick()"
-                        aria-label="Sync Devices from Panorama"
-                        [disabled]="!isSyncFromPanoramaButtonActive()"
-                    >
-                        <mat-icon>sync</mat-icon>
-                        Sync from Panorama
-                    </button>
-                </div>
-
-                @if (selection.selected.length > 0) {
-                <div class="selected-actions">
-                    <button
-                        mat-raised-button
-                        color="accent"
-                        (click)="onRefreshSelectedClick()"
-                    >
-                        <mat-icon>refresh</mat-icon>
-                        Refresh Selected
-                    </button>
-                    <button
-                        mat-raised-button
-                        color="warn"
-                        (click)="onDeleteSelectedClick()"
-                    >
-                        <mat-icon>delete</mat-icon>
-                        Delete Selected
-                    </button>
-                </div>
-                }
-            </div>
-        </div>
 
         <table
             mat-table
@@ -94,7 +76,7 @@
                 >
                     Hostname
                 </th>
-                <td mat-cell *matCellDef="let item">{{item.hostname}}</td>
+                <td mat-cell *matCellDef="let item">{{ item.hostname }}</td>
             </ng-container>
 
             <!-- IPv4/IPv6 Address Column -->
@@ -108,8 +90,10 @@
                     Management IP
                 </th>
                 <td mat-cell *matCellDef="let item">
-                    {{item.ipv4_address ? item.ipv4_address :
-                    item.ipv6_address}}
+                    {{
+                        item.ipv4_address ? item.ipv4_address :
+                            item.ipv6_address
+                    }}
                 </td>
             </ng-container>
 
@@ -124,7 +108,7 @@
                     Device Group
                 </th>
                 <td mat-cell *matCellDef="let item">
-                    {{item.device_group ? item.device_group : 'n/a'}}
+                    {{ item.device_group ? item.device_group : 'n/a' }}
                 </td>
             </ng-container>
 
@@ -139,9 +123,9 @@
                 </th>
                 <td mat-cell *matCellDef="let item">
                     @if (item.ha_enabled) {
-                    <mat-icon>done</mat-icon>
+                        <mat-icon>done</mat-icon>
                     } @else {
-                    <mat-icon>close</mat-icon>
+                        <mat-icon>close</mat-icon>
                     }
                 </td>
             </ng-container>
@@ -156,7 +140,7 @@
                 >
                     PAN-OS Version
                 </th>
-                <td mat-cell *matCellDef="let item">{{item.sw_version}}</td>
+                <td mat-cell *matCellDef="let item">{{ item.sw_version }}</td>
             </ng-container>
 
             <!-- App-ID Content Version Column -->
@@ -169,7 +153,7 @@
                 >
                     Content Version
                 </th>
-                <td mat-cell *matCellDef="let item">{{item.app_version}}</td>
+                <td mat-cell *matCellDef="let item">{{ item.app_version }}</td>
             </ng-container>
 
             <!-- Inventory Type Column -->
@@ -182,7 +166,7 @@
                 >
                     Inventory Type
                 </th>
-                <td mat-cell *matCellDef="let item">{{item.device_type}}</td>
+                <td mat-cell *matCellDef="let item">{{ item.device_type }}</td>
             </ng-container>
 
             <!-- Notes Column -->
@@ -195,7 +179,7 @@
                 >
                     Notes
                 </th>
-                <td mat-cell *matCellDef="let item">{{item.notes}}</td>
+                <td mat-cell *matCellDef="let item">{{ item.notes }}</td>
             </ng-container>
 
             <!-- Details Column -->

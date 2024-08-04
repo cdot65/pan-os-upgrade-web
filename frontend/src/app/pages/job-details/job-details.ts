@@ -5,7 +5,6 @@ import { catchError, map, switchMap, takeUntil, tap } from "rxjs/operators";
 import { ActivatedRoute } from "@angular/router";
 import { AsyncPipe, CommonModule, DatePipe } from "@angular/common";
 import { ComponentPageTitle } from "../page-title/page-title";
-import { Footer } from "src/app/shared/footer/footer";
 import { LoggingService } from "../../shared/services/logging.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
@@ -20,6 +19,7 @@ import { NgxJsonViewerModule } from "ngx-json-viewer";
 import { SortingService } from "../../shared/services/sorting.service";
 import { FirewallDiagramComponent } from "../firewall-diagram";
 import { UpgradeStepService } from "../../shared/services/upgrade-step.service";
+import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
 
 @Component({
     selector: "app-job-details",
@@ -30,7 +30,6 @@ import { UpgradeStepService } from "../../shared/services/upgrade-step.service";
         AsyncPipe,
         CommonModule,
         DatePipe,
-        Footer,
         MatButtonModule,
         MatCardModule,
         MatDividerModule,
@@ -41,10 +40,21 @@ import { UpgradeStepService } from "../../shared/services/upgrade-step.service";
         MatSelectModule,
         NgxJsonViewerModule,
         FirewallDiagramComponent,
+        PageHeaderComponent,
     ],
 })
 export class JobDetailsComponent implements OnDestroy, OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
+
+    // Component page details
+    pageTitle = "Job Details";
+    pageDescription = "View details and logs for the selected job";
+    breadcrumbs = [
+        { label: "Home", url: "/" },
+        { label: "Jobs", url: "/jobs" },
+        { label: "Details", url: "" },
+    ];
+
     jobStatusAndLogs$ = this.loggingService.jobStatusAndLogs$;
     jobStatusDetails$: Observable<any> = this.jobStatusAndLogs$.pipe(
         map((details) => details?.job ?? null),
@@ -72,7 +82,7 @@ export class JobDetailsComponent implements OnDestroy, OnInit {
     }
 
     ngOnInit(): void {
-        this._componentPageTitle.title = "Job Details";
+        this._componentPageTitle.title = this.pageTitle;
         this.jobUuid = this.route.snapshot.paramMap.get("id");
         if (this.jobUuid) {
             this.fetchInitialJobDetailsAndLogs();

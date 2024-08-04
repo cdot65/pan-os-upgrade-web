@@ -1,26 +1,9 @@
-<header
-    focusOnNavigation
-    class="app-headerbackground"
-    aria-label="Get started"
-    id="homepage-header"
->
-    <div class="app-headersection">
-        <div class="app-headerheadline">
-            <h1 class="mat-h1">PAN-OS Upgrade</h1>
-            <h2>
-                Automate the upgrades of your PAN-OS and Panorama appliances
-            </h2>
-        </div>
-        <div class="app-headerstart">
-            <a
-                mat-raised-button
-                class="app-button"
-                routerLink="/guide/getting-started"
-            >Get started</a
-            >
-        </div>
-    </div>
-</header>
+<app-page-header
+    [title]="pageTitle"
+    [description]="pageDescription"
+    [breadcrumbs]="breadcrumbs">
+    <a mat-raised-button color="accent" routerLink="/guide/getting-started">Get started</a>
+</app-page-header>
 
 <main class="homepage-promo">
     <div class="app-homepage-row docs-introduction">

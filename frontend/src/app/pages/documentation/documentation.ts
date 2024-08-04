@@ -10,7 +10,6 @@ import {
 import { ANIMATION_MODULE_TYPE } from "@angular/platform-browser/animations";
 
 import { MatButtonModule } from "@angular/material/button";
-import { Footer } from "../../shared/footer/footer";
 import { RouterLink } from "@angular/router";
 import { ComponentPageTitle } from "../page-title/page-title";
 import { NavigationFocus } from "../../shared/navigation-focus/navigation-focus";
@@ -39,7 +38,6 @@ import { Carousel, CarouselItem } from "../../shared/carousel/carousel";
         CarouselItem,
         MatCardModule,
         YouTubePlayer,
-        Footer,
     ],
 })
 export class Documentation implements OnInit {

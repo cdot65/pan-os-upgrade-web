@@ -1,17 +1,14 @@
-import { NgFor, NgIf } from "@angular/common";
-import { RouterLink, RouterLinkActive } from "@angular/router";
+// src/app/shared/navbar/navbar.ts
 
-import { AuthService } from "../services/auth.service";
 import { Component, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { RouterModule } from "@angular/router";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
+import { AuthService } from "../services/auth.service";
 import { NavigationFocusService } from "../navigation-focus/navigation-focus.service";
-import { ThemePicker } from "../theme-picker/theme-picker";
-
-export interface DocSection {
-    name: string;
-    summary: string;
-}
+import { ThemePicker } from "../theme-picker";
+import { SidenavStateService } from "../services/sidenav-state.service";
 
 @Component({
     selector: "app-navbar",
@@ -19,12 +16,10 @@ export interface DocSection {
     styleUrls: ["./navbar.scss"],
     standalone: true,
     imports: [
-        NgIf,
+        CommonModule,
+        RouterModule,
         MatButtonModule,
         MatIconModule,
-        RouterLink,
-        NgFor,
-        RouterLinkActive,
         ThemePicker,
     ],
 })
@@ -36,6 +31,7 @@ export class NavBar implements OnInit {
         public authService: AuthService,
         private navigationFocusService: NavigationFocusService,
         private themePicker: ThemePicker,
+        public sidenavStateService: SidenavStateService,
     ) {
         setTimeout(
             () =>
@@ -50,12 +46,10 @@ export class NavBar implements OnInit {
     }
 
     ngOnInit() {
-        // Initialize the theme
         const storedTheme = this.themePicker.getStoredThemeName();
         if (storedTheme) {
             this.themePicker.selectTheme(storedTheme);
         } else {
-            // Select default theme
             this.themePicker.selectTheme("redtail-light");
         }
     }

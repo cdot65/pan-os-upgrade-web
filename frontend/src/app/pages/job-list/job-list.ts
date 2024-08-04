@@ -13,7 +13,6 @@ import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 import { forkJoin, Subject } from "rxjs";
 
 import { ComponentPageTitle } from "../page-title/page-title";
-import { Footer } from "src/app/shared/footer/footer";
 import { JobStatus } from "../../shared/interfaces/job.interface";
 import { JobDeleteDialogComponent } from "../job-delete-dialog/job-delete-dialog";
 import { JobService } from "../../shared/services/job.service";
@@ -26,6 +25,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { Router } from "@angular/router";
 import { SelectionModel } from "@angular/cdk/collections";
 import { takeUntil } from "rxjs/operators";
+import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
 
 @Component({
     selector: "app-job-list",
@@ -33,12 +33,12 @@ import { takeUntil } from "rxjs/operators";
     styleUrls: ["./job-list.scss"],
     standalone: true,
     imports: [
-        Footer,
         MatCheckboxModule,
         MatTableModule,
         MatSortModule,
         MatIconModule,
         MatButtonModule,
+        PageHeaderComponent,
     ],
 })
 /**
@@ -47,6 +47,15 @@ import { takeUntil } from "rxjs/operators";
 export class JobListComponent implements OnInit, AfterViewInit, OnDestroy {
     // Host bind the main-content class to the component, allowing for styling
     @HostBinding("class.main-content") readonly mainContentClass = true;
+
+    // Component page details
+    pageTitle = "Job List";
+    pageDescription = "View and manage your jobs";
+    breadcrumbs = [
+        { label: "Home", url: "/" },
+        { label: "Jobs", url: "/jobs" },
+    ];
+
     jobItems: JobStatus[] = [];
     displayedColumns: string[] = [
         "select",
@@ -136,7 +145,7 @@ export class JobListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this._componentPageTitle.title = "Job List";
+        this._componentPageTitle.title = this.pageTitle;
         this.getJobs();
     }
 

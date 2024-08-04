@@ -7,7 +7,6 @@ import { mergeMap, retryWhen, switchMap, takeUntil, takeWhile, tap } from "rxjs/
 import { UpgradeJob, UpgradeResponse } from "../../shared/interfaces/upgrade-response.interface";
 import { ComponentPageTitle } from "../page-title/page-title";
 import { Device } from "../../shared/interfaces/device.interface";
-import { Footer } from "src/app/shared/footer/footer";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { JobService } from "src/app/shared/services/job.service";
 import { MatButtonModule } from "@angular/material/button";
@@ -28,6 +27,7 @@ import { UpgradeForm } from "../../shared/interfaces/upgrade-form.interface";
 import { UpgradeService } from "../../shared/services/upgrade.service";
 import { AsyncPipe } from "@angular/common";
 import { HttpErrorResponse } from "@angular/common/http";
+import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
 
 @Component({
     selector: "app-upgrade-list",
@@ -36,7 +36,6 @@ import { HttpErrorResponse } from "@angular/common/http";
     standalone: true,
     imports: [
         AsyncPipe,
-        Footer,
         MatDividerModule,
         MatFormFieldModule,
         MatIconModule,
@@ -48,10 +47,20 @@ import { HttpErrorResponse } from "@angular/common/http";
         MatCardModule,
         MatProgressBarModule,
         MatRadioModule,
+        PageHeaderComponent,
     ],
 })
 export class UpgradeListComponent implements OnInit, OnDestroy {
     @HostBinding("class.main-content") readonly mainContentClass = true;
+
+    // Component page details
+    pageTitle = "Upgrade Devices";
+    pageDescription = "Upgrade your PAN-OS devices to the latest version";
+    breadcrumbs = [
+        { label: "Home", url: "/" },
+        { label: "Upgrades", url: "/upgrades" },
+    ];
+
     devices: Device[] = [];
     jobStatuses: { [jobId: string]: string } = {};
     pollingSubscriptions: { [jobId: string]: Subject<void> } = {};
@@ -229,7 +238,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this._componentPageTitle.title = "Upgrade List";
+        this._componentPageTitle.title = this.pageTitle;
         this.getDevices();
         this.getProfiles();
         this.getPanosVersions();

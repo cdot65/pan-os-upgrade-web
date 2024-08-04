@@ -3,8 +3,6 @@
 .upgrade-list-container {
     display: grid;
     grid-template-rows: auto 1fr auto;
-    //min-height: 100vh;
-    //width: 99%;
     padding: 20px;
 }
 
@@ -14,6 +12,8 @@
 
     form {
         padding: 20px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .table-header {
@@ -39,7 +39,6 @@
             align-items: center;
         }
     }
-
 
     .selected-devices {
         display: grid;
@@ -139,13 +138,11 @@
 }
 
 .warning-message {
-    color: red;
     font-weight: bold;
     margin-top: 10px;
 }
 
 .info-message {
-    // color: blue;
     font-weight: bold;
     margin-top: 10px;
 }
