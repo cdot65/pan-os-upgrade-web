@@ -1,5 +1,6 @@
 // src/app/pages/firewall-diagram/firewall-diagram.config.ts
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const FirewallDiagramConfig = {
     imagePaths: {
         firewallSecondary: "assets/img/site/firewall_secondary.svg",
