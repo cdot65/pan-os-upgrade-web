@@ -57,6 +57,21 @@
             .sort-icon {
                 color: mat.get-color-from-palette($primary);
             }
+
+            .snapshot-details {
+                background-color: mat.get-color-from-palette($background, card);
+                color: mat.get-color-from-palette($foreground, text);
+                border-radius: 4px;
+                padding: 20px;
+                margin-bottom: 20px;
+
+                h2 {
+                    margin-top: 0;
+                    color: mat.get-color-from-palette($foreground, text);
+                }
+
+            }
+
         }
     }
 }

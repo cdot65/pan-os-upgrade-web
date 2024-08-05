@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Component, computed, DestroyRef, effect, inject, OnInit, signal } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { ReactiveFormsModule } from "@angular/forms";
+import { FormBuilder, FormGroup, ReactiveFormsModule } from "@angular/forms";
 import { MatTableModule } from "@angular/material/table";
 import { MatSelectModule } from "@angular/material/select";
 import { MatFormFieldModule } from "@angular/material/form-field";
@@ -23,6 +23,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
 import { ComponentPageTitle } from "../page-title/page-title";
+import { MatDividerModule } from "@angular/material/divider";
 
 @Component({
     selector: "app-snapshot-list",
@@ -36,6 +37,7 @@ import { ComponentPageTitle } from "../page-title/page-title";
         MatButtonModule,
         MatRadioModule,
         MatIconModule,
+        MatDividerModule,
         NgxChartsModule,
         PageHeaderComponent,
     ],
@@ -50,6 +52,8 @@ export class SnapshotListComponent implements OnInit {
         { label: "Home", url: "/" },
         { label: "Snapshots", url: "/snapshots" },
     ];
+
+    snapshotFilterForm: FormGroup;
 
     private snapshotService = inject(SnapshotService);
     private destroyRef = inject(DestroyRef);
@@ -157,7 +161,15 @@ export class SnapshotListComponent implements OnInit {
         ],
     };
 
-    constructor(public _componentPageTitle: ComponentPageTitle) {
+    constructor(
+        public _componentPageTitle: ComponentPageTitle,
+        private formBuilder: FormBuilder,
+    ) {
+        this.snapshotFilterForm = this.formBuilder.group({
+            jobId: [null],
+            deviceHostname: [null],
+            snapshotType: ["pre"],
+        });
         effect(() => {
             const firstSnapshot = this.filteredSnapshots()[0];
             if (
@@ -175,6 +187,34 @@ export class SnapshotListComponent implements OnInit {
     ngOnInit() {
         this._componentPageTitle.title = this.pageTitle;
         this.loadSnapshots();
+        this.setupFormListeners();
+    }
+
+    setupFormListeners() {
+        this.snapshotFilterForm
+            .get("jobId")
+            ?.valueChanges.subscribe((value) =>
+                this.updateSelectedJobId(value),
+            );
+        this.snapshotFilterForm
+            .get("deviceHostname")
+            ?.valueChanges.subscribe((value) =>
+                this.updateSelectedDeviceHostname(value),
+            );
+        this.snapshotFilterForm
+            .get("snapshotType")
+            ?.valueChanges.subscribe((value) =>
+                this.updateSelectedSnapshotType(value),
+            );
+    }
+
+    updateSelectedJobId(jobId: string | null) {
+        this.selectedJobId.set(jobId);
+        this.selectedDeviceHostname.set(null);
+        this.snapshotFilterForm.patchValue(
+            { deviceHostname: null },
+            { emitEvent: false },
+        );
     }
 
     loadSnapshots() {
@@ -187,11 +227,6 @@ export class SnapshotListComponent implements OnInit {
                 },
                 (error) => console.error("Error loading snapshots:", error),
             );
-    }
-
-    updateSelectedJobId(jobId: string | null) {
-        this.selectedJobId.set(jobId);
-        this.selectedDeviceHostname.set(null);
     }
 
     updateSelectedDeviceHostname(hostname: string | null) {
