@@ -1,38 +1,86 @@
 // src/app/pages/snapshot-list/snapshot-list.component.scss
 
 .snapshot-list-container {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
     padding: 20px;
 
-    mat-form-field {
-        width: 100%;
-        margin-bottom: 20px;
-    }
+    .snapshot-list {
+        width: 97%;
+        padding: 25px;
 
-    table {
-        width: 100%;
-        margin-bottom: 20px;
-    }
+        form {
+            padding: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
 
-    h2, h3 {
-        margin-top: 20px;
-        margin-bottom: 10px;
-    }
+        .snapshot-filter-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
 
-    .sort-icon {
-        font-size: 18px;
-        height: 18px;
-        width: 18px;
-        vertical-align: middle;
-        margin-left: 5px;
-    }
+            h3 {
+                margin-bottom: 10px;
+            }
 
-    th.mat-header-cell {
-        display: flex;
-        align-items: center;
+            .filter-row {
+                display: flex;
+                gap: 20px;
+
+                .form-field {
+                    flex: 1;
+
+                    mat-form-field {
+                        width: 100%;
+                    }
+                }
+            }
+
+            .form-field {
+                width: 100%;
+                margin-bottom: 20px;
+
+                mat-radio-group {
+                    display: flex;
+                    flex-direction: row;
+                    gap: 20px;
+
+                    mat-radio-button {
+                        margin-bottom: 10px;
+                    }
+                }
+            }
+        }
+
+
+        mat-divider {
+            margin: 20px 0;
+        }
+
     }
 }
 
 .chart-container {
     height: 400px;
     margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.sort-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+    vertical-align: middle;
+    margin-left: 5px;
+}
+
+th.mat-header-cell {
+    display: flex;
+    align-items: center;
 }
