@@ -14,7 +14,7 @@ export const APP_ROUTES: Routes = [
             {
                 path: "",
                 loadComponent: () =>
-                    import("./pages/homepage").then((m) => m.Homepage),
+                    import("./pages/homepage").then((m) => m.HomepageComponent),
             },
             {
                 path: "inventory",

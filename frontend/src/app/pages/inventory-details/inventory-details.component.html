@@ -1,9 +1,9 @@
-<!-- src/app/pages/inventory-details/inventory-details.html -->
+<!-- src/app/pages/inventory-details/inventory-details.component.html -->
 
 <app-page-header
-    [title]="pageTitle"
-    [description]="pageDescription"
-    [breadcrumbs]="breadcrumbs">
+    [title]="config.pageTitle"
+    [description]="config.pageDescription"
+    [breadcrumbs]="config.breadcrumbs">
     <button mat-raised-button color="accent" (click)="refreshDeviceDetails()">
         <mat-icon>sync</mat-icon>
         Refresh Device Details
@@ -22,8 +22,8 @@
             class="mat-elevation-z2"
         >
             <div class="inventory-details-grid">
+                <!-- Firewall Information -->
                 <div>
-                    <!-- Heading for the firewall information section -->
                     <h3>Firewall Information</h3>
 
                     <!-- Form field for entering the hostname -->
@@ -77,20 +77,19 @@
                     <div class="form-field">
                         <mat-form-field>
                             <mat-label>Inventory Type</mat-label>
-                            <!-- Select dropdown for choosing the device type, bound to the 'device_type' form control -->
-                            <!-- The 'aria-labelledby' attribute improves accessibility by associating the label with the select element -->
+
                             <mat-select
                                 id="device_type"
                                 formControlName="device_type"
                                 aria-labelledby="device_type"
                             >
-                                <!-- Option for selecting 'Firewall' as the device type -->
                                 <mat-option value="Firewall"
-                                    >Firewall</mat-option
+                                >Firewall
+                                </mat-option
                                 >
-                                <!-- Option for selecting 'Panorama' as the device type -->
                                 <mat-option value="Panorama"
-                                    >Panorama</mat-option
+                                >Panorama
+                                </mat-option
                                 >
                             </mat-select>
                         </mat-form-field>
@@ -100,22 +99,21 @@
                     <div class="form-field">
                         <mat-form-field>
                             <mat-label>Platform</mat-label>
+
                             <!-- Select dropdown for choosing the platform, bound to the 'platform_name' form control -->
-                            <!-- The 'aria-labelledby' attribute improves accessibility by associating the label with the select element -->
-                            <mat-select
-                                formControlName="platform_name"
-                                aria-labelledby="platform_label"
-                            >
-                                <!-- Option for each platform name based on the selected device type -->
-                                <!-- Uses an *ngFor directive to iterate over the platform names -->
-                                <!-- Conditionally selects the platform names based on the selected device type -->
-                                @for (platform_name of
-                                updateInventoryForm.get('device_type')?.value
-                                === 'Firewall' ? firewallPlatforms :
-                                panoramaPlatforms; track panoramaPlatforms) {
-                                <mat-option [value]="platform_name.name">
-                                    {{platform_name.name}}
-                                </mat-option>
+                            <mat-select formControlName="platform_name" aria-labelledby="platform_label">
+                                @if (updateInventoryForm.get('device_type')?.value === 'Firewall') {
+                                    @for (platform of firewallPlatforms$ | async; track platform.name) {
+                                        <mat-option [value]="platform.name">
+                                            {{ platform.name }}
+                                        </mat-option>
+                                    }
+                                } @else {
+                                    @for (platform of panoramaPlatforms$ | async; track platform.name) {
+                                        <mat-option [value]="platform.name">
+                                            {{ platform.name }}
+                                        </mat-option>
+                                    }
                                 }
                             </mat-select>
                         </mat-form-field>
@@ -189,15 +187,15 @@
                     <!-- Validation to require either IPv4 or IPv6 address -->
                     <div class="form-field">
                         @if (updateInventoryForm.hasError('requireIpAddress')) {
-                        <mat-hint>
-                            Please enter either an IPv4 address or an IPv6
-                            address.
-                        </mat-hint>
-                        } @if (updateInventoryForm.hasError('invalidIpAddress'))
-                        {
-                        <mat-error>
-                            Please enter a valid IPv4 or IPv6 address.
-                        </mat-error>
+                            <mat-hint>
+                                Please enter either an IPv4 address or an IPv6
+                                address.
+                            </mat-hint>
+                        }
+                        @if (updateInventoryForm.hasError('invalidIpAddress')) {
+                            <mat-error>
+                                Please enter a valid IPv4 or IPv6 address.
+                            </mat-error>
                         }
                     </div>
                 </div>
@@ -209,58 +207,63 @@
 
                     <!-- Conditional form field for specifying the HA deployment -->
                     @if (updateInventoryForm.get('ha_enabled')?.value) {
-                    <div class="form-field">
-                        <mat-form-field>
-                            <mat-label>Local HA State</mat-label>
-                            <mat-select formControlName="local_state">
-                                <mat-option value="active">Active</mat-option>
-                                <mat-option value="passive">Passive</mat-option>
-                                <mat-option value="active-primary"
-                                    >Active-Primary</mat-option
-                                >
-                                <mat-option value="active-secondary"
-                                    >Active-Secondary</mat-option
-                                >
-                            </mat-select>
-                        </mat-form-field>
+                        <div class="form-field">
+                            <mat-form-field>
+                                <mat-label>Local HA State</mat-label>
+                                <mat-select formControlName="local_state">
+                                    <mat-option value="active">Active</mat-option>
+                                    <mat-option value="passive">Passive</mat-option>
+                                    <mat-option value="active-primary"
+                                    >Active-Primary
+                                    </mat-option
+                                    >
+                                    <mat-option value="active-secondary"
+                                    >Active-Secondary
+                                    </mat-option
+                                    >
+                                </mat-select>
+                            </mat-form-field>
 
-                        <mat-form-field>
-                            <mat-label>Peer Device</mat-label>
-                            <mat-select formControlName="peer_device_id">
-                                @for (device of devices; track device) {
-                                <mat-option [value]="device.uuid">
-                                    {{device.hostname}}
-                                </mat-option>
-                                }
-                            </mat-select>
-                        </mat-form-field>
+                            <mat-form-field>
+                                <mat-label>Peer Device</mat-label>
+                                <mat-select formControlName="peer_device_id">
+                                    @for (device of devices$ | async; track device.uuid) {
+                                        <mat-option [value]="device.uuid">
+                                            {{ device.hostname }}
+                                        </mat-option>
+                                    }
+                                </mat-select>
+                            </mat-form-field>
 
-                        <mat-form-field>
-                            <mat-label>Peer IP</mat-label>
-                            <input matInput formControlName="peer_ip" />
-                        </mat-form-field>
+                            <mat-form-field>
+                                <mat-label>Peer IP</mat-label>
+                                <input matInput formControlName="peer_ip" />
+                            </mat-form-field>
 
-                        <mat-form-field>
-                            <mat-label>Peer State</mat-label>
-                            <mat-select formControlName="peer_state">
-                                <mat-option value="active">Active</mat-option>
-                                <mat-option value="passive">Passive</mat-option>
-                                <mat-option value="active-primary"
-                                    >Active-Primary</mat-option
-                                >
-                                <mat-option value="active-secondary"
-                                    >Active-Secondary</mat-option
-                                >
-                            </mat-select>
-                        </mat-form-field>
-                    </div>
+                            <mat-form-field>
+                                <mat-label>Peer State</mat-label>
+                                <mat-select formControlName="peer_state">
+                                    <mat-option value="active">Active</mat-option>
+                                    <mat-option value="passive">Passive</mat-option>
+                                    <mat-option value="active-primary"
+                                    >Active-Primary
+                                    </mat-option
+                                    >
+                                    <mat-option value="active-secondary"
+                                    >Active-Secondary
+                                    </mat-option
+                                    >
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
                     }
 
                     <!-- Form field for enabling/disabling high availability -->
                     <div class="form-field">
                         <!-- Checkbox for toggling high availability, bound to the 'ha_enabled' form control -->
                         <mat-checkbox formControlName="ha_enabled"
-                            >HA Enabled</mat-checkbox
+                        >HA Enabled
+                        </mat-checkbox
                         >
                     </div>
                 </div>
@@ -268,46 +271,47 @@
                 <!-- Conditional section for Panorama information, displayed only if the selected device type is 'Firewall' -->
                 @if (updateInventoryForm.get('device_type')?.value ===
                 'Firewall') {
-                <div>
-                    <!-- Heading for the Panorama information section -->
-                    <h3>Panorama Information</h3>
+                    <div>
+                        <!-- Heading for the Panorama information section -->
+                        <h3>Panorama Information</h3>
 
-                    <!-- Form field for entering the Panorama appliance, displayed only if the firewall is managed by Panorama -->
-                    @if (updateInventoryForm.get('panorama_managed')?.value) {
-                    <div class="form-field">
-                        <mat-form-field>
-                            <mat-label>Panorama Appliance</mat-label>
-                            <mat-select formControlName="panorama_appliance_id">
-                                @for (device of panoramas; track device) {
-                                <mat-option [value]="device.uuid">
-                                    {{device.hostname}}
-                                </mat-option>
-                                }
-                            </mat-select>
-                        </mat-form-field>
-                    </div>
+                        <!-- Form field for entering the Panorama appliance, displayed only if the firewall is managed by Panorama -->
+                        @if (updateInventoryForm.get('panorama_managed')?.value) {
+                            <div class="form-field">
+                                <mat-form-field>
+                                    <mat-label>Panorama Appliance</mat-label>
+                                    <mat-select formControlName="panorama_appliance_id">
+                                        @for (device of panoramas$ | async; track device.uuid) {
+                                            <mat-option [value]="device.uuid">
+                                                {{ device.hostname }}
+                                            </mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
 
-                    <!-- Form field for entering the device group, displayed only if the firewall is managed by Panorama -->
-                    <div class="form-field">
-                        <mat-form-field>
-                            <mat-label>Device Group</mat-label>
-                            <!-- Input field for the device group, bound to the 'device_group' form control -->
-                            <input
-                                matInput
-                                id="device_group"
-                                formControlName="device_group"
-                            />
-                        </mat-form-field>
-                    </div>
-                    }
+                            <!-- Form field for entering the device group, displayed only if the firewall is managed by Panorama -->
+                            <div class="form-field">
+                                <mat-form-field>
+                                    <mat-label>Device Group</mat-label>
+                                    <!-- Input field for the device group, bound to the 'device_group' form control -->
+                                    <input
+                                        matInput
+                                        id="device_group"
+                                        formControlName="device_group"
+                                    />
+                                </mat-form-field>
+                            </div>
+                        }
 
-                    <!-- Checkbox for indicating if the firewall is managed by Panorama -->
-                    <div class="form-field">
-                        <mat-checkbox formControlName="panorama_managed"
-                            >Panorama Managed</mat-checkbox
-                        >
+                        <!-- Checkbox for indicating if the firewall is managed by Panorama -->
+                        <div class="form-field">
+                            <mat-checkbox formControlName="panorama_managed"
+                            >Panorama Managed
+                            </mat-checkbox
+                            >
+                        </div>
                     </div>
-                </div>
                 }
             </div>
 
