@@ -1,4 +1,4 @@
-// src/app/pages/homepage/homepage.ts
+// src/app/pages/homepage/homepage.component.ts
 
 import { Component, HostBinding, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
@@ -13,8 +13,8 @@ import { HomepageFacade } from "./homepage.facade";
 
 @Component({
     selector: "app-homepage",
-    templateUrl: "./homepage.html",
-    styleUrls: ["./homepage.scss"],
+    templateUrl: "./homepage.component.html",
+    styleUrls: ["./homepage.component.scss"],
     standalone: true,
     imports: [
         CommonModule,
@@ -28,7 +28,7 @@ import { HomepageFacade } from "./homepage.facade";
     ],
     providers: [HomepageFacade],
 })
-export class Homepage implements OnInit {
+export class HomepageComponent implements OnInit {
     @HostBinding("class.main-content") readonly mainContentClass = true;
 
     config = this.facade.getConfig();
