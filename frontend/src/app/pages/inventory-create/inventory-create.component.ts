@@ -1,4 +1,4 @@
-// src/app/pages/inventory-create/inventory-create.ts
+// src/app/pages/inventory-create/inventory-create.component.ts
 
 import { Component, HostBinding, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
@@ -16,8 +16,8 @@ import { InventoryCreateFacade } from "./inventory-create.facade";
 
 @Component({
     selector: "app-inventory-create",
-    templateUrl: "./inventory-create.html",
-    styleUrls: ["./inventory-create.scss"],
+    templateUrl: "./inventory-create.component.html",
+    styleUrls: ["./inventory-create.component.scss"],
     standalone: true,
     imports: [
         CommonModule,
