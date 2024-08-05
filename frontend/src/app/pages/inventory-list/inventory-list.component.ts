@@ -148,7 +148,10 @@ export class InventoryListComponent
     onDeleteSelectedClick(): void {
         const dialogRef = this.dialog.open(InventoryDeleteDialogComponent, {
             width: this.config.deleteDialogWidth,
-            data: { count: this.selection.selected.length },
+            data: {
+                title: "Confirm Delete",
+                message: `Are you sure you want to delete ${this.selection.selected.length} selected inventory item(s)?`,
+            },
         });
 
         dialogRef.afterClosed().subscribe((result) => {
