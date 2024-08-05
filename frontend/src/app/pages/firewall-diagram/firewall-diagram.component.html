@@ -1,53 +1,54 @@
+<!-- firewall-diagram.component.html -->
 <div class="upgrade-diagram-container">
-    <div class="firewall-container" [class.single-firewall]="!hasPeerDevice">
+    <div class="firewall-container" [class.single-firewall]="!facade.hasPeerDevice()">
         <div class="firewall-group">
-            <img [src]="getFirewallSrc(jobStatusDetails?.devices?.target)" alt="Firewall" class="firewall-image">
+            <img [ngSrc]="facade.getFirewallSrc(facade.jobStatusDetails()?.devices?.target)" alt="Firewall" class="firewall-image" width="100" height="100">
             <div class="firewall-details">
                 <mat-chip-set>
-                    <mat-chip [class]="getHaStatusClass(jobStatusDetails?.devices?.target?.local_state, jobStatusDetails?.devices?.target?.ha_enabled)">
-                        {{ jobStatusDetails?.devices?.target?.hostname }}
+                    <mat-chip [class]="facade.getHaStatusClass(facade.jobStatusDetails()?.devices?.target?.local_state, facade.jobStatusDetails()?.devices?.target?.ha_enabled)">
+                        {{ facade.jobStatusDetails()?.devices?.target?.hostname }}
                     </mat-chip>
                     <mat-chip>
-                        {{ jobStatusDetails?.devices?.target?.ha_enabled ? jobStatusDetails?.devices?.target?.local_state : 'standalone' }}
+                        {{ facade.jobStatusDetails()?.devices?.target?.ha_enabled ? facade.jobStatusDetails()?.devices?.target?.local_state : 'standalone' }}
                     </mat-chip>
                     <mat-chip>
-                        {{ jobStatusDetails?.devices?.target?.sw_version }}
+                        {{ facade.jobStatusDetails()?.devices?.target?.sw_version }}
                     </mat-chip>
                 </mat-chip-set>
             </div>
-            @if (jobStatusDetails?.current_device === jobStatusDetails?.devices?.target?.hostname) {
+            @if (facade.jobStatusDetails()?.current_device === facade.jobStatusDetails()?.devices?.target?.hostname) {
                 <div class="status-container">
-                    <img [src]="statusSvg" alt="Status" class="status-svg">
+                    <img [ngSrc]="facade.statusSvg()" alt="Status" class="status-svg" width="40" height="40">
                     <div class="job-text">
-                        <h2 class="detail-label">{{ jobStatusDetails?.current_device }}</h2>
-                        <span class="status-text">{{ statusText }}</span>
+                        <h2 class="detail-label">{{ facade.jobStatusDetails()?.current_device }}</h2>
+                        <span class="status-text">{{ facade.statusText() }}</span>
                     </div>
                 </div>
             }
         </div>
 
-        @if (hasPeerDevice) {
+        @if (facade.hasPeerDevice()) {
             <div class="firewall-group">
-                <img [src]="getFirewallSrc(jobStatusDetails?.devices?.peer)" alt="Firewall" class="firewall-image">
+                <img [ngSrc]="facade.getFirewallSrc(facade.jobStatusDetails()?.devices?.peer)" alt="Firewall" class="firewall-image" width="100" height="100">
                 <div class="firewall-details">
                     <mat-chip-set>
-                        <mat-chip [class]="getHaStatusClass(jobStatusDetails?.devices?.peer?.local_state, jobStatusDetails?.devices?.peer?.ha_enabled)">
-                            {{ jobStatusDetails?.devices?.peer?.hostname }}
+                        <mat-chip [class]="facade.getHaStatusClass(facade.jobStatusDetails()?.devices?.peer?.local_state, facade.jobStatusDetails()?.devices?.peer?.ha_enabled)">
+                            {{ facade.jobStatusDetails()?.devices?.peer?.hostname }}
                         </mat-chip>
                         <mat-chip>
-                            {{ jobStatusDetails?.devices?.peer?.local_state }}
+                            {{ facade.jobStatusDetails()?.devices?.peer?.local_state }}
                         </mat-chip>
                         <mat-chip>
-                            {{ jobStatusDetails?.devices?.peer?.sw_version }}
+                            {{ facade.jobStatusDetails()?.devices?.peer?.sw_version }}
                         </mat-chip>
                     </mat-chip-set>
                 </div>
-                @if (jobStatusDetails?.current_device === jobStatusDetails?.devices?.peer?.hostname) {
+                @if (facade.jobStatusDetails()?.current_device === facade.jobStatusDetails()?.devices?.peer?.hostname) {
                     <div class="status-container">
-                        <img [src]="statusSvg" alt="Status" class="status-svg">
+                        <img [ngSrc]="facade.statusSvg()" alt="Status" class="status-svg" width="40" height="40">
                         <div class="job-text">
-                            <h2 class="detail-label">{{ jobStatusDetails?.current_device }}</h2>
-                            <span class="status-text">{{ statusText }}</span>
+                            <h2 class="detail-label">{{ facade.jobStatusDetails()?.current_device }}</h2>
+                            <span class="status-text">{{ facade.statusText() }}</span>
                         </div>
                     </div>
                 }
