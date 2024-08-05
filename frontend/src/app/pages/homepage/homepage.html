@@ -1,116 +1,109 @@
+<!-- src/app/pages/homepage/homepage.html -->
+
 <app-page-header
-    [title]="pageTitle"
-    [description]="pageDescription"
-    [breadcrumbs]="breadcrumbs">
-    <a mat-raised-button color="accent" routerLink="/guide/getting-started">Get started</a>
+    [title]="config.pageTitle"
+    [description]="config.pageDescription"
+    [breadcrumbs]="config.breadcrumbs">
 </app-page-header>
 
-<main class="homepage-promo">
-    <div class="app-homepage-row docs-introduction">
-        <!-- Add the PAN-OS Version Chart -->
-        <div class="app-homepage-row-column">
-            <div class="chart-container">
-                <h3>PAN-OS Version Distribution</h3>
-                <ngx-charts-advanced-pie-chart
-                    [view]="view"
-                    [scheme]="colorScheme"
-                    [results]="panOsVersionData"
-                    [gradient]="gradient"
-                >
-                </ngx-charts-advanced-pie-chart>
+<main>
+    <div class="homepage-promo" role="main">
+        <div class="app-homepage-row docs-introduction">
+            <div class="app-homepage-row-column">
+                <div class="chart-container">
+                    <h3>PAN-OS Version Distribution</h3>
+                    <ngx-charts-pie-chart
+                        [results]="panOsVersionData$ | async"
+                        [view]="config.chartConfig.view"
+                        [gradient]="config.chartConfig.gradient"
+                        [legend]="true"
+                        [labels]="true"
+                        [scheme]="config.chartConfig.colorScheme">
+                    </ngx-charts-pie-chart>
+                </div>
+            </div>
+
+            <div class="app-homepage-row-column">
+                <div class="chart-container">
+                    <h3>PAN-OS Version by Device Group</h3>
+                    <ngx-charts-bar-vertical-stacked
+                        [results]="swVersionByDeviceGroupData$ | async"
+                        [view]="config.swVersionChartConfig.view"
+                        [gradient]="config.chartConfig.gradient"
+                        [xAxis]="config.swVersionChartConfig.showXAxis"
+                        [yAxis]="config.swVersionChartConfig.showYAxis"
+                        [legend]="config.swVersionChartConfig.showLegend"
+                        [showXAxisLabel]="config.swVersionChartConfig.showXAxisLabel"
+                        [showYAxisLabel]="config.swVersionChartConfig.showYAxisLabel"
+                        [xAxisLabel]="config.swVersionChartConfig.xAxisLabel"
+                        [yAxisLabel]="config.swVersionChartConfig.yAxisLabel"
+                        [scheme]="config.chartConfig.colorScheme">
+                    </ngx-charts-bar-vertical-stacked>
+                </div>
             </div>
         </div>
 
-        <!-- Add the PAN-OS Version by Device Group -->
-        <div class="app-homepage-row-column">
-            <div class="chart-container">
-                <h3>PAN-OS Version by Device Group</h3>
-                <ngx-charts-bar-horizontal-2d
-                    [view]="swVersionChartView"
-                    [scheme]="colorScheme"
-                    [results]="swVersionByDeviceGroupData"
-                    [gradient]="gradient"
-                    [xAxis]="swVersionShowXAxis"
-                    [yAxis]="swVersionShowYAxis"
-                    [legend]="swVersionShowLegend"
-                    [showXAxisLabel]="swVersionShowXAxisLabel"
-                    [showYAxisLabel]="swVersionShowYAxisLabel"
-                    [xAxisLabel]="swVersionXAxisLabel"
-                    [yAxisLabel]="swVersionYAxisLabel"
-                    [legendTitle]="swVersionLegendTitle"
-                    class="custom-chart"
-                >
+        <mat-divider></mat-divider>
+
+        <!-- Add the App-ID Version Chart -->
+        <div class="app-homepage-row docs-introduction">
+            <div class="app-homepage-row-column">
+                <div class="chart-container">
+                    <h3>App-ID Version Distribution</h3>
+                    <ngx-charts-advanced-pie-chart
+                        [view]="config.chartConfig.view"
+                        [scheme]="config.chartConfig.colorScheme"
+                        [results]="appIdVersionData$ | async"
+                        [gradient]="config.chartConfig.gradient"
                     >
-                </ngx-charts-bar-horizontal-2d>
+                    </ngx-charts-advanced-pie-chart>
+                </div>
+            </div>
+
+            <!-- Add the App-ID Version by Device Group -->
+            <div class="app-homepage-row-column">
+                <div class="chart-container">
+                    <h3>App-ID Version by Device Group</h3>
+                    <ngx-charts-bar-horizontal-2d
+                        [view]="config.appVersionChartConfig.view"
+                        [scheme]="config.chartConfig.colorScheme"
+                        [results]="appVersionByDeviceGroupData$ | async"
+                        [gradient]="config.chartConfig.gradient"
+                        [xAxis]="config.appVersionChartConfig.showXAxis"
+                        [yAxis]="config.appVersionChartConfig.showYAxis"
+                        [legend]="config.appVersionChartConfig.showLegend"
+                        [showXAxisLabel]="config.appVersionChartConfig.showXAxisLabel"
+                        [showYAxisLabel]="config.appVersionChartConfig.showYAxisLabel"
+                        [xAxisLabel]="config.appVersionChartConfig.xAxisLabel"
+                        [yAxisLabel]="config.appVersionChartConfig.yAxisLabel"
+                        [legendTitle]="config.appVersionChartConfig.legendTitle"
+                    >
+                    </ngx-charts-bar-horizontal-2d>
+                </div>
             </div>
         </div>
 
-    </div>
+        <mat-divider></mat-divider>
 
-    <mat-divider></mat-divider>
-
-    <!-- Add the App-ID Version Chart -->
-    <div class="app-homepage-row docs-introduction">
-        <div class="app-homepage-row-column">
-            <div class="chart-container">
-                <h3>App-ID Version Distribution</h3>
-                <ngx-charts-advanced-pie-chart
-                    [view]="view"
-                    [scheme]="colorScheme"
-                    [results]="appIdVersionData"
-                    [gradient]="gradient"
-                >
-                </ngx-charts-advanced-pie-chart>
-            </div>
-        </div>
-
-        <!-- Add the App-ID Version by Device Group -->
-        <div class="app-homepage-row-column">
-            <div class="chart-container">
-                <h3>App-ID Version by Device Group</h3>
-                <ngx-charts-bar-horizontal-2d
-                    [view]="appVersionChartView"
-                    [scheme]="colorScheme"
-                    [results]="appVersionByDeviceGroupData"
-                    [gradient]="gradient"
-                    [xAxis]="appVersionShowXAxis"
-                    [yAxis]="appVersionShowYAxis"
-                    [legend]="appVersionShowLegend"
-                    [showXAxisLabel]="appVersionShowXAxisLabel"
-                    [showYAxisLabel]="appVersionShowYAxisLabel"
-                    [xAxisLabel]="appVersionXAxisLabel"
-                    [yAxisLabel]="appVersionYAxisLabel"
-                    [legendTitle]="appVersionLegendTitle"
-                >
-                </ngx-charts-bar-horizontal-2d>
-            </div>
-        </div>
-    </div>
-
-    <mat-divider></mat-divider>
-
-    <div class="app-homepage-row">
-        <div class="app-homepage-row-column">
-            <div class="chart-container">
-                <h3>Job Statistics</h3>
-                <ngx-charts-bar-horizontal-2d
-                    [view]="jobChartView"
-                    [scheme]="colorScheme"
-                    [results]="jobData"
-                    [gradient]="gradient"
-                    [xAxis]="jobShowXAxis"
-                    [yAxis]="jobShowYAxis"
-                    [legend]="jobShowLegend"
-                    [showXAxisLabel]="jobShowXAxisLabel"
-                    [showYAxisLabel]="jobShowYAxisLabel"
-                    [xAxisLabel]="jobXAxisLabel"
-                    [yAxisLabel]="jobYAxisLabel"
-                    [legendTitle]="jobLegendTitle"
-                >
-                </ngx-charts-bar-horizontal-2d>
+        <div class="app-homepage-row">
+            <div class="app-homepage-row-column">
+                <div class="chart-container">
+                    <h3>Job Statistics</h3>
+                    <ngx-charts-bar-vertical-2d
+                        [results]="jobData$ | async"
+                        [view]="config.jobChartConfig.view"
+                        [gradient]="config.chartConfig.gradient"
+                        [xAxis]="config.jobChartConfig.showXAxis"
+                        [yAxis]="config.jobChartConfig.showYAxis"
+                        [legend]="config.jobChartConfig.showLegend"
+                        [showXAxisLabel]="config.jobChartConfig.showXAxisLabel"
+                        [showYAxisLabel]="config.jobChartConfig.showYAxisLabel"
+                        [xAxisLabel]="config.jobChartConfig.xAxisLabel"
+                        [yAxisLabel]="config.jobChartConfig.yAxisLabel"
+                        [scheme]="config.chartConfig.colorScheme">
+                    </ngx-charts-bar-vertical-2d>
+                </div>
             </div>
         </div>
     </div>
-
-    <mat-divider></mat-divider>
 </main>
