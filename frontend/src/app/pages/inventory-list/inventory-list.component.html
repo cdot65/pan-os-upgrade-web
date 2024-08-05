@@ -1,29 +1,24 @@
-<!-- src/app/pages/inventory-list/inventory-list.html -->
+<!-- src/app/pages/inventory-list/inventory-list.component.html -->
 
 <app-page-header
-    [title]="pageTitle"
-    [description]="pageDescription"
-    [breadcrumbs]="breadcrumbs">
+    [title]="config.pageTitle"
+    [description]="config.pageDescription"
+    [breadcrumbs]="config.breadcrumbs">
     <div class="header-buttons">
         <button mat-raised-button color="accent" (click)="navigateToCreateInventory()">
             <mat-icon>add</mat-icon>
             Add new Device
         </button>
-        <button mat-raised-button color="accent"
-                (click)="onSyncFromPanoramaClick()"
-                [disabled]="!isSyncFromPanoramaButtonActive()">
+        <button mat-raised-button color="accent" (click)="onSyncFromPanoramaClick()"
+                [disabled]="!processor.isSyncFromPanoramaButtonActive(selection.selected)">
             <mat-icon>sync</mat-icon>
             Sync from Panorama
         </button>
-        <button mat-raised-button color="accent"
-                (click)="onRefreshSelectedClick()"
-                [disabled]="!isAnyItemSelected()">
+        <button mat-raised-button color="accent" (click)="onRefreshSelectedClick()" [disabled]="!selection.hasValue()">
             <mat-icon>refresh</mat-icon>
             Refresh Selected
         </button>
-        <button mat-raised-button color="warn"
-                (click)="onDeleteSelectedClick()"
-                [disabled]="!isAnyItemSelected()">
+        <button mat-raised-button color="warn" (click)="onDeleteSelectedClick()" [disabled]="!selection.hasValue()">
             <mat-icon>delete</mat-icon>
             Delete Selected
         </button>
@@ -196,10 +191,10 @@
                 </td>
             </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-header-row *matHeaderRowDef="config.displayedColumns"></tr>
             <tr
                 mat-row
-                *matRowDef="let row; columns: displayedColumns;"
+                *matRowDef="let row; columns: config.displayedColumns;"
                 (click)="selection.toggle(row)"
             ></tr>
         </table>

@@ -24,7 +24,7 @@ export const APP_ROUTES: Routes = [
                         path: "",
                         loadComponent: () =>
                             import("./pages/inventory-list").then(
-                                (m) => m.InventoryList,
+                                (m) => m.InventoryListComponent,
                             ),
                     },
                     {
