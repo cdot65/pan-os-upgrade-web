@@ -10,8 +10,8 @@
     <main aria-label="Snapshot list" id="snapshot-list" class="snapshot-list">
         <form [formGroup]="snapshotFilterForm" class="mat-elevation-z2">
             <div class="snapshot-filter-grid">
-                <div>
-                    <h3>Filter Snapshots</h3>
+                <h3>Filter Snapshots</h3>
+                <div class="filter-row">
                     <div class="form-field">
                         <mat-form-field>
                             <mat-label>Job ID</mat-label>
@@ -34,13 +34,14 @@
                             </mat-select>
                         </mat-form-field>
                     </div>
-                    <div class="form-field">
-                        <mat-label>Snapshot Type</mat-label>
-                        <mat-radio-group formControlName="snapshotType">
-                            <mat-radio-button value="pre">Pre Snapshot</mat-radio-button>
-                            <mat-radio-button value="post">Post Snapshot</mat-radio-button>
-                        </mat-radio-group>
-                    </div>
+                </div>
+                <div class="form-field">
+                    <mat-label>Snapshot Type</mat-label>
+                    <mat-radio-group formControlName="snapshotType">
+                        <mat-radio-button value="pre">Pre Snapshot</mat-radio-button>
+                        <mat-radio-button value="post">Post Snapshot</mat-radio-button>
+                        <mat-radio-button value="difference">Difference</mat-radio-button>
+                    </mat-radio-group>
                 </div>
             </div>
         </form>
@@ -89,8 +90,7 @@
                             }
                             <tr mat-header-row *matHeaderRowDef="licenseColumns"></tr>
                             <tr mat-row *matRowDef="let row; columns: licenseColumns;"></tr>
-                        </table>
-                    }
+                        </table>                    }
 
                     @if (snapshot.network_interfaces && snapshot.network_interfaces.length > 0) {
                         <h3>Network Interfaces</h3>
