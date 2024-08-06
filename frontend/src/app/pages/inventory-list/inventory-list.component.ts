@@ -4,6 +4,8 @@
 
 import {
     AfterViewInit,
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     OnDestroy,
     OnInit,
@@ -27,8 +29,8 @@ import { SelectionModel } from "@angular/cdk/collections";
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Router } from "@angular/router";
-import { Subject } from "rxjs";
-import { takeUntil } from "rxjs/operators";
+import { Observable, Subject } from "rxjs";
+import { takeUntil, tap } from "rxjs/operators";
 
 import { INVENTORY_LIST_CONFIG } from "./inventory-list.config";
 import { InventoryListFacade } from "./inventory-list.facade";
@@ -42,6 +44,7 @@ import { MatButton, MatIconButton } from "@angular/material/button";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { CookieService } from "ngx-cookie-service";
+import { AsyncPipe } from "@angular/common";
 
 @Component({
     selector: "app-inventory-list",
@@ -49,6 +52,7 @@ import { CookieService } from "ngx-cookie-service";
     styleUrls: ["./inventory-list.component.scss"],
     providers: [InventoryListFacade],
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         PageHeaderComponent,
         MatIcon,
@@ -67,13 +71,15 @@ import { CookieService } from "ngx-cookie-service";
         MatRowDef,
         MatRow,
         MatIconButton,
+        AsyncPipe,
     ],
 })
 export class InventoryListComponent
-    implements OnInit, OnDestroy, AfterViewInit {
+    implements OnInit, AfterViewInit, OnDestroy {
     config = INVENTORY_LIST_CONFIG;
-    dataSource = new MatTableDataSource<Device>([]);
+    dataSource: MatTableDataSource<Device>;
     selection = new SelectionModel<Device>(true, []);
+    inventoryItems$: Observable<Device[]>;
 
     @ViewChild(MatSort) sort!: MatSort;
 
@@ -87,7 +93,11 @@ export class InventoryListComponent
         private router: Router,
         private _liveAnnouncer: LiveAnnouncer,
         private cookieService: CookieService,
-    ) {}
+        private cdr: ChangeDetectorRef,
+    ) {
+        this.dataSource = new MatTableDataSource<Device>([]);
+        this.inventoryItems$ = this.facade.getInventoryItems();
+    }
 
     ngOnInit(): void {
         this.loadData();
@@ -103,13 +113,17 @@ export class InventoryListComponent
     }
 
     loadData(): void {
+        this.inventoryItems$
+            .pipe(
+                takeUntil(this.destroy$),
+                tap((items) => {
+                    this.dataSource.data = items;
+                    this.cdr.markForCheck();
+                }),
+            )
+            .subscribe();
+
         this.facade.loadInventoryItems();
-        this.facade
-            .getInventoryItems()
-            .pipe(takeUntil(this.destroy$))
-            .subscribe((items) => {
-                this.dataSource.data = items;
-            });
     }
 
     isAllSelected(): boolean {

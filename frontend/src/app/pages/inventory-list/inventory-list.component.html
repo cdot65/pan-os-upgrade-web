@@ -198,5 +198,9 @@
                 (click)="selection.toggle(row)"
             ></tr>
         </table>
+
+        @if (dataSource.data.length === 0) {
+            <div class="no-data">No inventory items found.</div>
+        }
     </main>
 </div>
