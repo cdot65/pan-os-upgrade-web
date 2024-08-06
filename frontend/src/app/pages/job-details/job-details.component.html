@@ -1,8 +1,8 @@
-<!-- src/app/pages/job-details/job-details.html -->
+<!-- src/app/pages/job-details/job-details.component.html -->
 <app-page-header
-    [title]="pageTitle"
-    [description]="pageDescription"
-    [breadcrumbs]="breadcrumbs">
+    [title]="config.pageTitle"
+    [description]="config.pageDescription"
+    [breadcrumbs]="config.breadcrumbs">
 </app-page-header>
 
 <div class="job-details-container">
@@ -69,25 +69,27 @@
                     <mat-divider></mat-divider>
 
                     <div class="live-logs">
-                        @if ((jobStatusAndLogs$ | async)?.logs?.length === 0) {
-                            <div>No logs found.</div>
+                        @if (logs$ | async; as logs) {
+                            @if (logs.length === 0) {
+                                <div>No logs found.</div>
+                            } @else {
+                                <div>
+                                    @for (log of logs; track log) {
+                                        <mat-card class="log-entry">
+                                            <mat-card-header class="mat-card-header">
+                                                <mat-card-title class="mat-card-title">
+                                                    {{ log.message }}
+                                                </mat-card-title>
+                                                <mat-card-subtitle class="mat-card-subtitle">
+                                                    {{ log.timestamp | date:'medium' }}
+                                                </mat-card-subtitle>
+                                            </mat-card-header>
+                                        </mat-card>
+                                    }
+                                </div>
+                            }
                         } @else {
-                            <div>
-                                @for (log of (jobStatusAndLogs$ | async)?.logs ?? []; track log) {
-                                    <mat-card class="log-entry">
-                                        <mat-card-header class="mat-card-header">
-                                            <mat-card-title class="mat-card-title">
-                                                {{ log.message }}
-                                            </mat-card-title>
-                                            <mat-card-subtitle
-                                                class="mat-card-subtitle"
-                                            >
-                                                {{ log.timestamp | date:'medium' }}
-                                            </mat-card-subtitle>
-                                        </mat-card-header>
-                                    </mat-card>
-                                }
-                            </div>
+                            <div>Loading logs...</div>
                         }
                     </div>
                 </mat-card-content>
