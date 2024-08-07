@@ -14,7 +14,7 @@ import { NgxChartsModule } from "@swimlane/ngx-charts";
 import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
 import { ComponentPageTitle } from "../page-title/page-title";
 import { SnapshotListFacade } from "./snapshot-list.facade";
-import { chartConfig } from "./chart-config";
+import { snapshotListConfig } from "./snapshot-list.config";
 
 @Component({
     selector: "app-snapshot-list",
@@ -83,7 +83,7 @@ export class SnapshotListComponent implements OnInit {
     sessionCountsData: any[] = [];
     sessionRatesData: any[] = [];
     timeoutData: any[] = [];
-    chartConfig = chartConfig;
+    chartConfig = snapshotListConfig;
 
     // Expose facade properties
     jobIds = this.facade.jobIds;

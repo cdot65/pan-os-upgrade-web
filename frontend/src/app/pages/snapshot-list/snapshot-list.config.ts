@@ -1,8 +1,8 @@
-// src/app/snapshots/snapshot-list/chart-config.ts
+// src/app/snapshots/snapshot-list/snapshot-list.config.ts
 
 import { Color, ScaleType } from "@swimlane/ngx-charts";
 
-export const chartConfig = {
+export const snapshotListConfig = {
     view: [700, 400] as [number, number],
     showXAxis: true,
     showYAxis: true,
