@@ -21,8 +21,8 @@ import { ComponentPageTitle } from "../page-title/page-title";
 import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
 import { ProfileDialogComponent } from "../profile-select-dialog/profile-select-dialog.component";
 import { InventoryDetailsFacade } from "./inventory-details.facade";
-import { takeUntil } from "rxjs/operators";
-import { Subject } from "rxjs";
+import { switchMap, take, takeUntil } from "rxjs/operators";
+import { EMPTY, Subject } from "rxjs";
 
 @Component({
     selector: "app-inventory-details",
@@ -103,42 +103,48 @@ export class InventoryDetailsComponent implements OnInit, OnDestroy {
             if (selectedProfileUuid) {
                 const author = this.cookieService.get("author");
                 this.inventoryItem$
-                    .pipe(takeUntil(this.destroy$))
-                    .subscribe((item) => {
-                        if (item) {
-                            const refreshForm = {
-                                author: author ? parseInt(author, 10) : 0,
-                                device: item.uuid,
-                                profile: selectedProfileUuid,
-                            };
-                            this.showRefreshProgress = true;
-                            this.showRefreshError = false;
-
-                            setTimeout(() => {
-                                this.facade
-                                    .refreshDevice(refreshForm)
-                                    .subscribe(
-                                        (jobId) => {
-                                            this.jobId = jobId;
-                                            this.getJobStatus();
-                                        },
-                                        (error) => {
-                                            console.error(
-                                                "Error refreshing device details:",
-                                                error,
-                                            );
-                                            this.showRefreshProgress = false;
-                                            this.showRefreshError = true;
-                                            this.snackBar.open(
-                                                "Failed to refresh device details. Please try again.",
-                                                "Close",
-                                                { duration: 3000 },
-                                            );
-                                        },
-                                    );
-                            }, 2000);
-                        }
-                    });
+                    .pipe(
+                        take(1),
+                        switchMap((item) => {
+                            if (item) {
+                                const refreshForm = {
+                                    author: author ? parseInt(author, 10) : 0,
+                                    device: item.uuid,
+                                    profile: selectedProfileUuid,
+                                };
+                                this.showRefreshProgress = true;
+                                this.showRefreshError = false;
+                                return this.facade.refreshDevice(refreshForm);
+                            }
+                            return EMPTY;
+                        }),
+                        takeUntil(this.destroy$),
+                    )
+                    .subscribe(
+                        (completed) => {
+                            if (completed) {
+                                this.showRefreshProgress = false;
+                                this.snackBar.open(
+                                    "Device details refreshed successfully",
+                                    "Close",
+                                    { duration: 3000 },
+                                );
+                            }
+                        },
+                        (error) => {
+                            console.error(
+                                "Error refreshing device details:",
+                                error,
+                            );
+                            this.showRefreshProgress = false;
+                            this.showRefreshError = true;
+                            this.snackBar.open(
+                                "Failed to refresh device details. Please try again.",
+                                "Close",
+                                { duration: 3000 },
+                            );
+                        },
+                    );
             }
         });
     }
