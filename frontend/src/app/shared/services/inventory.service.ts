@@ -16,7 +16,15 @@ import {
     HttpParams,
 } from "@angular/common/http";
 import { Observable, throwError, timer } from "rxjs";
-import { catchError, map, mergeMap, retryWhen, tap } from "rxjs/operators";
+import {
+    catchError,
+    map,
+    mergeMap,
+    retryWhen,
+    switchMap,
+    takeWhile,
+    tap,
+} from "rxjs/operators";
 
 import { CookieService } from "ngx-cookie-service";
 import { Device } from "../interfaces/device.interface";
@@ -289,6 +297,27 @@ export class InventoryService {
                     },
                 );
             }),
+        );
+    }
+
+    /**
+     * Polls a job status at specified intervals until completion or failure.
+     * @param jobId {string} The ID of the job to poll
+     * @param interval {number} The polling interval in milliseconds (default: 2000)
+     * @returns An Observable emitting job status updates
+     */
+    pollJobStatus(
+        jobId: string,
+        interval: number = 2000,
+    ): Observable<{ status: string }> {
+        return timer(interval, interval).pipe(
+            switchMap(() => this.getJobStatus(jobId)),
+            takeWhile(
+                (response) =>
+                    response.status !== "completed" &&
+                    response.status !== "failed",
+                true,
+            ),
         );
     }
 

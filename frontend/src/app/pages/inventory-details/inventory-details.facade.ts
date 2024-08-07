@@ -4,13 +4,20 @@
 
 import { Injectable } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { BehaviorSubject, Observable } from "rxjs";
+import { BehaviorSubject, Observable, of, throwError } from "rxjs";
 import { InventoryService } from "../../shared/services/inventory.service";
 import { Device } from "../../shared/interfaces/device.interface";
 import { DeviceType } from "../../shared/interfaces/device-type.interface";
 import { InventoryDetailsProcessorService } from "./inventory-details-processor.service";
 import { InventoryDetailsConfig } from "./inventory-details.config";
-import { map } from "rxjs/operators";
+import {
+    catchError,
+    finalize,
+    map,
+    switchMap,
+    takeWhile,
+} from "rxjs/operators";
+import { NotFoundError } from "../../shared/errors/job.error";
 
 @Injectable()
 export class InventoryDetailsFacade {
@@ -150,13 +157,34 @@ export class InventoryDetailsFacade {
         );
     }
 
-    refreshDevice(refreshForm: any): Observable<string> {
+    refreshDevice(refreshForm: any): Observable<boolean> {
         return this.inventoryService.refreshDevice(refreshForm).pipe(
-            map((jobId) => {
+            switchMap((jobId) => {
                 if (jobId === null) {
                     throw new Error("Job ID is null");
                 }
-                return jobId;
+                return this.pollJobStatus(jobId);
+            }),
+        );
+    }
+
+    private pollJobStatus(jobId: string): Observable<boolean> {
+        return this.inventoryService.pollJobStatus(jobId, 2000).pipe(
+            map((response) => response.status === "completed"),
+            catchError((error) => {
+                if (error instanceof NotFoundError) {
+                    // If 404, return false to continue polling
+                    return of(false);
+                }
+                // For other errors, rethrow
+                return throwError(() => error);
+            }),
+            takeWhile((completed) => !completed, true),
+            finalize(() => {
+                const currentItem = this.inventoryItem$.getValue();
+                if (currentItem) {
+                    this.getDevice(currentItem.uuid);
+                }
             }),
         );
     }
