@@ -6,7 +6,6 @@ import { RouterModule } from "@angular/router";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 import { AuthService } from "../../services/auth.service";
-import { NavigationFocusService } from "../../navigation-focus/navigation-focus.service";
 import { ThemePicker } from "../theme-picker";
 import { SidenavStateService } from "../../services/sidenav-state.service";
 
@@ -29,17 +28,9 @@ export class NavBar implements OnInit {
 
     constructor(
         public authService: AuthService,
-        private navigationFocusService: NavigationFocusService,
         private themePicker: ThemePicker,
         public sidenavStateService: SidenavStateService,
-    ) {
-        setTimeout(
-            () =>
-                (this.skipLinkHref =
-                    this.navigationFocusService.getSkipLinkHref()),
-            100,
-        );
-    }
+    ) {}
 
     get hasAuthToken() {
         return this.authService.getIsLoggedIn();

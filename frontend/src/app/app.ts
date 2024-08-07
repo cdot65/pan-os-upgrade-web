@@ -1,13 +1,11 @@
 // src/app/app.ts
 
 import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
-import { map, pairwise, startWith } from "rxjs/operators";
 
 import { AuthInterceptor } from "./shared/interceptors/auth.interceptor";
 import { CookieService } from "ngx-cookie-service";
 import { HTTP_INTERCEPTORS } from "@angular/common/http";
 import { NavBar } from "./shared/components/navbar";
-import { NavigationFocusService } from "./shared/navigation-focus/navigation-focus.service";
 import { RouterOutlet } from "@angular/router";
 import { Subscription } from "rxjs";
 import { ThemePicker } from "./shared/components/theme-picker";
@@ -27,37 +25,9 @@ import { ThemePicker } from "./shared/components/theme-picker";
 export class PanOsUpgradeApp implements OnDestroy {
     private subscriptions = new Subscription();
 
-    constructor(navigationFocusService: NavigationFocusService) {
-        this.subscriptions.add(
-            navigationFocusService.navigationEndEvents
-                .pipe(
-                    map((e) => e.urlAfterRedirects),
-                    startWith(""),
-                    pairwise(),
-                )
-                .subscribe(([fromUrl, toUrl]) => {
-                    if (
-                        !navigationFocusService.isNavigationWithinComponentView(
-                            fromUrl,
-                            toUrl,
-                        )
-                    ) {
-                        resetScrollPosition();
-                    }
-                }),
-        );
-    }
+    constructor() {}
 
     ngOnDestroy() {
         this.subscriptions.unsubscribe();
-    }
-}
-
-function resetScrollPosition() {
-    if (typeof document === "object" && document) {
-        const sidenavContent = document.querySelector(".mat-drawer-content");
-        if (sidenavContent) {
-            sidenavContent.scrollTop = 0;
-        }
     }
 }
