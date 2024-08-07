@@ -1,0 +1,66 @@
+<!-- src/app/pages/job-list/job-list.component.html -->
+<app-page-header
+    [title]="config.pageTitle"
+    [description]="config.pageDescription"
+    [breadcrumbs]="config.breadcrumbs">
+    <div class="header-buttons">
+        <button mat-raised-button color="warn" (click)="onDeleteSelectedClick()" [disabled]="!selection.hasValue()">
+            Delete Selected
+        </button>
+    </div>
+</app-page-header>
+
+<main class="job-list-container">
+    <div id="job-list" class="job-list" role="main" aria-label="Job list">
+        <table mat-table [dataSource]="dataSource" matSort (matSortChange)="announceSortChange($event)">
+            <!-- Checkbox Column -->
+            <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef>
+                    <mat-checkbox (change)="$event ? masterToggle() : null"
+                                  [checked]="selection.hasValue() && isAllSelected()"
+                                  [indeterminate]="selection.hasValue() && !isAllSelected()"
+                                  [aria-label]="checkboxLabel()">
+                    </mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let row">
+                    <mat-checkbox (click)="$event.stopPropagation()"
+                                  (change)="$event ? selection.toggle(row) : null"
+                                  [checked]="selection.isSelected(row)"
+                                  [aria-label]="checkboxLabel(row)">
+                    </mat-checkbox>
+                </td>
+            </ng-container>
+
+            <!-- Job ID Column -->
+            <ng-container matColumnDef="task_id">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Job ID</th>
+                <td mat-cell *matCellDef="let item"> {{ item.task_id }}</td>
+            </ng-container>
+
+            <!-- Job Type Column -->
+            <ng-container matColumnDef="job_type">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Job Type</th>
+                <td mat-cell *matCellDef="let item"> {{ item.job_type }}</td>
+            </ng-container>
+
+            <!-- Timestamp Column -->
+            <ng-container matColumnDef="created_at">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Timestamp</th>
+                <td mat-cell *matCellDef="let item"> {{ item.created_at | date:'medium' }}</td>
+            </ng-container>
+
+            <!-- View Details Column -->
+            <ng-container matColumnDef="view_details">
+                <th mat-header-cell *matHeaderCellDef> View Details</th>
+                <td mat-cell *matCellDef="let item">
+                    <button mat-icon-button (click)="onViewClick(item)" aria-label="View job details">
+                        <mat-icon>visibility</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="config.displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: config.displayedColumns;"></tr>
+        </table>
+    </div>
+</main>
