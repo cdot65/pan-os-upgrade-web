@@ -17,7 +17,7 @@ import { takeUntil } from "rxjs/operators";
 
 import { ComponentPageTitle } from "../page-title/page-title";
 import { InventoryDeleteDialogComponent } from "../inventory-delete-dialog/inventory-delete-dialog";
-import { Layout } from "../../shared/layout/layout";
+import { Layout } from "../../shared/components/layout/layout";
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";

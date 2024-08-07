@@ -1,6 +1,6 @@
 // src/app/routes.ts
 
-import { Layout } from "./shared/layout/layout";
+import { Layout } from "./shared/components/layout/layout";
 import { Routes } from "@angular/router";
 import { authGuard } from "./shared/guards/auth.guard";
 import { LoginComponent } from "./pages/auth/login/login.component";

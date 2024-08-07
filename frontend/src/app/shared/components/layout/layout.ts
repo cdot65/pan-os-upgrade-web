@@ -3,9 +3,9 @@
 import { Component } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { RouterOutlet } from "@angular/router";
-import { NavBar } from "../navbar";
-import { SideNav } from "../sidenav/sidenav";
-import { SidenavStateService } from "../services/sidenav-state.service";
+import { NavBar } from "../../navbar";
+import { SideNav } from "../../sidenav/sidenav";
+import { SidenavStateService } from "../../services/sidenav-state.service";
 
 @Component({
     selector: "app-layout",
