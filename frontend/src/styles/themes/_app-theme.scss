@@ -16,7 +16,6 @@
 @use "../../app/pages/profile-select-dialog/profile-select-dialogue-theme";
 @use '../../app/pages/snapshot-list/snapshot-list-theme' as snapshot-list;
 @use '../../app/pages/upgrade-list/upgrade-list-theme' as upgrade-list;
-@use "../../app/shared/carousel/carousel-theme";
 @use "../../app/shared/navbar/navbar-theme";
 @use "../../app/shared/sidenav/sidenav-theme";
 @use "../components/markdown-theme";
@@ -52,7 +51,6 @@
         }
     }
 
-    @include carousel-theme.theme($theme);
     @include homepage.theme($theme);
     @include inventory-create.theme($theme);
     @include inventory-details.theme($theme);
