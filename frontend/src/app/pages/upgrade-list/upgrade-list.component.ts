@@ -7,27 +7,26 @@ import { mergeMap, retryWhen, switchMap, takeUntil, takeWhile, tap } from "rxjs/
 import { UpgradeJob, UpgradeResponse } from "../../shared/interfaces/upgrade-response.interface";
 import { ComponentPageTitle } from "../page-title/page-title";
 import { Device } from "../../shared/interfaces/device.interface";
-import { InventoryService } from "../../shared/services/inventory.service";
-import { JobService } from "src/app/shared/services/job.service";
-import { MatButtonModule } from "@angular/material/button";
-import { MatCardModule } from "@angular/material/card";
-import { MatDividerModule } from "@angular/material/divider";
-import { MatFormFieldModule } from "@angular/material/form-field";
-import { MatIconModule } from "@angular/material/icon";
-import { MatInputModule } from "@angular/material/input";
-import { MatProgressBarModule } from "@angular/material/progress-bar";
-import { MatRadioModule } from "@angular/material/radio";
-import { MatSelectModule } from "@angular/material/select";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { PanosVersion } from "../../shared/interfaces/panos-version.interface";
 import { Profile } from "../../shared/interfaces/profile.interface";
-import { ProfileService } from "../../shared/services/profile.service";
 import { Router } from "@angular/router";
 import { UpgradeForm } from "../../shared/interfaces/upgrade-form.interface";
-import { UpgradeService } from "../../shared/services/upgrade.service";
 import { AsyncPipe } from "@angular/common";
-import { HttpErrorResponse } from "@angular/common/http";
 import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
+
+import { UPGRADE_LIST_CONFIG } from "./upgrade-list.config";
+import { UpgradeListFacade } from "./upgrade-list.facade";
+import { UpgradeListProcessorService } from "./upgrade-list.processor.service";
+import { MatDividerModule } from "@angular/material/divider";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatIconModule } from "@angular/material/icon";
+import { MatSelectModule } from "@angular/material/select";
+import { MatButtonModule } from "@angular/material/button";
+import { MatInputModule } from "@angular/material/input";
+import { MatCardModule } from "@angular/material/card";
+import { MatProgressBarModule } from "@angular/material/progress-bar";
+import { MatRadioModule } from "@angular/material/radio";
 
 @Component({
     selector: "app-upgrade-list",
@@ -49,24 +48,17 @@ import { PageHeaderComponent } from "../../shared/components/page-header/page-he
         MatRadioModule,
         PageHeaderComponent,
     ],
+    providers: [UpgradeListFacade, UpgradeListProcessorService],
 })
 export class UpgradeListComponent implements OnInit, OnDestroy {
     @HostBinding("class.main-content") readonly mainContentClass = true;
 
-    // Component page details
-    pageTitle = "Upgrade Devices";
-    pageDescription = "Upgrade your PAN-OS devices to the latest version";
-    breadcrumbs = [
-        { label: "Home", url: "/" },
-        { label: "Upgrades", url: "/upgrades" },
-    ];
-
+    config = UPGRADE_LIST_CONFIG;
     devices: Device[] = [];
     jobStatuses: { [jobId: string]: string } = {};
     pollingSubscriptions: { [jobId: string]: Subject<void> } = {};
     profiles: Profile[] = [];
     step = 0;
-    // target_versions: string[] = ["10.1.3", "10.2.9-h1", "11.1.1-h1"];
     syncVersions$: Observable<boolean>;
     target_versions: PanosVersion[] = [];
     upgradeForm: FormGroup;
@@ -74,10 +66,8 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
     private destroy$ = new Subject<void>();
 
     constructor(
-        private inventoryService: InventoryService,
-        private profileService: ProfileService,
-        public upgradeService: UpgradeService,
-        private jobService: JobService,
+        private facade: UpgradeListFacade,
+        private processor: UpgradeListProcessorService,
         private router: Router,
         private snackBar: MatSnackBar,
         private formBuilder: FormBuilder,
@@ -90,14 +80,14 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
             target_version: ["", Validators.required],
             scheduledAt: [""],
         });
-        this.syncVersions$ = this.upgradeService.syncVersions$;
+        this.syncVersions$ = this.facade.upgradeService.syncVersions$;
     }
 
     private pollJobStatus(jobId: string): Observable<string> {
         return timer(2000).pipe(
             switchMap(() =>
                 timer(0, 2000).pipe(
-                    switchMap(() => this.jobService.getJobStatus(jobId)),
+                    switchMap(() => this.facade.getJobStatus(jobId)),
                     tap((status) => {
                         this.snackBar.open(
                             `Job status for job ID ${jobId}: ${status}`,
@@ -120,22 +110,9 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         );
     }
 
-    private shouldRetry(error: HttpErrorResponse): boolean {
-        return error.status >= 500 || error.error instanceof ErrorEvent;
-    }
-
     checkDeviceEligibility(deviceId: string): boolean {
         const device = this.devices.find((d) => d.uuid === deviceId);
-        if (device) {
-            if (
-                device.local_state === "passive" ||
-                device.local_state === "active-secondary" ||
-                device.ha_enabled === false
-            ) {
-                return true;
-            }
-        }
-        return false;
+        return this.processor.checkDeviceEligibility(device);
     }
 
     getDeviceHaProperties(deviceId: string): {
@@ -145,21 +122,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         peer_state: string | null;
     } {
         const device = this.devices.find((d) => d.uuid === deviceId);
-        if (device && device.ha_enabled) {
-            return {
-                ha_enabled: true,
-                local_state: device.local_state || null,
-                peer_ip: device.peer_ip || null,
-                peer_state: device.peer_state || null,
-            };
-        } else {
-            return {
-                ha_enabled: false,
-                local_state: "n/a",
-                peer_ip: "n/a",
-                peer_state: "n/a",
-            };
-        }
+        return this.processor.getDeviceHaProperties(device);
     }
 
     getDeviceHostname(deviceId: string): string {
@@ -167,52 +130,48 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         return device ? device.hostname : "";
     }
 
+    ngOnInit(): void {
+        this._componentPageTitle.title = this.config.pageTitle;
+        this.getDevices();
+        this.getProfiles();
+        this.getPanosVersions();
+
+        this.syncVersions$
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((isSyncing) => {
+                if (!isSyncing) {
+                    this.getPanosVersions();
+                }
+            });
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
     getDevices(): void {
-        this.inventoryService
+        this.facade
             .getDevices()
             .pipe(takeUntil(this.destroy$))
             .subscribe(
                 (devices) => {
-                    this.devices = devices.filter(
-                        (device) => device.device_type === "Firewall",
-                    );
+                    this.devices =
+                        this.processor.filterFirewallDevices(devices);
                 },
                 (error) => {
                     console.error("Error fetching devices:", error);
                     this.snackBar.open(
-                        "Failed to fetch devices. Please try again.",
+                        this.config.errorMessages.fetchDevicesFailed,
                         "Close",
-                        {
-                            duration: 3000,
-                        },
-                    );
-                },
-            );
-    }
-
-    getPanosVersions(): void {
-        this.upgradeService
-            .getPanosVersions()
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(
-                (versions: PanosVersion[]) => {
-                    this.target_versions = versions;
-                },
-                (error) => {
-                    console.error("Error fetching PAN-OS versions:", error);
-                    this.snackBar.open(
-                        "Failed to fetch PAN-OS versions. Please try again.",
-                        "Close",
-                        {
-                            duration: 3000,
-                        },
+                        { duration: this.config.snackBarDuration },
                     );
                 },
             );
     }
 
     getProfiles(): void {
-        this.profileService
+        this.facade
             .getProfiles()
             .pipe(takeUntil(this.destroy$))
             .subscribe(
@@ -222,34 +181,31 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
                 (error) => {
                     console.error("Error fetching profiles:", error);
                     this.snackBar.open(
-                        "Failed to fetch profiles. Please try again.",
+                        this.config.errorMessages.fetchProfilesFailed,
                         "Close",
-                        {
-                            duration: 3000,
-                        },
+                        { duration: this.config.snackBarDuration },
                     );
                 },
             );
     }
 
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
-    }
-
-    ngOnInit(): void {
-        this._componentPageTitle.title = this.pageTitle;
-        this.getDevices();
-        this.getProfiles();
-        this.getPanosVersions();
-
-        this.upgradeService.syncVersions$
+    getPanosVersions(): void {
+        this.facade
+            .getPanosVersions()
             .pipe(takeUntil(this.destroy$))
-            .subscribe((isSyncing) => {
-                if (!isSyncing) {
-                    this.getPanosVersions();
-                }
-            });
+            .subscribe(
+                (versions: PanosVersion[]) => {
+                    this.target_versions = versions;
+                },
+                (error) => {
+                    console.error("Error fetching PAN-OS versions:", error);
+                    this.snackBar.open(
+                        this.config.errorMessages.fetchVersionsFailed,
+                        "Close",
+                        { duration: this.config.snackBarDuration },
+                    );
+                },
+            );
     }
 
     onUpgradeClick(): void {
@@ -262,7 +218,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
                 target_version: this.upgradeForm.get("target_version")?.value,
             };
 
-            this.upgradeService
+            this.facade
                 .upgradeDevice(upgradeFormData)
                 .pipe(takeUntil(this.destroy$))
                 .subscribe(
@@ -276,28 +232,22 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
                             this.snackBar.open(
                                 "Upgrade initiated successfully.",
                                 "Close",
-                                {
-                                    duration: 3000,
-                                },
+                                { duration: this.config.snackBarDuration },
                             );
                         } else {
                             this.snackBar.open(
-                                "Failed to initiate the upgrade. Please try again.",
+                                this.config.errorMessages.upgradeInitiateFailed,
                                 "Close",
-                                {
-                                    duration: 3000,
-                                },
+                                { duration: this.config.snackBarDuration },
                             );
                         }
                     },
                     (error) => {
                         console.error("Error upgrading device:", error);
                         this.snackBar.open(
-                            "Failed to initiate the upgrade. Please try again.",
+                            this.config.errorMessages.upgradeInitiateFailed,
                             "Close",
-                            {
-                                duration: 3000,
-                            },
+                            { duration: this.config.snackBarDuration },
                         );
                     },
                 );
@@ -313,7 +263,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         timer(0, 5000)
             .pipe(takeUntil(pollingSubject))
             .subscribe(() => {
-                this.jobService.getJobStatus(jobId).subscribe((status) => {
+                this.facade.getJobStatus(jobId).subscribe((status: string) => {
                     this.jobStatuses[jobId] = status;
                     if (
                         status === "completed" ||
@@ -339,7 +289,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
         const selectedProfile = this.upgradeForm.get("profile")?.value;
         if (selectedDevices && selectedDevices.length > 0 && selectedProfile) {
             const deviceId = selectedDevices[0];
-            this.upgradeService
+            this.facade
                 .syncPanosVersions(deviceId, selectedProfile)
                 .pipe(
                     takeUntil(this.destroy$),
@@ -348,8 +298,8 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
                             mergeMap((error, i) => {
                                 const retryAttempt = i + 1;
                                 if (
-                                    retryAttempt <= 3 &&
-                                    this.shouldRetry(error)
+                                    retryAttempt <= this.config.maxRetries &&
+                                    this.processor.shouldRetry(error)
                                 ) {
                                     return timer(
                                         Math.pow(2, retryAttempt) * 1000,
@@ -364,7 +314,7 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
                             this.snackBar.open(
                                 `Sync job started with ID: ${jobId}`,
                                 "Close",
-                                { duration: 3000 },
+                                { duration: this.config.snackBarDuration },
                             );
                             return this.pollJobStatus(jobId);
                         } else {
@@ -381,30 +331,30 @@ export class UpgradeListComponent implements OnInit, OnDestroy {
                             this.snackBar.open(
                                 `PAN-OS versions synced successfully for device ${this.getDeviceHostname(deviceId)}.`,
                                 "Close",
-                                { duration: 5000 },
+                                { duration: this.config.snackBarDuration },
                             );
                         } else if (status === "errored") {
                             this.snackBar.open(
-                                "Failed to sync PAN-OS versions. Please try again.",
+                                this.config.errorMessages.syncVersionsFailed,
                                 "Close",
-                                { duration: 3000 },
+                                { duration: this.config.snackBarDuration },
                             );
                         }
                     },
                     (error) => {
                         console.error("Error syncing PAN-OS versions:", error);
                         this.snackBar.open(
-                            "Failed to sync PAN-OS versions. Please try again.",
+                            this.config.errorMessages.syncVersionsFailed,
                             "Close",
-                            { duration: 3000 },
+                            { duration: this.config.snackBarDuration },
                         );
                     },
                 );
         } else {
             this.snackBar.open(
-                "Please select at least one device and a profile before syncing versions.",
+                this.config.errorMessages.selectDeviceAndProfile,
                 "Close",
-                { duration: 3000 },
+                { duration: this.config.snackBarDuration },
             );
         }
     }
