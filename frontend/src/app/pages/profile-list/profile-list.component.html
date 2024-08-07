@@ -1,12 +1,17 @@
-<!-- src/app/pages/profile-list/profile-list.html -->
+<!-- src/app/pages/profile-list/profile-list.component.html -->
 
 <app-page-header
-    [title]="pageTitle"
-    [description]="pageDescription"
-    [breadcrumbs]="breadcrumbs">
+    [title]="config.pageTitle"
+    [description]="config.pageDescription"
+    [breadcrumbs]="config.breadcrumbs">
     <button mat-raised-button color="accent" (click)="navigateToCreateSecurityProfile()">
         <mat-icon>add</mat-icon>
-        Add new Profile
+        Create New Profile
+    </button>
+    <button mat-raised-button color="warn"
+            (click)="onDeleteSelectedClick()"
+            [disabled]="!selection.hasValue()">
+        Delete Selected Profiles
     </button>
 </app-page-header>
 
