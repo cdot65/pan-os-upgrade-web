@@ -1,6 +1,6 @@
 // src/app/routes.ts
 
-import { Layout } from "./shared/layout/layout";
+import { Layout } from "./shared/components/layout/layout";
 import { Routes } from "@angular/router";
 import { authGuard } from "./shared/guards/auth.guard";
 import { LoginComponent } from "./pages/auth/login/login.component";
@@ -14,7 +14,7 @@ export const APP_ROUTES: Routes = [
             {
                 path: "",
                 loadComponent: () =>
-                    import("./pages/homepage").then((m) => m.Homepage),
+                    import("./pages/homepage").then((m) => m.HomepageComponent),
             },
             {
                 path: "inventory",
@@ -24,7 +24,7 @@ export const APP_ROUTES: Routes = [
                         path: "",
                         loadComponent: () =>
                             import("./pages/inventory-list").then(
-                                (m) => m.InventoryList,
+                                (m) => m.InventoryListComponent,
                             ),
                     },
                     {

@@ -1,0 +1,41 @@
+// src/app/pages/job-list/job-list.component.scss
+
+.job-list-container {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: 20px;
+}
+
+.job-list {
+    width: 97%;
+    padding: 25px;
+
+    .mat-table {
+        width: 100%;
+
+        .mat-row {
+            .mat-cell {
+                padding-right: 20px;
+                transition: background-color 0.3s;
+            }
+        }
+
+        .mat-header-cell {
+            font-weight: bold;
+        }
+
+        .edit-button {
+            margin-left: 10px;
+        }
+    }
+}
+
+.header-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    button {
+        margin: 0 5px 10px;
+    }
+}

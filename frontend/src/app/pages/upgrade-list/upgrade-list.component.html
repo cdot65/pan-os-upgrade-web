@@ -1,9 +1,9 @@
 <!-- src/app/pages/upgrade-list/upgrade-list.component.html -->
 
 <app-page-header
-    [title]="pageTitle"
-    [description]="pageDescription"
-    [breadcrumbs]="breadcrumbs">
+    [title]="config.pageTitle"
+    [description]="config.pageDescription"
+    [breadcrumbs]="config.breadcrumbs">
     <button mat-raised-button color="accent" (click)="onUpgradeClick()" [disabled]="!upgradeForm.valid">
         <mat-icon>sync</mat-icon>
         Start Upgrade

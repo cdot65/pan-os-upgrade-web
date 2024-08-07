@@ -1,0 +1,47 @@
+// src/app/shared/sidenav/_sidenav-theme.scss
+
+@use "../../../../../node_modules/@angular/material/index" as mat;
+
+@mixin theme($theme) {
+    $primary: map-get($theme, primary);
+    $accent: map-get($theme, accent);
+
+    .sidenav {
+        background-color: mat.get-color-from-palette($primary, 500) !important;
+        color: mat.get-color-from-palette($primary, default-contrast);
+
+        .sidenav-icon {
+            color: #f2e8df;
+            height: 24px;
+            transition: margin-right 0.2s ease-in-out;
+        }
+
+        &.collapsed {
+            .sidenav-icon {
+                margin-right: 0;
+            }
+        }
+
+        .sidenav-text {
+            color: #f2e8df;
+            padding-left: 15px;
+        }
+
+        .sidenav-divider {
+            height: 1px;
+            background-color: mat.get-color-from-palette($primary, 400);
+            margin: 10px 0;
+        }
+
+        .mat-list-item,
+        .mat-expansion-panel-header {
+            .mat-icon,
+            span {
+                color: mat.get-color-from-palette(
+                        $primary,
+                        default-contrast
+                ) !important;
+            }
+        }
+    }
+}

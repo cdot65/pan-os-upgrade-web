@@ -1,0 +1,77 @@
+// src/app/pages/job-details/job-details.component.scss
+
+.job-details-container {
+    padding: 40px;
+}
+
+.job-details {
+    width: 99%;
+    min-height: auto;
+    padding: 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.job-details-info {
+    margin-bottom: 20px;
+}
+
+.job-details-button-row {
+    margin-bottom: 20px;
+}
+
+app-firewall-diagram {
+    display: block;
+    width: 100%;
+    height: 300px;
+    margin-bottom: 20px;
+}
+
+.live-logs {
+    margin-top: 20px;
+
+    .polling-info,
+    .polling-warning {
+        margin-bottom: 16px;
+        font-style: italic;
+    }
+
+    .polling-interval-dropdown {
+        mat-form-field {
+            width: 50%;
+        }
+    }
+
+    .log-entry {
+        margin-bottom: 16px;
+
+        .mat-card-header {
+            padding: 8px 16px;
+        }
+
+        .mat-card-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .mat-card-content {
+            padding: 16px;
+        }
+    }
+}
+
+.job-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-label {
+    font-weight: bold;
+    margin-bottom: 4px;
+}

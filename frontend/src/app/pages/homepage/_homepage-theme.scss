@@ -55,11 +55,6 @@
             color: mat.get-color-from-palette($foreground, secondary-text);
         }
 
-        a.app-link,
-        a.app-featured-components-carousel-item {
-            color: mat.get-color-from-palette($foreground, secondary-text);
-        }
-
         .app-homepage-guides-card,
         a.app-link:hover {
             color: mat.get-color-from-palette($foreground, text);
@@ -69,21 +64,5 @@
             background: mat.get-color-from-palette($accent);
         }
 
-        [carousel-item]:hover {
-            .app-homepage-guides-card {
-                background: mat.get-color-from-palette($background, hover);
-            }
-        }
-
-        [carousel-item]:focus {
-            .app-homepage-guides-card {
-                background: mat.get-color-from-palette(
-                        $background,
-                        focused-button
-                );
-            }
-
-            outline: none;
-        }
     }
 }
