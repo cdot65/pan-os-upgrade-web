@@ -46,7 +46,7 @@ import { DatePipe } from "@angular/common";
         PageHeaderComponent,
         DatePipe,
     ],
-    providers: [JobListFacade],
+    providers: [JobListFacade, JobListProcessorService],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class JobListComponent implements OnInit, OnDestroy {

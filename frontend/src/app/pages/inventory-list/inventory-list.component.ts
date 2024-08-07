@@ -50,7 +50,7 @@ import { AsyncPipe } from "@angular/common";
     selector: "app-inventory-list",
     templateUrl: "./inventory-list.component.html",
     styleUrls: ["./inventory-list.component.scss"],
-    providers: [InventoryListFacade],
+    providers: [InventoryListFacade, InventoryListProcessorService],
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
