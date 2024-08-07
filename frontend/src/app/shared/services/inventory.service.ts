@@ -39,6 +39,12 @@ export class InventoryService {
     private apiEndpointRefresh = `${this.apiUrl}${ApiEndpoints.Refresh}`;
     private apiEndpointSync = `${this.apiUrl}${ApiEndpoints.Sync}`;
 
+    /**
+     * Constructor for initializing HTTP client, snack bar, and cookie service.
+     * @param http {HttpClient} Angular's HttpClient for making HTTP requests
+     * @param snackBar {MatSnackBar} Material's SnackBar for displaying notifications
+     * @param cookieService {CookieService} Service for handling browser cookies
+     */
     constructor(
         private http: HttpClient,
         private snackBar: MatSnackBar,
@@ -46,9 +52,9 @@ export class InventoryService {
     ) {}
 
     /**
-     * Constructs an HttpHeaders object with the Authorization header set to the authentication token.
-     *
-     * @returns The HttpHeaders object.
+     * Generates HTTP headers with an authorization token for authenticated requests.
+     * @throws Error If the auth_token cookie is not set
+     * @returns HttpHeaders object with the Authorization header set
      */
     private getAuthHeaders(): HttpHeaders {
         const authToken = this.cookieService.get("auth_token");
@@ -56,10 +62,10 @@ export class InventoryService {
     }
 
     /**
-     * Handles the error response from an HTTP request and returns an Observable that emits the error.
-     *
-     * @param error - The HttpErrorResponse object representing the error response.
-     * @returns An Observable that emits the error.
+     * Handles HTTP errors and creates appropriate InventoryError instances.
+     * @param error {HttpErrorResponse} The HTTP error response to handle
+     * @throws InventoryError Various subtypes based on the error status
+     * @returns An Observable that emits the created InventoryError
      */
     private handleError(error: HttpErrorResponse): Observable<never> {
         let inventoryError: InventoryError;
@@ -101,6 +107,12 @@ export class InventoryService {
         return throwError(() => inventoryError);
     }
 
+    /**
+     * Handles HTTP requests with retry logic and error handling.
+     * @param request {Observable<"T">} The HTTP request observable
+     * @throws Error If the request fails after 3 retry attempts
+     * @returns The handled HTTP request observable
+     */
     private handleHttpRequest<T>(request: Observable<T>): Observable<T> {
         return request.pipe(
             retryWhen((errors) =>
@@ -119,11 +131,9 @@ export class InventoryService {
     }
 
     /**
-     * Determines whether the HTTP request should be retried based on the error response.
-     * Retry is only performed for 5xx errors (server errors) and network errors.
-     *
-     * @param error - The HTTP error response.
-     * @returns A boolean value indicating whether the request should be retried.
+     * Determines if an HTTP request should be retried based on the error response.
+     * @param error {HttpErrorResponse} The HTTP error response to evaluate
+     * @returns True if the request should be retried, false otherwise
      */
     private shouldRetry(error: HttpErrorResponse): boolean {
         // Retry only for 5xx errors (server errors) and network errors
@@ -131,9 +141,9 @@ export class InventoryService {
     }
 
     /**
-     * Retrieves the list of devices from the backend server.
-     *
-     * @returns An Observable that emits an array of Device objects.
+     * Retrieves a sorted list of devices from the inventory API.
+     * @throws HttpErrorResponse If the HTTP request fails
+     * @returns An Observable of Device array sorted by hostname
      */
     getDevices(): Observable<Device[]> {
         return this.handleHttpRequest(
@@ -152,10 +162,10 @@ export class InventoryService {
     }
 
     /**
-     * Retrieves a device from the inventory based on its UUID.
-     *
-     * @param uuid The UUID of the device to retrieve.
-     * @returns An Observable that emits the retrieved Device object.
+     * Retrieves a device by its UUID from the inventory API.
+     * @param uuid {string} The unique identifier of the device
+     * @throws HttpErrorResponse If the HTTP request fails
+     * @returns An Observable that emits the requested Device object
      */
     getDevice(uuid: string): Observable<Device> {
         // Construct URL with placeholder
@@ -169,9 +179,8 @@ export class InventoryService {
     }
 
     /**
-     * Retrieves the list of firewall platforms from the server.
-     *
-     * @returns An Observable that emits an array of DeviceType objects representing the firewall platforms.
+     * Retrieves a list of firewall platforms (device types) from the API.
+     * @returns An Observable that emits an array of DeviceType objects
      */
     getFirewallPlatforms(): Observable<DeviceType[]> {
         return this.handleHttpRequest(
@@ -180,9 +189,9 @@ export class InventoryService {
     }
 
     /**
-     * Retrieves the Panorama platforms from the server.
-     *
-     * @returns An Observable that emits an array of DeviceType objects.
+     * Retrieves a list of Panorama platforms from the API.
+     * @throws HttpErrorResponse If the HTTP request fails
+     * @returns An Observable of DeviceType array representing Panorama platforms
      */
     getPanoramaPlatforms(): Observable<DeviceType[]> {
         return this.handleHttpRequest(
@@ -194,9 +203,8 @@ export class InventoryService {
 
     /**
      * Creates a new device in the inventory.
-     *
-     * @param inventoryItem The device object to be created.
-     * @returns An Observable that emits the created device.
+     * @param inventoryItem {Device} The device object to be added to the inventory
+     * @returns An Observable that emits the created Device object
      */
     createDevice(inventoryItem: Device): Observable<Device> {
         return this.handleHttpRequest(
@@ -207,11 +215,10 @@ export class InventoryService {
     }
 
     /**
-     * Updates a device in the inventory.
-     *
-     * @param inventoryItem - The updated device object.
-     * @param uuid - The UUID of the device to update.
-     * @returns An Observable that emits the updated device object.
+     * Updates a device in the inventory using a PATCH request.
+     * @param inventoryItem {Device} The updated device information
+     * @param uuid {string} The unique identifier of the device to update
+     * @returns An Observable that emits the updated Device object
      */
     updateDevice(inventoryItem: Device, uuid: string): Observable<Device> {
         // Construct URL with placeholder
@@ -225,10 +232,9 @@ export class InventoryService {
     }
 
     /**
-     * Deletes a device with the specified UUID.
-     *
-     * @param uuid - The UUID of the device to delete.
-     * @returns An observable that emits the response from the server.
+     * Deletes a device from the inventory using its UUID.
+     * @param uuid {string} The unique identifier of the device to delete
+     * @returns An Observable that emits the response from the delete request
      */
     deleteDevice(uuid: string): Observable<any> {
         const url = `${this.apiEndpointInventory}${uuid}/`;
@@ -239,10 +245,9 @@ export class InventoryService {
     }
 
     /**
-     * Refreshes the device details by sending a POST request to the API.
-     *
-     * @param refreshForm - The form data to be sent in the request.
-     * @returns An Observable that emits the job ID of the refresh request, or null if an error occurs.
+     * Refreshes a device by sending a POST request to the API endpoint.
+     * @param refreshForm {any} The form data to be sent in the request body
+     * @returns An Observable that emits the job ID or null
      */
     refreshDevice(refreshForm: any): Observable<string | null> {
         return this.handleHttpRequest(
@@ -259,10 +264,9 @@ export class InventoryService {
     }
 
     /**
-     * Retrieves the status of a job.
-     *
-     * @param jobId The ID of the job.
-     * @returns An Observable that emits an object containing the status of the job.
+     * Retrieves the status of a job and displays it in a snackbar.
+     * @param jobId {string} The ID of the job to check
+     * @returns An Observable that emits the job status
      */
     getJobStatus(jobId: string): Observable<{ status: string }> {
         const params = new HttpParams().set("job_id", jobId);
@@ -289,10 +293,9 @@ export class InventoryService {
     }
 
     /**
-     * Synchronizes the inventory by sending a POST request to the server.
-     *
-     * @param syncForm - The device sync form containing the necessary data.
-     * @returns An Observable that emits the job ID of the synchronization request, or null if an error occurs.
+     * Synchronizes inventory by sending a POST request to the API endpoint.
+     * @param syncForm {DeviceSyncForm} The form data for device synchronization
+     * @returns An Observable that emits the job ID or null
      */
     syncInventory(syncForm: DeviceSyncForm): Observable<string | null> {
         return this.handleHttpRequest(
