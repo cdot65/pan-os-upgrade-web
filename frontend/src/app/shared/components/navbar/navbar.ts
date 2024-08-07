@@ -5,10 +5,10 @@ import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
-import { AuthService } from "../services/auth.service";
-import { NavigationFocusService } from "../navigation-focus/navigation-focus.service";
+import { AuthService } from "../../services/auth.service";
+import { NavigationFocusService } from "../../navigation-focus/navigation-focus.service";
 import { ThemePicker } from "../theme-picker";
-import { SidenavStateService } from "../services/sidenav-state.service";
+import { SidenavStateService } from "../../services/sidenav-state.service";
 
 @Component({
     selector: "app-navbar",

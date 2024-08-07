@@ -6,11 +6,11 @@ import { map, pairwise, startWith } from "rxjs/operators";
 import { AuthInterceptor } from "./shared/interceptors/auth.interceptor";
 import { CookieService } from "ngx-cookie-service";
 import { HTTP_INTERCEPTORS } from "@angular/common/http";
-import { NavBar } from "./shared/navbar";
+import { NavBar } from "./shared/components/navbar";
 import { NavigationFocusService } from "./shared/navigation-focus/navigation-focus.service";
 import { RouterOutlet } from "@angular/router";
 import { Subscription } from "rxjs";
-import { ThemePicker } from "./shared/theme-picker";
+import { ThemePicker } from "./shared/components/theme-picker";
 
 @Component({
     selector: "app",

@@ -12,8 +12,8 @@ import { PanOsUpgradeApp } from "./app";
 import { bootstrapApplication } from "@angular/platform-browser";
 import { provideHttpClient } from "@angular/common/http";
 import { unregisterServiceWorkers } from "./unregister-service-workers";
-import { StyleManager } from "./app/shared/style-manager";
-import { ThemePicker } from "./app/shared/theme-picker";
+import { StyleManager } from "./app/shared/components/style-manager";
+import { ThemePicker } from "./app/shared/components/theme-picker";
 
 const prefersReducedMotion =
     typeof matchMedia === "function"

@@ -16,8 +16,8 @@
 @use "../../app/pages/profile-select-dialog/profile-select-dialogue-theme";
 @use '../../app/pages/snapshot-list/snapshot-list-theme' as snapshot-list;
 @use '../../app/pages/upgrade-list/upgrade-list-theme' as upgrade-list;
-@use "../../app/shared/navbar/navbar-theme";
-@use "../../app/shared/sidenav/sidenav-theme";
+@use "../../app/shared/components/navbar/navbar-theme";
+@use "../../app/shared/components/sidenav/sidenav-theme";
 @use "../components/markdown-theme";
 @use "../components/svg-theme";
 @use "../components/tables-theme";

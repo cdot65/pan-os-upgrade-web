@@ -1,6 +1,6 @@
 // src/app/shared/sidenav/_sidenav-theme.scss
 
-@use "@angular/material" as mat;
+@use "../../../../../node_modules/@angular/material/index" as mat;
 
 @mixin theme($theme) {
     $primary: map-get($theme, primary);
@@ -38,8 +38,8 @@
             .mat-icon,
             span {
                 color: mat.get-color-from-palette(
-                    $primary,
-                    default-contrast
+                        $primary,
+                        default-contrast
                 ) !important;
             }
         }
