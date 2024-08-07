@@ -13,6 +13,7 @@ import {
     HttpClient,
     HttpErrorResponse,
     HttpHeaders,
+    HttpParams,
 } from "@angular/common/http";
 import { Observable, throwError, timer } from "rxjs";
 import { catchError, map, mergeMap, retryWhen, tap } from "rxjs/operators";
@@ -24,6 +25,7 @@ import { DeviceType } from "../interfaces/device-type.interface";
 import { Injectable } from "@angular/core";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { environment } from "../../../environments/environment.prod";
+import { ApiEndpoints } from "../enums/api-endpoints.enum";
 
 @Injectable({
     providedIn: "root",
@@ -31,12 +33,11 @@ import { environment } from "../../../environments/environment.prod";
 export class InventoryService {
     // Define the API endpoints
     private apiUrl = environment.apiUrl;
-    private apiEndpointInventory = `${this.apiUrl}/api/v1/inventory/`;
-    private apiEndpointFirewallPlatforms = `${this.apiUrl}/api/v1/inventory/platforms/firewall/`;
-    private apiEndpointPanoramaPlatforms = `${this.apiUrl}/api/v1/inventory/platforms/panorama/`;
-    private apiEndpointPanoramaDevices = `${this.apiUrl}/api/v1/inventory/?device_type=Panorama`;
-    private apiEndpointRefresh = `${this.apiUrl}/api/v1/inventory/refresh/`;
-    private apiEndpointSync = `${this.apiUrl}/api/v1/inventory/sync/`;
+    private apiEndpointInventory = `${this.apiUrl}${ApiEndpoints.Inventory}`;
+    private apiEndpointFirewallPlatforms = `${this.apiUrl}${ApiEndpoints.FirewallPlatforms}`;
+    private apiEndpointPanoramaPlatforms = `${this.apiUrl}${ApiEndpoints.PanoramaPlatforms}`;
+    private apiEndpointRefresh = `${this.apiUrl}${ApiEndpoints.Refresh}`;
+    private apiEndpointSync = `${this.apiUrl}${ApiEndpoints.Sync}`;
 
     constructor(
         private http: HttpClient,
@@ -100,6 +101,23 @@ export class InventoryService {
         return throwError(() => inventoryError);
     }
 
+    private handleHttpRequest<T>(request: Observable<T>): Observable<T> {
+        return request.pipe(
+            retryWhen((errors) =>
+                errors.pipe(
+                    mergeMap((error, i) => {
+                        const retryAttempt = i + 1;
+                        if (retryAttempt <= 3 && this.shouldRetry(error)) {
+                            return timer(Math.pow(2, retryAttempt) * 1000);
+                        }
+                        return throwError(() => error);
+                    }),
+                ),
+            ),
+            catchError(this.handleError.bind(this)),
+        );
+    }
+
     /**
      * Determines whether the HTTP request should be retried based on the error response.
      * Retry is only performed for 5xx errors (server errors) and network errors.
@@ -118,35 +136,19 @@ export class InventoryService {
      * @returns An Observable that emits an array of Device objects.
      */
     getDevices(): Observable<Device[]> {
-        return this.http
-            .get<
-                Device[]
-            >(this.apiEndpointInventory, { headers: this.getAuthHeaders() })
-            .pipe(
-                map((devices) =>
-                    devices.sort((a, b) =>
-                        a.hostname.localeCompare(b.hostname),
+        return this.handleHttpRequest(
+            this.http
+                .get<
+                    Device[]
+                >(this.apiEndpointInventory, { headers: this.getAuthHeaders() })
+                .pipe(
+                    map((devices) =>
+                        devices.sort((a, b) =>
+                            a.hostname.localeCompare(b.hostname),
+                        ),
                     ),
                 ),
-                // Retry the request for server errors up to 3 times with an exponential backoff strategy
-                retryWhen((errors) =>
-                    errors.pipe(
-                        mergeMap((error: HttpErrorResponse, i) => {
-                            const retryAttempt = i + 1;
-                            if (retryAttempt <= 3 && this.shouldRetry(error)) {
-                                // Apply an exponential backoff strategy
-                                const delayTime =
-                                    Math.pow(2, retryAttempt) * 1000;
-                                return timer(delayTime);
-                            } else {
-                                // After 3 retries, throw error
-                                return throwError(() => error);
-                            }
-                        }),
-                    ),
-                ),
-                catchError(this.handleError.bind(this)),
-            );
+        );
     }
 
     /**
@@ -159,31 +161,11 @@ export class InventoryService {
         // Construct URL with placeholder
         const url = `${this.apiEndpointInventory}${uuid}/`;
 
-        return this.http
-            .get<Device>(url, {
+        return this.handleHttpRequest(
+            this.http.get<Device>(url, {
                 headers: this.getAuthHeaders(),
-            })
-            .pipe(
-                // Retry the request for server errors up to 3 times with an exponential backoff strategy
-                retryWhen((errors) =>
-                    errors.pipe(
-                        mergeMap((error: HttpErrorResponse, i) => {
-                            const retryAttempt = i + 1;
-                            if (retryAttempt <= 3 && this.shouldRetry(error)) {
-                                // Apply an exponential backoff strategy
-                                const delayTime =
-                                    Math.pow(2, retryAttempt) * 1000;
-                                return timer(delayTime);
-                            } else {
-                                // After 3 retries, throw error
-                                return throwError(() => error);
-                            }
-                        }),
-                    ),
-                ),
-                // Log an error message and return an empty array if the request fails
-                catchError(this.handleError.bind(this)),
-            );
+            }),
+        );
     }
 
     /**
@@ -192,68 +174,9 @@ export class InventoryService {
      * @returns An Observable that emits an array of DeviceType objects representing the firewall platforms.
      */
     getFirewallPlatforms(): Observable<DeviceType[]> {
-        return this.http
-            .get<DeviceType[]>(this.apiEndpointFirewallPlatforms)
-            .pipe(
-                // Retry the request for server errors up to 3 times with an exponential backoff strategy
-                retryWhen((errors) =>
-                    errors.pipe(
-                        mergeMap((error: HttpErrorResponse, i) => {
-                            const retryAttempt = i + 1;
-                            if (retryAttempt <= 3 && this.shouldRetry(error)) {
-                                // Apply an exponential backoff strategy
-                                const delayTime =
-                                    Math.pow(2, retryAttempt) * 1000;
-                                return timer(delayTime);
-                            } else {
-                                // After 3 retries, throw error
-                                return throwError(() => error);
-                            }
-                        }),
-                    ),
-                ),
-                // Log an error message and return an empty array if the request fails
-                catchError(this.handleError.bind(this)),
-            );
-    }
-
-    /**
-     * Retrieves the Panorama devices from the server.
-     *
-     * @returns An Observable that emits an array of Device objects.
-     */
-    getPanoramaDevices(): Observable<Device[]> {
-        return this.http
-            .get<
-                Device[]
-            >(this.apiEndpointPanoramaDevices, { headers: this.getAuthHeaders() })
-            .pipe(
-                // Sort the devices by hostname
-                map((devices) =>
-                    devices.sort((a, b) =>
-                        a.hostname.localeCompare(b.hostname),
-                    ),
-                ),
-                // Retry the request for server errors up to 3 times with an exponential backoff strategy
-                retryWhen((errors) =>
-                    errors.pipe(
-                        mergeMap((error: HttpErrorResponse, i) => {
-                            const retryAttempt = i + 1;
-                            if (retryAttempt <= 3 && this.shouldRetry(error)) {
-                                // Apply an exponential backoff strategy
-                                const delayTime =
-                                    Math.pow(2, retryAttempt) * 1000;
-                                return timer(delayTime);
-                            } else {
-                                // After 3 retries, throw error
-                                return throwError(() => error);
-                            }
-                        }),
-                    ),
-                ),
-                // Log an error message and return an empty array if the request fails
-                catchError(this.handleError.bind(this)),
-            );
+        return this.handleHttpRequest(
+            this.http.get<DeviceType[]>(this.apiEndpointFirewallPlatforms),
+        );
     }
 
     /**
@@ -262,31 +185,11 @@ export class InventoryService {
      * @returns An Observable that emits an array of DeviceType objects.
      */
     getPanoramaPlatforms(): Observable<DeviceType[]> {
-        return this.http
-            .get<
-                DeviceType[]
-            >(this.apiEndpointPanoramaPlatforms, { headers: this.getAuthHeaders() })
-            .pipe(
-                // Retry the request for server errors up to 3 times with an exponential backoff strategy
-                retryWhen((errors) =>
-                    errors.pipe(
-                        mergeMap((error: HttpErrorResponse, i) => {
-                            const retryAttempt = i + 1;
-                            if (retryAttempt <= 3 && this.shouldRetry(error)) {
-                                // Apply an exponential backoff strategy
-                                const delayTime =
-                                    Math.pow(2, retryAttempt) * 1000;
-                                return timer(delayTime);
-                            } else {
-                                // After 3 retries, throw error
-                                return throwError(() => error);
-                            }
-                        }),
-                    ),
-                ),
-                // Log an error message and return an empty array if the request fails
-                catchError(this.handleError.bind(this)),
-            );
+        return this.handleHttpRequest(
+            this.http.get<DeviceType[]>(this.apiEndpointPanoramaPlatforms, {
+                headers: this.getAuthHeaders(),
+            }),
+        );
     }
 
     /**
@@ -296,31 +199,11 @@ export class InventoryService {
      * @returns An Observable that emits the created device.
      */
     createDevice(inventoryItem: Device): Observable<Device> {
-        return this.http
-            .post<Device>(this.apiEndpointInventory, inventoryItem, {
+        return this.handleHttpRequest(
+            this.http.post<Device>(this.apiEndpointInventory, inventoryItem, {
                 headers: this.getAuthHeaders(),
-            })
-            .pipe(
-                // Retry the request for server errors up to 3 times with an exponential backoff strategy
-                retryWhen((errors) =>
-                    errors.pipe(
-                        mergeMap((error: HttpErrorResponse, i) => {
-                            const retryAttempt = i + 1;
-                            if (retryAttempt <= 3 && this.shouldRetry(error)) {
-                                // Apply an exponential backoff strategy
-                                const delayTime =
-                                    Math.pow(2, retryAttempt) * 1000;
-                                return timer(delayTime);
-                            } else {
-                                // After 3 retries, throw error
-                                return throwError(() => error);
-                            }
-                        }),
-                    ),
-                ),
-                // Log an error message and return an empty array if the request fails
-                catchError(this.handleError.bind(this)),
-            );
+            }),
+        );
     }
 
     /**
@@ -334,31 +217,11 @@ export class InventoryService {
         // Construct URL with placeholder
         const url = `${this.apiEndpointInventory}${uuid}/`;
 
-        return this.http
-            .patch<Device>(url, inventoryItem, {
+        return this.handleHttpRequest(
+            this.http.patch<Device>(url, inventoryItem, {
                 headers: this.getAuthHeaders(),
-            })
-            .pipe(
-                // Retry the request for server errors up to 3 times with an exponential backoff strategy
-                retryWhen((errors) =>
-                    errors.pipe(
-                        mergeMap((error: HttpErrorResponse, i) => {
-                            const retryAttempt = i + 1;
-                            if (retryAttempt <= 3 && this.shouldRetry(error)) {
-                                // Apply an exponential backoff strategy
-                                const delayTime =
-                                    Math.pow(2, retryAttempt) * 1000;
-                                return timer(delayTime);
-                            } else {
-                                // After 3 retries, throw error
-                                return throwError(() => error);
-                            }
-                        }),
-                    ),
-                ),
-                // Log an error message and return an empty array if the request fails
-                catchError(this.handleError.bind(this)),
-            );
+            }),
+        );
     }
 
     /**
@@ -370,25 +233,8 @@ export class InventoryService {
     deleteDevice(uuid: string): Observable<any> {
         const url = `${this.apiEndpointInventory}${uuid}/`;
 
-        return this.http.delete(url, { headers: this.getAuthHeaders() }).pipe(
-            // Retry the request for server errors up to 3 times with an exponential backoff strategy
-            retryWhen((errors) =>
-                errors.pipe(
-                    mergeMap((error: HttpErrorResponse, i) => {
-                        const retryAttempt = i + 1;
-                        if (retryAttempt <= 3 && this.shouldRetry(error)) {
-                            // Apply an exponential backoff strategy
-                            const delayTime = Math.pow(2, retryAttempt) * 1000;
-                            return timer(delayTime);
-                        } else {
-                            // After 3 retries, throw error
-                            return throwError(() => error);
-                        }
-                    }),
-                ),
-            ),
-            // Log an error message and return an empty array if the request fails
-            catchError(this.handleError.bind(this)),
+        return this.handleHttpRequest(
+            this.http.delete(url, { headers: this.getAuthHeaders() }),
         );
     }
 
@@ -399,32 +245,17 @@ export class InventoryService {
      * @returns An Observable that emits the job ID of the refresh request, or null if an error occurs.
      */
     refreshDevice(refreshForm: any): Observable<string | null> {
-        return this.http
-            .post<{ job_id: string }>(this.apiEndpointRefresh, refreshForm, {
-                headers: this.getAuthHeaders(),
-            })
-            .pipe(
-                map((response) => response.job_id),
-                // Retry the request for server errors up to 3 times with an exponential backoff strategy
-                retryWhen((errors) =>
-                    errors.pipe(
-                        mergeMap((error: HttpErrorResponse, i) => {
-                            const retryAttempt = i + 1;
-                            if (retryAttempt <= 3 && this.shouldRetry(error)) {
-                                // Apply an exponential backoff strategy
-                                const delayTime =
-                                    Math.pow(2, retryAttempt) * 1000;
-                                return timer(delayTime);
-                            } else {
-                                // After 3 retries, throw error
-                                return throwError(() => error);
-                            }
-                        }),
-                    ),
-                ),
-                // Log an error message and return an empty array if the request fails
-                catchError(this.handleError.bind(this)),
-            );
+        return this.handleHttpRequest(
+            this.http
+                .post<{ job_id: string }>(
+                    this.apiEndpointRefresh,
+                    refreshForm,
+                    {
+                        headers: this.getAuthHeaders(),
+                    },
+                )
+                .pipe(map((response) => response.job_id)),
+        );
     }
 
     /**
@@ -434,71 +265,27 @@ export class InventoryService {
      * @returns An Observable that emits an object containing the status of the job.
      */
     getJobStatus(jobId: string): Observable<{ status: string }> {
-        const url = `${this.apiUrl}/api/v1/inventory/job-status/?job_id=${jobId}`;
-
-        return this.http
-            .get<{
-                status: string;
-            }>(url, {
-                headers: this.getAuthHeaders(),
-            })
-            .pipe(
-                tap((response) => {
-                    // Show the job status in SnackBar
-                    this.snackBar.open(
-                        `Job status for job ID ${jobId}: ${response.status}`,
-                        "Close",
-                        {
-                            duration: 5000, // 5 seconds
-                            verticalPosition: "bottom",
-                        },
-                    );
-                }),
-                // Retry the request for server errors and 400 errors up to 5 times with a delay
-                retryWhen((errors) =>
-                    errors.pipe(
-                        mergeMap((error: HttpErrorResponse, i) => {
-                            const retryAttempt = i + 1;
-                            if (
-                                retryAttempt <= 5 &&
-                                (this.shouldRetry(error) ||
-                                    (error.status === 400 &&
-                                        error.error &&
-                                        error.error.error ===
-                                            "Invalid job ID."))
-                            ) {
-                                // Apply a delay of 2 seconds before retrying
-                                const delayTime = 2000;
-                                return timer(delayTime);
-                            } else {
-                                // After 5 retries or for other errors, throw the error
-                                return throwError(() => error);
-                            }
-                        }),
-                    ),
-                ),
-                catchError((error: HttpErrorResponse) => {
-                    if (
-                        error.status === 400 &&
-                        error.error &&
-                        error.error.error === "Invalid job ID."
-                    ) {
-                        // Handle the case when the job ID is not found after retries
-                        this.snackBar.open(
-                            `Job ID ${jobId} not found. Please try again later.`,
-                            "Close",
-                            {
-                                duration: 5000,
-                                verticalPosition: "bottom",
-                            },
-                        );
-                        return throwError(() => new NotFoundError(error));
-                    } else {
-                        // Handle other errors
-                        return this.handleError(error);
-                    }
-                }),
-            );
+        const params = new HttpParams().set("job_id", jobId);
+        return this.handleHttpRequest(
+            this.http.get<{ status: string }>(
+                `${this.apiUrl}/api/v1/inventory/job-status/`,
+                {
+                    headers: this.getAuthHeaders(),
+                    params,
+                },
+            ),
+        ).pipe(
+            tap((response) => {
+                this.snackBar.open(
+                    `Job status for job ID ${jobId}: ${response.status}`,
+                    "Close",
+                    {
+                        duration: 5000,
+                        verticalPosition: "bottom",
+                    },
+                );
+            }),
+        );
     }
 
     /**
@@ -508,31 +295,12 @@ export class InventoryService {
      * @returns An Observable that emits the job ID of the synchronization request, or null if an error occurs.
      */
     syncInventory(syncForm: DeviceSyncForm): Observable<string | null> {
-        return this.http
-            .post<{ job_id: string }>(this.apiEndpointSync, syncForm, {
-                headers: this.getAuthHeaders(),
-            })
-            .pipe(
-                map((response) => response.job_id),
-                // Retry the request for server errors up to 3 times with an exponential backoff strategy
-                retryWhen((errors) =>
-                    errors.pipe(
-                        mergeMap((error: HttpErrorResponse, i) => {
-                            const retryAttempt = i + 1;
-                            if (retryAttempt <= 3 && this.shouldRetry(error)) {
-                                // Apply an exponential backoff strategy
-                                const delayTime =
-                                    Math.pow(2, retryAttempt) * 1000;
-                                return timer(delayTime);
-                            } else {
-                                // After 3 retries, throw error
-                                return throwError(() => error);
-                            }
-                        }),
-                    ),
-                ),
-                // Log an error message and return an empty array if the request fails
-                catchError(this.handleError.bind(this)),
-            );
+        return this.handleHttpRequest(
+            this.http
+                .post<{ job_id: string }>(this.apiEndpointSync, syncForm, {
+                    headers: this.getAuthHeaders(),
+                })
+                .pipe(map((response) => response.job_id)),
+        );
     }
 }
